@@ -1,0 +1,364 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using NeoModLoader.General;
+using NeoModLoader.General.UI.Tab;
+using NeoModLoader.api;
+using NeoModLoader.ui;
+using xn.bloodline;
+using xn.tournament;
+using xn.newbie;
+using xn.feedback;
+using xn.questions;
+namespace xn.ui
+{
+    public static class XNModTab
+    {
+        private static bool _inited;
+        private static PowersTab _tab;
+        public static PowerButton BtnAura;
+        public static PowerButton BtnXiuzhenguo;
+        public static PowerButton BtnRuins;
+        public static PowerButton BtnRanking;
+        public static PowerButton BtnSearch;
+        public static PowerButton BtnBloodline;
+        public static PowerButton BtnTournament;
+        public static PowerButton BtnModSettings;
+        public static PowersTab Tab => _tab;
+        public static void Init()
+        {
+            if (_inited) return; _inited = true;
+            var tabIcon = SpriteTextureLoader.getSprite("ui/icon/icontab")
+                        ?? SpriteTextureLoader.getSprite("ui/icons/iconTab");
+            _tab = TabManager.CreateTab("xn_tab_root", "修真", "仙逆模组入口", tabIcon);
+            _tab.SetLayout(new List<string> { "tools" });
+            var btnIcon = SpriteTextureLoader.getSprite("ui/icon/lingqi")
+                      ?? SpriteTextureLoader.getSprite("ui/icons/iconBook");
+            var btn = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("灵气铭牌", OnToggleAura, btnIcon);
+            _tab.AddPowerButton("tools", btn);
+            BtnAura = btn;
+            var tip = btn.GetComponent<TipButton>() ?? btn.gameObject.AddComponent<TipButton>();
+            tip.textOnClick            = "btn_xn_aura_toggle";
+            tip.textOnClickDescription = "btn_xn_aura_toggle_desc";
+            AuraAddBrushTool.Init();
+            var auraAddIcon = SpriteTextureLoader.getSprite("GameResources/ui/icon/lingqiadd")
+                           ?? SpriteTextureLoader.getSprite("ui/icon/lingqiadd");
+            var btnAuraAdd = AuraAddBrushTool.GetPowerButton();
+            if (btnAuraAdd != null)
+            {
+                _tab.AddPowerButton("tools", btnAuraAdd);
+                var tipAuraAdd = btnAuraAdd.GetComponent<TipButton>() ?? btnAuraAdd.gameObject.AddComponent<TipButton>();
+                tipAuraAdd.textOnClick = "btn_xn_aura_add_brush";
+                tipAuraAdd.textOnClickDescription = "btn_xn_aura_add_brush_desc";
+            }
+            var xzgIcon = SpriteTextureLoader.getSprite("ui/icon/xiuzhenguo")
+                       ?? SpriteTextureLoader.getSprite("ui/icons/iconKingdoms");
+            var btnXzg = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("修真国铭牌", OnToggleXiuzhenguo, xzgIcon);
+            _tab.AddPowerButton("tools", btnXzg);
+            BtnXiuzhenguo = btnXzg;
+            var tipXzg = btnXzg.GetComponent<TipButton>() ?? btnXzg.gameObject.AddComponent<TipButton>();
+            tipXzg.textOnClick = "btn_xn_xiuzhenguo_toggle";
+            tipXzg.textOnClickDescription = "btn_xn_xiuzhenguo_toggle_desc";
+            var icon = SpriteTextureLoader.getSprite("ui/icon/ruins")
+               ?? SpriteTextureLoader.getSprite("ui/icons/iconTemple");
+            var btnRuin = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("放置遗迹", OnPlaceRuinsOnce, icon);
+            _tab.AddPowerButton("tools", btnRuin);
+            BtnRuins = btnRuin;
+            var tipRuin = btnRuin.GetComponent<TipButton>() ?? btnRuin.gameObject.AddComponent<TipButton>();
+            tipRuin.textOnClick = "btn_xn_place_ruins";
+            tipRuin.textOnClickDescription = "btn_xn_place_ruins_desc";
+            var chartsIcon = SpriteTextureLoader.getSprite("ui/icon/charts")
+                ?? SpriteTextureLoader.getSprite("ui/icons/iconCompareStatistics"); 
+            var btnRank = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("战力排行榜", OnOpenRanking, chartsIcon);
+            _tab.AddPowerButton("tools", btnRank);
+            BtnRanking = btnRank;
+            var tipRank = btnRank.GetComponent<TipButton>() ?? btnRank.gameObject.AddComponent<TipButton>();
+            tipRank.textOnClick = "btn_xn_power_rank";
+            tipRank.textOnClickDescription = "btn_xn_power_rank_desc";
+            var gcIcon = SpriteTextureLoader.getSprite("ui/icon/gc")
+                ?? SpriteTextureLoader.getSprite("ui/icons/iconTrash")
+                ?? SpriteTextureLoader.getSprite("ui/icons/iconBomb");
+            var btnGC = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("手动GC", OnManualGC, gcIcon);
+            _tab.AddPowerButton("tools", btnGC);
+            var tipGC = btnGC.GetComponent<TipButton>() ?? btnGC.gameObject.AddComponent<TipButton>();
+            tipGC.textOnClick = "btn_xn_manual_gc";
+            tipGC.textOnClickDescription = "btn_xn_manual_gc_desc";
+            var yxIcon = SpriteTextureLoader.getSprite("ui/icon/yexin")
+                ?? SpriteTextureLoader.getSprite("ui/icons/iconBook");
+            var btnAmb = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("增加野心", OnAddAmbition, yxIcon);
+            _tab.AddPowerButton("tools", btnAmb);
+            var tipAmb = btnAmb.GetComponent<TipButton>() ?? btnAmb.gameObject.AddComponent<TipButton>();
+            tipAmb.textOnClick = "btn_xn_add_ambition";
+            tipAmb.textOnClickDescription = "btn_xn_add_ambition_desc";
+            var searchIcon = SpriteTextureLoader.getSprite("ui/icon/search");
+            var btnSearch = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("生物搜索", OnSearchUnits, searchIcon);
+            _tab.AddPowerButton("tools", btnSearch);
+            BtnSearch = btnSearch;
+            var tipSearch = btnSearch.GetComponent<TipButton>() ?? btnSearch.gameObject.AddComponent<TipButton>();
+            tipSearch.textOnClick = "btn_xn_search_units";
+            tipSearch.textOnClickDescription = "btn_xn_search_units_desc";
+            var modsysIcon = SpriteTextureLoader.getSprite("ui/icon/modsystem");
+            var btnModSettings = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("Mod设置", OnOpenModSettings, modsysIcon);
+            _tab.AddPowerButton("tools", btnModSettings);
+            BtnModSettings = btnModSettings;
+            var tipMod = btnModSettings.GetComponent<TipButton>() ?? btnModSettings.gameObject.AddComponent<TipButton>();
+            tipMod.textOnClick = "btn_xn_open_modsettings";
+            tipMod.textOnClickDescription = "btn_xn_open_modsettings_desc";
+            var nvpuIcon = SpriteTextureLoader.getSprite("GameResources/ui/icon/nvpu")
+                        ?? SpriteTextureLoader.getSprite("ui/icon/nvpu");
+            var btnNvpu = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("放置女仆", OnPlaceNvpu, nvpuIcon);
+            _tab.AddPowerButton("tools", btnNvpu);
+            var tipNvpu = btnNvpu.GetComponent<TipButton>() ?? btnNvpu.gameObject.AddComponent<TipButton>();
+            tipNvpu.textOnClick = "btn_xn_place_nvpu";
+            tipNvpu.textOnClickDescription = "btn_xn_place_nvpu_desc";
+            var dashouIcon = SpriteTextureLoader.getSprite("ui/icon/dashou")
+                        ?? SpriteTextureLoader.getSprite("ui/icons/iconHuman");
+            var btnDashou = NeoModLoader.General.PowerButtonCreator.CreateGodPowerButton(xn.race.DashouRace.POWER_ID, dashouIcon);
+            _tab.AddPowerButton("tools", btnDashou);
+            var tipDashou = btnDashou.GetComponent<TipButton>() ?? btnDashou.gameObject.AddComponent<TipButton>();
+            tipDashou.textOnClick = "btn_xn_place_dashou";
+            tipDashou.textOnClickDescription = "btn_xn_place_dashou_desc";
+            var kongzhiIcon = SpriteTextureLoader.getSprite("ui/icon/kongzhi")
+                        ?? SpriteTextureLoader.getSprite("ui/icons/iconBook");
+            var btnControl = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("控制打手", OnControlDashou, kongzhiIcon);
+            _tab.AddPowerButton("tools", btnControl);
+            var tipControl = btnControl.GetComponent<TipButton>() ?? btnControl.gameObject.AddComponent<TipButton>();
+            tipControl.textOnClick = "btn_xn_control_dashou";
+            tipControl.textOnClickDescription = "btn_xn_control_dashou_desc";
+            SkinToneBrushTool.Init();
+            var skintoneIcon = SpriteTextureLoader.getSprite("GameResources/ui/icon/skintone")
+                            ?? SpriteTextureLoader.getSprite("ui/icon/skintone");
+            var btnSkinTone = SkinToneBrushTool.GetPowerButton();
+            if (btnSkinTone != null)
+            {
+                _tab.AddPowerButton("tools", btnSkinTone);
+                var tipSkinTone = btnSkinTone.GetComponent<TipButton>() ?? btnSkinTone.gameObject.AddComponent<TipButton>();
+                tipSkinTone.textOnClick = "btn_xn_skin_tone_brush";
+                tipSkinTone.textOnClickDescription = "btn_xn_skin_tone_brush_desc";
+            }
+            BloodlineSystem.Init();
+            BloodlineWindow.Init();
+            var bloodlineIcon = SpriteTextureLoader.getSprite("ui/icon/bloodline")
+                             ?? SpriteTextureLoader.getSprite("zhanwei");
+            var btnBloodline = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("血脉氏族", OnOpenBloodline, bloodlineIcon);
+            _tab.AddPowerButton("tools", btnBloodline);
+            BtnBloodline = btnBloodline;
+            var tipBloodline = btnBloodline.GetComponent<TipButton>() ?? btnBloodline.gameObject.AddComponent<TipButton>();
+            tipBloodline.textOnClick = "btn_xn_bloodline";
+            tipBloodline.textOnClickDescription = "btn_xn_bloodline_desc";
+            ServantBrushTool.Init();
+            var servantIcon = SpriteTextureLoader.getSprite("ui/icon/servant");
+            var btnServant = ServantBrushTool.GetPowerButton();
+            if (btnServant != null)
+            {
+                _tab.AddPowerButton("tools", btnServant);
+                var tipServant = btnServant.GetComponent<TipButton>() ?? btnServant.gameObject.AddComponent<TipButton>();
+                tipServant.textOnClick = "btn_xn_servant_brush";
+                tipServant.textOnClickDescription = "btn_xn_servant_brush_desc";
+            }
+            MasterApprenticeBrushTool.Init();
+            var masterIcon = SpriteTextureLoader.getSprite("ui/icon/master");
+            var btnMaster = MasterApprenticeBrushTool.GetPowerButton();
+            if (btnMaster != null)
+            {
+                _tab.AddPowerButton("tools", btnMaster);
+                var tipMaster = btnMaster.GetComponent<TipButton>() ?? btnMaster.gameObject.AddComponent<TipButton>();
+                tipMaster.textOnClick = "btn_xn_master_apprentice_brush";
+                tipMaster.textOnClickDescription = "btn_xn_master_apprentice_brush_desc";
+            }
+            PossessionBrushTool.Init();
+            var takeawayIcon = SpriteTextureLoader.getSprite("ui/icon/takeaway");
+            var btnPossession = PossessionBrushTool.GetPowerButton();
+            if (btnPossession != null)
+            {
+                _tab.AddPowerButton("tools", btnPossession);
+                var tipPossession = btnPossession.GetComponent<TipButton>() ?? btnPossession.gameObject.AddComponent<TipButton>();
+                tipPossession.textOnClick = "btn_xn_possession_brush";
+                tipPossession.textOnClickDescription = "btn_xn_possession_brush_desc";
+            }
+            ReincarnationBrushTool.Init();
+            var transmigrationIcon = SpriteTextureLoader.getSprite("ui/icon/transmigration");
+            var btnReincarnation = ReincarnationBrushTool.GetPowerButton();
+            if (btnReincarnation != null)
+            {
+                _tab.AddPowerButton("tools", btnReincarnation);
+                var tipReincarnation = btnReincarnation.GetComponent<TipButton>() ?? btnReincarnation.gameObject.AddComponent<TipButton>();
+                tipReincarnation.textOnClick = "btn_xn_reincarnation_brush";
+                tipReincarnation.textOnClickDescription = "btn_xn_reincarnation_brush_desc";
+            }
+            TournamentManager.Init();
+            var tournamentIcon = SpriteTextureLoader.getSprite("ui/icon/tournament")
+                              ?? SpriteTextureLoader.getSprite("ui/icons/iconWar");
+            var btnTournament = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("比武大会", OnStartTournament, tournamentIcon);
+            _tab.AddPowerButton("tools", btnTournament);
+            BtnTournament = btnTournament;
+            var tipTournament = btnTournament.GetComponent<TipButton>() ?? btnTournament.gameObject.AddComponent<TipButton>();
+            tipTournament.textOnClick = "btn_xn_tournament";
+            tipTournament.textOnClickDescription = "btn_xn_tournament_desc";
+            MainCharacterBrushTool.Init();
+            MainCharacterSelectSfx.Init();
+            var mcIcon = SpriteTextureLoader.getSprite("ui/icon/mc");
+            var btnMC = MainCharacterBrushTool.GetPowerButton();
+            if (btnMC != null)
+            {
+                _tab.AddPowerButton("tools", btnMC);
+                var tipMC = btnMC.GetComponent<TipButton>() ?? btnMC.gameObject.AddComponent<TipButton>();
+                tipMC.textOnClick = "btn_xn_main_character_brush";
+                tipMC.textOnClickDescription = "btn_xn_main_character_brush_desc";
+            }
+            TournamentHistoryWindow.Init();
+            var historyIcon = SpriteTextureLoader.getSprite("ui/icon/duizhanlishi")
+                           ?? SpriteTextureLoader.getSprite("ui/icons/iconWar");
+            var btnHistory = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("对战历史", OnOpenTournamentHistory, historyIcon);
+            _tab.AddPowerButton("tools", btnHistory);
+            var tipHistory = btnHistory.GetComponent<TipButton>() ?? btnHistory.gameObject.AddComponent<TipButton>();
+            tipHistory.textOnClick = "btn_xn_tournament_history";
+            tipHistory.textOnClickDescription = "btn_xn_tournament_history_desc";
+            var guideIcon = SpriteTextureLoader.getSprite("ui/icon/youwan")
+                         ?? SpriteTextureLoader.getSprite("ui/icons/iconBook");
+            var btnGuide = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("新手引导", OnOpenNewbieGuide, guideIcon);
+            _tab.AddPowerButton("tools", btnGuide);
+            var tipGuide = btnGuide.GetComponent<TipButton>() ?? btnGuide.gameObject.AddComponent<TipButton>();
+            tipGuide.textOnClick = "btn_xn_newbie_guide";
+            tipGuide.textOnClickDescription = "btn_xn_newbie_guide_desc";
+            QuestionsWindow.Init();
+            var questionIcon = SpriteTextureLoader.getSprite("ui/questionui/question")
+                            ?? SpriteTextureLoader.getSprite("ui/icons/iconAbout");
+            var btnQuestion = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("常见问题", OnOpenQuestions, questionIcon);
+            _tab.AddPowerButton("tools", btnQuestion);
+            var tipQuestion = btnQuestion.GetComponent<TipButton>() ?? btnQuestion.gameObject.AddComponent<TipButton>();
+            tipQuestion.textOnClick = "btn_xn_questions";
+            tipQuestion.textOnClickDescription = "btn_xn_questions_desc";
+            FeedbackWindow.Init();
+            var feedbackIcon = SpriteTextureLoader.getSprite("ui/icons/iconAbout");
+            var btnFeedback = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton("评价反馈", OnOpenFeedback, feedbackIcon);
+            _tab.AddPowerButton("tools", btnFeedback);
+            var tipFeedback = btnFeedback.GetComponent<TipButton>() ?? btnFeedback.gameObject.AddComponent<TipButton>();
+            tipFeedback.textOnClick = "btn_xn_feedback";
+            tipFeedback.textOnClickDescription = "btn_xn_feedback_desc";
+            _tab.UpdateLayout();
+            XNPowerRanking.Init();
+        }
+        private static void OnOpenRanking()
+        {
+            xn.voice.AIVoiceBroadcast.OnRankingClicked();
+            XNPowerRanking.Open();
+        }
+        private static void OnToggleAura()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("灵气铭牌");
+            if (xn.world.XiuzhenguoSystem.Visible)
+            {
+                xn.world.XiuzhenguoSystem.Toggle();
+            }
+            xn.world.CityAuraSystem.Toggle();
+        }
+        private static void OnToggleXiuzhenguo()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("修真国铭牌");
+            if (xn.world.CityAuraSystem.Visible)
+            {
+                xn.world.CityAuraSystem.Toggle();
+            }
+            xn.world.XiuzhenguoSystem.Toggle();
+        }
+        private static void OnPlaceRuinsOnce()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("放置遗迹");
+            xn.ui.RuinPlacementTool.BeginOneShot();
+        }
+        private static void OnManualGC()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("手动GC");
+            xn.voice.VoiceCache.ClearCache();
+            xn.world.GarbageCollectorSystem.RunGC("manual_button");
+        }
+        private static void OnAddAmbition()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("增加野心");
+            int add = xn.config.ModConfigHooks.AmbitionAddValue;
+            if (add == 0)
+            {
+                xn.world.AmbitionSystem.ClearAll();
+                int cur0 = xn.world.AmbitionSystem.GetValue();
+                xn.world.BroadcastSystem.Custom($"当前天运子的野心值：{cur0}");
+                return;
+            }
+            if (add < 0) return; 
+            xn.world.AmbitionSystem.Add(add);
+            int cur = xn.world.AmbitionSystem.GetValue();
+            xn.world.BroadcastSystem.Custom($"当前天运子的野心值：{cur}");
+        }
+        private static void OnSearchUnits()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("生物搜索");
+            string kw = xn.config.ModConfigHooks.UnitSearchKeyword;
+            if (string.IsNullOrEmpty(kw)) kw = "康康";
+            xn.ui.XNSearchRanking.Open(kw);
+        }
+        private static void OnOpenModSettings()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("Mod设置");
+            const string MY_UID = "XIAN_NI_MOD";
+            IMod self = null;
+            foreach (var m in NeoModLoader.WorldBoxMod.LoadedMods)
+            {
+                var declare = m?.GetDeclaration();
+                if (declare != null && declare.UID == MY_UID) { self = m; break; }
+            }
+            if (self == null) return;
+            var go = self.GetGameObject();
+            if (go == null) return;
+            var configurable = go.GetComponent<IConfigurable>();
+            if (configurable == null) return;
+            var cfg = configurable.GetConfig();
+            if (cfg == null) return;
+            ModConfigureWindow.ShowWindow(cfg);
+        }
+        private static void OnPlaceNvpu()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("放置女仆");
+            NvpuPlacementTool.BeginOneShot();
+        }
+        private static void OnControlDashou()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("控制打手");
+            xn.race.DashouSystem.ApplyBehaviorToAll();
+        }
+        private static void OnOpenBloodline()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("血脉氏族");
+            BloodlineWindow.Toggle();
+        }
+        private static void OnStartTournament()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("比武大会");
+            if (TournamentManager.IsRunning)
+            {
+                xn.world.BroadcastSystem.Custom("比武大会正在进行中，请稍候");
+                return;
+            }
+            TournamentManager.StartTournament();
+        }
+        private static void OnOpenTournamentHistory()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("对战历史");
+            TournamentHistoryWindow.Toggle();
+        }
+        private static void OnOpenNewbieGuide()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("新手引导");
+            NewbieGuideSystem.Start();
+        }
+        private static void OnOpenFeedback()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("评价反馈");
+            FeedbackWindow.Toggle();
+        }
+        private static void OnOpenQuestions()
+        {
+            xn.voice.AIVoiceBroadcast.OnButtonClicked("常见问题");
+            QuestionsWindow.Toggle();
+        }
+    }
+}

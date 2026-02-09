@@ -1,0 +1,222 @@
+{
+  "xn_config_basic": [
+    {
+      "Id": "xn_config_enable_log",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnLogSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_animation",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnAnimationSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_titles",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnTitlesSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_broadcast_display",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnBroadcastDisplaySwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_broadcast_console_log",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnBroadcastConsoleLogSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_mc_select_sfx",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnMcSelectSfxSwitchChanged"
+    },
+    {
+      "Id": "xn_config_unit_search_keyword",
+      "Type": "TEXT",
+      "TextVal": "康康",
+      "Callback": "xn.config.ModConfigHooks:OnUnitSearchKeywordChanged"
+    },
+    {
+      "Id": "xn_config_skin_tone_color",
+      "Type": "INT_SLIDER",
+      "IntVal": 0,
+      "MinIntVal": 0,
+      "MaxIntVal": 15,
+      "Callback": "xn.config.ModConfigHooks:OnSkinToneColorChanged"
+    }
+  ],
+  "xn_config_cultivation": [
+    {
+      "Id": "xn_config_city_aura_max",
+      "Type": "TEXT",
+      "TextVal": "10000",
+      "Callback": "xn.config.ModConfigHooks:OnCityAuraMaxChanged"
+    },
+    {
+      "Id": "xn_config_city_aura_refresh_years",
+      "Type": "TEXT",
+      "TextVal": "30",
+      "Callback": "xn.config.ModConfigHooks:OnCityAuraRefreshYearsChanged"
+    },
+    {
+      "Id": "xn_config_auto_fav_realm_gate",
+      "Type": "TEXT",
+      "TextVal": "1",
+      "Callback": "xn.config.ModConfigHooks:OnAutoFavRealmGateChanged"
+    },
+    {
+      "Id": "xn_config_tianyun_years",
+      "Type": "TEXT",
+      "TextVal": "15",
+      "Callback": "xn.config.ModConfigHooks:OnTianyunYearsChanged"
+    },
+    {
+      "Id": "xn_config_enable_tianyunzi_spawn",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnTianyunziSpawnSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_xiuzhenguo_suppress",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnXiuzhenguoSuppressSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_ancient_beast_level_limit",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnAncientBeastLevelLimitSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_xiuzhenguo_aura_limit",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnXiuzhenguoAuraLimitSwitchChanged"
+    },
+    {
+      "Id": "xn_config_ancient_beast_multiplier",
+      "Type": "INT_SLIDER",
+      "IntVal": 1,
+      "MinIntVal": 1,
+      "MaxIntVal": 10000,
+      "Callback": "xn.config.ModConfigHooks:OnAncientBeastMultiplierChanged"
+    },
+    {
+      "Id": "xn_config_disable_condense",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnCondenseSwitchChanged"
+    }
+  ],
+  "xn_config_gameplay": [
+    {
+      "Id": "xn_config_ambition_add_value",
+      "Type": "TEXT",
+      "TextVal": "1",
+      "Callback": "xn.config.ModConfigHooks:OnAmbitionAddValueChanged"
+    },
+    {
+      "Id": "xn_config_enable_auto_join_army",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnAutoJoinArmySwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_building_protection",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnBuildingProtectionSwitchChanged"
+    },
+    {
+      "Id": "xn_config_dashou_behavior",
+      "Type": "TEXT",
+      "TextVal": "0",
+      "Callback": "xn.config.ModConfigHooks:OnDashouBehaviorChanged"
+    },
+    {
+      "Id": "xn_config_enable_demonic_hunt",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnDemonicHuntSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_bloodline_awaken",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnBloodlineAwakenSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_mentorship",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnMentorshipSwitchChanged"
+    }
+  ],
+  "xn_config_ai": [
+    {
+      "Id": "xn_config_enable_ai_voice",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnAIVoiceSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_deepseek_textgen",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnDeepSeekTextGenSwitchChanged"
+    },
+    {
+      "Id": "xn_config_custom_ai_api_key",
+      "Type": "TEXT",
+      "TextVal": "",
+      "Callback": "xn.config.ModConfigHooks:OnCustomAIApiKeyChanged"
+    },
+    {
+      "Id": "xn_config_custom_ai_url",
+      "Type": "TEXT",
+      "TextVal": "",
+      "Callback": "xn.config.ModConfigHooks:OnCustomAIUrlChanged"
+    },
+    {
+      "Id": "xn_config_custom_ai_model",
+      "Type": "TEXT",
+      "TextVal": "",
+      "Callback": "xn.config.ModConfigHooks:OnCustomAIModelChanged"
+    }
+  ],
+  "xn_config_performance": [
+    {
+      "Id": "xn_config_enable_auto_gc",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnAutoGCSwitchChanged"
+    },
+    {
+      "Id": "xn_config_auto_gc_threshold_mb",
+      "Type": "TEXT",
+      "TextVal": "512",
+      "Callback": "xn.config.ModConfigHooks:OnAutoGCThresholdChanged"
+    }
+  ],
+  "xn_config_advanced": [
+    {
+      "Id": "xn_config_enable_xianni_law",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnXianniLawSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_death_law",
+      "Type": "SWITCH",
+      "BoolVal": false,
+      "Callback": "xn.config.ModConfigHooks:OnDeathLawSwitchChanged"
+    }
+  ]
+}
