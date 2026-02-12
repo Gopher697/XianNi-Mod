@@ -1,0 +1,4871 @@
+--- cultivation/ai/BreakthroughJob.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/ai/BreakthroughJob.cs	Fri Feb  6 11:33:46 2026
+@@ -9,16 +9,16 @@
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x02000156 RID: 342
++	// Token: 0x0200015B RID: 347
+ 	internal static class BreakthroughJob
+ 	{
+-		// Token: 0x0600061E RID: 1566 RVA: 0x00004BE0 File Offset: 0x00002DE0
++		// Token: 0x06000690 RID: 1680 RVA: 0x0000542A File Offset: 0x0000362A
+ 		public static void Init()
+ 		{
+ 			BreakthroughJob.RegisterJob();
+ 		}
+ 
+-		// Token: 0x0600061F RID: 1567 RVA: 0x00040EBC File Offset: 0x0003F0BC
++		// Token: 0x06000691 RID: 1681 RVA: 0x00041758 File Offset: 0x0003F958
+ 		private static void RegisterJob()
+ 		{
+ 			ActorJobLibrary job_actor = AssetManager.job_actor;
+@@ -36,7 +36,7 @@
+ 			actorJob.addTask("end_job");
+ 		}
+ 
+-		// Token: 0x06000620 RID: 1568 RVA: 0x00040F14 File Offset: 0x0003F114
++		// Token: 0x06000692 RID: 1682 RVA: 0x000417B0 File Offset: 0x0003F9B0
+ 		private static void RegisterBreakthroughTask()
+ 		{
+ 			BehaviourTaskActorLibrary tasks_actor = AssetManager.tasks_actor;
+@@ -59,7 +59,7 @@
+ 			behaviourTaskActor.addBeh(new BehExitBuilding());
+ 		}
+ 
+-		// Token: 0x06000621 RID: 1569 RVA: 0x00040FBC File Offset: 0x0003F1BC
++		// Token: 0x06000693 RID: 1683 RVA: 0x00041858 File Offset: 0x0003FA58
+ 		private static int GetCurrentRealmIndex(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -81,7 +81,7 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x06000622 RID: 1570 RVA: 0x00041040 File Offset: 0x0003F240
++		// Token: 0x06000694 RID: 1684 RVA: 0x000418DC File Offset: 0x0003FADC
+ 		private static int GetNextRealmIndex(Actor a)
+ 		{
+ 			int num = BreakthroughJob.GetCurrentRealmIndex(a) + 1;
+@@ -92,13 +92,13 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x06000623 RID: 1571 RVA: 0x00004BE7 File Offset: 0x00002DE7
++		// Token: 0x06000695 RID: 1685 RVA: 0x00005431 File Offset: 0x00003631
+ 		private static bool IsHeavenGateRealm(int idx)
+ 		{
+ 			return idx == 6 || idx == 9 || idx == 12 || idx == 13 || idx == 14;
+ 		}
+ 
+-		// Token: 0x06000624 RID: 1572 RVA: 0x00041064 File Offset: 0x0003F264
++		// Token: 0x06000696 RID: 1686 RVA: 0x00041900 File Offset: 0x0003FB00
+ 		private static bool HasDaoBaseDamage(Actor a, int curYear)
+ 		{
+ 			int num;
+@@ -106,7 +106,7 @@
+ 			return num > curYear;
+ 		}
+ 
+-		// Token: 0x06000625 RID: 1573 RVA: 0x00041088 File Offset: 0x0003F288
++		// Token: 0x06000697 RID: 1687 RVA: 0x00041924 File Offset: 0x0003FB24
+ 		private static bool TryDoBreakthrough(Actor a, int curYear)
+ 		{
+ 			int currentRealmIndex = BreakthroughJob.GetCurrentRealmIndex(a);
+@@ -375,7 +375,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000626 RID: 1574 RVA: 0x000416E0 File Offset: 0x0003F8E0
++		// Token: 0x06000698 RID: 1688 RVA: 0x00041F7C File Offset: 0x0004017C
+ 		private static void StartHeavenTrial(Actor a, int ttype, int targetIndex)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -418,7 +418,11 @@
+ 				long num4;
+ 				a.data.get("xn.trial.bridge", out num4, 0L);
+ 				int num5 = (int)num4;
+-				BroadcastSystem.PostActor(a, a.getName() + " 正在闯踏天" + (num5 + 1).ToString() + "桥");
++				BroadcastSystem.PostActor(a, BroadcastSystem.FormatLocalized("broadcast_tatian_bridge_attempt", new object[]
++				{
++					a.getName(),
++					num5 + 1
++				}));
+ 			}
+ 			else
+ 			{
+@@ -427,7 +431,7 @@
+ 			HeavenTrialFX.StartFor(a);
+ 		}
+ 
+-		// Token: 0x06000627 RID: 1575 RVA: 0x0004186C File Offset: 0x0003FA6C
++		// Token: 0x06000699 RID: 1689 RVA: 0x00042108 File Offset: 0x00040308
+ 		private static string GetDaoBaseCode(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -468,7 +472,7 @@
+ 			return "";
+ 		}
+ 
+-		// Token: 0x06000628 RID: 1576 RVA: 0x0004199C File Offset: 0x0003FB9C
++		// Token: 0x0600069A RID: 1690 RVA: 0x00042238 File Offset: 0x00040438
+ 		private static int GetDaoBaseCooldownYears(string daoCode)
+ 		{
+ 			if (daoCode == "01")
+@@ -498,7 +502,7 @@
+ 			return 5;
+ 		}
+ 
+-		// Token: 0x06000629 RID: 1577 RVA: 0x00041A0C File Offset: 0x0003FC0C
++		// Token: 0x0600069B RID: 1691 RVA: 0x000422A8 File Offset: 0x000404A8
+ 		private static void EnsureDaoBaseAfterFoundation(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -553,7 +557,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600062A RID: 1578 RVA: 0x00041B48 File Offset: 0x0003FD48
++		// Token: 0x0600069C RID: 1692 RVA: 0x000423E4 File Offset: 0x000405E4
+ 		private static int CountDivine(Actor a)
+ 		{
+ 			if (a == null)
+@@ -576,7 +580,7 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x0600062B RID: 1579 RVA: 0x00041BC0 File Offset: 0x0003FDC0
++		// Token: 0x0600069D RID: 1693 RVA: 0x0004245C File Offset: 0x0004065C
+ 		private static void GiveRandomDivine(Actor a)
+ 		{
+ 			if (a == null)
+@@ -615,7 +619,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600062C RID: 1580 RVA: 0x00041CB8 File Offset: 0x0003FEB8
++		// Token: 0x0600069E RID: 1694 RVA: 0x00042554 File Offset: 0x00040754
+ 		private static void GiveRandomArt(Actor a)
+ 		{
+ 			if (a == null)
+@@ -654,7 +658,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600062D RID: 1581 RVA: 0x00041DB0 File Offset: 0x0003FFB0
++		// Token: 0x0600069F RID: 1695 RVA: 0x0004264C File Offset: 0x0004084C
+ 		private static void GiveRealmBreakthroughRewards(Actor a, int realmIndex)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -693,7 +697,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600062E RID: 1582 RVA: 0x0002B53C File Offset: 0x0002973C
++		// Token: 0x060006A0 RID: 1696 RVA: 0x0002D794 File Offset: 0x0002B994
+ 		private static bool HasTrait(Actor a, string traitId)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -711,7 +715,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x0600062F RID: 1583 RVA: 0x00041E14 File Offset: 0x00040014
++		// Token: 0x060006A1 RID: 1697 RVA: 0x000426B0 File Offset: 0x000408B0
+ 		private static bool HasAnyFiveAttr(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -729,7 +733,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000630 RID: 1584 RVA: 0x00041E80 File Offset: 0x00040080
++		// Token: 0x060006A2 RID: 1698 RVA: 0x0004271C File Offset: 0x0004091C
+ 		private static void MaybeGiveAttrForRealm(Actor a, int realmIdx)
+ 		{
+ 			if (a == null)
+@@ -778,7 +782,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000631 RID: 1585 RVA: 0x00041F3C File Offset: 0x0004013C
++		// Token: 0x060006A3 RID: 1699 RVA: 0x000427D8 File Offset: 0x000409D8
+ 		private static void IncreaseXinmoAndMaybeCorrupt(Actor a)
+ 		{
+ 			int num;
+@@ -816,7 +820,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000632 RID: 1586 RVA: 0x00041FDC File Offset: 0x000401DC
++		// Token: 0x060006A4 RID: 1700 RVA: 0x00042878 File Offset: 0x00040A78
+ 		private static float GetTrialLightningScale(Actor a)
+ 		{
+ 			int num;
+@@ -867,7 +871,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000633 RID: 1587 RVA: 0x000420B0 File Offset: 0x000402B0
++		// Token: 0x060006A5 RID: 1701 RVA: 0x0004294C File Offset: 0x00040B4C
+ 		private static void SpawnTrialLightning(Actor a)
+ 		{
+ 			if (a == null || a.current_tile == null)
+@@ -888,7 +892,7 @@
+ 			MapBox.spawnLightningSmall(a.current_tile, trialLightningScale, null);
+ 		}
+ 
+-		// Token: 0x06000634 RID: 1588 RVA: 0x0004210C File Offset: 0x0004030C
++		// Token: 0x060006A6 RID: 1702 RVA: 0x000429A8 File Offset: 0x00040BA8
+ 		private static void FinishHeavenTrial(Actor a, int curYear)
+ 		{
+ 			a.data.set("xn.trial.active", 0);
+@@ -1007,6 +1011,21 @@
+ 							BreakthroughJob.ReplaceRealmTo(a, 14);
+ 							BroadcastSystem.HeavenSuccessRealm(a, BreakthroughJob.REALM_IDS[14]);
+ 							a.data.set("xn.break.success_year", curYear);
++							if (UnityEngine.Random.value < 0.25f)
++							{
++								a.data.set("xn.half_tatian.locked", 1);
++								BroadcastSystem.PostActor(a, BroadcastSystem.FormatLocalized("broadcast_half_tatian_locked", new object[]
++								{
++									a.getName()
++								}));
++							}
++							else
++							{
++								BroadcastSystem.PostActor(a, BroadcastSystem.FormatLocalized("broadcast_half_tatian_continue", new object[]
++								{
++									a.getName()
++								}));
++							}
+ 						}
+ 						else if (num15 == 9)
+ 						{
+@@ -1033,13 +1052,20 @@
+ 				{
+ 					if (num15 < 5 && Randy.randomChance(0.1f))
+ 					{
+-						BroadcastSystem.PostActor(a, a.getName() + " 感悟道心，原来这就是修仙，桥段保留");
++						BroadcastSystem.PostActor(a, BroadcastSystem.FormatLocalized("broadcast_bridge_dao_insight", new object[]
++						{
++							a.getName()
++						}));
+ 						action();
+ 						a.data.set("xn.trial.cooldown_until", curYear + 30);
+ 					}
+ 					else
+ 					{
+-						BroadcastSystem.PostActor(a, a.getName() + " 经历踏天" + (num15 + 1).ToString() + "桥失败咯");
++						BroadcastSystem.PostActor(a, BroadcastSystem.FormatLocalized("broadcast_bridge_fail", new object[]
++						{
++							a.getName(),
++							num15 + 1
++						}));
+ 						BreakthroughJob.ApplyImmortalDemonicFailPenalty(a, num, num2, num10);
+ 						action();
+ 						a.data.set("xn.trial.cooldown_until", curYear + 30);
+@@ -1161,7 +1187,7 @@
+ 			HeavenTrialFX.StopFor(a);
+ 		}
+ 
+-		// Token: 0x06000635 RID: 1589 RVA: 0x00042A24 File Offset: 0x00040C24
++		// Token: 0x060006A7 RID: 1703 RVA: 0x00043348 File Offset: 0x00041548
+ 		private static void ApplyImmortalDemonicFailPenalty(Actor a, int ttype, int targetRealmIndex, int xinmo)
+ 		{
+ 			switch (UnityEngine.Random.Range(1, 7))
+@@ -1169,10 +1195,10 @@
+ 			case 1:
+ 			{
+ 				BreakthroughJob.DemoteRealmBy(a, 3, 0.5f);
+-				int num = BreakthroughJob.CurrentRealmIndex(a);
+-				if (num >= 0)
++				int currentRealmIndex = BreakthroughJob.GetCurrentRealmIndex(a);
++				if (currentRealmIndex >= 0)
+ 				{
+-					BroadcastSystem.RealmFailDemote(a, BreakthroughJob.REALM_IDS[num]);
++					BroadcastSystem.RealmFailDemote(a, BreakthroughJob.REALM_IDS[currentRealmIndex]);
+ 				}
+ 				break;
+ 			}
+@@ -1202,7 +1228,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000636 RID: 1590 RVA: 0x00042B40 File Offset: 0x00040D40
++		// Token: 0x060006A8 RID: 1704 RVA: 0x00043464 File Offset: 0x00041664
+ 		private static void ApplyAncientBeastFailPenalty(Actor a, int ttype, int curIdx)
+ 		{
+ 			BreakthroughJob.DemoteAncientOrBeast(a, ttype, 1, 0.5f);
+@@ -1238,29 +1264,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000637 RID: 1591 RVA: 0x00040FBC File Offset: 0x0003F1BC
+-		private static int CurrentRealmIndex(Actor a)
+-		{
+-			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+-			if (traits == null)
+-			{
+-				return -1;
+-			}
+-			int num = -1;
+-			for (int i = 0; i < BreakthroughJob.REALM_IDS.Length; i++)
+-			{
+-				foreach (ActorTrait actorTrait in traits)
+-				{
+-					if (actorTrait != null && actorTrait.id == BreakthroughJob.REALM_IDS[i] && i > num)
+-					{
+-						num = i;
+-					}
+-				}
+-			}
+-			return num;
+-		}
+-
+-		// Token: 0x06000638 RID: 1592 RVA: 0x00042C50 File Offset: 0x00040E50
++		// Token: 0x060006A9 RID: 1705 RVA: 0x00043574 File Offset: 0x00041774
+ 		private static void ReplaceRealmTo(Actor a, int idx)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -1291,22 +1295,22 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000639 RID: 1593 RVA: 0x00042D50 File Offset: 0x00040F50
++		// Token: 0x060006AA RID: 1706 RVA: 0x00043674 File Offset: 0x00041874
+ 		private static void DemoteRealmBy(Actor a, int levels, float percentOfThreshold)
+ 		{
+-			int num = BreakthroughJob.CurrentRealmIndex(a);
+-			if (num < 0)
++			int currentRealmIndex = BreakthroughJob.GetCurrentRealmIndex(a);
++			if (currentRealmIndex < 0)
+ 			{
+ 				return;
+ 			}
+-			int num2 = Mathf.Max(num - Mathf.Max(levels, 1), 0);
+-			BreakthroughJob.ReplaceRealmTo(a, num2);
+-			long pData = (long)((float)((num2 >= 0 && num2 < BreakthroughJob.REALM_THRESHOLDS.Length) ? BreakthroughJob.REALM_THRESHOLDS[num2] : 0L) * Mathf.Clamp01(percentOfThreshold));
++			int num = Mathf.Max(currentRealmIndex - Mathf.Max(levels, 1), 0);
++			BreakthroughJob.ReplaceRealmTo(a, num);
++			long pData = (long)((float)((num >= 0 && num < BreakthroughJob.REALM_THRESHOLDS.Length) ? BreakthroughJob.REALM_THRESHOLDS[num] : 0L) * Mathf.Clamp01(percentOfThreshold));
+ 			a.data.set("xn.stat.xiuwei", pData);
+ 			a.data.set("xn.cultivation.stop", 0);
+ 		}
+ 
+-		// Token: 0x0600063A RID: 1594 RVA: 0x00042DC8 File Offset: 0x00040FC8
++		// Token: 0x060006AB RID: 1707 RVA: 0x000436EC File Offset: 0x000418EC
+ 		private static void GiveOrReplaceTrait(Actor a, string id, string groupId)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -1332,7 +1336,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600063B RID: 1595 RVA: 0x00042E94 File Offset: 0x00041094
++		// Token: 0x060006AC RID: 1708 RVA: 0x000437B8 File Offset: 0x000419B8
+ 		private static void DowngradeDaoBase(Actor a)
+ 		{
+ 			string[] array = new string[]
+@@ -1374,7 +1378,7 @@
+ 			BreakthroughJob.GiveOrReplaceTrait(a, array[num2], "dao_base");
+ 		}
+ 
+-		// Token: 0x0600063C RID: 1596 RVA: 0x00042F94 File Offset: 0x00041194
++		// Token: 0x060006AD RID: 1709 RVA: 0x000438B8 File Offset: 0x00041AB8
+ 		private static void ReplaceTraitInSet(Actor a, string[] ids, int pickIndex)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -1405,7 +1409,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600063D RID: 1597 RVA: 0x00043084 File Offset: 0x00041284
++		// Token: 0x060006AE RID: 1710 RVA: 0x000439A8 File Offset: 0x00041BA8
+ 		private static int GetCurrentBeastIndex(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -1427,7 +1431,7 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x0600063E RID: 1598 RVA: 0x00043108 File Offset: 0x00041308
++		// Token: 0x060006AF RID: 1711 RVA: 0x00043A2C File Offset: 0x00041C2C
+ 		private static void DemoteAncientOrBeast(Actor a, int ttype, int steps, float percentOfCap)
+ 		{
+ 			if (ttype == 3)
+@@ -1464,7 +1468,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600063F RID: 1599 RVA: 0x000431F8 File Offset: 0x000413F8
++		// Token: 0x060006B0 RID: 1712 RVA: 0x00043B1C File Offset: 0x00041D1C
+ 		private static void ResetAncientOrBeastTo2(Actor a, int ttype)
+ 		{
+ 			if (ttype == 3)
+@@ -1483,7 +1487,7 @@
+ 			a.data.set("xn.beast.stop", 0);
+ 		}
+ 
+-		// Token: 0x06000640 RID: 1600 RVA: 0x00043298 File Offset: 0x00041498
++		// Token: 0x060006B1 RID: 1713 RVA: 0x00043BBC File Offset: 0x00041DBC
+ 		private static int GetMaxAllowedStarStageIndex(Actor a)
+ 		{
+ 			if (!ModConfigHooks.EnableAncientBeastLevelLimit)
+@@ -1521,7 +1525,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000641 RID: 1601 RVA: 0x00043320 File Offset: 0x00041520
++		// Token: 0x060006B2 RID: 1714 RVA: 0x00043C44 File Offset: 0x00041E44
+ 		private static void PromoteAncientTo(Actor a, int idx)
+ 		{
+ 			int maxAllowedStarStageIndex = BreakthroughJob.GetMaxAllowedStarStageIndex(a);
+@@ -1529,7 +1533,7 @@
+ 			BreakthroughJob.ReplaceTraitInSet(a, BreakthroughJob.ANC_STAR_IDS, pickIndex);
+ 		}
+ 
+-		// Token: 0x06000642 RID: 1602 RVA: 0x00043358 File Offset: 0x00041558
++		// Token: 0x060006B3 RID: 1715 RVA: 0x00043C7C File Offset: 0x00041E7C
+ 		private static void PromoteBeastTo(Actor a, int idx)
+ 		{
+ 			int maxAllowedStarStageIndex = BreakthroughJob.GetMaxAllowedStarStageIndex(a);
+@@ -1537,7 +1541,7 @@
+ 			BreakthroughJob.ReplaceTraitInSet(a, BreakthroughJob.BEAST_STAGE_IDS, pickIndex);
+ 		}
+ 
+-		// Token: 0x06000643 RID: 1603 RVA: 0x00043390 File Offset: 0x00041590
++		// Token: 0x060006B4 RID: 1716 RVA: 0x00043CB4 File Offset: 0x00041EB4
+ 		private static int GetCurrentAncientIndex(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -1559,7 +1563,7 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x06000644 RID: 1604 RVA: 0x00043414 File Offset: 0x00041614
++		// Token: 0x060006B5 RID: 1717 RVA: 0x00043D38 File Offset: 0x00041F38
+ 		private static float GetRootHeavenAdd(Actor a)
+ 		{
+ 			if (BreakthroughJob.HasTrait(a, "root_06_tiandi"))
+@@ -1585,7 +1589,7 @@
+ 			return 0f;
+ 		}
+ 
+-		// Token: 0x06000645 RID: 1605 RVA: 0x00043488 File Offset: 0x00041688
++		// Token: 0x060006B6 RID: 1718 RVA: 0x00043DAC File Offset: 0x00041FAC
+ 		private static float GetDaoHeavenAdd(Actor a)
+ 		{
+ 			if (BreakthroughJob.HasTrait(a, "dao_06_tiandi"))
+@@ -1615,7 +1619,7 @@
+ 			return 0f;
+ 		}
+ 
+-		// Token: 0x06000646 RID: 1606 RVA: 0x0004350C File Offset: 0x0004170C
++		// Token: 0x060006B7 RID: 1719 RVA: 0x00043E30 File Offset: 0x00042030
+ 		private static void GiveTatianAllPowersAndArts(Actor a)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -1685,49 +1689,49 @@
+ 			a.data.set("xn.tatian_rewarded", 1);
+ 		}
+ 
+-		// Token: 0x06000647 RID: 1607 RVA: 0x00043764 File Offset: 0x00041964
++		// Token: 0x060006B8 RID: 1720 RVA: 0x00044088 File Offset: 0x00042288
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static BreakthroughJob()
+ 		{
+ 		}
+ 
+-		// Token: 0x04000613 RID: 1555
++		// Token: 0x0400061A RID: 1562
+ 		private const string KEY_STOP = "xn.cultivation.stop";
+ 
+-		// Token: 0x04000614 RID: 1556
++		// Token: 0x0400061B RID: 1563
+ 		private const string KEY_XP = "xn.stat.xiuwei";
+ 
+-		// Token: 0x04000615 RID: 1557
++		// Token: 0x0400061C RID: 1564
+ 		private const string KEY_COEFF = "xn.root.coeff";
+ 
+-		// Token: 0x04000616 RID: 1558
++		// Token: 0x0400061D RID: 1565
+ 		private const string KEY_WUXIN = "xn.stat.wuxin";
+ 
+-		// Token: 0x04000617 RID: 1559
++		// Token: 0x0400061E RID: 1566
+ 		private const string KEY_QIYUN = "xn.stat.qiyun";
+ 
+-		// Token: 0x04000618 RID: 1560
++		// Token: 0x0400061F RID: 1567
+ 		private const string KEY_DAOB_ID = "xn.daobase.id";
+ 
+-		// Token: 0x04000619 RID: 1561
++		// Token: 0x04000620 RID: 1568
+ 		private const string KEY_DAOB_DAMAGED_UNTIL = "xn.daobase.damaged_until";
+ 
+-		// Token: 0x0400061A RID: 1562
++		// Token: 0x04000621 RID: 1569
+ 		private const string KEY_BREAK_TRIED_YEAR = "xn.break.tried_year";
+ 
+-		// Token: 0x0400061B RID: 1563
++		// Token: 0x04000622 RID: 1570
+ 		private const string KEY_BREAK_SUCCESS_YEAR = "xn.break.success_year";
+ 
+-		// Token: 0x0400061C RID: 1564
++		// Token: 0x04000623 RID: 1571
+ 		private const string KEY_XINMO = "xn.stat.xinmo";
+ 
+-		// Token: 0x0400061D RID: 1565
++		// Token: 0x04000624 RID: 1572
+ 		private const string KEY_ANC_POWER = "xn.stat.gushen_power";
+ 
+-		// Token: 0x0400061E RID: 1566
++		// Token: 0x04000625 RID: 1573
+ 		private const string KEY_BEAST_POWER = "xn.stat.yaoli";
+ 
+-		// Token: 0x0400061F RID: 1567
++		// Token: 0x04000626 RID: 1574
+ 		private static readonly string[] ATTR_IDS = new string[]
+ 		{
+ 			"attr_01_metal",
+@@ -1737,55 +1741,58 @@
+ 			"attr_05_earth"
+ 		};
+ 
+-		// Token: 0x04000620 RID: 1568
++		// Token: 0x04000627 RID: 1575
+ 		private const string KEY_ATTR_TRY_11 = "xn.benyuan.try.11";
+ 
+-		// Token: 0x04000621 RID: 1569
++		// Token: 0x04000628 RID: 1576
+ 		private const string KEY_ATTR_TRY_12 = "xn.benyuan.try.12";
+ 
+-		// Token: 0x04000622 RID: 1570
++		// Token: 0x04000629 RID: 1577
+ 		private const string KEY_ATTR_TRY_13 = "xn.benyuan.try.13";
+ 
+-		// Token: 0x04000623 RID: 1571
++		// Token: 0x0400062A RID: 1578
+ 		private const string KEY_TRIAL_ACTIVE = "xn.trial.active";
+ 
+-		// Token: 0x04000624 RID: 1572
++		// Token: 0x0400062B RID: 1579
+ 		private const string KEY_TRIAL_TYPE = "xn.trial.type";
+ 
+-		// Token: 0x04000625 RID: 1573
++		// Token: 0x0400062C RID: 1580
+ 		private const string KEY_TRIAL_TARGET = "xn.trial.target";
+ 
+-		// Token: 0x04000626 RID: 1574
++		// Token: 0x0400062D RID: 1581
+ 		private const string KEY_TRIAL_BRIDGE = "xn.trial.bridge";
+ 
+-		// Token: 0x04000627 RID: 1575
++		// Token: 0x0400062E RID: 1582
+ 		private const string KEY_TRIAL_END_T = "xn.trial.end_t";
+ 
+-		// Token: 0x04000628 RID: 1576
++		// Token: 0x0400062F RID: 1583
+ 		private const string KEY_TRIAL_COOLDOWN_UNTIL = "xn.trial.cooldown_until";
+ 
+-		// Token: 0x04000629 RID: 1577
++		// Token: 0x04000630 RID: 1584
+ 		private const string KEY_TRIAL_NEXT_LIGHTNING = "xn.trial.next_lightning";
+ 
+-		// Token: 0x0400062A RID: 1578
++		// Token: 0x04000631 RID: 1585
++		private const string KEY_HALF_TATIAN_LOCKED = "xn.half_tatian.locked";
++
++		// Token: 0x04000632 RID: 1586
+ 		private const float TRIAL_DURATION_SECONDS = 120f;
+ 
+-		// Token: 0x0400062B RID: 1579
++		// Token: 0x04000633 RID: 1587
+ 		private const float TRIAL_STUN_LARGE = 9999f;
+ 
+-		// Token: 0x0400062C RID: 1580
++		// Token: 0x04000634 RID: 1588
+ 		private const float LIGHTNING_INTERVAL = 10f;
+ 
+-		// Token: 0x0400062D RID: 1581
++		// Token: 0x04000635 RID: 1589
+ 		private const int TRIAL_COOLDOWN_YEARS = 30;
+ 
+-		// Token: 0x0400062E RID: 1582
++		// Token: 0x04000636 RID: 1590
+ 		private const string KEY_ANC_STOP = "xn.ancient.stop";
+ 
+-		// Token: 0x0400062F RID: 1583
++		// Token: 0x04000637 RID: 1591
+ 		private const string KEY_BEAST_STOP = "xn.beast.stop";
+ 
+-		// Token: 0x04000630 RID: 1584
++		// Token: 0x04000638 RID: 1592
+ 		private static readonly string[] ANC_STAR_IDS = new string[]
+ 		{
+ 			"ancient_01_star",
+@@ -1800,7 +1807,7 @@
+ 			"ancient_10_star"
+ 		};
+ 
+-		// Token: 0x04000631 RID: 1585
++		// Token: 0x04000639 RID: 1593
+ 		private static readonly string[] BEAST_STAGE_IDS = new string[]
+ 		{
+ 			"beast_01_stage",
+@@ -1815,7 +1822,7 @@
+ 			"beast_10_stage"
+ 		};
+ 
+-		// Token: 0x04000632 RID: 1586
++		// Token: 0x0400063A RID: 1594
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -1836,7 +1843,7 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x04000633 RID: 1587
++		// Token: 0x0400063B RID: 1595
+ 		private static readonly long[] REALM_THRESHOLDS = new long[]
+ 		{
+ 			100000L,
+@@ -1857,7 +1864,7 @@
+ 			1500000000L
+ 		};
+ 
+-		// Token: 0x04000634 RID: 1588
++		// Token: 0x0400063C RID: 1596
+ 		private static readonly string[] DIVINE_IDS = new string[]
+ 		{
+ 			"divine_01_baonuzhibian",
+@@ -1871,7 +1878,7 @@
+ 			"divine_09_jianzhan"
+ 		};
+ 
+-		// Token: 0x04000635 RID: 1589
++		// Token: 0x0400063D RID: 1597
+ 		private static readonly string[] ART_IDS = new string[]
+ 		{
+ 			"art_01_missile",
+@@ -1886,33 +1893,28 @@
+ 			"art_10_link"
+ 		};
+ 
+-		// Token: 0x02000157 RID: 343
++		// Token: 0x0200015C RID: 348
+ 		private class BehDoBreakthrough : BehaviourActionActor
+ 		{
+-			// Token: 0x06000648 RID: 1608 RVA: 0x000439BC File Offset: 0x00041BBC
++			// Token: 0x060006B9 RID: 1721 RVA: 0x000442E0 File Offset: 0x000424E0
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				int currentYear = Date.getCurrentYear();
+-				int num;
+-				pActor.data.get("xn.break.tried_year", out num, -1);
+-				if (num == currentYear)
+-				{
+-					BreakthroughJob.TryDoBreakthrough(pActor, currentYear);
+-				}
++				BreakthroughJob.TryDoBreakthrough(pActor, currentYear);
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x06000649 RID: 1609 RVA: 0x000034E5 File Offset: 0x000016E5
++			// Token: 0x060006BA RID: 1722 RVA: 0x000034C1 File Offset: 0x000016C1
+ 			public BehDoBreakthrough()
+ 			{
+ 			}
+ 		}
+ 
+-		// Token: 0x02000158 RID: 344
++		// Token: 0x0200015D RID: 349
+ 		[HarmonyPatch(typeof(Actor), "getNextJob")]
+ 		private static class Patch_Actor_GetNextJob
+ 		{
+-			// Token: 0x0600064A RID: 1610 RVA: 0x000439F0 File Offset: 0x00041BF0
++			// Token: 0x060006BB RID: 1723 RVA: 0x000442FC File Offset: 0x000424FC
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref string __result)
+ 			{
+@@ -1971,6 +1973,12 @@
+ 					return true;
+ 				}
+ 				int currentRealmIndex = BreakthroughJob.GetCurrentRealmIndex(__instance);
++				int num8;
++				__instance.data.get("xn.half_tatian.locked", out num8, 0);
++				if (num8 == 1 && currentRealmIndex >= 14)
++				{
++					return true;
++				}
+ 				if (num5 == 1 && BreakthroughJob.IsHeavenGateRealm(currentRealmIndex) && num6 >= num7)
+ 				{
+ 					int ttype = BreakthroughJob.HasTrait(__instance, "path_01_demonic") ? 2 : 1;
+@@ -1987,35 +1995,34 @@
+ 				}
+ 				if (currentRealmIndex >= 1)
+ 				{
+-					int num8;
+-					__instance.data.get("xn.break.success_year", out num8, 0);
+-					if (num8 > 0)
++					int num9;
++					__instance.data.get("xn.break.success_year", out num9, 0);
++					if (num9 > 0)
+ 					{
+ 						int daoBaseCooldownYears = BreakthroughJob.GetDaoBaseCooldownYears(BreakthroughJob.GetDaoBaseCode(__instance));
+-						if (currentYear - num8 < daoBaseCooldownYears)
++						if (currentYear - num9 < daoBaseCooldownYears)
+ 						{
+ 							return true;
+ 						}
+ 					}
+ 				}
+-				int num9;
+-				__instance.data.get("xn.break.tried_year", out num9, -1);
+-				if (num9 == currentYear)
++				int num10;
++				__instance.data.get("xn.break.tried_year", out num10, -1);
++				if (num10 == currentYear)
+ 				{
+ 					return true;
+ 				}
+ 				__instance.data.set("xn.break.tried_year", currentYear);
+-				BreakthroughJob.RegisterJob();
+ 				__result = "job_xn_breakthrough";
+ 				return false;
+ 			}
+ 		}
+ 
+-		// Token: 0x02000159 RID: 345
++		// Token: 0x0200015E RID: 350
+ 		[HarmonyPatch(typeof(MapBox), "Update")]
+ 		private static class Patch_TickHeavenTrial
+ 		{
+-			// Token: 0x0600064B RID: 1611 RVA: 0x00043BCC File Offset: 0x00041DCC
++			// Token: 0x060006BC RID: 1724 RVA: 0x000444F0 File Offset: 0x000426F0
+ 			[HarmonyPostfix]
+ 			private static void Postfix(MapBox __instance)
+ 			{
+@@ -2068,7 +2075,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200015A RID: 346
++		// Token: 0x0200015F RID: 351
+ 		[HarmonyPatch(typeof(Actor), "addStatusEffect", new Type[]
+ 		{
+ 			typeof(StatusAsset),
+@@ -2077,7 +2084,7 @@
+ 		})]
+ 		private static class Patch_Actor_addStatusEffect_TrialProtection
+ 		{
+-			// Token: 0x0600064C RID: 1612 RVA: 0x00043CE8 File Offset: 0x00041EE8
++			// Token: 0x060006BD RID: 1725 RVA: 0x0004460C File Offset: 0x0004280C
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, StatusAsset pStatusAsset)
+ 			{
+@@ -2101,11 +2108,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200015B RID: 347
++		// Token: 0x02000160 RID: 352
+ 		[HarmonyPatch(typeof(Actor), "dieAndDestroy")]
+ 		private static class Patch_Actor_dieAndDestroy_TrialDeath
+ 		{
+-			// Token: 0x0600064D RID: 1613 RVA: 0x00043D54 File Offset: 0x00041F54
++			// Token: 0x060006BE RID: 1726 RVA: 0x00044678 File Offset: 0x00042878
+ 			[HarmonyPrefix]
+ 			private static void Prefix(Actor __instance)
+ 			{
+@@ -2121,41 +2128,44 @@
+ 				}
+ 				if (__instance.attackedBy == null)
+ 				{
+-					BroadcastSystem.PostActor(__instance, __instance.getName() + " 突破中被天劫杀死了");
++					BroadcastSystem.PostActor(__instance, BroadcastSystem.FormatLocalized("broadcast_tribulation_death", new object[]
++					{
++						__instance.getName()
++					}));
+ 				}
+ 				__instance.data.set("xn.trial.active", 0);
+ 				HeavenTrialFX.StopFor(__instance);
+ 			}
+ 		}
+ 
+-		// Token: 0x0200015C RID: 348
++		// Token: 0x02000161 RID: 353
+ 		[CompilerGenerated]
+-		private sealed class <>c__DisplayClass60_0
++		private sealed class <>c__DisplayClass61_0
+ 		{
+-			// Token: 0x0600064E RID: 1614 RVA: 0x00002360 File Offset: 0x00000560
+-			public <>c__DisplayClass60_0()
++			// Token: 0x060006BF RID: 1727 RVA: 0x0000230F File Offset: 0x0000050F
++			public <>c__DisplayClass61_0()
+ 			{
+ 			}
+ 
+-			// Token: 0x0600064F RID: 1615 RVA: 0x00004C03 File Offset: 0x00002E03
++			// Token: 0x060006C0 RID: 1728 RVA: 0x0000544D File Offset: 0x0000364D
+ 			internal void <FinishHeavenTrial>b__0()
+ 			{
+ 				this.a.data.set("xn.cultivation.stop", 0);
+ 			}
+ 
+-			// Token: 0x06000650 RID: 1616 RVA: 0x00004C1C File Offset: 0x00002E1C
++			// Token: 0x060006C1 RID: 1729 RVA: 0x00005466 File Offset: 0x00003666
+ 			internal void <FinishHeavenTrial>b__1()
+ 			{
+ 				this.a.data.set("xn.ancient.stop", 0);
+ 			}
+ 
+-			// Token: 0x06000651 RID: 1617 RVA: 0x00004C35 File Offset: 0x00002E35
++			// Token: 0x060006C2 RID: 1730 RVA: 0x0000547F File Offset: 0x0000367F
+ 			internal void <FinishHeavenTrial>b__2()
+ 			{
+ 				this.a.data.set("xn.beast.stop", 0);
+ 			}
+ 
+-			// Token: 0x04000636 RID: 1590
++			// Token: 0x0400063E RID: 1598
+ 			public Actor a;
+ 		}
+ 	}
+--- cultivation/ai/CondenseRootJob.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/ai/CondenseRootJob.cs	Fri Feb  6 11:33:46 2026
+@@ -8,17 +8,17 @@
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x0200015D RID: 349
++	// Token: 0x02000162 RID: 354
+ 	internal static class CondenseRootJob
+ 	{
+-		// Token: 0x06000652 RID: 1618 RVA: 0x00004C4E File Offset: 0x00002E4E
++		// Token: 0x060006C3 RID: 1731 RVA: 0x00005498 File Offset: 0x00003698
+ 		public static void Init()
+ 		{
+ 			CondenseRootJob.RegisterJob();
+ 			CondenseRootFX.Register();
+ 		}
+ 
+-		// Token: 0x06000653 RID: 1619 RVA: 0x00043DB4 File Offset: 0x00041FB4
++		// Token: 0x060006C4 RID: 1732 RVA: 0x000446E0 File Offset: 0x000428E0
+ 		private static void RegisterJob()
+ 		{
+ 			ActorJobLibrary job_actor = AssetManager.job_actor;
+@@ -36,7 +36,7 @@
+ 			actorJob.addTask("end_job");
+ 		}
+ 
+-		// Token: 0x06000654 RID: 1620 RVA: 0x00043E0C File Offset: 0x0004200C
++		// Token: 0x060006C5 RID: 1733 RVA: 0x00044738 File Offset: 0x00042938
+ 		private static void RegisterCondenseTask()
+ 		{
+ 			BehaviourTaskActorLibrary tasks_actor = AssetManager.tasks_actor;
+@@ -56,7 +56,7 @@
+ 			behaviourTaskActor.addBeh(new CondenseRootJob.BehStopCondense());
+ 		}
+ 
+-		// Token: 0x06000655 RID: 1621 RVA: 0x00043E88 File Offset: 0x00042088
++		// Token: 0x060006C6 RID: 1734 RVA: 0x000447B4 File Offset: 0x000429B4
+ 		private static void TryDoCondense(Actor a, int curYear)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -129,7 +129,7 @@
+ 			a.data.set("xn.root.next_try_year", 0);
+ 		}
+ 
+-		// Token: 0x06000656 RID: 1622 RVA: 0x00044090 File Offset: 0x00042290
++		// Token: 0x060006C7 RID: 1735 RVA: 0x000449BC File Offset: 0x00042BBC
+ 		private static string PickWeightedRootId()
+ 		{
+ 			int num = 0;
+@@ -149,7 +149,7 @@
+ 			return CondenseRootJob.ROOT_IDS[0];
+ 		}
+ 
+-		// Token: 0x06000657 RID: 1623 RVA: 0x000440F8 File Offset: 0x000422F8
++		// Token: 0x060006C8 RID: 1736 RVA: 0x00044A24 File Offset: 0x00042C24
+ 		private static string PickWeightedInheritId()
+ 		{
+ 			float num = 0f;
+@@ -169,7 +169,7 @@
+ 			return CondenseRootJob.INHERIT_IDS[0];
+ 		}
+ 
+-		// Token: 0x06000658 RID: 1624 RVA: 0x0002B45C File Offset: 0x0002965C
++		// Token: 0x060006C9 RID: 1737 RVA: 0x0002D6B4 File Offset: 0x0002B8B4
+ 		private static bool HasAnySpiritRoot(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -187,7 +187,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000659 RID: 1625 RVA: 0x0002B4C8 File Offset: 0x000296C8
++		// Token: 0x060006CA RID: 1738 RVA: 0x0002D720 File Offset: 0x0002B920
+ 		private static bool HasAnyAncientInheritance(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -205,7 +205,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x0600065A RID: 1626 RVA: 0x0002B53C File Offset: 0x0002973C
++		// Token: 0x060006CB RID: 1739 RVA: 0x0002D794 File Offset: 0x0002B994
+ 		private static bool HasTraitId(Actor a, string id)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -223,13 +223,13 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x0600065B RID: 1627 RVA: 0x00004C5A File Offset: 0x00002E5A
++		// Token: 0x060006CC RID: 1740 RVA: 0x000054A4 File Offset: 0x000036A4
+ 		private static bool IsHuman(Actor a)
+ 		{
+ 			return a != null && a.asset != null && a.asset.id == "human";
+ 		}
+ 
+-		// Token: 0x0600065C RID: 1628 RVA: 0x00044168 File Offset: 0x00042368
++		// Token: 0x060006CD RID: 1741 RVA: 0x00044A94 File Offset: 0x00042C94
+ 		private static void RemoveAllSpiritRoots(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -252,7 +252,7 @@
+ 			a.data.set("xn.root.coeff", 0f);
+ 		}
+ 
+-		// Token: 0x0600065D RID: 1629 RVA: 0x00044210 File Offset: 0x00042410
++		// Token: 0x060006CE RID: 1742 RVA: 0x00044B3C File Offset: 0x00042D3C
+ 		private static void RemoveAllAncientInheritance(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -274,37 +274,37 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600065E RID: 1630 RVA: 0x000442AC File Offset: 0x000424AC
++		// Token: 0x060006CF RID: 1743 RVA: 0x00044BD8 File Offset: 0x00042DD8
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static CondenseRootJob()
+ 		{
+ 		}
+ 
+-		// Token: 0x04000637 RID: 1591
++		// Token: 0x0400063F RID: 1599
+ 		private const string KEY_CONDENSE_READY = "xn.root.condense_ready";
+ 
+-		// Token: 0x04000638 RID: 1592
++		// Token: 0x04000640 RID: 1600
+ 		private const string KEY_CONDENSE_YEAR = "xn.root.condense_year";
+ 
+-		// Token: 0x04000639 RID: 1593
++		// Token: 0x04000641 RID: 1601
+ 		private const string KEY_COEFF = "xn.root.coeff";
+ 
+-		// Token: 0x0400063A RID: 1594
++		// Token: 0x04000642 RID: 1602
+ 		private const string KEY_NEXT_TRY_YEAR = "xn.root.next_try_year";
+ 
+-		// Token: 0x0400063B RID: 1595
++		// Token: 0x04000643 RID: 1603
+ 		private const string KEY_CITY_AURA = "xn.city.aura";
+ 
+-		// Token: 0x0400063C RID: 1596
++		// Token: 0x04000644 RID: 1604
+ 		private const string KEY_CITY_ROOT_USED = "xn.city.root.try_used";
+ 
+-		// Token: 0x0400063D RID: 1597
++		// Token: 0x04000645 RID: 1605
+ 		private const string KEY_CONDENSE_RESULT = "xn.root.condense_result";
+ 
+-		// Token: 0x0400063E RID: 1598
++		// Token: 0x04000646 RID: 1606
+ 		private const string KEY_CONDENSE_ID = "xn.root.condense_id";
+ 
+-		// Token: 0x0400063F RID: 1599
++		// Token: 0x04000647 RID: 1607
+ 		private static readonly string[] ROOT_IDS = new string[]
+ 		{
+ 			"root_01_mortal",
+@@ -315,7 +315,7 @@
+ 			"root_06_tiandi"
+ 		};
+ 
+-		// Token: 0x04000640 RID: 1600
++		// Token: 0x04000648 RID: 1608
+ 		private static readonly int[] ROOT_WEIGHTS = new int[]
+ 		{
+ 			40,
+@@ -326,7 +326,7 @@
+ 			1
+ 		};
+ 
+-		// Token: 0x04000641 RID: 1601
++		// Token: 0x04000649 RID: 1609
+ 		private static readonly Vector2[] ROOT_COEFF_RANGE = new Vector2[]
+ 		{
+ 			new Vector2(0.1f, 0.5f),
+@@ -337,7 +337,7 @@
+ 			new Vector2(10f, 20f)
+ 		};
+ 
+-		// Token: 0x04000642 RID: 1602
++		// Token: 0x0400064A RID: 1610
+ 		private static readonly string[] INHERIT_IDS = new string[]
+ 		{
+ 			"inherit_01_poor",
+@@ -347,7 +347,7 @@
+ 			"inherit_05_ancientblood"
+ 		};
+ 
+-		// Token: 0x04000643 RID: 1603
++		// Token: 0x0400064B RID: 1611
+ 		private static readonly float[] INHERIT_WEIGHTS = new float[]
+ 		{
+ 			50f,
+@@ -357,10 +357,10 @@
+ 			0.5f
+ 		};
+ 
+-		// Token: 0x0200015E RID: 350
++		// Token: 0x02000163 RID: 355
+ 		private class BehStartCondense : BehaviourActionActor
+ 		{
+-			// Token: 0x0600065F RID: 1631 RVA: 0x00004C7E File Offset: 0x00002E7E
++			// Token: 0x060006D0 RID: 1744 RVA: 0x000054C8 File Offset: 0x000036C8
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				if (pActor != null && pActor.isAlive())
+@@ -370,23 +370,23 @@
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x06000660 RID: 1632 RVA: 0x000034E5 File Offset: 0x000016E5
++			// Token: 0x060006D1 RID: 1745 RVA: 0x000034C1 File Offset: 0x000016C1
+ 			public BehStartCondense()
+ 			{
+ 			}
+ 		}
+ 
+-		// Token: 0x0200015F RID: 351
++		// Token: 0x02000164 RID: 356
+ 		private class BehStayCondense : BehaviourActionActor
+ 		{
+-			// Token: 0x06000661 RID: 1633 RVA: 0x00004C92 File Offset: 0x00002E92
++			// Token: 0x060006D2 RID: 1746 RVA: 0x000054DC File Offset: 0x000036DC
+ 			public BehStayCondense(float pMinSeconds, float pMaxSeconds)
+ 			{
+ 				this.minSeconds = pMinSeconds;
+ 				this.maxSeconds = pMaxSeconds;
+ 			}
+ 
+-			// Token: 0x06000662 RID: 1634 RVA: 0x000443E4 File Offset: 0x000425E4
++			// Token: 0x060006D3 RID: 1747 RVA: 0x00044D10 File Offset: 0x00042F10
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				if (pActor == null || !pActor.isAlive())
+@@ -415,7 +415,7 @@
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x06000663 RID: 1635 RVA: 0x0004446C File Offset: 0x0004266C
++			// Token: 0x060006D4 RID: 1748 RVA: 0x00044D98 File Offset: 0x00042F98
+ 			private bool hasStarted(Actor pActor)
+ 			{
+ 				float num;
+@@ -423,29 +423,29 @@
+ 				return num > 0f;
+ 			}
+ 
+-			// Token: 0x06000664 RID: 1636 RVA: 0x00004CA8 File Offset: 0x00002EA8
++			// Token: 0x060006D5 RID: 1749 RVA: 0x000054F2 File Offset: 0x000036F2
+ 			private void setTimer(Actor pActor, float endTime)
+ 			{
+ 				pActor.data.set(this.getTimerKey(), endTime);
+ 			}
+ 
+-			// Token: 0x06000665 RID: 1637 RVA: 0x00004CBD File Offset: 0x00002EBD
++			// Token: 0x060006D6 RID: 1750 RVA: 0x00005507 File Offset: 0x00003707
+ 			private string getTimerKey()
+ 			{
+ 				return "xn.condense.stay_timer";
+ 			}
+ 
+-			// Token: 0x04000644 RID: 1604
++			// Token: 0x0400064C RID: 1612
+ 			private readonly float minSeconds;
+ 
+-			// Token: 0x04000645 RID: 1605
++			// Token: 0x0400064D RID: 1613
+ 			private readonly float maxSeconds;
+ 		}
+ 
+-		// Token: 0x02000160 RID: 352
++		// Token: 0x02000165 RID: 357
+ 		private class BehDoCondense : BehaviourActionActor
+ 		{
+-			// Token: 0x06000666 RID: 1638 RVA: 0x0004449C File Offset: 0x0004269C
++			// Token: 0x060006D7 RID: 1751 RVA: 0x00044DC8 File Offset: 0x00042FC8
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				int currentYear = Date.getCurrentYear();
+@@ -458,16 +458,16 @@
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x06000667 RID: 1639 RVA: 0x000034E5 File Offset: 0x000016E5
++			// Token: 0x060006D8 RID: 1752 RVA: 0x000034C1 File Offset: 0x000016C1
+ 			public BehDoCondense()
+ 			{
+ 			}
+ 		}
+ 
+-		// Token: 0x02000161 RID: 353
++		// Token: 0x02000166 RID: 358
+ 		private class BehStopCondense : BehaviourActionActor
+ 		{
+-			// Token: 0x06000668 RID: 1640 RVA: 0x00004CC4 File Offset: 0x00002EC4
++			// Token: 0x060006D9 RID: 1753 RVA: 0x0000550E File Offset: 0x0000370E
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				if (pActor != null)
+@@ -477,17 +477,17 @@
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x06000669 RID: 1641 RVA: 0x000034E5 File Offset: 0x000016E5
++			// Token: 0x060006DA RID: 1754 RVA: 0x000034C1 File Offset: 0x000016C1
+ 			public BehStopCondense()
+ 			{
+ 			}
+ 		}
+ 
+-		// Token: 0x02000162 RID: 354
++		// Token: 0x02000167 RID: 359
+ 		[HarmonyPatch(typeof(Actor), "getNextJob")]
+ 		private static class Patch_Actor_GetNextJob
+ 		{
+-			// Token: 0x0600066A RID: 1642 RVA: 0x000444D0 File Offset: 0x000426D0
++			// Token: 0x060006DB RID: 1755 RVA: 0x00044DFC File Offset: 0x00042FFC
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref string __result)
+ 			{
+--- cultivation/ai/DemonicHuntJob.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/ai/DemonicHuntJob.cs	Fri Feb  6 11:33:46 2026
+@@ -3,14 +3,15 @@
+ using ai.behaviours;
+ using HarmonyLib;
+ using UnityEngine;
++using xn.config;
+ using xn.world;
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x02000163 RID: 355
++	// Token: 0x02000168 RID: 360
+ 	internal static class DemonicHuntJob
+ 	{
+-		// Token: 0x0600066B RID: 1643 RVA: 0x00044568 File Offset: 0x00042768
++		// Token: 0x060006DC RID: 1756 RVA: 0x00044E94 File Offset: 0x00043094
+ 		public static void Init()
+ 		{
+ 			if (DemonicHuntJob.REALM_INDEX_MAP.Count == 0)
+@@ -23,7 +24,7 @@
+ 			DemonicHuntJob.RegisterJob();
+ 		}
+ 
+-		// Token: 0x0600066C RID: 1644 RVA: 0x000445AC File Offset: 0x000427AC
++		// Token: 0x060006DD RID: 1757 RVA: 0x00044ED8 File Offset: 0x000430D8
+ 		private static void RegisterJob()
+ 		{
+ 			ActorJobLibrary job_actor = AssetManager.job_actor;
+@@ -40,7 +41,7 @@
+ 			actorJob.addTask("task_xn_demonic_hunt");
+ 		}
+ 
+-		// Token: 0x0600066D RID: 1645 RVA: 0x000445F8 File Offset: 0x000427F8
++		// Token: 0x060006DE RID: 1758 RVA: 0x00044F24 File Offset: 0x00043124
+ 		private static void RegisterHuntTask()
+ 		{
+ 			BehaviourTaskActorLibrary tasks_actor = AssetManager.tasks_actor;
+@@ -58,7 +59,7 @@
+ 			behaviourTaskActor.addBeh(new BehRestartTask());
+ 		}
+ 
+-		// Token: 0x0600066E RID: 1646 RVA: 0x00044654 File Offset: 0x00042854
++		// Token: 0x060006DF RID: 1759 RVA: 0x00044F80 File Offset: 0x00043180
+ 		private static void OnHuntSuccess(Actor hunter)
+ 		{
+ 			if (hunter == null || !hunter.isAlive())
+@@ -81,7 +82,7 @@
+ 			hunter.data.set("xn.stat.xinmo", num3 + num4);
+ 		}
+ 
+-		// Token: 0x0600066F RID: 1647 RVA: 0x00004CD0 File Offset: 0x00002ED0
++		// Token: 0x060006E0 RID: 1760 RVA: 0x0000551A File Offset: 0x0000371A
+ 		private static void OnHuntFailed(Actor hunter)
+ 		{
+ 			if (hunter == null || !hunter.isAlive())
+@@ -91,7 +92,7 @@
+ 			hunter.dieAndDestroy(AttackType.Divine);
+ 		}
+ 
+-		// Token: 0x06000670 RID: 1648 RVA: 0x00044714 File Offset: 0x00042914
++		// Token: 0x060006E1 RID: 1761 RVA: 0x00045040 File Offset: 0x00043240
+ 		private static Actor FindSuitableTarget(Actor hunter)
+ 		{
+ 			if (hunter == null)
+@@ -135,7 +136,7 @@
+ 			return list[UnityEngine.Random.Range(0, list.Count)];
+ 		}
+ 
+-		// Token: 0x06000671 RID: 1649 RVA: 0x00044808 File Offset: 0x00042A08
++		// Token: 0x060006E2 RID: 1762 RVA: 0x00045134 File Offset: 0x00043334
+ 		private static int GetCurrentRealmIndex(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -155,7 +156,7 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x06000672 RID: 1650 RVA: 0x00044880 File Offset: 0x00042A80
++		// Token: 0x060006E3 RID: 1763 RVA: 0x000451AC File Offset: 0x000433AC
+ 		private static void CheckTaskDeadline(int curYear)
+ 		{
+ 			if (DemonicHuntJob.s_activeHunters.Count == 0)
+@@ -219,11 +220,11 @@
+ 					string text;
+ 					if (actor2.isSexFemale())
+ 					{
+-						text = actor2.getName() + "榨取男修元阳失败，被天运子处决";
++						text = actor2.getName() + " failed to drain a male cultivator's Primordial Yang and was executed by Tianyunzi";
+ 					}
+ 					else
+ 					{
+-						text = actor2.getName() + "夺取女修元阴失败，被天运子处决";
++						text = actor2.getName() + " failed to seize a female cultivator's Primordial Yin and was executed by Tianyunzi";
+ 					}
+ 					BroadcastSystem.PostActor(actor2, text);
+ 					DemonicHuntJob.OnHuntFailed(actor2);
+@@ -231,7 +232,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000673 RID: 1651 RVA: 0x0002B53C File Offset: 0x0002973C
++		// Token: 0x060006E4 RID: 1764 RVA: 0x0002D794 File Offset: 0x0002B994
+ 		private static bool HasTrait(Actor a, string traitId)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -249,28 +250,28 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000674 RID: 1652 RVA: 0x00044A30 File Offset: 0x00042C30
++		// Token: 0x060006E5 RID: 1765 RVA: 0x0004535C File Offset: 0x0004355C
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static DemonicHuntJob()
+ 		{
+ 		}
+ 
+-		// Token: 0x04000646 RID: 1606
++		// Token: 0x0400064E RID: 1614
+ 		private const string KEY_HUNT_TARGET = "xn.demonic_hunt.target_id";
+ 
+-		// Token: 0x04000647 RID: 1607
++		// Token: 0x0400064F RID: 1615
+ 		private const string KEY_HUNT_YEAR = "xn.demonic_hunt.year";
+ 
+-		// Token: 0x04000648 RID: 1608
++		// Token: 0x04000650 RID: 1616
+ 		private const string KEY_HUNT_ACTIVE = "xn.demonic_hunt.active";
+ 
+-		// Token: 0x04000649 RID: 1609
++		// Token: 0x04000651 RID: 1617
+ 		private const string KEY_XINMO = "xn.stat.xinmo";
+ 
+-		// Token: 0x0400064A RID: 1610
++		// Token: 0x04000652 RID: 1618
+ 		private const string KEY_GLOBAL_NEXT_CHECK = "xn.demonic_hunt.next_check_year";
+ 
+-		// Token: 0x0400064B RID: 1611
++		// Token: 0x04000653 RID: 1619
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -291,10 +292,10 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x0400064C RID: 1612
++		// Token: 0x04000654 RID: 1620
+ 		private static readonly Dictionary<string, int> REALM_INDEX_MAP = new Dictionary<string, int>();
+ 
+-		// Token: 0x0400064D RID: 1613
++		// Token: 0x04000655 RID: 1621
+ 		private static readonly long[] REALM_THRESHOLDS = new long[]
+ 		{
+ 			100000L,
+@@ -315,16 +316,16 @@
+ 			1500000000L
+ 		};
+ 
+-		// Token: 0x0400064E RID: 1614
++		// Token: 0x04000656 RID: 1622
+ 		private static readonly HashSet<long> s_activeHunters = new HashSet<long>();
+ 
+-		// Token: 0x0400064F RID: 1615
++		// Token: 0x04000657 RID: 1623
+ 		private static int s_nextCheckYear = 0;
+ 
+-		// Token: 0x02000164 RID: 356
++		// Token: 0x02000169 RID: 361
+ 		private class BehFindAndChaseTarget : BehaviourActionActor
+ 		{
+-			// Token: 0x06000675 RID: 1653 RVA: 0x00044B04 File Offset: 0x00042D04
++			// Token: 0x060006E6 RID: 1766 RVA: 0x00045430 File Offset: 0x00043630
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				long num;
+@@ -358,17 +359,17 @@
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x06000676 RID: 1654 RVA: 0x000034E5 File Offset: 0x000016E5
++			// Token: 0x060006E7 RID: 1767 RVA: 0x000034C1 File Offset: 0x000016C1
+ 			public BehFindAndChaseTarget()
+ 			{
+ 			}
+ 		}
+ 
+-		// Token: 0x02000165 RID: 357
++		// Token: 0x0200016A RID: 362
+ 		[HarmonyPatch(typeof(Actor), "getNextJob")]
+ 		private static class Patch_Actor_GetNextJob
+ 		{
+-			// Token: 0x06000677 RID: 1655 RVA: 0x00044C04 File Offset: 0x00042E04
++			// Token: 0x060006E8 RID: 1768 RVA: 0x00045530 File Offset: 0x00043730
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref string __result)
+ 			{
+@@ -408,7 +409,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000166 RID: 358
++		// Token: 0x0200016B RID: 363
+ 		[HarmonyPatch(typeof(Actor), "setTask", new Type[]
+ 		{
+ 			typeof(string),
+@@ -418,7 +419,7 @@
+ 		})]
+ 		private static class Patch_Actor_SetTask
+ 		{
+-			// Token: 0x06000678 RID: 1656 RVA: 0x00044C98 File Offset: 0x00042E98
++			// Token: 0x060006E9 RID: 1769 RVA: 0x000455C4 File Offset: 0x000437C4
+ 			[HarmonyPrefix]
+ 			private static void Prefix(Actor __instance, string pTaskId, bool pClean, ref bool pCleanJob, bool pForceAction)
+ 			{
+@@ -447,7 +448,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000167 RID: 359
++		// Token: 0x0200016C RID: 364
+ 		[HarmonyPatch(typeof(BaseSimObject), "canAttackTarget", new Type[]
+ 		{
+ 			typeof(BaseSimObject),
+@@ -456,7 +457,7 @@
+ 		})]
+ 		private static class Patch_BaseSimObject_CanAttackTarget
+ 		{
+-			// Token: 0x06000679 RID: 1657 RVA: 0x00044D18 File Offset: 0x00042F18
++			// Token: 0x060006EA RID: 1770 RVA: 0x00045644 File Offset: 0x00043844
+ 			[HarmonyPostfix]
+ 			private static void Postfix(BaseSimObject __instance, BaseSimObject pTarget, bool pCheckForFactions, bool pAttackBuildings, ref bool __result)
+ 			{
+@@ -497,7 +498,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000168 RID: 360
++		// Token: 0x0200016D RID: 365
+ 		[HarmonyPatch(typeof(Actor), "getHit", new Type[]
+ 		{
+ 			typeof(float),
+@@ -510,7 +511,7 @@
+ 		})]
+ 		private static class Patch_Actor_GetHit
+ 		{
+-			// Token: 0x0600067A RID: 1658 RVA: 0x00044DBC File Offset: 0x00042FBC
++			// Token: 0x060006EB RID: 1771 RVA: 0x000456E8 File Offset: 0x000438E8
+ 			[HarmonyPostfix]
+ 			private static void Postfix(Actor __instance, float pDamage, bool pFlash, AttackType pAttackType, BaseSimObject pAttacker, bool pSkipIfShake, bool pMetallicWeapon, bool pCheckDamageReduction)
+ 			{
+@@ -548,34 +549,38 @@
+ 				{
+ 					if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
+ 					{
+-						text = name + "榨干了男修" + name2 + "的元阳导致他精尽人亡";
++						text = name + " drained " + name2 + "'s vital yang essence, leaving him lifeless.";
+ 					}
+ 					else
+ 					{
+-						text = name + "发现男修" + name2 + "偷喝自己的洗澡水于是将其抓住并榨取了元阳";
++						text = name + " caught " + name2 + " trespassing and forcibly extracted his vital yang essence.";
+ 					}
+ 				}
+ 				else if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
+ 				{
+-					text = name + "夺取了女修" + name2 + "的元阴并强暴了她";
++					text = name + " seized " + name2 + "'s vital yin essence by force.";
+ 				}
+ 				else
+ 				{
+-					text = name + "强行让女修" + name2 + "生子其不愿意杀死并将元阴夺走了";
++					text = name + " attempted to forcefully take " + name2 + "'s essence; when she resisted, she was killed and her yin essence was taken.";
+ 				}
+ 				BroadcastSystem.PostActor(a, text);
+ 				DemonicHuntJob.OnHuntSuccess(a);
+ 			}
+ 		}
+ 
+-		// Token: 0x02000169 RID: 361
++		// Token: 0x0200016E RID: 366
+ 		[HarmonyPatch(typeof(MapBox), "Update")]
+ 		private static class Patch_Map_Update_CheckHunt
+ 		{
+-			// Token: 0x0600067B RID: 1659 RVA: 0x00044EF8 File Offset: 0x000430F8
++			// Token: 0x060006EC RID: 1772 RVA: 0x00045824 File Offset: 0x00043A24
+ 			[HarmonyPostfix]
+ 			private static void Postfix(MapBox __instance)
+ 			{
++				if (!ModConfigHooks.EnableDemonicHunt)
++				{
++					return;
++				}
+ 				int currentYear = Date.getCurrentYear();
+ 				if (currentYear <= 0)
+ 				{
+@@ -659,11 +664,11 @@
+ 						string text;
+ 						if (actor2.isSexFemale())
+ 						{
+-							text = name + "按耐不住欲望开始榨取男修" + name2;
++							text = name + " can no longer restrain her desire and begins draining the cultivation of " + name2;
+ 						}
+ 						else
+ 						{
+-							text = name + "想吃好的了开始玩弄女修" + name2;
++							text = name + ", seeking richer sustenance, turns his attention to draining power from " + name2;
+ 						}
+ 						BroadcastSystem.PostActor(actor2, text);
+ 					}
+@@ -671,13 +676,13 @@
+ 				}
+ 			}
+ 
+-			// Token: 0x0600067C RID: 1660 RVA: 0x00004CE5 File Offset: 0x00002EE5
++			// Token: 0x060006ED RID: 1773 RVA: 0x0000552F File Offset: 0x0000372F
+ 			// Note: this type is marked as 'beforefieldinit'.
+ 			static Patch_Map_Update_CheckHunt()
+ 			{
+ 			}
+ 
+-			// Token: 0x04000650 RID: 1616
++			// Token: 0x04000658 RID: 1624
+ 			private static int s_lastCheckYear = -1;
+ 		}
+ 	}
+--- cultivation/ai/IntentComprehendJob.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/ai/IntentComprehendJob.cs	Fri Feb  6 11:33:46 2026
+@@ -7,16 +7,16 @@
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x0200016A RID: 362
++	// Token: 0x0200016F RID: 367
+ 	internal static class IntentComprehendJob
+ 	{
+-		// Token: 0x0600067D RID: 1661 RVA: 0x00004CED File Offset: 0x00002EED
++		// Token: 0x060006EE RID: 1774 RVA: 0x00005537 File Offset: 0x00003737
+ 		public static void Init()
+ 		{
+ 			IntentComprehendJob.RegisterJob();
+ 		}
+ 
+-		// Token: 0x0600067E RID: 1662 RVA: 0x00045188 File Offset: 0x00043388
++		// Token: 0x060006EF RID: 1775 RVA: 0x00045ABC File Offset: 0x00043CBC
+ 		private static void RegisterJob()
+ 		{
+ 			ActorJobLibrary job_actor = AssetManager.job_actor;
+@@ -34,7 +34,7 @@
+ 			actorJob.addTask("end_job");
+ 		}
+ 
+-		// Token: 0x0600067F RID: 1663 RVA: 0x000451E0 File Offset: 0x000433E0
++		// Token: 0x060006F0 RID: 1776 RVA: 0x00045B14 File Offset: 0x00043D14
+ 		private static void RegisterIntentComprehendTask()
+ 		{
+ 			BehaviourTaskActorLibrary tasks_actor = AssetManager.tasks_actor;
+@@ -56,7 +56,7 @@
+ 			behaviourTaskActor.addBeh(new BehExitBuilding());
+ 		}
+ 
+-		// Token: 0x06000680 RID: 1664 RVA: 0x0004527C File Offset: 0x0004347C
++		// Token: 0x060006F1 RID: 1777 RVA: 0x00045BB0 File Offset: 0x00043DB0
+ 		private static bool HasAnyIntent(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -74,7 +74,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000681 RID: 1665 RVA: 0x000452E8 File Offset: 0x000434E8
++		// Token: 0x060006F2 RID: 1778 RVA: 0x00045C1C File Offset: 0x00043E1C
+ 		private static int GetRealmIndex(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -96,22 +96,22 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x06000682 RID: 1666 RVA: 0x0004536C File Offset: 0x0004356C
++		// Token: 0x060006F3 RID: 1779 RVA: 0x00045CA0 File Offset: 0x00043EA0
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static IntentComprehendJob()
+ 		{
+ 		}
+ 
+-		// Token: 0x04000651 RID: 1617
++		// Token: 0x04000659 RID: 1625
+ 		private const string KEY_LV_ACTIVE = "xn.intent.lv_active";
+ 
+-		// Token: 0x04000652 RID: 1618
++		// Token: 0x0400065A RID: 1626
+ 		private const string KEY_LV_END_T = "xn.intent.lv_end_t";
+ 
+-		// Token: 0x04000653 RID: 1619
++		// Token: 0x0400065B RID: 1627
+ 		private const string KEY_LV_CD_UNTIL = "xn.intent.lv_cd_until_year";
+ 
+-		// Token: 0x04000654 RID: 1620
++		// Token: 0x0400065C RID: 1628
+ 		private static readonly string[] INTENT_IDS = new string[]
+ 		{
+ 			"intent_02_angel",
+@@ -124,7 +124,7 @@
+ 			"intent_09_madness"
+ 		};
+ 
+-		// Token: 0x04000655 RID: 1621
++		// Token: 0x0400065D RID: 1629
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -145,11 +145,11 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x0200016B RID: 363
++		// Token: 0x02000170 RID: 368
+ 		[HarmonyPatch(typeof(Actor), "getNextJob")]
+ 		private static class Patch_Actor_GetNextJob_Comprehend
+ 		{
+-			// Token: 0x06000683 RID: 1667 RVA: 0x00045458 File Offset: 0x00043658
++			// Token: 0x060006F4 RID: 1780 RVA: 0x00045D8C File Offset: 0x00043F8C
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref string __result)
+ 			{
+@@ -190,11 +190,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200016C RID: 364
++		// Token: 0x02000171 RID: 369
+ 		[HarmonyPatch(typeof(MapBox), "Update")]
+ 		private static class Patch_Tick_Comprehend
+ 		{
+-			// Token: 0x06000684 RID: 1668 RVA: 0x00045520 File Offset: 0x00043720
++			// Token: 0x060006F5 RID: 1781 RVA: 0x00045E54 File Offset: 0x00044054
+ 			[HarmonyPostfix]
+ 			private static void Postfix(MapBox __instance)
+ 			{
+--- cultivation/ai/MainCharacterSystem.cs	Fri Feb  6 11:48:57 2026
++++ cultivation/ai/MainCharacterSystem.cs	Fri Feb  6 11:33:46 2026
+@@ -1,14 +1,15 @@
+ using System;
+ using HarmonyLib;
+ using UnityEngine;
++using xn.tournament;
+ using xn.world;
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x0200016D RID: 365
++	// Token: 0x02000172 RID: 370
+ 	internal static class MainCharacterSystem
+ 	{
+-		// Token: 0x06000685 RID: 1669 RVA: 0x000456D0 File Offset: 0x000438D0
++		// Token: 0x060006F6 RID: 1782 RVA: 0x00046004 File Offset: 0x00044204
+ 		public static void Init(Harmony h)
+ 		{
+ 			h.Patch(AccessTools.Method(typeof(Actor), "die", new Type[]
+@@ -17,7 +18,10 @@
+ 				typeof(AttackType),
+ 				typeof(bool),
+ 				typeof(bool)
+-			}, null), new HarmonyMethod(typeof(MainCharacterSystem), "Prefix_Actor_die", null), null, null, null, null);
++			}, null), new HarmonyMethod(typeof(MainCharacterSystem), "Prefix_Actor_die", null)
++			{
++				priority = 600
++			}, null, null, null, null);
+ 			h.Patch(AccessTools.Method(typeof(Actor), "tryToAttack", new Type[]
+ 			{
+ 				typeof(BaseSimObject),
+@@ -46,7 +50,7 @@
+ 			}, null), new HarmonyMethod(typeof(MainCharacterSystem), "Prefix_Actor_addStatusEffect", null), null, null, null, null);
+ 		}
+ 
+-		// Token: 0x06000686 RID: 1670 RVA: 0x000458DC File Offset: 0x00043ADC
++		// Token: 0x060006F7 RID: 1783 RVA: 0x0004621C File Offset: 0x0004441C
+ 		private static bool Prefix_Actor_die(Actor __instance, bool pDestroy, AttackType pType, bool pCountDeath, bool pLogFavorite)
+ 		{
+ 			if (__instance == null)
+@@ -69,6 +73,10 @@
+ 			{
+ 				return true;
+ 			}
++			if (TournamentManager.IsRunning && TournamentManager.IsParticipant(__instance))
++			{
++				return true;
++			}
+ 			int num3;
+ 			__instance.data.get("xn.main_char.lives", out num3, 3);
+ 			if (num3 > 0)
+@@ -79,15 +87,19 @@
+ 				int maxHealth = __instance.getMaxHealth();
+ 				__instance.changeHealth(maxHealth);
+ 				MainCharacterSystem.TeleportToRandomLocation(__instance);
+-				string arg = __instance.getName() ?? "未知";
+-				string text = string.Format("{0}的主角光环触发保命，剩余保命次数：{1}", arg, num3);
+-				BroadcastSystem.PostActor(__instance, text);
++				string text = __instance.getName() ?? "Unknown";
++				string text2 = BroadcastSystem.FormatLocalized("broadcast_mc_save", new object[]
++				{
++					text,
++					num3
++				});
++				BroadcastSystem.PostActor(__instance, text2);
+ 				return false;
+ 			}
+ 			return true;
+ 		}
+ 
+-		// Token: 0x06000687 RID: 1671 RVA: 0x00004CF4 File Offset: 0x00002EF4
++		// Token: 0x060006F8 RID: 1784 RVA: 0x0000553E File Offset: 0x0000373E
+ 		private static void RecordNearDeathEvent(Actor actor, AttackType deathType)
+ 		{
+ 			if (actor == null)
+@@ -102,7 +114,7 @@
+ 			WorldLog.logFavDead(actor);
+ 		}
+ 
+-		// Token: 0x06000688 RID: 1672 RVA: 0x000459A0 File Offset: 0x00043BA0
++		// Token: 0x060006F9 RID: 1785 RVA: 0x000462FC File Offset: 0x000444FC
+ 		private static void TeleportToRandomLocation(Actor actor)
+ 		{
+ 			if (actor == null || !actor.isAlive())
+@@ -142,7 +154,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000689 RID: 1673 RVA: 0x00045A84 File Offset: 0x00043C84
++		// Token: 0x060006FA RID: 1786 RVA: 0x000463E0 File Offset: 0x000445E0
+ 		private static void Postfix_Actor_tryToAttack(Actor __instance, BaseSimObject pTarget, bool pDoChecks, Action pKillAction, Vector3 pAttackPosition, Kingdom pForceKingdom, WorldTile pTileTarget, float pBonusAreOfEffect, bool __result)
+ 		{
+ 			if (__instance == null || !__instance.isAlive())
+@@ -183,7 +195,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600068A RID: 1674 RVA: 0x00045B34 File Offset: 0x00043D34
++		// Token: 0x060006FB RID: 1787 RVA: 0x00046490 File Offset: 0x00044690
+ 		private static bool Prefix_Actor_getHit(Actor __instance, float pDamage, bool pFlash, AttackType pAttackType, BaseSimObject pAttacker, bool pMetallicWeapon, bool pSkipIfShake, bool pCheckDamageReduction)
+ 		{
+ 			if (__instance == null)
+@@ -225,7 +237,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x0600068B RID: 1675 RVA: 0x00045C40 File Offset: 0x00043E40
++		// Token: 0x060006FC RID: 1788 RVA: 0x0004659C File Offset: 0x0004479C
+ 		private static bool Prefix_Actor_addStatusEffect(Actor __instance, StatusAsset pStatusAsset, float pOverrideTimer, bool pColorEffect)
+ 		{
+ 			if (__instance == null || pStatusAsset == null)
+@@ -237,13 +249,13 @@
+ 			return num != 1 || !(pStatusAsset.id == "burning");
+ 		}
+ 
+-		// Token: 0x04000656 RID: 1622
++		// Token: 0x0400065E RID: 1630
+ 		private const string KEY_OWN_LIGHTNING_IMMUNE = "xn.main_char.own_lightning_immune";
+ 
+-		// Token: 0x04000657 RID: 1623
++		// Token: 0x0400065F RID: 1631
+ 		private const string KEY_OWN_LIGHTNING_TIME = "xn.main_char.own_lightning_time";
+ 
+-		// Token: 0x04000658 RID: 1624
++		// Token: 0x04000660 RID: 1632
+ 		private const float IMMUNE_DURATION = 2f;
+ 	}
+ }
+--- cultivation/ai/PossessionJob.cs	Fri Feb  6 11:48:57 2026
++++ cultivation/ai/PossessionJob.cs	Fri Feb  6 11:33:46 2026
+@@ -6,10 +6,10 @@
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x0200016E RID: 366
++	// Token: 0x02000173 RID: 371
+ 	internal static class PossessionJob
+ 	{
+-		// Token: 0x0600068C RID: 1676 RVA: 0x00004D2C File Offset: 0x00002F2C
++		// Token: 0x060006FD RID: 1789 RVA: 0x00005576 File Offset: 0x00003776
+ 		private static float GetTriggerProbByRealmIndex(int idx)
+ 		{
+ 			if (idx < 0 || idx >= PossessionJob.REALM_TRIGGER_PROB.Length)
+@@ -19,7 +19,7 @@
+ 			return PossessionJob.REALM_TRIGGER_PROB[idx];
+ 		}
+ 
+-		// Token: 0x0600068D RID: 1677 RVA: 0x00045C84 File Offset: 0x00043E84
++		// Token: 0x060006FE RID: 1790 RVA: 0x000465E0 File Offset: 0x000447E0
+ 		public static void Init(Harmony h)
+ 		{
+ 			PossessionJob.RegisterJob();
+@@ -29,11 +29,14 @@
+ 				typeof(AttackType),
+ 				typeof(bool),
+ 				typeof(bool)
+-			}, null), new HarmonyMethod(typeof(PossessionJob), "Prefix_Actor_die", null), null, null, null, null);
++			}, null), new HarmonyMethod(typeof(PossessionJob), "Prefix_Actor_die", null)
++			{
++				priority = 400
++			}, null, null, null, null);
+ 			h.Patch(AccessTools.Method(typeof(MapBox), "Update", null, null), null, new HarmonyMethod(typeof(PossessionJob), "Post_MapBox_Update", null), null, null, null);
+ 		}
+ 
+-		// Token: 0x0600068E RID: 1678 RVA: 0x00045D3C File Offset: 0x00043F3C
++		// Token: 0x060006FF RID: 1791 RVA: 0x000466A4 File Offset: 0x000448A4
+ 		private static void RegisterJob()
+ 		{
+ 			ActorJobLibrary job_actor = AssetManager.job_actor;
+@@ -50,7 +53,7 @@
+ 			actorJob.addTask("end_job");
+ 		}
+ 
+-		// Token: 0x0600068F RID: 1679 RVA: 0x00045D8C File Offset: 0x00043F8C
++		// Token: 0x06000700 RID: 1792 RVA: 0x000466F4 File Offset: 0x000448F4
+ 		private static bool Prefix_Actor_die(Actor __instance, bool pDestroy, AttackType pType, bool pCountDeath, bool pLogFavorite)
+ 		{
+ 			if (SpaceRiftSystem.IsSpaceActiveFor(__instance))
+@@ -83,11 +86,22 @@
+ 			{
+ 				return true;
+ 			}
++			int num2;
++			__instance.data.get("xn.main_character", out num2, 0);
++			if (num2 == 1)
++			{
++				int num3;
++				__instance.data.get("xn.main_char.lives", out num3, 0);
++				if (num3 > 0)
++				{
++					return true;
++				}
++			}
+ 			if (!pDestroy)
+ 			{
+-				int num2;
+-				__instance.data.get("xn.possession.active", out num2, 0);
+-				if (num2 == 1)
++				int num4;
++				__instance.data.get("xn.possession.active", out num4, 0);
++				if (num4 == 1)
+ 				{
+ 					return false;
+ 				}
+@@ -98,7 +112,7 @@
+ 					if (triggerProbByRealmIndex > 0f && Randy.randomChance(triggerProbByRealmIndex))
+ 					{
+ 						__instance.data.set("xn.possession.active", 1);
+-						__instance.data.set("xn.possession.deadline_time", Time.time + 30f);
++						__instance.data.set("xn.possession.deadline_time", Time.time + 15f);
+ 						__instance.ai.setJob("job_xn_possession");
+ 						return false;
+ 					}
+@@ -107,7 +121,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x06000690 RID: 1680 RVA: 0x00045EA0 File Offset: 0x000440A0
++		// Token: 0x06000701 RID: 1793 RVA: 0x00046840 File Offset: 0x00044A40
+ 		private static void Post_MapBox_Update(MapBox __instance)
+ 		{
+ 			ActorManager units = World.world.units;
+@@ -178,7 +192,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000691 RID: 1681 RVA: 0x00046080 File Offset: 0x00044280
++		// Token: 0x06000702 RID: 1794 RVA: 0x00046A20 File Offset: 0x00044C20
+ 		private static void ResolvePossession(Actor soul, Actor target)
+ 		{
+ 			soul.data.set("xn.possession.active", 0);
+@@ -239,7 +253,7 @@
+ 			PossessionJob.ForceDestroySoul(soul);
+ 		}
+ 
+-		// Token: 0x06000692 RID: 1682 RVA: 0x00009DA0 File Offset: 0x00007FA0
++		// Token: 0x06000703 RID: 1795 RVA: 0x00009C30 File Offset: 0x00007E30
+ 		private static void FreezeDuringFX(Actor a, Actor t)
+ 		{
+ 			float duration = DuoSheFX.GetDuration();
+@@ -253,7 +267,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000693 RID: 1683 RVA: 0x00004D49 File Offset: 0x00002F49
++		// Token: 0x06000704 RID: 1796 RVA: 0x00005593 File Offset: 0x00003793
+ 		private static void ForceDestroySoul(Actor soul)
+ 		{
+ 			if (soul == null)
+@@ -269,7 +283,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000694 RID: 1684 RVA: 0x00046290 File Offset: 0x00044490
++		// Token: 0x06000705 RID: 1797 RVA: 0x00046C30 File Offset: 0x00044E30
+ 		private static void SavePreviousLifeSnapshot(Actor soul, Actor target)
+ 		{
+ 			if (soul == null || target == null)
+@@ -312,9 +326,10 @@
+ 			target.data.set("xn.possession.prev_info", pData);
+ 		}
+ 
+-		// Token: 0x06000695 RID: 1685 RVA: 0x000463F4 File Offset: 0x000445F4
++		// Token: 0x06000706 RID: 1798 RVA: 0x00046D94 File Offset: 0x00044F94
+ 		private static void ApplyPossessionSuccess(Actor src, Actor dst)
+ 		{
++			bool favorite = dst.data.favorite;
+ 			PossessionJob.TransferBloodlineData(src, dst);
+ 			TitleSystem.ClearTitleData(dst);
+ 			string pName = PossessionJob.ExtractBaseNameOnly(src);
+@@ -390,26 +405,57 @@
+ 			if (city != null && !city.isRekt())
+ 			{
+ 				dst.setCity(city);
+-				return;
+ 			}
+-			if (city2 != null && !city2.isRekt())
++			else if (city2 != null && !city2.isRekt())
+ 			{
+ 				dst.setCity(null);
+ 				dst.setCity(city2);
+-				return;
+ 			}
+-			if (kingdom != null && !kingdom.isRekt())
++			else if (kingdom != null && !kingdom.isRekt())
+ 			{
+ 				dst.setKingdom(kingdom);
+-				return;
+ 			}
+-			if (kingdom2 != null && !kingdom2.isRekt())
++			else if (kingdom2 != null && !kingdom2.isRekt())
+ 			{
+ 				dst.setKingdom(kingdom2);
+ 			}
++			if (favorite)
++			{
++				dst.data.favorite = true;
++			}
++			PossessionJob.TransferMainCharacterStatus(src, dst);
+ 		}
+ 
+-		// Token: 0x06000696 RID: 1686 RVA: 0x000466A0 File Offset: 0x000448A0
++		// Token: 0x06000707 RID: 1799 RVA: 0x0004706C File Offset: 0x0004526C
++		private static void TransferMainCharacterStatus(Actor src, Actor dst)
++		{
++			if (src == null || dst == null)
++			{
++				return;
++			}
++			int num;
++			src.data.get("xn.main_character", out num, 0);
++			if (num != 1)
++			{
++				return;
++			}
++			dst.data.set("xn.main_character", 1);
++			dst.data.set("xn.main_char.lives", 3);
++			dst.data.set("xn.main_char.removed", 0);
++			if (World.world.map_stats.custom_data == null)
++			{
++				World.world.map_stats.custom_data = new SaveCustomData();
++			}
++			World.world.map_stats.custom_data.set("xn.world.main_char_id", dst.getID());
++			if (!dst.isFavorite())
++			{
++				dst.switchFavorite();
++			}
++			string str = dst.getName() ?? "Unknown";
++			BroadcastSystem.Custom("Main Character " + str + " successfully possessed a new body and retains the protagonist aura.");
++		}
++
++		// Token: 0x06000708 RID: 1800 RVA: 0x00047148 File Offset: 0x00045348
+ 		private static Actor PickTarget(Actor soul)
+ 		{
+ 			int realmIndex = PossessionJob.GetRealmIndex(soul);
+@@ -459,7 +505,7 @@
+ 			return actor ?? actor2;
+ 		}
+ 
+-		// Token: 0x06000697 RID: 1687 RVA: 0x0000A3C8 File Offset: 0x000085C8
++		// Token: 0x06000709 RID: 1801 RVA: 0x0000A274 File Offset: 0x00008474
+ 		private static bool HasAnyCultivationRealm(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -477,7 +523,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000698 RID: 1688 RVA: 0x000467C8 File Offset: 0x000449C8
++		// Token: 0x0600070A RID: 1802 RVA: 0x00047270 File Offset: 0x00045470
+ 		private static bool HasAnyAncientOrBeast(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -502,7 +548,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000699 RID: 1689 RVA: 0x00046848 File Offset: 0x00044A48
++		// Token: 0x0600070B RID: 1803 RVA: 0x000472F0 File Offset: 0x000454F0
+ 		private static int GetRealmIndex(Actor a)
+ 		{
+ 			int num = -1;
+@@ -524,13 +570,13 @@
+ 			return num;
+ 		}
+ 
+-		// Token: 0x0600069A RID: 1690 RVA: 0x00004D87 File Offset: 0x00002F87
++		// Token: 0x0600070C RID: 1804 RVA: 0x000055D1 File Offset: 0x000037D1
+ 		private static bool IsNascentOrAbove(Actor a)
+ 		{
+ 			return PossessionJob.GetRealmIndex(a) >= 3;
+ 		}
+ 
+-		// Token: 0x0600069B RID: 1691 RVA: 0x000468CC File Offset: 0x00044ACC
++		// Token: 0x0600070D RID: 1805 RVA: 0x00047374 File Offset: 0x00045574
+ 		private static string ExtractBaseNameOnly(Actor a)
+ 		{
+ 			if (a != null)
+@@ -583,7 +629,7 @@
+ 			return text2.Trim();
+ 		}
+ 
+-		// Token: 0x0600069C RID: 1692 RVA: 0x0000A4C4 File Offset: 0x000086C4
++		// Token: 0x0600070E RID: 1806 RVA: 0x0000A370 File Offset: 0x00008570
+ 		private static void TransferBloodlineData(Actor src, Actor dst)
+ 		{
+ 			if (src == null || dst == null)
+@@ -656,58 +702,58 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600069D RID: 1693 RVA: 0x000469B8 File Offset: 0x00044BB8
++		// Token: 0x0600070F RID: 1807 RVA: 0x00047460 File Offset: 0x00045660
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static PossessionJob()
+ 		{
+ 		}
+ 
+-		// Token: 0x04000659 RID: 1625
++		// Token: 0x04000661 RID: 1633
+ 		private const string KEY_POS_ACTIVE = "xn.possession.active";
+ 
+-		// Token: 0x0400065A RID: 1626
++		// Token: 0x04000662 RID: 1634
+ 		private const string KEY_POS_DEADLINE = "xn.possession.deadline_time";
+ 
+-		// Token: 0x0400065B RID: 1627
++		// Token: 0x04000663 RID: 1635
+ 		private const string KEY_POS_TARGET = "xn.possession.target_id";
+ 
+-		// Token: 0x0400065C RID: 1628
++		// Token: 0x04000664 RID: 1636
+ 		private const string KEY_POS_RESOLVE = "xn.possession.resolve_t";
+ 
+-		// Token: 0x0400065D RID: 1629
++		// Token: 0x04000665 RID: 1637
+ 		private const string KEY_POS_TAKEN = "xn.possession.taken";
+ 
+-		// Token: 0x0400065E RID: 1630
++		// Token: 0x04000666 RID: 1638
+ 		private const string KEY_POS_BEING_POSSESSED = "xn.possession.being_possessed";
+ 
+-		// Token: 0x0400065F RID: 1631
++		// Token: 0x04000667 RID: 1639
+ 		private const string KEY_POS_RESOLVE_DEATH = "xn.possession.resolve_death";
+ 
+-		// Token: 0x04000660 RID: 1632
++		// Token: 0x04000668 RID: 1640
+ 		private const string KEY_REINC = "xn.reincarnation.count";
+ 
+-		// Token: 0x04000661 RID: 1633
++		// Token: 0x04000669 RID: 1641
+ 		private const string KEY_POS_PREV_INFO = "xn.possession.prev_info";
+ 
+-		// Token: 0x04000662 RID: 1634
++		// Token: 0x0400066A RID: 1642
+ 		private const string KEY_REINC_BRUSH = "xn.reincarnation.brush";
+ 
+-		// Token: 0x04000663 RID: 1635
++		// Token: 0x0400066B RID: 1643
+ 		private const string KEY_XP = "xn.stat.xiuwei";
+ 
+-		// Token: 0x04000664 RID: 1636
++		// Token: 0x0400066C RID: 1644
+ 		private const string KEY_WUXIN = "xn.stat.wuxin";
+ 
+-		// Token: 0x04000665 RID: 1637
++		// Token: 0x0400066D RID: 1645
+ 		private const string KEY_LUCK = "xn.stat.qiyun";
+ 
+-		// Token: 0x04000666 RID: 1638
++		// Token: 0x0400066E RID: 1646
+ 		private const string KEY_STOP = "xn.cultivation.stop";
+ 
+-		// Token: 0x04000667 RID: 1639
++		// Token: 0x0400066F RID: 1647
+ 		private const string KEY_SEAL_UNTIL_YEAR = "xn.seal_until_year";
+ 
+-		// Token: 0x04000668 RID: 1640
++		// Token: 0x04000670 RID: 1648
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -728,7 +774,7 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x04000669 RID: 1641
++		// Token: 0x04000671 RID: 1649
+ 		private static readonly long[] REALM_THRESHOLDS = new long[]
+ 		{
+ 			100000L,
+@@ -749,7 +795,7 @@
+ 			1500000000L
+ 		};
+ 
+-		// Token: 0x0400066A RID: 1642
++		// Token: 0x04000672 RID: 1650
+ 		private static readonly float[] REALM_TRIGGER_PROB = new float[]
+ 		{
+ 			0f,
+--- cultivation/ai/TianyunziJob.cs	Fri Feb  6 11:48:57 2026
++++ cultivation/ai/TianyunziJob.cs	Fri Feb  6 11:33:46 2026
+@@ -5,16 +5,16 @@
+ 
+ namespace cultivation.ai
+ {
+-	// Token: 0x0200016F RID: 367
++	// Token: 0x02000174 RID: 372
+ 	internal static class TianyunziJob
+ 	{
+-		// Token: 0x0600069E RID: 1694 RVA: 0x00004D95 File Offset: 0x00002F95
++		// Token: 0x06000710 RID: 1808 RVA: 0x000055DF File Offset: 0x000037DF
+ 		public static void Init()
+ 		{
+ 			TianyunziJob.RegisterJob();
+ 		}
+ 
+-		// Token: 0x0600069F RID: 1695 RVA: 0x00046A88 File Offset: 0x00044C88
++		// Token: 0x06000711 RID: 1809 RVA: 0x00047530 File Offset: 0x00045730
+ 		private static void RegisterJob()
+ 		{
+ 			ActorJobLibrary job_actor = AssetManager.job_actor;
+@@ -31,7 +31,7 @@
+ 			actorJob.addTask("task_xn_tianyunzi_hunt");
+ 		}
+ 
+-		// Token: 0x060006A0 RID: 1696 RVA: 0x00046AD4 File Offset: 0x00044CD4
++		// Token: 0x06000712 RID: 1810 RVA: 0x0004757C File Offset: 0x0004577C
+ 		private static void RegisterHuntTask()
+ 		{
+ 			BehaviourTaskActorLibrary tasks_actor = AssetManager.tasks_actor;
+@@ -49,13 +49,13 @@
+ 			behaviourTaskActor.addBeh(new BehRestartTask());
+ 		}
+ 
+-		// Token: 0x0400066B RID: 1643
++		// Token: 0x04000673 RID: 1651
+ 		private const string KEY_TYZ_FLAG = "xn_is_tianyunzi";
+ 
+-		// Token: 0x02000170 RID: 368
++		// Token: 0x02000175 RID: 373
+ 		private class BehFindAndAttackTarget : BehaviourActionActor
+ 		{
+-			// Token: 0x060006A1 RID: 1697 RVA: 0x00046B30 File Offset: 0x00044D30
++			// Token: 0x06000713 RID: 1811 RVA: 0x000475D8 File Offset: 0x000457D8
+ 			public override BehResult execute(Actor pActor)
+ 			{
+ 				if (pActor == null || !pActor.isAlive())
+@@ -104,7 +104,7 @@
+ 				return BehResult.Continue;
+ 			}
+ 
+-			// Token: 0x060006A2 RID: 1698 RVA: 0x00046C3C File Offset: 0x00044E3C
++			// Token: 0x06000714 RID: 1812 RVA: 0x000476E4 File Offset: 0x000458E4
+ 			private Actor FindNearestVisibleTarget(Actor tianyunzi)
+ 			{
+ 				if (tianyunzi == null)
+@@ -128,7 +128,7 @@
+ 				return result;
+ 			}
+ 
+-			// Token: 0x060006A3 RID: 1699 RVA: 0x00046CC0 File Offset: 0x00044EC0
++			// Token: 0x06000715 RID: 1813 RVA: 0x00047768 File Offset: 0x00045968
+ 			private WorldTile GetRandomNearbyTile(Actor a)
+ 			{
+ 				if (a == null || a.current_tile == null)
+@@ -142,17 +142,17 @@
+ 				return World.world.GetTile(pX, pY);
+ 			}
+ 
+-			// Token: 0x060006A4 RID: 1700 RVA: 0x000034E5 File Offset: 0x000016E5
++			// Token: 0x06000716 RID: 1814 RVA: 0x000034C1 File Offset: 0x000016C1
+ 			public BehFindAndAttackTarget()
+ 			{
+ 			}
+ 		}
+ 
+-		// Token: 0x02000171 RID: 369
++		// Token: 0x02000176 RID: 374
+ 		[HarmonyPatch(typeof(Actor), "getNextJob")]
+ 		private static class Patch_Actor_GetNextJob
+ 		{
+-			// Token: 0x060006A5 RID: 1701 RVA: 0x00046D18 File Offset: 0x00044F18
++			// Token: 0x06000717 RID: 1815 RVA: 0x000477C0 File Offset: 0x000459C0
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref string __result)
+ 			{
+@@ -184,7 +184,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000172 RID: 370
++		// Token: 0x02000177 RID: 375
+ 		[HarmonyPatch(typeof(Actor), "setTask", new Type[]
+ 		{
+ 			typeof(string),
+@@ -194,7 +194,7 @@
+ 		})]
+ 		private static class Patch_Actor_SetTask
+ 		{
+-			// Token: 0x060006A6 RID: 1702 RVA: 0x00046D8C File Offset: 0x00044F8C
++			// Token: 0x06000718 RID: 1816 RVA: 0x00047834 File Offset: 0x00045A34
+ 			[HarmonyPrefix]
+ 			private static void Prefix(Actor __instance, string pTaskId, bool pClean, ref bool pCleanJob, bool pForceAction)
+ 			{
+@@ -215,7 +215,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000173 RID: 371
++		// Token: 0x02000178 RID: 376
+ 		[HarmonyPatch(typeof(BaseSimObject), "canAttackTarget", new Type[]
+ 		{
+ 			typeof(BaseSimObject),
+@@ -224,7 +224,7 @@
+ 		})]
+ 		private static class Patch_BaseSimObject_CanAttackTarget
+ 		{
+-			// Token: 0x060006A7 RID: 1703 RVA: 0x00046DF0 File Offset: 0x00044FF0
++			// Token: 0x06000719 RID: 1817 RVA: 0x00047898 File Offset: 0x00045A98
+ 			[HarmonyPostfix]
+ 			private static void Postfix(BaseSimObject __instance, BaseSimObject pTarget, bool pCheckForFactions, bool pAttackBuildings, ref bool __result)
+ 			{
+--- cultivation/BlackHoleSkill.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/BlackHoleSkill.cs	Fri Feb  6 11:33:46 2026
+@@ -5,10 +5,10 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x0200013E RID: 318
++	// Token: 0x02000142 RID: 322
+ 	internal static class BlackHoleSkill
+ 	{
+-		// Token: 0x060005BC RID: 1468 RVA: 0x0003C1C8 File Offset: 0x0003A3C8
++		// Token: 0x0600062A RID: 1578 RVA: 0x0003C598 File Offset: 0x0003A798
+ 		public static void Register()
+ 		{
+ 			if (BlackHoleSkill.s_registered)
+@@ -31,7 +31,7 @@
+ 			BlackHoleSkill.s_registered = true;
+ 		}
+ 
+-		// Token: 0x060005BD RID: 1469 RVA: 0x0003C240 File Offset: 0x0003A440
++		// Token: 0x0600062B RID: 1579 RVA: 0x0003C610 File Offset: 0x0003A810
+ 		public static bool TryTrigger(Actor suppressor, List<Actor> suppressedTargets)
+ 		{
+ 			if (suppressor == null || !suppressor.isAlive())
+@@ -50,7 +50,7 @@
+ 			}
+ 			int num;
+ 			suppressor.data.get("xn.stat.nieli", out num, 0);
+-			if (num < 5000)
++			if (num < 6000)
+ 			{
+ 				return false;
+ 			}
+@@ -75,12 +75,15 @@
+ 			{
+ 				return false;
+ 			}
+-			BroadcastSystem.PostActor(suppressor, suppressor.getName() + " 发动了天劫之力绞杀余孽");
++			BroadcastSystem.PostActor(suppressor, BroadcastSystem.FormatLocalized("broadcast_blackhole_kill", new object[]
++			{
++				suppressor.getName()
++			}));
+ 			BlackHoleSkill.StartBlackHole(suppressor, actor, suppressedTargets, num);
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005BE RID: 1470 RVA: 0x0003C320 File Offset: 0x0003A520
++		// Token: 0x0600062C RID: 1580 RVA: 0x0003C6F8 File Offset: 0x0003A8F8
+ 		private static Actor FindTargetActor(List<Actor> targets)
+ 		{
+ 			if (targets == null || targets.Count == 0)
+@@ -97,13 +100,13 @@
+ 			return null;
+ 		}
+ 
+-		// Token: 0x060005BF RID: 1471 RVA: 0x0003C390 File Offset: 0x0003A590
++		// Token: 0x0600062D RID: 1581 RVA: 0x0003C768 File Offset: 0x0003A968
+ 		private static void StartBlackHole(Actor caster, Actor targetActor, List<Actor> targets, int casterNieli)
+ 		{
+ 			BlackHoleSkill.Register();
+ 			caster.data.set("xn.blackhole.cooldown", Time.time);
+ 			caster.data.set("xn.blackhole.active", 1);
+-			caster.data.set("xn.stat.nieli", 0);
++			caster.data.set("xn.stat.nieli", casterNieli / 2);
+ 			if (caster.is_moving)
+ 			{
+ 				caster.stopMovement();
+@@ -159,7 +162,7 @@
+ 			BlackHoleSkill.s_activeBlackHoles.Add(blackHoleData);
+ 		}
+ 
+-		// Token: 0x060005C0 RID: 1472 RVA: 0x0003C548 File Offset: 0x0003A748
++		// Token: 0x0600062E RID: 1582 RVA: 0x0003C920 File Offset: 0x0003AB20
+ 		public static void Update()
+ 		{
+ 			if (BlackHoleSkill.s_activeBlackHoles.Count == 0)
+@@ -224,7 +227,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005C1 RID: 1473 RVA: 0x0003C6B0 File Offset: 0x0003A8B0
++		// Token: 0x0600062F RID: 1583 RVA: 0x0003CA88 File Offset: 0x0003AC88
+ 		private static void PullTargets(BlackHoleSkill.BlackHoleData data)
+ 		{
+ 			if (data == null || data.centerTile == null)
+@@ -266,7 +269,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005C2 RID: 1474 RVA: 0x0003C87C File Offset: 0x0003AA7C
++		// Token: 0x06000630 RID: 1584 RVA: 0x0003CC54 File Offset: 0x0003AE54
+ 		private static bool HasAnyRealm(Actor a)
+ 		{
+ 			if (a == null)
+@@ -297,14 +300,15 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x060005C3 RID: 1475 RVA: 0x0003C8FC File Offset: 0x0003AAFC
++		// Token: 0x06000631 RID: 1585 RVA: 0x0003CCD4 File Offset: 0x0003AED4
+ 		private static void DealFinalDamage(BlackHoleSkill.BlackHoleData data)
+ 		{
+ 			if (data == null || data.caster == null)
+ 			{
+ 				return;
+ 			}
+-			int num = data.casterNieli * 2;
++			int num = UnityEngine.Random.Range(1, 21);
++			int num2 = data.casterNieli * num;
+ 			for (int i = data.targets.Count - 1; i >= 0; i--)
+ 			{
+ 				Actor actor = data.targets[i];
+@@ -323,7 +327,7 @@
+ 					}
+ 					else
+ 					{
+-						actor.data.health = Mathf.Max(0, actor.data.health - num);
++						actor.data.health = Mathf.Max(0, actor.data.health - num2);
+ 						actor.startColorEffect(ActorColorEffect.Red);
+ 						if (!actor.hasHealth() && actor.batch != null)
+ 						{
+@@ -340,7 +344,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005C4 RID: 1476 RVA: 0x00004A19 File Offset: 0x00002C19
++		// Token: 0x06000632 RID: 1586 RVA: 0x00005263 File Offset: 0x00003463
+ 		private static void EndBlackHole(BlackHoleSkill.BlackHoleData data)
+ 		{
+ 			if (data == null)
+@@ -357,7 +361,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005C5 RID: 1477 RVA: 0x0003CA20 File Offset: 0x0003AC20
++		// Token: 0x06000633 RID: 1587 RVA: 0x0003CE04 File Offset: 0x0003B004
+ 		public static bool IsCasting(Actor actor)
+ 		{
+ 			if (actor == null)
+@@ -369,64 +373,64 @@
+ 			return num == 1;
+ 		}
+ 
+-		// Token: 0x060005C6 RID: 1478 RVA: 0x0003CA4C File Offset: 0x0003AC4C
++		// Token: 0x06000634 RID: 1588 RVA: 0x0003CE30 File Offset: 0x0003B030
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static BlackHoleSkill()
+ 		{
+ 		}
+ 
+-		// Token: 0x0400058B RID: 1419
+-		private const string SPRITE_PATH = "tiandao";
+-
+ 		// Token: 0x0400058C RID: 1420
+-		private const string FX_BLACKHOLE = "fx_blackhole_skill";
++		private const string SPRITE_PATH = "tiandao";
+ 
+ 		// Token: 0x0400058D RID: 1421
+-		private const string KEY_NIELI = "xn.stat.nieli";
++		private const string FX_BLACKHOLE = "fx_blackhole_skill";
+ 
+ 		// Token: 0x0400058E RID: 1422
+-		private const string KEY_SUPPRESSED = "xn.tatian.suppressed";
++		private const string KEY_NIELI = "xn.stat.nieli";
+ 
+ 		// Token: 0x0400058F RID: 1423
+-		private const string KEY_BLACKHOLE_CD = "xn.blackhole.cooldown";
++		private const string KEY_SUPPRESSED = "xn.tatian.suppressed";
+ 
+ 		// Token: 0x04000590 RID: 1424
+-		private const string KEY_BLACKHOLE_ACTIVE = "xn.blackhole.active";
++		private const string KEY_BLACKHOLE_CD = "xn.blackhole.cooldown";
+ 
+ 		// Token: 0x04000591 RID: 1425
+-		private const float COOLDOWN = 30f;
++		private const string KEY_BLACKHOLE_ACTIVE = "xn.blackhole.active";
+ 
+ 		// Token: 0x04000592 RID: 1426
+-		private const int MIN_SUPPRESSED = 5;
++		private const float COOLDOWN = 30f;
+ 
+ 		// Token: 0x04000593 RID: 1427
+-		private const int MIN_NIELI = 5000;
++		private const int MIN_SUPPRESSED = 5;
+ 
+ 		// Token: 0x04000594 RID: 1428
+-		private const int TOTAL_FRAMES = 32;
++		private const int MIN_NIELI = 6000;
+ 
+ 		// Token: 0x04000595 RID: 1429
+-		private const float FRAME_TIME = 0.15f;
++		private const int TOTAL_FRAMES = 32;
+ 
+ 		// Token: 0x04000596 RID: 1430
+-		private const float PULL_RANGE = 10f;
++		private const float FRAME_TIME = 0.15f;
+ 
+ 		// Token: 0x04000597 RID: 1431
+-		private const float EFFECT_SCALE = 1.2f;
++		private const float PULL_RANGE = 10f;
+ 
+ 		// Token: 0x04000598 RID: 1432
+-		private const float EFFECT_Y_OFFSET = -2f;
++		private const float EFFECT_SCALE = 1.2f;
+ 
+ 		// Token: 0x04000599 RID: 1433
+-		private const int DAMAGE_FRAME = 28;
++		private const float EFFECT_Y_OFFSET = -2f;
+ 
+ 		// Token: 0x0400059A RID: 1434
+-		private static bool s_registered;
++		private const int DAMAGE_FRAME = 28;
+ 
+ 		// Token: 0x0400059B RID: 1435
+-		private static readonly List<BlackHoleSkill.BlackHoleData> s_activeBlackHoles = new List<BlackHoleSkill.BlackHoleData>();
++		private static bool s_registered;
+ 
+ 		// Token: 0x0400059C RID: 1436
++		private static readonly List<BlackHoleSkill.BlackHoleData> s_activeBlackHoles = new List<BlackHoleSkill.BlackHoleData>();
++
++		// Token: 0x0400059D RID: 1437
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -447,7 +451,7 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x0400059D RID: 1437
++		// Token: 0x0400059E RID: 1438
+ 		private static readonly string[] ANC_STAR_IDS = new string[]
+ 		{
+ 			"ancient_01_star",
+@@ -462,7 +466,7 @@
+ 			"ancient_10_star"
+ 		};
+ 
+-		// Token: 0x0400059E RID: 1438
++		// Token: 0x0400059F RID: 1439
+ 		private static readonly string[] BEAST_STAGE_IDS = new string[]
+ 		{
+ 			"beast_01_stage",
+@@ -477,39 +481,39 @@
+ 			"beast_10_stage"
+ 		};
+ 
+-		// Token: 0x0200013F RID: 319
++		// Token: 0x02000143 RID: 323
+ 		private class BlackHoleData
+ 		{
+-			// Token: 0x060005C7 RID: 1479 RVA: 0x00004A57 File Offset: 0x00002C57
++			// Token: 0x06000635 RID: 1589 RVA: 0x000052A1 File Offset: 0x000034A1
+ 			public BlackHoleData()
+ 			{
+ 			}
+ 
+-			// Token: 0x0400059F RID: 1439
++			// Token: 0x040005A0 RID: 1440
+ 			public Actor caster;
+ 
+-			// Token: 0x040005A0 RID: 1440
++			// Token: 0x040005A1 RID: 1441
+ 			public Actor targetActor;
+ 
+-			// Token: 0x040005A1 RID: 1441
++			// Token: 0x040005A2 RID: 1442
+ 			public WorldTile centerTile;
+ 
+-			// Token: 0x040005A2 RID: 1442
++			// Token: 0x040005A3 RID: 1443
+ 			public int casterNieli;
+ 
+-			// Token: 0x040005A3 RID: 1443
++			// Token: 0x040005A4 RID: 1444
+ 			public BaseEffect effect;
+ 
+-			// Token: 0x040005A4 RID: 1444
++			// Token: 0x040005A5 RID: 1445
+ 			public List<Actor> targets = new List<Actor>();
+ 
+-			// Token: 0x040005A5 RID: 1445
++			// Token: 0x040005A6 RID: 1446
+ 			public int currentFrame;
+ 
+-			// Token: 0x040005A6 RID: 1446
++			// Token: 0x040005A7 RID: 1447
+ 			public float nextFrameTime;
+ 
+-			// Token: 0x040005A7 RID: 1447
++			// Token: 0x040005A8 RID: 1448
+ 			public bool damageDealt;
+ 		}
+ 	}
+--- cultivation/DamageSystemOverride.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/DamageSystemOverride.cs	Fri Feb  6 11:33:46 2026
+@@ -7,13 +7,14 @@
+ using ai;
+ using HarmonyLib;
+ using UnityEngine;
++using xn.config;
+ 
+ namespace cultivation
+ {
+-	// Token: 0x02000140 RID: 320
++	// Token: 0x02000144 RID: 324
+ 	public static class DamageSystemOverride
+ 	{
+-		// Token: 0x060005C8 RID: 1480 RVA: 0x0003CBB0 File Offset: 0x0003ADB0
++		// Token: 0x06000636 RID: 1590 RVA: 0x0003CF94 File Offset: 0x0003B194
+ 		public static void Init(Harmony existingHarmony)
+ 		{
+ 			if (DamageSystemOverride._initialized)
+@@ -21,6 +22,12 @@
+ 				return;
+ 			}
+ 			DamageSystemOverride._initialized = true;
++			if (!ModConfigHooks.EnableXianniLaw)
++			{
++				Debug.Log("[XN-DamageOverride] Xianni Law: Off");
++				return;
++			}
++			Debug.Log("[XN-DamageOverride] Xianni Law: On");
+ 			DamageSystemOverride._harmony = new Harmony("xianni.damage.override");
+ 			foreach (ValueTuple<Type, string, Type[]> valueTuple in DamageSystemOverride.TargetMethods)
+ 			{
+@@ -39,11 +46,11 @@
+ 				{
+ 					Debug.LogError(string.Concat(new string[]
+ 					{
+-						"[XN-DamageOverride] 处理 ",
++						"[XN-DamageOverride] Error while processing ",
+ 						item.Name,
+ 						".",
+ 						item2,
+-						" 时出错: ",
++						": ",
+ 						ex.Message
+ 					}));
+ 				}
+@@ -54,11 +61,11 @@
+ 			}
+ 			catch (Exception arg)
+ 			{
+-				Debug.LogError(string.Format("[XN-DamageOverride] 重新应用 Patch 失败: {0}", arg));
++				Debug.LogError(string.Format("[XN-DamageOverride] Failed to reapply patch: {0}", arg));
+ 			}
+ 		}
+ 
+-		// Token: 0x060005C9 RID: 1481 RVA: 0x0003CCC8 File Offset: 0x0003AEC8
++		// Token: 0x06000637 RID: 1591 RVA: 0x0003D0C8 File Offset: 0x0003B2C8
+ 		private static void ReapplyXianniPatches(Harmony h)
+ 		{
+ 			MethodInfo methodInfo = AccessTools.Method(typeof(Actor), "getHit", new Type[]
+@@ -143,7 +150,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005CA RID: 1482 RVA: 0x0003CEDC File Offset: 0x0003B0DC
++		// Token: 0x06000638 RID: 1592 RVA: 0x0003D2DC File Offset: 0x0003B4DC
+ 		private static void UnpatchOthers(MethodBase method)
+ 		{
+ 			Patches patchInfo = Harmony.GetPatchInfo(method);
+@@ -217,7 +224,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005CB RID: 1483 RVA: 0x0003D0DC File Offset: 0x0003B2DC
++		// Token: 0x06000639 RID: 1593 RVA: 0x0003D4DC File Offset: 0x0003B6DC
+ 		private static bool IsXianniPatch(string owner)
+ 		{
+ 			if (string.IsNullOrEmpty(owner))
+@@ -235,22 +242,22 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x060005CC RID: 1484 RVA: 0x0003D124 File Offset: 0x0003B324
++		// Token: 0x0600063A RID: 1594 RVA: 0x0003D524 File Offset: 0x0003B724
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static DamageSystemOverride()
+ 		{
+ 		}
+ 
+-		// Token: 0x040005A8 RID: 1448
++		// Token: 0x040005A9 RID: 1449
+ 		private const string HARMONY_ID = "xianni.damage.override";
+ 
+-		// Token: 0x040005A9 RID: 1449
++		// Token: 0x040005AA RID: 1450
+ 		private static Harmony _harmony;
+ 
+-		// Token: 0x040005AA RID: 1450
++		// Token: 0x040005AB RID: 1451
+ 		private static bool _initialized = false;
+ 
+-		// Token: 0x040005AB RID: 1451
++		// Token: 0x040005AC RID: 1452
+ 		private static readonly string[] XianniOwnerKeywords = new string[]
+ 		{
+ 			"xianni",
+@@ -260,7 +267,7 @@
+ 			"xianni.damage.override"
+ 		};
+ 
+-		// Token: 0x040005AC RID: 1452
++		// Token: 0x040005AD RID: 1453
+ 		[TupleElementNames(new string[]
+ 		{
+ 			"type",
+@@ -298,41 +305,41 @@
+ 			})
+ 		};
+ 
+-		// Token: 0x02000141 RID: 321
++		// Token: 0x02000145 RID: 325
+ 		[CompilerGenerated]
+ 		[Serializable]
+ 		private sealed class <>c
+ 		{
+-			// Token: 0x060005CD RID: 1485 RVA: 0x00004A6A File Offset: 0x00002C6A
++			// Token: 0x0600063B RID: 1595 RVA: 0x000052B4 File Offset: 0x000034B4
+ 			// Note: this type is marked as 'beforefieldinit'.
+ 			static <>c()
+ 			{
+ 			}
+ 
+-			// Token: 0x060005CE RID: 1486 RVA: 0x00002360 File Offset: 0x00000560
++			// Token: 0x0600063C RID: 1596 RVA: 0x0000230F File Offset: 0x0000050F
+ 			public <>c()
+ 			{
+ 			}
+ 
+-			// Token: 0x060005CF RID: 1487 RVA: 0x00004A76 File Offset: 0x00002C76
++			// Token: 0x0600063D RID: 1597 RVA: 0x000052C0 File Offset: 0x000034C0
+ 			internal bool <ReapplyXianniPatches>b__6_0(Patch p)
+ 			{
+ 				return DamageSystemOverride.IsXianniPatch(p.owner);
+ 			}
+ 
+-			// Token: 0x060005D0 RID: 1488 RVA: 0x00004A76 File Offset: 0x00002C76
++			// Token: 0x0600063E RID: 1598 RVA: 0x000052C0 File Offset: 0x000034C0
+ 			internal bool <ReapplyXianniPatches>b__6_1(Patch p)
+ 			{
+ 				return DamageSystemOverride.IsXianniPatch(p.owner);
+ 			}
+ 
+-			// Token: 0x040005AD RID: 1453
++			// Token: 0x040005AE RID: 1454
+ 			public static readonly DamageSystemOverride.<>c <>9 = new DamageSystemOverride.<>c();
+ 
+-			// Token: 0x040005AE RID: 1454
++			// Token: 0x040005AF RID: 1455
+ 			public static Func<Patch, bool> <>9__6_0;
+ 
+-			// Token: 0x040005AF RID: 1455
++			// Token: 0x040005B0 RID: 1456
+ 			public static Func<Patch, bool> <>9__6_1;
+ 		}
+ 	}
+--- /dev/null	Wed Dec 31 19:00:00 1969
++++ cultivation/DeathSystemOverride.cs	Fri Feb  6 11:33:46 2026
+@@ -0,0 +1,191 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Reflection;
++using System.Runtime.CompilerServices;
++using HarmonyLib;
++using UnityEngine;
++using xn.config;
++
++namespace cultivation
++{
++	// Token: 0x02000146 RID: 326
++	public static class DeathSystemOverride
++	{
++		// Token: 0x0600063F RID: 1599 RVA: 0x0003D6BC File Offset: 0x0003B8BC
++		public static void Init(Harmony existingHarmony)
++		{
++			if (DeathSystemOverride._initialized)
++			{
++				return;
++			}
++			DeathSystemOverride._initialized = true;
++			if (!ModConfigHooks.EnableDeathLaw)
++			{
++				return;
++			}
++			DeathSystemOverride._harmony = new Harmony("xianni.death.override");
++			foreach (ValueTuple<Type, string, Type[]> valueTuple in DeathSystemOverride.TargetMethods)
++			{
++				Type item = valueTuple.Item1;
++				string item2 = valueTuple.Item2;
++				Type[] item3 = valueTuple.Item3;
++				try
++				{
++					MethodInfo methodInfo = AccessTools.Method(item, item2, item3, null);
++					if (methodInfo != null)
++					{
++						DeathSystemOverride.UnpatchOthers(methodInfo);
++					}
++				}
++				catch (Exception ex)
++				{
++					Debug.LogError(string.Concat(new string[]
++					{
++						"[XN-DeathOverride] Error while processing ",
++						item.Name,
++						".",
++						item2,
++						": ",
++						ex.Message
++					}));
++				}
++			}
++		}
++
++		// Token: 0x06000640 RID: 1600 RVA: 0x0003D7B0 File Offset: 0x0003B9B0
++		private static void UnpatchOthers(MethodBase method)
++		{
++			Patches patchInfo = Harmony.GetPatchInfo(method);
++			if (patchInfo == null)
++			{
++				return;
++			}
++			if (patchInfo.Prefixes != null)
++			{
++				foreach (Patch patch in patchInfo.Prefixes.ToList<Patch>())
++				{
++					if (!DeathSystemOverride.IsXianniPatch(patch.owner))
++					{
++						try
++						{
++							DeathSystemOverride._harmony.Unpatch(method, patch.PatchMethod);
++						}
++						catch
++						{
++						}
++					}
++				}
++			}
++			if (patchInfo.Postfixes != null)
++			{
++				foreach (Patch patch2 in patchInfo.Postfixes.ToList<Patch>())
++				{
++					if (!DeathSystemOverride.IsXianniPatch(patch2.owner))
++					{
++						try
++						{
++							DeathSystemOverride._harmony.Unpatch(method, patch2.PatchMethod);
++						}
++						catch
++						{
++						}
++					}
++				}
++			}
++			if (patchInfo.Transpilers != null)
++			{
++				foreach (Patch patch3 in patchInfo.Transpilers.ToList<Patch>())
++				{
++					if (!DeathSystemOverride.IsXianniPatch(patch3.owner))
++					{
++						try
++						{
++							DeathSystemOverride._harmony.Unpatch(method, patch3.PatchMethod);
++						}
++						catch
++						{
++						}
++					}
++				}
++			}
++			if (patchInfo.Finalizers != null)
++			{
++				foreach (Patch patch4 in patchInfo.Finalizers.ToList<Patch>())
++				{
++					if (!DeathSystemOverride.IsXianniPatch(patch4.owner))
++					{
++						try
++						{
++							DeathSystemOverride._harmony.Unpatch(method, patch4.PatchMethod);
++						}
++						catch
++						{
++						}
++					}
++				}
++			}
++		}
++
++		// Token: 0x06000641 RID: 1601 RVA: 0x0003D9B0 File Offset: 0x0003BBB0
++		private static bool IsXianniPatch(string owner)
++		{
++			if (string.IsNullOrEmpty(owner))
++			{
++				return false;
++			}
++			string text = owner.ToLowerInvariant();
++			foreach (string text2 in DeathSystemOverride.XianniOwnerKeywords)
++			{
++				if (text.Contains(text2.ToLowerInvariant()))
++				{
++					return true;
++				}
++			}
++			return false;
++		}
++
++		// Token: 0x06000642 RID: 1602 RVA: 0x0003D9F8 File Offset: 0x0003BBF8
++		// Note: this type is marked as 'beforefieldinit'.
++		static DeathSystemOverride()
++		{
++		}
++
++		// Token: 0x040005B1 RID: 1457
++		private const string HARMONY_ID = "xianni.death.override";
++
++		// Token: 0x040005B2 RID: 1458
++		private static Harmony _harmony;
++
++		// Token: 0x040005B3 RID: 1459
++		private static bool _initialized = false;
++
++		// Token: 0x040005B4 RID: 1460
++		private static readonly string[] XianniOwnerKeywords = new string[]
++		{
++			"xianni",
++			"xn",
++			"cultivation",
++			"xn.worldbox.mod.cultivation",
++			"xianni.death.override"
++		};
++
++		// Token: 0x040005B5 RID: 1461
++		[TupleElementNames(new string[]
++		{
++			"type",
++			"methodName",
++			"parameters"
++		})]
++		private static readonly List<ValueTuple<Type, string, Type[]>> TargetMethods = new List<ValueTuple<Type, string, Type[]>>
++		{
++			new ValueTuple<Type, string, Type[]>(typeof(Actor), "die", new Type[]
++			{
++				typeof(bool),
++				typeof(AttackType),
++				typeof(bool),
++				typeof(bool)
++			})
++		};
++	}
++}
+--- cultivation/ImmortalTraitControl.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/ImmortalTraitControl.cs	Fri Feb  6 11:33:46 2026
+@@ -3,34 +3,34 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x02000142 RID: 322
++	// Token: 0x02000147 RID: 327
+ 	internal static class ImmortalTraitControl
+ 	{
+-		// Token: 0x040005B0 RID: 1456
++		// Token: 0x040005B6 RID: 1462
+ 		private const string IMMORTAL_ID = "immortal";
+ 
+-		// Token: 0x040005B1 RID: 1457
++		// Token: 0x040005B7 RID: 1463
+ 		[ThreadStatic]
+ 		private static bool s_isEditorAdding;
+ 
+-		// Token: 0x02000143 RID: 323
++		// Token: 0x02000148 RID: 328
+ 		[HarmonyPatch(typeof(ActorTraitsEditor), "addTrait")]
+ 		private static class EditorPatch
+ 		{
+-			// Token: 0x060005D1 RID: 1489 RVA: 0x00004A83 File Offset: 0x00002C83
++			// Token: 0x06000643 RID: 1603 RVA: 0x000052CD File Offset: 0x000034CD
+ 			private static void Prefix()
+ 			{
+ 				ImmortalTraitControl.s_isEditorAdding = true;
+ 			}
+ 
+-			// Token: 0x060005D2 RID: 1490 RVA: 0x00004A8B File Offset: 0x00002C8B
++			// Token: 0x06000644 RID: 1604 RVA: 0x000052D5 File Offset: 0x000034D5
+ 			private static void Finalizer()
+ 			{
+ 				ImmortalTraitControl.s_isEditorAdding = false;
+ 			}
+ 		}
+ 
+-		// Token: 0x02000144 RID: 324
++		// Token: 0x02000149 RID: 329
+ 		[HarmonyPatch(typeof(Actor), "addTrait", new Type[]
+ 		{
+ 			typeof(string),
+@@ -38,7 +38,7 @@
+ 		})]
+ 		private static class StringPatch
+ 		{
+-			// Token: 0x060005D3 RID: 1491 RVA: 0x00004A93 File Offset: 0x00002C93
++			// Token: 0x06000645 RID: 1605 RVA: 0x000052DD File Offset: 0x000034DD
+ 			private static bool Prefix(ref bool __result, string pTraitID)
+ 			{
+ 				if (pTraitID != "immortal" || ImmortalTraitControl.s_isEditorAdding)
+@@ -50,7 +50,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000145 RID: 325
++		// Token: 0x0200014A RID: 330
+ 		[HarmonyPatch(typeof(Actor), "addTrait", new Type[]
+ 		{
+ 			typeof(ActorTrait),
+@@ -58,7 +58,7 @@
+ 		})]
+ 		private static class AssetPatch
+ 		{
+-			// Token: 0x060005D4 RID: 1492 RVA: 0x00004AAF File Offset: 0x00002CAF
++			// Token: 0x06000646 RID: 1606 RVA: 0x000052F9 File Offset: 0x000034F9
+ 			private static bool Prefix(ref bool __result, ActorTrait pTrait)
+ 			{
+ 				if (((pTrait != null) ? pTrait.id : null) != "immortal" || ImmortalTraitControl.s_isEditorAdding)
+--- cultivation/IntentSystem.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/IntentSystem.cs	Fri Feb  6 11:33:45 2026
+@@ -6,10 +6,10 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x02000155 RID: 341
++	// Token: 0x0200015A RID: 346
+ 	internal static class IntentSystem
+ 	{
+-		// Token: 0x0600060D RID: 1549 RVA: 0x00004BC0 File Offset: 0x00002DC0
++		// Token: 0x0600067F RID: 1663 RVA: 0x0000540A File Offset: 0x0000360A
+ 		public static void Init(Harmony h)
+ 		{
+ 			if (IntentSystem.s_patched)
+@@ -20,7 +20,7 @@
+ 			IntentSystem.s_patched = true;
+ 		}
+ 
+-		// Token: 0x0600060E RID: 1550 RVA: 0x000403F8 File Offset: 0x0003E5F8
++		// Token: 0x06000680 RID: 1664 RVA: 0x00040C94 File Offset: 0x0003EE94
+ 		[HarmonyPatch(typeof(MapBox), "Update")]
+ 		[HarmonyPostfix]
+ 		private static void Post_MapBox_Update()
+@@ -39,7 +39,7 @@
+ 			IntentSystem.TickIntents();
+ 		}
+ 
+-		// Token: 0x0600060F RID: 1551 RVA: 0x00040440 File Offset: 0x0003E640
++		// Token: 0x06000681 RID: 1665 RVA: 0x00040CDC File Offset: 0x0003EEDC
+ 		private static void RefreshIntentUnitsCache()
+ 		{
+ 			IntentSystem.s_intentUnits.Clear();
+@@ -54,7 +54,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000610 RID: 1552 RVA: 0x000404C0 File Offset: 0x0003E6C0
++		// Token: 0x06000682 RID: 1666 RVA: 0x00040D5C File Offset: 0x0003EF5C
+ 		private static bool HasAnyIntent(Actor a)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -78,7 +78,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000611 RID: 1553 RVA: 0x00040540 File Offset: 0x0003E740
++		// Token: 0x06000683 RID: 1667 RVA: 0x00040DDC File Offset: 0x0003EFDC
+ 		private static void TickIntents()
+ 		{
+ 			Dictionary<long, Status> dictionary = IntentSystem.BuildFirstNegativeStatusIndex();
+@@ -230,7 +230,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000612 RID: 1554 RVA: 0x0002B53C File Offset: 0x0002973C
++		// Token: 0x06000684 RID: 1668 RVA: 0x0002D794 File Offset: 0x0002B994
+ 		private static bool HasIntent(Actor a, string id)
+ 		{
+ 			IReadOnlyCollection<ActorTrait> traits = a.getTraits();
+@@ -248,7 +248,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000613 RID: 1555 RVA: 0x000409B0 File Offset: 0x0003EBB0
++		// Token: 0x06000685 RID: 1669 RVA: 0x0004124C File Offset: 0x0003F44C
+ 		private static bool GetActive(Actor a, string id)
+ 		{
+ 			int num;
+@@ -256,7 +256,7 @@
+ 			return num == 1;
+ 		}
+ 
+-		// Token: 0x06000614 RID: 1556 RVA: 0x000409DC File Offset: 0x0003EBDC
++		// Token: 0x06000686 RID: 1670 RVA: 0x00041278 File Offset: 0x0003F478
+ 		private static void SetActive(Actor a, string id, bool on)
+ 		{
+ 			a.data.set("xn.intent.active." + id, (on > false) ? 1 : 0);
+@@ -271,7 +271,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000615 RID: 1557 RVA: 0x00040A30 File Offset: 0x0003EC30
++		// Token: 0x06000687 RID: 1671 RVA: 0x000412CC File Offset: 0x0003F4CC
+ 		private static bool IsInCombat(Actor a)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -298,7 +298,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x06000616 RID: 1558 RVA: 0x00040A8C File Offset: 0x0003EC8C
++		// Token: 0x06000688 RID: 1672 RVA: 0x00041328 File Offset: 0x0003F528
+ 		private static bool SpendLingli(Actor a, int amount)
+ 		{
+ 			if (amount <= 0)
+@@ -315,7 +315,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x06000617 RID: 1559 RVA: 0x00040AD0 File Offset: 0x0003ECD0
++		// Token: 0x06000689 RID: 1673 RVA: 0x0004136C File Offset: 0x0003F56C
+ 		private static bool HasWoundedAllyNearby(Actor a, float radiusTiles, out int friendsCount)
+ 		{
+ 			friendsCount = 0;
+@@ -343,7 +343,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x06000618 RID: 1560 RVA: 0x00040B70 File Offset: 0x0003ED70
++		// Token: 0x0600068A RID: 1674 RVA: 0x0004140C File Offset: 0x0003F60C
+ 		private static void HealAllies(Actor a, float radiusTiles, float pct)
+ 		{
+ 			IEnumerable<Actor> unitsFromChunk = Finder.getUnitsFromChunk(a.current_tile, 0, radiusTiles, false);
+@@ -368,7 +368,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000619 RID: 1561 RVA: 0x00040C18 File Offset: 0x0003EE18
++		// Token: 0x0600068B RID: 1675 RVA: 0x000414B4 File Offset: 0x0003F6B4
+ 		private static Dictionary<long, Status> BuildFirstNegativeStatusIndex()
+ 		{
+ 			Dictionary<long, Status> dictionary = new Dictionary<long, Status>();
+@@ -403,7 +403,7 @@
+ 			return dictionary;
+ 		}
+ 
+-		// Token: 0x0600061A RID: 1562 RVA: 0x00040CFC File Offset: 0x0003EEFC
++		// Token: 0x0600068C RID: 1676 RVA: 0x00041598 File Offset: 0x0003F798
+ 		private static void TryMadnessSelfLose(Actor a)
+ 		{
+ 			int num;
+@@ -425,7 +425,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600061B RID: 1563 RVA: 0x00040D7C File Offset: 0x0003EF7C
++		// Token: 0x0600068D RID: 1677 RVA: 0x00041618 File Offset: 0x0003F818
+ 		private static void TryCleanOneNegative(Actor a, Dictionary<long, Status> firstNeg)
+ 		{
+ 			Status status;
+@@ -442,50 +442,50 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0600061C RID: 1564 RVA: 0x00040DDC File Offset: 0x0003EFDC
++		// Token: 0x0600068E RID: 1678 RVA: 0x00041678 File Offset: 0x0003F878
+ 		private static void MarkReverseBoost5s(Actor a)
+ 		{
+ 			int num = (int)World.world.getCurWorldTime();
+ 			a.data.set("xn.intent.reverse_boost_until", num + 5);
+ 		}
+ 
+-		// Token: 0x0600061D RID: 1565 RVA: 0x00040E0C File Offset: 0x0003F00C
++		// Token: 0x0600068F RID: 1679 RVA: 0x000416A8 File Offset: 0x0003F8A8
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static IntentSystem()
+ 		{
+ 		}
+ 
+-		// Token: 0x040005E9 RID: 1513
++		// Token: 0x040005F0 RID: 1520
+ 		private static bool s_patched = false;
+ 
+-		// Token: 0x040005EA RID: 1514
++		// Token: 0x040005F1 RID: 1521
+ 		public const string INTENT_EXTREME = "intent_01_extreme";
+ 
+-		// Token: 0x040005EB RID: 1515
++		// Token: 0x040005F2 RID: 1522
+ 		public const string INTENT_ANGEL = "intent_02_angel";
+ 
+-		// Token: 0x040005EC RID: 1516
++		// Token: 0x040005F3 RID: 1523
+ 		public const string INTENT_QIANHUAN = "intent_03_qianhuan";
+ 
+-		// Token: 0x040005ED RID: 1517
++		// Token: 0x040005F4 RID: 1524
+ 		public const string INTENT_KILLING = "intent_04_killing";
+ 
+-		// Token: 0x040005EE RID: 1518
++		// Token: 0x040005F5 RID: 1525
+ 		public const string INTENT_REVERSE = "intent_05_reverse";
+ 
+-		// Token: 0x040005EF RID: 1519
++		// Token: 0x040005F6 RID: 1526
+ 		public const string INTENT_LIFE_DEATH = "intent_06_life_death";
+ 
+-		// Token: 0x040005F0 RID: 1520
++		// Token: 0x040005F7 RID: 1527
+ 		public const string INTENT_REINCARNATION = "intent_07_reincarnation";
+ 
+-		// Token: 0x040005F1 RID: 1521
++		// Token: 0x040005F8 RID: 1528
+ 		public const string INTENT_CHAOS = "intent_08_chaos";
+ 
+-		// Token: 0x040005F2 RID: 1522
++		// Token: 0x040005F9 RID: 1529
+ 		public const string INTENT_MADNESS = "intent_09_madness";
+ 
+-		// Token: 0x040005F3 RID: 1523
++		// Token: 0x040005FA RID: 1530
+ 		private static readonly string[] ALL_INTENT_IDS = new string[]
+ 		{
+ 			"intent_01_extreme",
+@@ -499,55 +499,55 @@
+ 			"intent_09_madness"
+ 		};
+ 
+-		// Token: 0x040005F4 RID: 1524
++		// Token: 0x040005FB RID: 1531
+ 		private const int COST_SEC_ANGEL = 100;
+ 
+-		// Token: 0x040005F5 RID: 1525
++		// Token: 0x040005FC RID: 1532
+ 		private const int COST_SEC_QIANHUAN = 60;
+ 
+-		// Token: 0x040005F6 RID: 1526
++		// Token: 0x040005FD RID: 1533
+ 		private const int COST_SEC_KILLING = 50;
+ 
+-		// Token: 0x040005F7 RID: 1527
++		// Token: 0x040005FE RID: 1534
+ 		private const int COST_SEC_REVERSE = 70;
+ 
+-		// Token: 0x040005F8 RID: 1528
++		// Token: 0x040005FF RID: 1535
+ 		private const int COST_SEC_LIFEDEATH = 200;
+ 
+-		// Token: 0x040005F9 RID: 1529
++		// Token: 0x04000600 RID: 1536
+ 		private const int COST_SEC_CHAOS = 100;
+ 
+-		// Token: 0x040005FA RID: 1530
++		// Token: 0x04000601 RID: 1537
+ 		private const int COST_SEC_MADNESS = 50;
+ 
+-		// Token: 0x040005FB RID: 1531
++		// Token: 0x04000602 RID: 1538
+ 		public const int COST_EVENT_EXTREME = 10;
+ 
+-		// Token: 0x040005FC RID: 1532
++		// Token: 0x04000603 RID: 1539
+ 		public const int COST_EVENT_REBIRTH = 1500;
+ 
+-		// Token: 0x040005FD RID: 1533
++		// Token: 0x04000604 RID: 1540
+ 		private const float RADIUS_TILES = 10f;
+ 
+-		// Token: 0x040005FE RID: 1534
++		// Token: 0x04000605 RID: 1541
+ 		private const int FRIENDS_MAX = 10;
+ 
+-		// Token: 0x040005FF RID: 1535
++		// Token: 0x04000606 RID: 1542
+ 		private const float ANGEL_HEAL_PCT = 0.05f;
+ 
+-		// Token: 0x04000600 RID: 1536
++		// Token: 0x04000607 RID: 1543
+ 		private const float ANGEL_DEF_PER_FRIEND = 0.02f;
+ 
+-		// Token: 0x04000601 RID: 1537
++		// Token: 0x04000608 RID: 1544
+ 		private const float MADNESS_SELF_LOSS_PCT = 0.05f;
+ 
+-		// Token: 0x04000602 RID: 1538
++		// Token: 0x04000609 RID: 1545
+ 		private const int MADNESS_SELF_LOSS_EVERY = 2;
+ 
+-		// Token: 0x04000603 RID: 1539
++		// Token: 0x0400060A RID: 1546
+ 		private const int REVERSE_CHECK_INTERVAL = 5;
+ 
+-		// Token: 0x04000604 RID: 1540
++		// Token: 0x0400060B RID: 1547
+ 		private static readonly string[] NEGATIVE_STATUSES = new string[]
+ 		{
+ 			"poisoned",
+@@ -556,46 +556,46 @@
+ 			"slowness"
+ 		};
+ 
+-		// Token: 0x04000605 RID: 1541
++		// Token: 0x0400060C RID: 1548
+ 		private const string KEY_LINGLI = "xn.stat.lingli";
+ 
+-		// Token: 0x04000606 RID: 1542
++		// Token: 0x0400060D RID: 1549
+ 		private const string KEY_ACTIVE_PREFIX = "xn.intent.active.";
+ 
+-		// Token: 0x04000607 RID: 1543
++		// Token: 0x0400060E RID: 1550
+ 		private const string KEY_TMP_DEF_PCT = "xn.intent.tmp_def_pct";
+ 
+-		// Token: 0x04000608 RID: 1544
++		// Token: 0x0400060F RID: 1551
+ 		private const string KEY_LAST_COMBAT_TS = "xn.intent.last_combat_ts";
+ 
+-		// Token: 0x04000609 RID: 1545
++		// Token: 0x04000610 RID: 1552
+ 		private const string KEY_KILLING_LAYERS = "xn.intent.killing_layers";
+ 
+-		// Token: 0x0400060A RID: 1546
++		// Token: 0x04000611 RID: 1553
+ 		private const string KEY_QH_LAYERS = "xn.intent.qh_layers";
+ 
+-		// Token: 0x0400060B RID: 1547
++		// Token: 0x04000612 RID: 1554
+ 		private const string KEY_REVERSE_NEXT = "xn.intent.reverse_next_ts";
+ 
+-		// Token: 0x0400060C RID: 1548
++		// Token: 0x04000613 RID: 1555
+ 		private const string KEY_MADNESS_NEXT = "xn.intent.madness_next_ts";
+ 
+-		// Token: 0x0400060D RID: 1549
++		// Token: 0x04000614 RID: 1556
+ 		private const string KEY_LD_ACTIVE = "xn.intent.life_death_active";
+ 
+-		// Token: 0x0400060E RID: 1550
++		// Token: 0x04000615 RID: 1557
+ 		private const string KEY_MADNESS_ATKSPD_ON = "xn.intent.madness_atkspd_on";
+ 
+-		// Token: 0x0400060F RID: 1551
++		// Token: 0x04000616 RID: 1558
+ 		private static float s_nextTick = 0f;
+ 
+-		// Token: 0x04000610 RID: 1552
++		// Token: 0x04000617 RID: 1559
+ 		private static readonly HashSet<long> s_intentUnits = new HashSet<long>();
+ 
+-		// Token: 0x04000611 RID: 1553
++		// Token: 0x04000618 RID: 1560
+ 		private static float s_nextCacheRefresh = 0f;
+ 
+-		// Token: 0x04000612 RID: 1554
++		// Token: 0x04000619 RID: 1561
+ 		private const float CACHE_REFRESH_INTERVAL = 5f;
+ 	}
+ }
+--- cultivation/StatsCombatPatches.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/StatsCombatPatches.cs	Fri Feb  6 11:33:46 2026
+@@ -9,16 +9,16 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x02000146 RID: 326
++	// Token: 0x0200014B RID: 331
+ 	internal static class StatsCombatPatches
+ 	{
+-		// Token: 0x060005D5 RID: 1493 RVA: 0x0003D2BC File Offset: 0x0003B4BC
++		// Token: 0x06000647 RID: 1607 RVA: 0x0003DAA0 File Offset: 0x0003BCA0
+ 		static StatsCombatPatches()
+ 		{
+ 			StatsCombatPatches.TryRaiseArmorPercentCap();
+ 		}
+ 
+-		// Token: 0x060005D6 RID: 1494 RVA: 0x0003D434 File Offset: 0x0003B634
++		// Token: 0x06000648 RID: 1608 RVA: 0x0003DC18 File Offset: 0x0003BE18
+ 		private static void TryRaiseArmorPercentCap()
+ 		{
+ 			try
+@@ -40,7 +40,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005D7 RID: 1495 RVA: 0x00004AD6 File Offset: 0x00002CD6
++		// Token: 0x06000649 RID: 1609 RVA: 0x00005320 File Offset: 0x00003520
+ 		private static void D(string msg)
+ 		{
+ 			if (!StatsCombatPatches.s_debugDamage)
+@@ -50,7 +50,7 @@
+ 			Debug.Log("[XN-DMG] " + msg);
+ 		}
+ 
+-		// Token: 0x060005D8 RID: 1496 RVA: 0x0003D48C File Offset: 0x0003B68C
++		// Token: 0x0600064A RID: 1610 RVA: 0x0003DC70 File Offset: 0x0003BE70
+ 		private static int GetAncIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -68,7 +68,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x060005D9 RID: 1497 RVA: 0x0003D4C4 File Offset: 0x0003B6C4
++		// Token: 0x0600064B RID: 1611 RVA: 0x0003DCA8 File Offset: 0x0003BEA8
+ 		private static int GetBeastIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -86,7 +86,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x060005DA RID: 1498 RVA: 0x00029718 File Offset: 0x00027918
++		// Token: 0x0600064C RID: 1612 RVA: 0x0002B678 File Offset: 0x00029878
+ 		private static int ConvertAncientBeastToRealmIndex(int starOrStage)
+ 		{
+ 			switch (starOrStage)
+@@ -116,7 +116,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005DB RID: 1499 RVA: 0x0003D4FC File Offset: 0x0003B6FC
++		// Token: 0x0600064D RID: 1613 RVA: 0x0003DCE0 File Offset: 0x0003BEE0
+ 		private static int GetUnifiedRealmIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -141,7 +141,7 @@
+ 			return -1;
+ 		}
+ 
+-		// Token: 0x060005DC RID: 1500 RVA: 0x0003D544 File Offset: 0x0003B744
++		// Token: 0x0600064E RID: 1614 RVA: 0x0003DD28 File Offset: 0x0003BF28
+ 		private static bool IsAncient(Actor a)
+ 		{
+ 			if (a == null)
+@@ -163,7 +163,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x060005DD RID: 1501 RVA: 0x0003D5BC File Offset: 0x0003B7BC
++		// Token: 0x0600064F RID: 1615 RVA: 0x0003DDA0 File Offset: 0x0003BFA0
+ 		private static bool IsBeast(Actor a)
+ 		{
+ 			if (a == null)
+@@ -185,7 +185,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x060005DE RID: 1502 RVA: 0x0003D644 File Offset: 0x0003B844
++		// Token: 0x06000650 RID: 1616 RVA: 0x0003DE28 File Offset: 0x0003C028
+ 		private static bool IsIntentActive(Actor a, string id)
+ 		{
+ 			if (a == null)
+@@ -201,7 +201,7 @@
+ 			return num == 1;
+ 		}
+ 
+-		// Token: 0x060005DF RID: 1503 RVA: 0x0003D680 File Offset: 0x0003B880
++		// Token: 0x06000651 RID: 1617 RVA: 0x0003DE64 File Offset: 0x0003C064
+ 		private static bool SpendLingli(Actor a, int amount)
+ 		{
+ 			if (a == null || amount <= 0)
+@@ -218,19 +218,19 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005E0 RID: 1504 RVA: 0x00003ADE File Offset: 0x00001CDE
++		// Token: 0x06000652 RID: 1618 RVA: 0x000042E4 File Offset: 0x000024E4
+ 		private static int NowTs()
+ 		{
+ 			return (int)World.world.getCurWorldTime();
+ 		}
+ 
+-		// Token: 0x060005E1 RID: 1505 RVA: 0x00004AF0 File Offset: 0x00002CF0
++		// Token: 0x06000653 RID: 1619 RVA: 0x0000533A File Offset: 0x0000353A
+ 		private static int CurYear()
+ 		{
+ 			return Date.getCurrentYear();
+ 		}
+ 
+-		// Token: 0x060005E2 RID: 1506 RVA: 0x0003D6C4 File Offset: 0x0003B8C4
++		// Token: 0x06000654 RID: 1620 RVA: 0x0003DEA8 File Offset: 0x0003C0A8
+ 		private static int GetRealmIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -248,7 +248,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x060005E3 RID: 1507 RVA: 0x0003D6FC File Offset: 0x0003B8FC
++		// Token: 0x06000655 RID: 1621 RVA: 0x0003DEE0 File Offset: 0x0003C0E0
+ 		private static void DoAnnualRegen(Actor a, int years)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -273,7 +273,7 @@
+ 			StatsCombatPatches.AddResourceAnnual(a, years, "xn.stat.nieli", "NieliMax", "NieliRegenPerYear");
+ 		}
+ 
+-		// Token: 0x060005E4 RID: 1508 RVA: 0x0003D788 File Offset: 0x0003B988
++		// Token: 0x06000656 RID: 1622 RVA: 0x0003DF6C File Offset: 0x0003C16C
+ 		private static void AddResourceAnnual(Actor a, int years, string dataKey, string maxStatKey, string regenStatKey)
+ 		{
+ 			if (a == null || !a.isAlive())
+@@ -300,136 +300,139 @@
+ 			a.data.set(dataKey, (int)num4);
+ 		}
+ 
+-		// Token: 0x040005B2 RID: 1458
++		// Token: 0x040005B8 RID: 1464
+ 		private static Actor s_currentDelegateAttacker = null;
+ 
+-		// Token: 0x040005B3 RID: 1459
++		// Token: 0x040005B9 RID: 1465
+ 		private static bool s_debugDamage = false;
+ 
+-		// Token: 0x040005B4 RID: 1460
++		// Token: 0x040005BA RID: 1466
+ 		private const string LOGTAG = "[XN-DMG]";
+ 
+-		// Token: 0x040005B5 RID: 1461
++		// Token: 0x040005BB RID: 1467
+ 		private const string KEY_TMP_DEF_PCT = "xn.intent.tmp_def_pct";
+ 
+-		// Token: 0x040005B6 RID: 1462
++		// Token: 0x040005BC RID: 1468
+ 		private const string KEY_LD_ACTIVE = "xn.intent.life_death_active";
+ 
+-		// Token: 0x040005B7 RID: 1463
++		// Token: 0x040005BD RID: 1469
+ 		private const string KEY_ACTIVE_KILLING = "xn.intent.active.intent_04_killing";
+ 
+-		// Token: 0x040005B8 RID: 1464
++		// Token: 0x040005BE RID: 1470
+ 		private const string KEY_KILLING_LAYERS = "xn.intent.killing_layers";
+ 
+-		// Token: 0x040005B9 RID: 1465
++		// Token: 0x040005BF RID: 1471
+ 		private const string KEY_ACTIVE_PREFIX = "xn.intent.active.";
+ 
+-		// Token: 0x040005BA RID: 1466
++		// Token: 0x040005C0 RID: 1472
+ 		private const string KEY_LINGLI = "xn.stat.lingli";
+ 
+-		// Token: 0x040005BB RID: 1467
++		// Token: 0x040005C1 RID: 1473
+ 		private const string KEY_QH_LAYERS = "xn.intent.qh_layers";
+ 
+-		// Token: 0x040005BC RID: 1468
++		// Token: 0x040005C2 RID: 1474
+ 		private const string KEY_QH_UNTIL = "xn.intent.qh_until";
+ 
+-		// Token: 0x040005BD RID: 1469
++		// Token: 0x040005C3 RID: 1475
+ 		private const string KEY_REVERSE_BOOST_UNTIL = "xn.intent.reverse_boost_until";
+ 
+-		// Token: 0x040005BE RID: 1470
++		// Token: 0x040005C4 RID: 1476
+ 		private const string KEY_REBIRTH_CD_UNTIL_YEAR = "xn.intent.rebirth_cd_until_year";
+ 
+-		// Token: 0x040005BF RID: 1471
++		// Token: 0x040005C5 RID: 1477
+ 		private const string KEY_REBIRTH_INVULN_UNTIL = "xn.intent.rebirth_invuln_until";
+ 
+-		// Token: 0x040005C0 RID: 1472
++		// Token: 0x040005C6 RID: 1478
+ 		private const string INTENT_EXTREME = "intent_01_extreme";
+ 
+-		// Token: 0x040005C1 RID: 1473
++		// Token: 0x040005C7 RID: 1479
+ 		private const string INTENT_ANGEL = "intent_02_angel";
+ 
+-		// Token: 0x040005C2 RID: 1474
++		// Token: 0x040005C8 RID: 1480
+ 		private const string INTENT_QIANHUAN = "intent_03_qianhuan";
+ 
+-		// Token: 0x040005C3 RID: 1475
++		// Token: 0x040005C9 RID: 1481
+ 		private const string INTENT_KILLING = "intent_04_killing";
+ 
+-		// Token: 0x040005C4 RID: 1476
++		// Token: 0x040005CA RID: 1482
+ 		private const string INTENT_REVERSE = "intent_05_reverse";
+ 
+-		// Token: 0x040005C5 RID: 1477
++		// Token: 0x040005CB RID: 1483
+ 		private const string INTENT_LIFE_DEATH = "intent_06_life_death";
+ 
+-		// Token: 0x040005C6 RID: 1478
++		// Token: 0x040005CC RID: 1484
+ 		private const string INTENT_REINCARNATION = "intent_07_reincarnation";
+ 
+-		// Token: 0x040005C7 RID: 1479
++		// Token: 0x040005CD RID: 1485
+ 		private const string INTENT_CHAOS = "intent_08_chaos";
+ 
+-		// Token: 0x040005C8 RID: 1480
++		// Token: 0x040005CE RID: 1486
+ 		private const string INTENT_MADNESS = "intent_09_madness";
+ 
+-		// Token: 0x040005C9 RID: 1481
++		// Token: 0x040005CF RID: 1487
+ 		private const string KEY_ART_SHIELD_ACTIVE = "xn.art.shield_on";
+ 
+-		// Token: 0x040005CA RID: 1482
++		// Token: 0x040005D0 RID: 1488
+ 		private const string KEY_ART_LINK_ACTIVE = "xn.art.link_on";
+ 
+-		// Token: 0x040005CB RID: 1483
++		// Token: 0x040005D1 RID: 1489
+ 		private const string KEY_ART_LINK_END = "xn.art.link_end";
+ 
+-		// Token: 0x040005CC RID: 1484
++		// Token: 0x040005D2 RID: 1490
+ 		private const string KEY_ART_LINK_TID = "xn.art.link_tid";
+ 
+-		// Token: 0x040005CD RID: 1485
++		// Token: 0x040005D3 RID: 1491
+ 		private const string KEY_BY_METAL = "xn.benyuan.metal_on";
+ 
+-		// Token: 0x040005CE RID: 1486
++		// Token: 0x040005D4 RID: 1492
+ 		private const string KEY_BY_WOOD = "xn.benyuan.wood_on";
+ 
+-		// Token: 0x040005CF RID: 1487
++		// Token: 0x040005D5 RID: 1493
+ 		private const string KEY_NOHEAL_END = "xn.benyuan.noheal_end";
+ 
+-		// Token: 0x040005D0 RID: 1488
++		// Token: 0x040005D6 RID: 1494
+ 		private const string KEY_BY_WATER = "xn.benyuan.water_on";
+ 
+-		// Token: 0x040005D1 RID: 1489
++		// Token: 0x040005D7 RID: 1495
+ 		private const string KEY_BY_FIRE = "xn.benyuan.fire_on";
+ 
+-		// Token: 0x040005D2 RID: 1490
++		// Token: 0x040005D8 RID: 1496
+ 		private const string KEY_BY_EARTH = "xn.benyuan.earth_on";
+ 
+-		// Token: 0x040005D3 RID: 1491
++		// Token: 0x040005D9 RID: 1497
+ 		private const string ATTR_METAL = "attr_01_metal";
+ 
+-		// Token: 0x040005D4 RID: 1492
++		// Token: 0x040005DA RID: 1498
+ 		private const string ATTR_WOOD = "attr_02_wood";
+ 
+-		// Token: 0x040005D5 RID: 1493
++		// Token: 0x040005DB RID: 1499
+ 		private const string ATTR_WATER = "attr_03_water";
+ 
+-		// Token: 0x040005D6 RID: 1494
++		// Token: 0x040005DC RID: 1500
+ 		private const string ATTR_FIRE = "attr_04_fire";
+ 
+-		// Token: 0x040005D7 RID: 1495
++		// Token: 0x040005DD RID: 1501
+ 		private const string ATTR_EARTH = "attr_05_earth";
+ 
+-		// Token: 0x040005D8 RID: 1496
++		// Token: 0x040005DE RID: 1502
+ 		private const string KEY_FIRE_DOT_STACKS = "xn.benyuan.fire_dot_stacks";
+ 
+-		// Token: 0x040005D9 RID: 1497
++		// Token: 0x040005DF RID: 1503
+ 		private const string KEY_FIRE_DOT_UNTIL = "xn.benyuan.fire_dot_until";
+ 
+-		// Token: 0x040005DA RID: 1498
++		// Token: 0x040005E0 RID: 1504
+ 		private const int COST_EVENT_EXTREME = 10;
+ 
+-		// Token: 0x040005DB RID: 1499
++		// Token: 0x040005E1 RID: 1505
+ 		private const int COST_EVENT_REBIRTH = 1500;
+ 
+-		// Token: 0x040005DC RID: 1500
++		// Token: 0x040005E2 RID: 1506
+ 		private const int MAX_SAFE_DAMAGE = 2100000000;
+ 
+-		// Token: 0x040005DD RID: 1501
++		// Token: 0x040005E3 RID: 1507
++		private const int MAX_MP_SP_REFLECT = 1800000000;
++
++		// Token: 0x040005E4 RID: 1508
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -450,7 +453,7 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x040005DE RID: 1502
++		// Token: 0x040005E5 RID: 1509
+ 		private static readonly string[] ANC_STAR_IDS = new string[]
+ 		{
+ 			"ancient_01_star",
+@@ -465,7 +468,7 @@
+ 			"ancient_10_star"
+ 		};
+ 
+-		// Token: 0x040005DF RID: 1503
++		// Token: 0x040005E6 RID: 1510
+ 		private static readonly string[] BEAST_STAGE_IDS = new string[]
+ 		{
+ 			"beast_01_stage",
+@@ -480,13 +483,13 @@
+ 			"beast_10_stage"
+ 		};
+ 
+-		// Token: 0x040005E0 RID: 1504
++		// Token: 0x040005E7 RID: 1511
+ 		private static bool s_annualPatched = false;
+ 
+-		// Token: 0x040005E1 RID: 1505
++		// Token: 0x040005E8 RID: 1512
+ 		private static int s_lastAppliedYear = -1;
+ 
+-		// Token: 0x02000147 RID: 327
++		// Token: 0x0200014C RID: 332
+ 		[HarmonyPatch(typeof(Actor), "getHit", new Type[]
+ 		{
+ 			typeof(float),
+@@ -499,7 +502,7 @@
+ 		})]
+ 		private static class GetHitPatch
+ 		{
+-			// Token: 0x060005E5 RID: 1509 RVA: 0x0003D800 File Offset: 0x0003BA00
++			// Token: 0x06000657 RID: 1623 RVA: 0x0003DFE4 File Offset: 0x0003C1E4
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref float pDamage, bool pFlash, AttackType pAttackType, BaseSimObject pAttacker, bool pSkipIfShake, bool pMetallicWeapon, bool pCheckDamageReduction)
+ 			{
+@@ -540,7 +543,7 @@
+ 				__instance.data.get("xn.intent.rebirth_invuln_until", out num6, 0);
+ 				if (num6 > 0 && StatsCombatPatches.NowTs() < num6)
+ 				{
+-					StatsCombatPatches.D("Invuln(护命无敌) SKIP");
++					StatsCombatPatches.D("Invuln(Life-Protecting Invincibility) SKIP");
+ 					return false;
+ 				}
+ 				if (actor != null && __instance.isAlive())
+@@ -724,11 +727,7 @@
+ 						if (actor2 != null && actor2.isAlive())
+ 						{
+ 							int num24 = unifiedRealmIndex4 + 1;
+-							float num25 = 1f;
+-							for (int i = 0; i < num24; i++)
+-							{
+-								num25 *= 1.3f;
+-							}
++							float num25 = Mathf.Pow(2f, (float)num24);
+ 							int num26 = Mathf.FloorToInt(num5 * num25);
+ 							if (num26 > 2100000000)
+ 							{
+@@ -737,8 +736,20 @@
+ 							if (num26 > 0)
+ 							{
+ 								actor2.changeHealth(-num26);
++								long num27 = (num24 >= 3) ? ((long)Math.Pow(10.0, (double)(num24 - 3))) : 1L;
++								long num28 = (long)num26 * num27;
++								int num29 = (num28 > 1800000000L) ? 1800000000 : ((int)num28);
++								actor2.changeMana(-num29);
++								actor2.changeStamina(-num29);
+ 								actor2.startColorEffect(ActorColorEffect.Red);
+-								StatsCombatPatches.D(string.Format("RealmReflect: NoRealm attacker takes {0} (orig={1:F0} x {2:F2})", num26, num5, num25));
++								StatsCombatPatches.D(string.Format("RealmReflect: NoRealm attacker takes {0} HP, {1} MP/SP (stages={2}, hpMult={3}x, mpMult={4}x)", new object[]
++								{
++									num26,
++									num29,
++									num24,
++									num25,
++									num27
++								}));
+ 								if (!actor2.hasHealth())
+ 								{
+ 									actor2.batch.c_check_deaths.Add(actor2);
+@@ -748,37 +759,40 @@
+ 					}
+ 					else if (unifiedRealmIndex3 >= 0 && unifiedRealmIndex4 >= 0)
+ 					{
+-						int num27 = unifiedRealmIndex3 - unifiedRealmIndex4;
+-						if (num27 < 0)
++						int num30 = unifiedRealmIndex3 - unifiedRealmIndex4;
++						if (num30 < 0)
+ 						{
+-							int num28 = -num27;
+-							if (num28 >= 3)
++							int num31 = -num30;
++							if (num31 >= 3)
+ 							{
+ 								pDamage = 0f;
+-								StatsCombatPatches.D(string.Format("RealmDiff A({0}) < D({1}), diff={2}, immune (damage=0)", unifiedRealmIndex3, unifiedRealmIndex4, num28));
++								StatsCombatPatches.D(string.Format("RealmDiff A({0}) < D({1}), diff={2}, immune (damage=0)", unifiedRealmIndex3, unifiedRealmIndex4, num31));
+ 								if (actor2 != null && actor2.isAlive())
+ 								{
+-									float num29 = 1f;
+-									for (int j = 0; j < num28; j++)
+-									{
+-										num29 *= 1.3f;
+-									}
+-									int num30 = Mathf.FloorToInt(num5 * num29);
+-									if (num30 > 2100000000)
++									float num32 = Mathf.Pow(2f, (float)num31);
++									int num33 = Mathf.FloorToInt(num5 * num32);
++									if (num33 > 2100000000)
+ 									{
+-										num30 = 2100000000;
++										num33 = 2100000000;
+ 									}
+-									if (num30 > 0)
++									if (num33 > 0)
+ 									{
+-										actor2.changeHealth(-num30);
++										actor2.changeHealth(-num33);
++										long num34 = (num31 >= 3) ? ((long)Math.Pow(10.0, (double)(num31 - 3))) : 1L;
++										long num35 = (long)num33 * num34;
++										int num36 = (num35 > 1800000000L) ? 1800000000 : ((int)num35);
++										actor2.changeMana(-num36);
++										actor2.changeStamina(-num36);
+ 										actor2.startColorEffect(ActorColorEffect.Red);
+-										StatsCombatPatches.D(string.Format("RealmReflect: A({0}) takes {1} from D({2}) (orig={3:F0} x {4:F2})", new object[]
++										StatsCombatPatches.D(string.Format("RealmReflect: A({0}) takes {1} HP, {2} MP/SP from D({3}) (stages={4}, hpMult={5}x, mpMult={6}x)", new object[]
+ 										{
+ 											unifiedRealmIndex3,
+-											num30,
++											num33,
++											num36,
+ 											unifiedRealmIndex4,
+-											num5,
+-											num29
++											num31,
++											num32,
++											num34
+ 										}));
+ 										if (!actor2.hasHealth())
+ 										{
+@@ -789,63 +803,63 @@
+ 							}
+ 							else
+ 							{
+-								float num31 = 1f;
+-								for (int k = 0; k < num28; k++)
++								float num37 = 1f;
++								for (int i = 0; i < num31; i++)
+ 								{
+-									num31 *= 0.5f;
++									num37 *= 0.5f;
+ 								}
+-								pDamage *= num31;
++								pDamage *= num37;
+ 								StatsCombatPatches.D(string.Format("RealmDiff A({0}) < D({1}), diff={2}, mult={3:F3} -> {4:F2}", new object[]
+ 								{
+ 									unifiedRealmIndex3,
+ 									unifiedRealmIndex4,
+-									num28,
+ 									num31,
++									num37,
+ 									pDamage
+ 								}));
+ 							}
+ 						}
+-						else if (num27 > 0)
++						else if (num30 > 0)
+ 						{
+-							int num32 = num27;
+-							float num33 = 1f;
+-							for (int l = 0; l < num32; l++)
++							int num38 = num30;
++							float num39 = 1f;
++							for (int j = 0; j < num38; j++)
+ 							{
+-								num33 *= 1.3f;
++								num39 *= 1.3f;
+ 							}
+-							pDamage *= num33;
++							pDamage *= num39;
+ 							StatsCombatPatches.D(string.Format("RealmDiff A({0}) > D({1}), diff={2}, mult={3:F3} -> {4:F2}", new object[]
+ 							{
+ 								unifiedRealmIndex3,
+ 								unifiedRealmIndex4,
+-								num32,
+-								num33,
++								num38,
++								num39,
+ 								pDamage
+ 							}));
+-							float num34 = (num32 >= 3) ? 1f : ((num32 == 2) ? 0.6f : ((num32 == 1) ? 0.2f : 0.01f));
+-							if (Randy.randomChance(num34))
++							float num40 = (num38 >= 3) ? 1f : ((num38 == 2) ? 0.6f : ((num38 == 1) ? 0.2f : 0.01f));
++							if (Randy.randomChance(num40))
+ 							{
+-								int num35 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
+-								if (num35 > 0)
++								int num41 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
++								if (num41 > 0)
+ 								{
+-									__instance.changeHealth(-num35);
+-									StatsCombatPatches.D(string.Format("RealmTrueDmg chance={0:P0} dealt={1}", num34, num35));
++									__instance.changeHealth(-num41);
++									StatsCombatPatches.D(string.Format("RealmTrueDmg chance={0:P0} dealt={1}", num40, num41));
+ 								}
+ 							}
+ 						}
+-						else if (num27 == 0 && Randy.randomChance(0.01f))
++						else if (num30 == 0 && Randy.randomChance(0.01f))
+ 						{
+-							int num36 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
+-							if (num36 > 0)
++							int num42 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
++							if (num42 > 0)
+ 							{
+-								__instance.changeHealth(-num36);
+-								StatsCombatPatches.D(string.Format("RealmTrueDmg(same) dealt={0}", num36));
++								__instance.changeHealth(-num42);
++								StatsCombatPatches.D(string.Format("RealmTrueDmg(same) dealt={0}", num42));
+ 							}
+ 						}
+ 					}
+ 					else if (unifiedRealmIndex3 == 15 && unifiedRealmIndex4 < 0)
+ 					{
+-						if (Randy.randomChance(0.1f))
++						if (Randy.randomChance(1E-05f))
+ 						{
+ 							if (actor != null)
+ 							{
+@@ -853,25 +867,28 @@
+ 								int kills = data.kills;
+ 								data.kills = kills + 1;
+ 							}
+-							BroadcastSystem.PostActor(actor, (((actor != null) ? actor.getName() : null) ?? "踏天强者") + "使用天劫之力绞杀孽畜");
++							BroadcastSystem.PostActor(actor, BroadcastSystem.FormatLocalized("broadcast_tribulation_kill", new object[]
++							{
++								((actor != null) ? actor.getName() : null) ?? "Heaven-Trampling Powerhouse"
++							}));
+ 							World.world.units.destroyObject(__instance);
+-							StatsCombatPatches.D("Tatian instant kill: NoRealm target erased from world (10% chance)");
++							StatsCombatPatches.D("Tatian instant kill: NoRealm target erased from world (0.1% chance)");
+ 							return false;
+ 						}
+-						int num37 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
+-						if (num37 > 0)
++						int num43 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
++						if (num43 > 0)
+ 						{
+-							__instance.changeHealth(-num37);
+-							StatsCombatPatches.D(string.Format("RealmTrueDmg(Tatian->NoRealm) dealt={0}", num37));
++							__instance.changeHealth(-num43);
++							StatsCombatPatches.D(string.Format("RealmTrueDmg(Tatian->NoRealm) dealt={0}", num43));
+ 						}
+ 					}
+ 					else if (unifiedRealmIndex3 >= 0 && unifiedRealmIndex4 < 0)
+ 					{
+-						int num38 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
+-						if (num38 > 0)
++						int num44 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.2f);
++						if (num44 > 0)
+ 						{
+-							__instance.changeHealth(-num38);
+-							StatsCombatPatches.D(string.Format("RealmTrueDmg(HasRealm->NoRealm) dealt={0}", num38));
++							__instance.changeHealth(-num44);
++							StatsCombatPatches.D(string.Format("RealmTrueDmg(HasRealm->NoRealm) dealt={0}", num44));
+ 						}
+ 					}
+ 				}
+@@ -885,22 +902,22 @@
+ 				}
+ 				if (actor != null)
+ 				{
+-					int num39;
+-					actor.data.get("xn.intent.qh_until", out num39, 0);
+-					if (num39 > 0 && StatsCombatPatches.NowTs() > num39)
++					int num45;
++					actor.data.get("xn.intent.qh_until", out num45, 0);
++					if (num45 > 0 && StatsCombatPatches.NowTs() > num45)
+ 					{
+ 						actor.data.set("xn.intent.qh_layers", 0);
+ 						actor.data.set("xn.intent.qh_until", 0);
+ 					}
+-					int num40;
+-					actor.data.get("xn.intent.qh_layers", out num40, 0);
+-					if (num40 > 0)
++					int num46;
++					actor.data.get("xn.intent.qh_layers", out num46, 0);
++					if (num46 > 0)
+ 					{
+-						pDamage *= 1f + 0.05f * (float)Mathf.Min(num40, 5);
++						pDamage *= 1f + 0.05f * (float)Mathf.Min(num46, 5);
+ 					}
+-					if (num40 > 0)
++					if (num46 > 0)
+ 					{
+-						StatsCombatPatches.D(string.Format("Qianhuan layers={0} -> {1:F2}", num40, pDamage));
++						StatsCombatPatches.D(string.Format("Qianhuan layers={0} -> {1:F2}", num46, pDamage));
+ 					}
+ 				}
+ 				if (actor != null && actor.isAlive())
+@@ -912,9 +929,9 @@
+ 					}
+ 					if (num4 == 1 && actor.hasTrait("attr_02_wood"))
+ 					{
+-						int num41;
+-						__instance.data.get("xn.benyuan.metal_on", out num41, 0);
+-						if (num41 != 1)
++						int num47;
++						__instance.data.get("xn.benyuan.metal_on", out num47, 0);
++						if (num47 != 1)
+ 						{
+ 							if (Randy.randomChance(0.3f))
+ 							{
+@@ -926,13 +943,13 @@
+ 				}
+ 				if (actor != null)
+ 				{
+-					int num42;
+-					actor.data.get("xn.intent.reverse_boost_until", out num42, 0);
+-					if (num42 > StatsCombatPatches.NowTs())
++					int num48;
++					actor.data.get("xn.intent.reverse_boost_until", out num48, 0);
++					if (num48 > StatsCombatPatches.NowTs())
+ 					{
+ 						pDamage *= 1.2f;
+ 					}
+-					if (num42 > StatsCombatPatches.NowTs())
++					if (num48 > StatsCombatPatches.NowTs())
+ 					{
+ 						StatsCombatPatches.D(string.Format("Reverse buff +20% -> {0:F2}", pDamage));
+ 					}
+@@ -951,22 +968,22 @@
+ 				}
+ 				if (StatsCombatPatches.IsIntentActive(__instance, "intent_02_angel"))
+ 				{
+-					float num43 = 0f;
+-					__instance.data.get("xn.intent.tmp_def_pct", out num43, 0f);
+-					if (num43 > 0f)
+-					{
+-						num43 = Mathf.Clamp(num43, 0f, 0.8f);
+-						pDamage *= 1f - num43;
+-						StatsCombatPatches.D(string.Format("Angel guard -{0:P0} -> {1:F2}", num43, pDamage));
++					float num49 = 0f;
++					__instance.data.get("xn.intent.tmp_def_pct", out num49, 0f);
++					if (num49 > 0f)
++					{
++						num49 = Mathf.Clamp(num49, 0f, 0.8f);
++						pDamage *= 1f - num49;
++						StatsCombatPatches.D(string.Format("Angel guard -{0:P0} -> {1:F2}", num49, pDamage));
+ 					}
+ 				}
+-				int num44;
+-				__instance.data.get("xn.intent.life_death_active", out num44, 0);
+-				if (num44 == 1 && __instance.hasTrait("intent_06_life_death"))
++				int num50;
++				__instance.data.get("xn.intent.life_death_active", out num50, 0);
++				if (num50 == 1 && __instance.hasTrait("intent_06_life_death"))
+ 				{
+ 					pDamage *= 0.6f;
+ 				}
+-				if (num44 == 1 && __instance.hasTrait("intent_06_life_death"))
++				if (num50 == 1 && __instance.hasTrait("intent_06_life_death"))
+ 				{
+ 					StatsCombatPatches.D(string.Format("LifeDeath -40% -> {0:F2}", pDamage));
+ 				}
+@@ -986,9 +1003,9 @@
+ 					{
+ 						if (!StatsCombatPatches.IsAncient(actor) && !StatsCombatPatches.IsBeast(actor) && flag)
+ 						{
+-							int num45;
+-							actor.data.get("xn.intent.active.intent_01_extreme", out num45, 0);
+-							if (num45 == 0)
++							int num51;
++							actor.data.get("xn.intent.active.intent_01_extreme", out num51, 0);
++							if (num51 == 0)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_01_extreme", 1);
+ 							}
+@@ -1002,9 +1019,9 @@
+ 					{
+ 						if (actor.hasTrait("intent_03_qianhuan"))
+ 						{
+-							int num46;
+-							actor.data.get("xn.intent.active.intent_03_qianhuan", out num46, 0);
+-							if (num46 == 1)
++							int num52;
++							actor.data.get("xn.intent.active.intent_03_qianhuan", out num52, 0);
++							if (num52 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_03_qianhuan", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1012,9 +1029,9 @@
+ 						}
+ 						if (actor.hasTrait("intent_04_killing"))
+ 						{
+-							int num47;
+-							actor.data.get("xn.intent.active.intent_04_killing", out num47, 0);
+-							if (num47 == 1)
++							int num53;
++							actor.data.get("xn.intent.active.intent_04_killing", out num53, 0);
++							if (num53 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_04_killing", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1022,9 +1039,9 @@
+ 						}
+ 						if (actor.hasTrait("intent_05_reverse"))
+ 						{
+-							int num48;
+-							actor.data.get("xn.intent.active.intent_05_reverse", out num48, 0);
+-							if (num48 == 1)
++							int num54;
++							actor.data.get("xn.intent.active.intent_05_reverse", out num54, 0);
++							if (num54 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_05_reverse", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1032,9 +1049,9 @@
+ 						}
+ 						if (actor.hasTrait("intent_08_chaos"))
+ 						{
+-							int num49;
+-							actor.data.get("xn.intent.active.intent_08_chaos", out num49, 0);
+-							if (num49 == 1)
++							int num55;
++							actor.data.get("xn.intent.active.intent_08_chaos", out num55, 0);
++							if (num55 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_08_chaos", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1042,9 +1059,9 @@
+ 						}
+ 						if (actor.hasTrait("intent_09_madness"))
+ 						{
+-							int num50;
+-							actor.data.get("xn.intent.active.intent_09_madness", out num50, 0);
+-							if (num50 == 1)
++							int num56;
++							actor.data.get("xn.intent.active.intent_09_madness", out num56, 0);
++							if (num56 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_09_madness", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1055,11 +1072,11 @@
+ 					{
+ 						if (actor.hasTrait("intent_03_qianhuan"))
+ 						{
+-							int num51;
+-							actor.data.get("xn.intent.active.intent_03_qianhuan", out num51, 0);
++							int num57;
++							actor.data.get("xn.intent.active.intent_03_qianhuan", out num57, 0);
+ 							if (StatsCombatPatches.SpendLingli(actor, 60))
+ 							{
+-								if (num51 == 0)
++								if (num57 == 0)
+ 								{
+ 									actor.data.set("xn.intent.active.intent_03_qianhuan", 1);
+ 									YijingFX.StartLoop(actor);
+@@ -1069,7 +1086,7 @@
+ 									YijingFX.StartLoop(actor);
+ 								}
+ 							}
+-							else if (num51 == 1)
++							else if (num57 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_03_qianhuan", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1077,11 +1094,11 @@
+ 						}
+ 						if (actor.hasTrait("intent_04_killing"))
+ 						{
+-							int num52;
+-							actor.data.get("xn.intent.active.intent_04_killing", out num52, 0);
++							int num58;
++							actor.data.get("xn.intent.active.intent_04_killing", out num58, 0);
+ 							if (StatsCombatPatches.SpendLingli(actor, 50))
+ 							{
+-								if (num52 == 0)
++								if (num58 == 0)
+ 								{
+ 									actor.data.set("xn.intent.active.intent_04_killing", 1);
+ 									YijingFX.StartLoop(actor);
+@@ -1091,7 +1108,7 @@
+ 									YijingFX.StartLoop(actor);
+ 								}
+ 							}
+-							else if (num52 == 1)
++							else if (num58 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_04_killing", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1099,11 +1116,11 @@
+ 						}
+ 						if (actor.hasTrait("intent_05_reverse"))
+ 						{
+-							int num53;
+-							actor.data.get("xn.intent.active.intent_05_reverse", out num53, 0);
++							int num59;
++							actor.data.get("xn.intent.active.intent_05_reverse", out num59, 0);
+ 							if (StatsCombatPatches.SpendLingli(actor, 70))
+ 							{
+-								if (num53 == 0)
++								if (num59 == 0)
+ 								{
+ 									actor.data.set("xn.intent.active.intent_05_reverse", 1);
+ 									YijingFX.StartLoop(actor);
+@@ -1113,7 +1130,7 @@
+ 									YijingFX.StartLoop(actor);
+ 								}
+ 							}
+-							else if (num53 == 1)
++							else if (num59 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_05_reverse", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1121,11 +1138,11 @@
+ 						}
+ 						if (actor.hasTrait("intent_08_chaos"))
+ 						{
+-							int num54;
+-							actor.data.get("xn.intent.active.intent_08_chaos", out num54, 0);
++							int num60;
++							actor.data.get("xn.intent.active.intent_08_chaos", out num60, 0);
+ 							if (StatsCombatPatches.SpendLingli(actor, 100))
+ 							{
+-								if (num54 == 0)
++								if (num60 == 0)
+ 								{
+ 									actor.data.set("xn.intent.active.intent_08_chaos", 1);
+ 									YijingFX.StartLoop(actor);
+@@ -1135,7 +1152,7 @@
+ 									YijingFX.StartLoop(actor);
+ 								}
+ 							}
+-							else if (num54 == 1)
++							else if (num60 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_08_chaos", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1143,11 +1160,11 @@
+ 						}
+ 						if (actor.hasTrait("intent_09_madness"))
+ 						{
+-							int num55;
+-							actor.data.get("xn.intent.active.intent_09_madness", out num55, 0);
++							int num61;
++							actor.data.get("xn.intent.active.intent_09_madness", out num61, 0);
+ 							if (StatsCombatPatches.SpendLingli(actor, 50))
+ 							{
+-								if (num55 == 0)
++								if (num61 == 0)
+ 								{
+ 									actor.data.set("xn.intent.active.intent_09_madness", 1);
+ 									YijingFX.StartLoop(actor);
+@@ -1157,7 +1174,7 @@
+ 									YijingFX.StartLoop(actor);
+ 								}
+ 							}
+-							else if (num55 == 1)
++							else if (num61 == 1)
+ 							{
+ 								actor.data.set("xn.intent.active.intent_09_madness", 0);
+ 								YijingFX.StopLoop(actor);
+@@ -1183,44 +1200,44 @@
+ 				}
+ 				if (__instance != null && __instance.isAlive() && __instance.hasTrait("intent_07_reincarnation") && !flag2)
+ 				{
+-					int num56;
+-					__instance.data.get("xn.intent.rebirth_cd_until_year", out num56, 0);
+-					if (StatsCombatPatches.CurYear() >= num56)
++					int num62;
++					__instance.data.get("xn.intent.rebirth_cd_until_year", out num62, 0);
++					if (StatsCombatPatches.CurYear() >= num62)
+ 					{
+-						float num57 = (float)__instance.getHealth();
+-						if (num57 - pDamage <= 0f && StatsCombatPatches.SpendLingli(__instance, 1500))
++						float num63 = (float)__instance.getHealth();
++						if (num63 - pDamage <= 0f && StatsCombatPatches.SpendLingli(__instance, 1500))
+ 						{
+-							int num58 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.5f);
+-							if (num58 > 0)
++							int num64 = Mathf.FloorToInt((float)__instance.getMaxHealth() * 0.5f);
++							if (num64 > 0)
+ 							{
+-								__instance.changeHealth(num58);
++								__instance.changeHealth(num64);
+ 							}
+-							pDamage = Mathf.Max(0f, num57 - 1f);
++							pDamage = Mathf.Max(0f, num63 - 1f);
+ 							__instance.data.set("xn.intent.rebirth_invuln_until", StatsCombatPatches.NowTs() + 20);
+ 							__instance.data.set("xn.intent.rebirth_cd_until_year", StatsCombatPatches.CurYear() + 300);
+ 							StatsCombatPatches.D("Rebirth: save to 1 HP");
+ 						}
+ 					}
+ 				}
+-				int num59;
+-				__instance.data.get("xn.benyuan.water_on", out num59, 0);
+-				if (num59 == 1 && __instance.hasTrait("attr_03_water"))
++				int num65;
++				__instance.data.get("xn.benyuan.water_on", out num65, 0);
++				if (num65 == 1 && __instance.hasTrait("attr_03_water"))
+ 				{
+ 					pDamage *= 0.6f;
+ 					__instance.finishStatusEffect("burning");
+ 					StatsCombatPatches.D(string.Format("Water DEF -40% -> {0:F2} (clear burning)", pDamage));
+ 				}
+-				int num60;
+-				__instance.data.get("xn.benyuan.fire_on", out num60, 0);
+-				if (num60 == 1 && __instance.hasTrait("attr_04_fire") && actor != null && actor.hasTrait("attr_01_metal"))
+-				{
+-					int num61;
+-					actor.data.get("xn.benyuan.metal_on", out num61, 0);
+-					if (num61 == 1)
++				int num66;
++				__instance.data.get("xn.benyuan.fire_on", out num66, 0);
++				if (num66 == 1 && __instance.hasTrait("attr_04_fire") && actor != null && actor.hasTrait("attr_01_metal"))
++				{
++					int num67;
++					actor.data.get("xn.benyuan.metal_on", out num67, 0);
++					if (num67 == 1)
+ 					{
+ 						pDamage *= 0.5f;
+ 					}
+-					if (num60 == 1 && actor != null && actor.hasTrait("attr_01_metal"))
++					if (num66 == 1 && actor != null && actor.hasTrait("attr_01_metal"))
+ 					{
+ 						StatsCombatPatches.D(string.Format("Fire DEF vs Metal ATK -50% -> {0:F2}", pDamage));
+ 					}
+@@ -1243,39 +1260,39 @@
+ 				{
+ 					pDamage = 2.1E+09f;
+ 				}
+-				int num62 = Mathf.FloorToInt(pDamage);
+-				if (num62 <= 0 && pDamage > 0f)
++				int num68 = Mathf.FloorToInt(pDamage);
++				if (num68 <= 0 && pDamage > 0f)
+ 				{
+-					num62 = 1;
++					num68 = 1;
+ 				}
+-				if (num62 > 0)
++				if (num68 > 0)
+ 				{
+-					__instance.changeHealth(-num62);
++					__instance.changeHealth(-num68);
+ 				}
+-				StatsCombatPatches.D(string.Format("DEALT {0}  -> defHP={1:F0}", num62, __instance.getHealth()));
++				StatsCombatPatches.D(string.Format("DEALT {0}  -> defHP={1:F0}", num68, __instance.getHealth()));
+ 				if (actor != null && actor.isAlive())
+ 				{
+-					int num63;
+-					actor.data.get("xn.benyuan.water_on", out num63, 0);
+-					int num64;
+-					actor.data.get("xn.benyuan.fire_on", out num64, 0);
+-					int num65;
+-					actor.data.get("xn.benyuan.earth_on", out num65, 0);
+-					if (num63 == 1)
++					int num69;
++					actor.data.get("xn.benyuan.water_on", out num69, 0);
++					int num70;
++					actor.data.get("xn.benyuan.fire_on", out num70, 0);
++					int num71;
++					actor.data.get("xn.benyuan.earth_on", out num71, 0);
++					if (num69 == 1)
+ 					{
+ 						__instance.addStatusEffect("slowness", 3f, true);
+ 						StatsCombatPatches.D("Water hit: slowness 3s");
+ 					}
+-					if (num64 == 1)
++					if (num70 == 1)
+ 					{
+ 						__instance.addStatusEffect("burning", 5f, true);
+-						int num66;
+-						__instance.data.get("xn.benyuan.fire_dot_stacks", out num66, 0);
+-						__instance.data.set("xn.benyuan.fire_dot_stacks", num66 + 1);
++						int num72;
++						__instance.data.get("xn.benyuan.fire_dot_stacks", out num72, 0);
++						__instance.data.set("xn.benyuan.fire_dot_stacks", num72 + 1);
+ 						__instance.data.set("xn.benyuan.fire_dot_until", Time.time + 5f);
+-						StatsCombatPatches.D(string.Format("Fire hit: burning + dot stacks={0}", num66 + 1));
++						StatsCombatPatches.D(string.Format("Fire hit: burning + dot stacks={0}", num72 + 1));
+ 					}
+-					if (num65 == 1)
++					if (num71 == 1)
+ 					{
+ 						if (Randy.randomChance(0.25f))
+ 						{
+@@ -1284,81 +1301,81 @@
+ 						StatsCombatPatches.D("Earth hit: stun 1s (25%) try");
+ 					}
+ 				}
+-				int num67;
+-				__instance.data.get("xn.benyuan.earth_on", out num67, 0);
+-				if (num67 == 1 && __instance.hasTrait("attr_05_earth") && actor != null && actor.isAlive())
++				int num73;
++				__instance.data.get("xn.benyuan.earth_on", out num73, 0);
++				if (num73 == 1 && __instance.hasTrait("attr_05_earth") && actor != null && actor.isAlive())
+ 				{
+-					int num68 = Mathf.CeilToInt((float)num62 * 0.3f);
+-					if (num68 > 2100000000)
++					int num74 = Mathf.CeilToInt((float)num68 * 0.3f);
++					if (num74 > 2100000000)
+ 					{
+-						num68 = 2100000000;
++						num74 = 2100000000;
+ 					}
+-					if (num68 > 0)
++					if (num74 > 0)
+ 					{
+-						actor.changeHealth(-num68);
++						actor.changeHealth(-num74);
+ 					}
+ 					if (!actor.hasHealth())
+ 					{
+ 						actor.batch.c_check_deaths.Add(actor);
+ 					}
+-					StatsCombatPatches.D(string.Format("Earth reflect {0}", num68));
++					StatsCombatPatches.D(string.Format("Earth reflect {0}", num74));
+ 				}
+ 				if (actor != null && !__instance.hasHealth())
+ 				{
+-					int num69;
+-					actor.data.get("xn.intent.active.intent_04_killing", out num69, 0);
+-					if (num69 == 1)
++					int num75;
++					actor.data.get("xn.intent.active.intent_04_killing", out num75, 0);
++					if (num75 == 1)
+ 					{
+-						int num70;
+-						actor.data.get("xn.intent.killing_layers", out num70, 0);
+-						if (num70 < 20)
++						int num76;
++						actor.data.get("xn.intent.killing_layers", out num76, 0);
++						if (num76 < 20)
+ 						{
+-							actor.data.set("xn.intent.killing_layers", num70 + 1);
++							actor.data.set("xn.intent.killing_layers", num76 + 1);
+ 						}
+-						StatsCombatPatches.D(string.Format("Killing add layer -> {0} layers+1", (num69 == 1) ? ((int)actor.data.id) : 0));
++						StatsCombatPatches.D(string.Format("Killing add layer -> {0} layers+1", (num75 == 1) ? ((int)actor.data.id) : 0));
+ 					}
+ 				}
+ 				if (actor != null && StatsCombatPatches.IsIntentActive(actor, "intent_03_qianhuan"))
+ 				{
+-					int num71;
+-					actor.data.get("xn.intent.qh_layers", out num71, 0);
+-					if (num71 < 5)
++					int num77;
++					actor.data.get("xn.intent.qh_layers", out num77, 0);
++					if (num77 < 5)
+ 					{
+-						num71++;
++						num77++;
+ 					}
+-					actor.data.set("xn.intent.qh_layers", num71);
++					actor.data.set("xn.intent.qh_layers", num77);
+ 					actor.data.set("xn.intent.qh_until", StatsCombatPatches.NowTs() + 5);
+ 				}
+-				if (actor != null && actor.isAlive() && num62 > 0)
++				if (actor != null && actor.isAlive() && num68 > 0)
+ 				{
+-					int num72 = 0;
+-					actor.data.get("xn.benyuan.wood_on", out num72, 0);
+-					if (num72 == 1 && actor.hasTrait("attr_02_wood"))
++					int num78 = 0;
++					actor.data.get("xn.benyuan.wood_on", out num78, 0);
++					if (num78 == 1 && actor.hasTrait("attr_02_wood"))
+ 					{
+-						int num73 = Mathf.CeilToInt((float)num62 * 0.5f);
+-						if (num73 > 0)
++						int num79 = Mathf.CeilToInt((float)num68 * 0.5f);
++						if (num79 > 0)
+ 						{
+-							actor.changeHealth(num73);
++							actor.changeHealth(num79);
+ 						}
+-						StatsCombatPatches.D(string.Format("Wood leech heal={0} (based on dealt={1})", num73, num62));
++						StatsCombatPatches.D(string.Format("Wood leech heal={0} (based on dealt={1})", num79, num68));
+ 					}
+-					float num74 = actor.stats["Vampire"];
+-					if (num74 > 0f)
++					float num80 = actor.stats["Vampire"];
++					if (num80 > 0f)
+ 					{
+-						int num75 = Mathf.FloorToInt((float)num62 * num74 / 100f);
+-						if (num75 > 0)
++						int num81 = Mathf.FloorToInt((float)num68 * num80 / 100f);
++						if (num81 > 0)
+ 						{
+-							actor.changeHealth(num75);
++							actor.changeHealth(num81);
+ 						}
+ 					}
+-					int num76;
+-					actor.data.get("xn.intent.life_death_active", out num76, 0);
+-					if (num76 == 1)
++					int num82;
++					actor.data.get("xn.intent.life_death_active", out num82, 0);
++					if (num82 == 1)
+ 					{
+-						int num77 = Mathf.FloorToInt((float)num62 * 0.3f);
+-						if (num77 > 0)
++						int num83 = Mathf.FloorToInt((float)num68 * 0.3f);
++						if (num83 > 0)
+ 						{
+-							actor.changeHealth(num77);
++							actor.changeHealth(num83);
+ 						}
+ 					}
+ 				}
+@@ -1372,7 +1389,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000148 RID: 328
++		// Token: 0x0200014D RID: 333
+ 		[HarmonyPatch(typeof(ActorTool), "applyForceToUnit", new Type[]
+ 		{
+ 			typeof(AttackData),
+@@ -1382,7 +1399,7 @@
+ 		})]
+ 		private static class ApplyForceToUnitPatch
+ 		{
+-			// Token: 0x060005E6 RID: 1510 RVA: 0x0003F1A0 File Offset: 0x0003D3A0
++			// Token: 0x06000658 RID: 1624 RVA: 0x0003FA3C File Offset: 0x0003DC3C
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(AttackData pData, BaseSimObject pTargetToCheck, float pMod = 1f, bool pCheckCancelJobOnLand = false)
+ 			{
+@@ -1420,11 +1437,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000149 RID: 329
++		// Token: 0x0200014E RID: 334
+ 		[HarmonyPatch(typeof(MapBox), "updateMetaHistory")]
+ 		private static class YearlyRegen_MapBoxPatch
+ 		{
+-			// Token: 0x060005E7 RID: 1511 RVA: 0x0003F2D0 File Offset: 0x0003D4D0
++			// Token: 0x06000659 RID: 1625 RVA: 0x0003FB6C File Offset: 0x0003DD6C
+ 			[HarmonyPostfix]
+ 			private static void Postfix(MapBox __instance)
+ 			{
+@@ -1457,11 +1474,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200014A RID: 330
++		// Token: 0x0200014F RID: 335
+ 		[HarmonyPatch(typeof(MapBox), "Update")]
+ 		private static class YearlyRegen_MapBoxUpdatePatch
+ 		{
+-			// Token: 0x060005E8 RID: 1512 RVA: 0x0003F348 File Offset: 0x0003D548
++			// Token: 0x0600065A RID: 1626 RVA: 0x0003FBE4 File Offset: 0x0003DDE4
+ 			[HarmonyPostfix]
+ 			private static void Postfix(MapBox __instance)
+ 			{
+@@ -1496,18 +1513,18 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200014B RID: 331
++		// Token: 0x02000150 RID: 336
+ 		[HarmonyPatch(typeof(Actor), "attackTargetActions")]
+ 		private static class AttackTargetActionsPatch
+ 		{
+-			// Token: 0x060005E9 RID: 1513 RVA: 0x00004AF7 File Offset: 0x00002CF7
++			// Token: 0x0600065B RID: 1627 RVA: 0x00005341 File Offset: 0x00003541
+ 			[HarmonyPrefix]
+ 			private static void Prefix(Actor __instance, BaseSimObject pTarget, WorldTile pTile)
+ 			{
+ 				StatsCombatPatches.s_currentDelegateAttacker = __instance;
+ 			}
+ 
+-			// Token: 0x060005EA RID: 1514 RVA: 0x00004AFF File Offset: 0x00002CFF
++			// Token: 0x0600065C RID: 1628 RVA: 0x00005349 File Offset: 0x00003549
+ 			[HarmonyPostfix]
+ 			private static void Postfix()
+ 			{
+@@ -1515,11 +1532,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200014C RID: 332
++		// Token: 0x02000151 RID: 337
+ 		[HarmonyPatch(typeof(BaseSimObject), "changeHealth")]
+ 		private static class ChangeHealthRealmCheckPatch
+ 		{
+-			// Token: 0x060005EB RID: 1515 RVA: 0x0003F3D4 File Offset: 0x0003D5D4
++			// Token: 0x0600065D RID: 1629 RVA: 0x0003FC70 File Offset: 0x0003DE70
+ 			[HarmonyPrefix]
+ 			[HarmonyPriority(800)]
+ 			private static void Prefix(BaseSimObject __instance, ref int pValue)
+@@ -1570,11 +1587,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x0200014D RID: 333
++		// Token: 0x02000152 RID: 338
+ 		[HarmonyPatch(typeof(Actor), "addForce")]
+ 		private static class AddForceRealmCheckPatch
+ 		{
+-			// Token: 0x060005EC RID: 1516 RVA: 0x0003F490 File Offset: 0x0003D690
++			// Token: 0x0600065E RID: 1630 RVA: 0x0003FD2C File Offset: 0x0003DF2C
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, ref float pX, ref float pY, ref float pHeight)
+ 			{
+--- cultivation/StatsCustomRegistry.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/StatsCustomRegistry.cs	Fri Feb  6 11:33:45 2026
+@@ -2,10 +2,10 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x0200014E RID: 334
++	// Token: 0x02000153 RID: 339
+ 	internal static class StatsCustomRegistry
+ 	{
+-		// Token: 0x060005ED RID: 1517 RVA: 0x0003F524 File Offset: 0x0003D724
++		// Token: 0x0600065F RID: 1631 RVA: 0x0003FDC0 File Offset: 0x0003DFC0
+ 		public static void Init()
+ 		{
+ 			StatsCustomRegistry.AddIfMissing("Accuracy", true, true, 0f, 99999f);
+@@ -28,7 +28,7 @@
+ 			StatsCustomRegistry.AddIfMissing("cultivation_speed", true, false, 0f, 999999f);
+ 		}
+ 
+-		// Token: 0x060005EE RID: 1518 RVA: 0x0003F6C0 File Offset: 0x0003D8C0
++		// Token: 0x06000660 RID: 1632 RVA: 0x0003FF5C File Offset: 0x0003E15C
+ 		private static void AddIfMissing(string id, bool normalize, bool showAsPercents, float min, float max)
+ 		{
+ 			BaseStatsLibrary base_stats_library = AssetManager.base_stats_library;
+--- cultivation/StatusEffectRealmLimitPatch.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/StatusEffectRealmLimitPatch.cs	Fri Feb  6 11:33:45 2026
+@@ -5,10 +5,10 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x0200014F RID: 335
++	// Token: 0x02000154 RID: 340
+ 	internal static class StatusEffectRealmLimitPatch
+ 	{
+-		// Token: 0x060005EF RID: 1519 RVA: 0x0003F718 File Offset: 0x0003D918
++		// Token: 0x06000661 RID: 1633 RVA: 0x0003FFB4 File Offset: 0x0003E1B4
+ 		public static void Init(Harmony h)
+ 		{
+ 			h.Patch(AccessTools.Method(typeof(StatusLibrary), "burningEffect", null, null), new HarmonyMethod(typeof(StatusEffectRealmLimitPatch), "Prefix_BurningEffect", null), null, null, null, null);
+@@ -24,7 +24,7 @@
+ 			}, null), new HarmonyMethod(typeof(StatusEffectRealmLimitPatch), "Prefix_AddStatusEffect", null), null, null, null, null);
+ 		}
+ 
+-		// Token: 0x060005F0 RID: 1520 RVA: 0x0003F898 File Offset: 0x0003DA98
++		// Token: 0x06000662 RID: 1634 RVA: 0x00040134 File Offset: 0x0003E334
+ 		private static bool ShouldBlockPercentDamage(BaseSimObject target, out Actor attacker)
+ 		{
+ 			attacker = null;
+@@ -55,14 +55,14 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x060005F1 RID: 1521 RVA: 0x00004B07 File Offset: 0x00002D07
++		// Token: 0x06000663 RID: 1635 RVA: 0x00005351 File Offset: 0x00003551
+ 		private static bool ShouldBlockFireDamage(BaseSimObject target, out Actor attacker)
+ 		{
+ 			attacker = null;
+ 			return target.isActor() && target.a.isImmuneToFire();
+ 		}
+ 
+-		// Token: 0x060005F2 RID: 1522 RVA: 0x0003F920 File Offset: 0x0003DB20
++		// Token: 0x06000664 RID: 1636 RVA: 0x000401BC File Offset: 0x0003E3BC
+ 		private static bool ShouldBlockControlEffect(BaseSimObject target, BaseSimObject caster)
+ 		{
+ 			if (!target.isActor())
+@@ -92,7 +92,7 @@
+ 			return unifiedRealmIndex2 < 0 || unifiedRealmIndex2 < unifiedRealmIndex;
+ 		}
+ 
+-		// Token: 0x060005F3 RID: 1523 RVA: 0x0003F99C File Offset: 0x0003DB9C
++		// Token: 0x06000665 RID: 1637 RVA: 0x00040238 File Offset: 0x0003E438
+ 		private static bool IsModCall()
+ 		{
+ 			StackFrame[] frames = new StackTrace(2, false).GetFrames();
+@@ -120,7 +120,7 @@
+ 			return false;
+ 		}
+ 
+-		// Token: 0x060005F4 RID: 1524 RVA: 0x0003FA1C File Offset: 0x0003DC1C
++		// Token: 0x06000666 RID: 1638 RVA: 0x000402B8 File Offset: 0x0003E4B8
+ 		private static int GetUnifiedRealmIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -211,7 +211,7 @@
+ 			return -1;
+ 		}
+ 
+-		// Token: 0x060005F5 RID: 1525 RVA: 0x00029718 File Offset: 0x00027918
++		// Token: 0x06000667 RID: 1639 RVA: 0x0002B678 File Offset: 0x00029878
+ 		private static int ConvertAncientBeastToRealmIndex(int starOrStage)
+ 		{
+ 			switch (starOrStage)
+@@ -241,7 +241,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005F6 RID: 1526 RVA: 0x0003FC00 File Offset: 0x0003DE00
++		// Token: 0x06000668 RID: 1640 RVA: 0x0004049C File Offset: 0x0003E69C
+ 		private static bool Prefix_BurningEffect(BaseSimObject pTarget, WorldTile pTile, ref bool __result)
+ 		{
+ 			Actor actor;
+@@ -257,7 +257,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005F7 RID: 1527 RVA: 0x0003FC50 File Offset: 0x0003DE50
++		// Token: 0x06000669 RID: 1641 RVA: 0x000404EC File Offset: 0x0003E6EC
+ 		private static bool Prefix_AshFeverEffect(BaseSimObject pTarget, WorldTile pTile, ref bool __result)
+ 		{
+ 			Actor actor;
+@@ -269,7 +269,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005F8 RID: 1528 RVA: 0x0003FC70 File Offset: 0x0003DE70
++		// Token: 0x0600066A RID: 1642 RVA: 0x0004050C File Offset: 0x0003E70C
+ 		private static bool Prefix_PoisonedEffect(BaseSimObject pTarget, WorldTile pTile, ref bool __result)
+ 		{
+ 			Actor actor;
+@@ -283,7 +283,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005F9 RID: 1529 RVA: 0x00004B21 File Offset: 0x00002D21
++		// Token: 0x0600066B RID: 1643 RVA: 0x0000536B File Offset: 0x0000356B
+ 		private static bool Prefix_AddFrozenEffect(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile, ref bool __result)
+ 		{
+ 			if (StatusEffectRealmLimitPatch.ShouldBlockControlEffect(pTarget, pSelf))
+@@ -294,7 +294,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005FA RID: 1530 RVA: 0x00004B21 File Offset: 0x00002D21
++		// Token: 0x0600066C RID: 1644 RVA: 0x0000536B File Offset: 0x0000356B
+ 		private static bool Prefix_AddStunnedEffect(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile, ref bool __result)
+ 		{
+ 			if (StatusEffectRealmLimitPatch.ShouldBlockControlEffect(pTarget, pSelf))
+@@ -305,7 +305,7 @@
+ 			return true;
+ 		}
+ 
+-		// Token: 0x060005FB RID: 1531 RVA: 0x00004B32 File Offset: 0x00002D32
++		// Token: 0x0600066D RID: 1645 RVA: 0x0000537C File Offset: 0x0000357C
+ 		private static bool Prefix_AddStatusEffect(BaseSimObject __instance, string pID, float pOverrideTimer, bool pColorEffect, ref bool __result)
+ 		{
+ 			if (pID != "frozen" && pID != "stunned")
+--- cultivation/TatianSuppressionSystem.cs	Fri Feb  6 11:48:56 2026
++++ cultivation/TatianSuppressionSystem.cs	Fri Feb  6 11:33:45 2026
+@@ -5,10 +5,10 @@
+ 
+ namespace cultivation
+ {
+-	// Token: 0x02000150 RID: 336
++	// Token: 0x02000155 RID: 341
+ 	internal static class TatianSuppressionSystem
+ 	{
+-		// Token: 0x060005FC RID: 1532 RVA: 0x00029718 File Offset: 0x00027918
++		// Token: 0x0600066E RID: 1646 RVA: 0x0002B678 File Offset: 0x00029878
+ 		private static int ConvertAncientBeastToRealmIndex(int starOrStage)
+ 		{
+ 			switch (starOrStage)
+@@ -38,7 +38,7 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x060005FD RID: 1533 RVA: 0x0003FCB4 File Offset: 0x0003DEB4
++		// Token: 0x0600066F RID: 1647 RVA: 0x00040550 File Offset: 0x0003E750
+ 		private static int GetRealmIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -56,7 +56,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x060005FE RID: 1534 RVA: 0x0003FCEC File Offset: 0x0003DEEC
++		// Token: 0x06000670 RID: 1648 RVA: 0x00040588 File Offset: 0x0003E788
+ 		private static int GetAncIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -74,7 +74,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x060005FF RID: 1535 RVA: 0x0003FD24 File Offset: 0x0003DF24
++		// Token: 0x06000671 RID: 1649 RVA: 0x000405C0 File Offset: 0x0003E7C0
+ 		private static int GetBeastIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -92,7 +92,7 @@
+ 			return result;
+ 		}
+ 
+-		// Token: 0x06000600 RID: 1536 RVA: 0x0003FD5C File Offset: 0x0003DF5C
++		// Token: 0x06000672 RID: 1650 RVA: 0x000405F8 File Offset: 0x0003E7F8
+ 		private static int GetUnifiedRealmIndex(Actor a)
+ 		{
+ 			if (a == null)
+@@ -117,13 +117,13 @@
+ 			return -1;
+ 		}
+ 
+-		// Token: 0x06000601 RID: 1537 RVA: 0x00004B69 File Offset: 0x00002D69
++		// Token: 0x06000673 RID: 1651 RVA: 0x000053B3 File Offset: 0x000035B3
+ 		private static bool AreEnemies(Actor a, Actor b)
+ 		{
+ 			return a != null && b != null && a != b && a.areFoes(b);
+ 		}
+ 
+-		// Token: 0x06000602 RID: 1538 RVA: 0x0003FDA4 File Offset: 0x0003DFA4
++		// Token: 0x06000674 RID: 1652 RVA: 0x00040640 File Offset: 0x0003E840
+ 		private static void ApplySuppression(Actor target, Actor suppressor)
+ 		{
+ 			if (target == null || !target.isAlive())
+@@ -147,7 +147,7 @@
+ 			target.cancelAllBeh();
+ 		}
+ 
+-		// Token: 0x06000603 RID: 1539 RVA: 0x00004B80 File Offset: 0x00002D80
++		// Token: 0x06000675 RID: 1653 RVA: 0x000053CA File Offset: 0x000035CA
+ 		private static void RemoveSuppression(Actor target)
+ 		{
+ 			if (target == null)
+@@ -158,7 +158,7 @@
+ 			target.data.set("xn.tatian.suppressor_id", 0);
+ 		}
+ 
+-		// Token: 0x06000604 RID: 1540 RVA: 0x0003FE1C File Offset: 0x0003E01C
++		// Token: 0x06000676 RID: 1654 RVA: 0x000406B8 File Offset: 0x0003E8B8
+ 		private static float GetSuppressionRange(Actor suppressor)
+ 		{
+ 			if (suppressor == null)
+@@ -196,7 +196,7 @@
+ 			return 0f;
+ 		}
+ 
+-		// Token: 0x06000605 RID: 1541 RVA: 0x0003FEBC File Offset: 0x0003E0BC
++		// Token: 0x06000677 RID: 1655 RVA: 0x00040758 File Offset: 0x0003E958
+ 		private static bool IsInSuppressionRange(Actor suppressor, Actor target, float maxRange)
+ 		{
+ 			if (suppressor == null || target == null)
+@@ -212,7 +212,7 @@
+ 			return num <= num2;
+ 		}
+ 
+-		// Token: 0x06000606 RID: 1542 RVA: 0x0003FF00 File Offset: 0x0003E100
++		// Token: 0x06000678 RID: 1656 RVA: 0x0004079C File Offset: 0x0003E99C
+ 		private static void CheckAndUpdateSuppression(Actor suppressor, float range)
+ 		{
+ 			if (suppressor == null || !suppressor.isAlive())
+@@ -269,19 +269,19 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x06000607 RID: 1543 RVA: 0x00040044 File Offset: 0x0003E244
++		// Token: 0x06000679 RID: 1657 RVA: 0x000408E0 File Offset: 0x0003EAE0
+ 		// Note: this type is marked as 'beforefieldinit'.
+ 		static TatianSuppressionSystem()
+ 		{
+ 		}
+ 
+-		// Token: 0x040005E2 RID: 1506
++		// Token: 0x040005E9 RID: 1513
+ 		private const string KEY_SUPPRESSED = "xn.tatian.suppressed";
+ 
+-		// Token: 0x040005E3 RID: 1507
++		// Token: 0x040005EA RID: 1514
+ 		private const string KEY_SUPPRESSOR_ID = "xn.tatian.suppressor_id";
+ 
+-		// Token: 0x040005E4 RID: 1508
++		// Token: 0x040005EB RID: 1515
+ 		private static readonly string[] REALM_IDS = new string[]
+ 		{
+ 			"realm_01_qi",
+@@ -302,7 +302,7 @@
+ 			"realm_16_tatian"
+ 		};
+ 
+-		// Token: 0x040005E5 RID: 1509
++		// Token: 0x040005EC RID: 1516
+ 		private static readonly string[] ANC_STAR_IDS = new string[]
+ 		{
+ 			"ancient_01_star",
+@@ -317,7 +317,7 @@
+ 			"ancient_10_star"
+ 		};
+ 
+-		// Token: 0x040005E6 RID: 1510
++		// Token: 0x040005ED RID: 1517
+ 		private static readonly string[] BEAST_STAGE_IDS = new string[]
+ 		{
+ 			"beast_01_stage",
+@@ -332,11 +332,11 @@
+ 			"beast_10_stage"
+ 		};
+ 
+-		// Token: 0x02000151 RID: 337
++		// Token: 0x02000156 RID: 342
+ 		[HarmonyPatch(typeof(MapBox), "Update")]
+ 		private static class UpdateSuppressionPatch
+ 		{
+-			// Token: 0x06000608 RID: 1544 RVA: 0x000401A0 File Offset: 0x0003E3A0
++			// Token: 0x0600067A RID: 1658 RVA: 0x00040A3C File Offset: 0x0003EC3C
+ 			[HarmonyPostfix]
+ 			private static void Postfix(MapBox __instance)
+ 			{
+@@ -415,24 +415,24 @@
+ 				}
+ 			}
+ 
+-			// Token: 0x06000609 RID: 1545 RVA: 0x00004BAA File Offset: 0x00002DAA
++			// Token: 0x0600067B RID: 1659 RVA: 0x000053F4 File Offset: 0x000035F4
+ 			// Note: this type is marked as 'beforefieldinit'.
+ 			static UpdateSuppressionPatch()
+ 			{
+ 			}
+ 
+-			// Token: 0x040005E7 RID: 1511
++			// Token: 0x040005EE RID: 1518
+ 			private static float s_lastUpdateTime = 0f;
+ 
+-			// Token: 0x040005E8 RID: 1512
++			// Token: 0x040005EF RID: 1519
+ 			private static readonly float UPDATE_INTERVAL = 0.5f;
+ 		}
+ 
+-		// Token: 0x02000152 RID: 338
++		// Token: 0x02000157 RID: 343
+ 		[HarmonyPatch(typeof(Actor), "b3_findEnemyTarget")]
+ 		private static class PreventEnemyTargetPatch
+ 		{
+-			// Token: 0x0600060A RID: 1546 RVA: 0x0004034C File Offset: 0x0003E54C
++			// Token: 0x0600067C RID: 1660 RVA: 0x00040BE8 File Offset: 0x0003EDE8
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, float pElapsed)
+ 			{
+@@ -446,11 +446,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000153 RID: 339
++		// Token: 0x02000158 RID: 344
+ 		[HarmonyPatch(typeof(Actor), "b5_checkPathMovement")]
+ 		private static class PreventMovementPatch
+ 		{
+-			// Token: 0x0600060B RID: 1547 RVA: 0x00040380 File Offset: 0x0003E580
++			// Token: 0x0600067D RID: 1661 RVA: 0x00040C1C File Offset: 0x0003EE1C
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance, float pElapsed)
+ 			{
+@@ -476,11 +476,11 @@
+ 			}
+ 		}
+ 
+-		// Token: 0x02000154 RID: 340
++		// Token: 0x02000159 RID: 345
+ 		[HarmonyPatch(typeof(Actor), "attackTargetActions")]
+ 		private static class BlockAttackActionsPatch
+ 		{
+-			// Token: 0x0600060C RID: 1548 RVA: 0x000403D0 File Offset: 0x0003E5D0
++			// Token: 0x0600067E RID: 1662 RVA: 0x00040C6C File Offset: 0x0003EE6C
+ 			[HarmonyPrefix]
+ 			private static bool Prefix(Actor __instance)
+ 			{
