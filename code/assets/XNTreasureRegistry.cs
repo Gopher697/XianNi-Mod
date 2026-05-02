@@ -28,16 +28,16 @@ namespace xn.assets
             if (_doneItems) return;
             _doneItems = true;
             EquipmentType treasureType = (EquipmentType)XNTreasureDefs.EQUIP_TYPE_TREASURE_INT;
-            add("hunfan",          "魂幡",        XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
-            add("qingtong_jian",   "青铜剑",      XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
-            add("zijin_hulu",      "紫金葫芦",    XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
-            add("pangu_fu",        "盘古斧头",    XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
-            add("qingguang_dun",   "青光盾",      XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
-            add("tianni_zhu",      "天逆珠",      XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
-            add("xianyu_baota",    "仙玉宝塔",    XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
-            add("mieshen_mao",     "灭神矛",      XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
-            add("liguang_gong",    "李广弓",      XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
-            add("xiuxing_zhixin",  "修星之心",    XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
+            add("hunfan",          T("treasure_name_hunfan", "魂幡"),                         XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
+            add("qingtong_jian",   T("treasure_name_qingtong_jian", "青铜剑"),                 XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
+            add("zijin_hulu",      T("treasure_name_zijin_hulu", "紫金葫芦"),                  XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
+            add("pangu_fu",        T("treasure_name_pangu_fu", "盘古斧头"),                    XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
+            add("qingguang_dun",   T("treasure_name_qingguang_dun", "青光盾"),                 XNTreasureDefs.GROUP_TREASURE_BASIC, treasureType);
+            add("tianni_zhu",      T("treasure_name_tianni_zhu", "天逆珠"),                    XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
+            add("xianyu_baota",    T("treasure_name_xianyu_baota", "仙玉宝塔"),                XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
+            add("mieshen_mao",     T("treasure_name_mieshen_mao", "灭神矛"),                   XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
+            add("liguang_gong",    T("treasure_name_liguang_gong", "李广弓"),                  XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
+            add("xiuxing_zhixin",  T("treasure_name_xiuxing_zhixin", "修星之心"),              XNTreasureDefs.GROUP_TREASURE_VOID,  treasureType);
             static void add(string id, string display, string group, EquipmentType et)
             {
                 string finalId = "xn_treasure_" + id;
@@ -54,6 +54,11 @@ namespace xn.assets
                 AssetManager.items.add(a);
                     a.unlock(true);
             }
+        }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
         }
     }
     [HarmonyPatch(typeof(ItemGroupLibrary), "init")]
