@@ -153,12 +153,12 @@ namespace xn.ui
         {
             if (_pool_shizu == null) yield break;
             long masterId;
-            actor.data.get(KEY_MASTER_ID, out masterId, 0L);
+            xn.access.ActorAccess.GetData(actor).get(KEY_MASTER_ID, out masterId, 0L);
             if (masterId <= 0) yield break;
             var shifu = World.world.units.get(masterId);
             if (shifu == null || shifu.isRekt()) yield break;
             long shizuId;
-            shifu.data.get(KEY_MASTER_ID, out shizuId, 0L);
+            xn.access.ActorAccess.GetData(shifu).get(KEY_MASTER_ID, out shizuId, 0L);
             if (shizuId <= 0) yield break;
             var shizu = World.world.units.get(shizuId);
             if (shizu == null || shizu.isRekt()) yield break;
@@ -169,7 +169,7 @@ namespace xn.ui
         {
             if (_pool_shifu == null) yield break;
             long masterId;
-            actor.data.get(KEY_MASTER_ID, out masterId, 0L);
+            xn.access.ActorAccess.GetData(actor).get(KEY_MASTER_ID, out masterId, 0L);
             if (masterId <= 0) yield break;
             var shifu = World.world.units.get(masterId);
             if (shifu == null || shifu.isRekt()) yield break;
@@ -184,12 +184,12 @@ namespace xn.ui
                 _tongmen_unfolder.gameObject.SetActive(false);
         }
             long myMasterId;
-            actor.data.get(KEY_MASTER_ID, out myMasterId, 0L);
+            xn.access.ActorAccess.GetData(actor).get(KEY_MASTER_ID, out myMasterId, 0L);
             if (myMasterId <= 0) yield break;
             var master = World.world.units.get(myMasterId);
             if (master == null || master.isRekt()) yield break;
             string idsStr;
-            master.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+            xn.access.ActorAccess.GetData(master).get(KEY_DISCIPLES_IDS, out idsStr, "");
             if (string.IsNullOrEmpty(idsStr)) yield break;
             using ListPool<Actor> tTongmen = new ListPool<Actor>();
             string[] parts = idsStr.Split(',');
@@ -198,7 +198,7 @@ namespace xn.ui
                 if (long.TryParse(part.Trim(), out long id) && id > 0)
                 {
                     var disc = World.world.units.get(id);
-                    if (disc != null && !disc.isRekt() && disc.data.id != actor.data.id)
+                    if (disc != null && !disc.isRekt() && xn.access.ActorAccess.GetData(disc).id != xn.access.ActorAccess.GetData(actor).id)
         {
                         tTongmen.Add(disc);
                     }
@@ -245,7 +245,7 @@ namespace xn.ui
                 _disciples_unfolder.gameObject.SetActive(false);
             }
             string idsStr;
-            actor.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+            xn.access.ActorAccess.GetData(actor).get(KEY_DISCIPLES_IDS, out idsStr, "");
             if (string.IsNullOrEmpty(idsStr)) yield break;
             using ListPool<Actor> tDisciples = new ListPool<Actor>();
             string[] parts = idsStr.Split(',');

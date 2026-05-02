@@ -9,6 +9,13 @@ namespace xn.ui.charts
         private static PowerButton _legendButton;
         private static Text _legendText;
         private static GameObject _legendTextObj;
+        private const string LegendMarker = "---\u6218\u529b\u6392\u884c\u699c\u4f20\u5947---";
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void Create(Transform background)
         {
             if (background == null) return;
@@ -82,9 +89,9 @@ namespace xn.ui.charts
             if (_legendText != null)
             {
                 string displayContent = content;
-                int idx = content.IndexOf("---战力排行榜传奇---");
+                int idx = content.IndexOf(LegendMarker);
                 if (idx >= 0)
-                    displayContent = content.Substring(idx + "---战力排行榜传奇---".Length).Trim();
+                    displayContent = content.Substring(idx + LegendMarker.Length).Trim();
                 _legendText.text = displayContent;
                 _legendTextObj?.SetActive(true);
             }
@@ -104,7 +111,7 @@ namespace xn.ui.charts
             }
             if (!RankingLegendGenerator.CanGenerate())
             {
-                ShowLegendText("默认密匙只能生成一次，请配置自定义API密匙");
+                ShowLegendText(T("ranking_legend_default_key_limit", "The default key can generate only once. Configure a custom API key."));
                 return;
             }
             GenerateLegend();
@@ -113,7 +120,7 @@ namespace xn.ui.charts
         {
             if (!RankingLegendGenerator.CanRegenerate())
             {
-                ShowLegendText("重新生成需要配置自定义API密匙");
+                ShowLegendText(T("ranking_legend_regenerate_requires_custom_key", "Regeneration requires a custom API key."));
                 return;
             }
             string previousContent = RankingLegendStorage.Load();
@@ -146,10 +153,10 @@ namespace xn.ui.charts
             }
             if (top3[0] == null)
             {
-                ShowLegendText("没有找到可排名的单位");
+                ShowLegendText(T("ranking_legend_no_rankable_units", "No rankable units found"));
                 return;
             }
-            ShowLegendText("正在生成传奇故事...");
+            ShowLegendText(T("ranking_legend_generating_story", "Generating legend story..."));
             RankingLegendGenerator.GenerateLegend(top3, scores, (result) =>
             {
                 ShowLegendText(result);

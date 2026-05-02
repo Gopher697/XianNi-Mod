@@ -82,8 +82,8 @@ namespace xn.tournament
                 return true; 
             }
             TournamentManager.RecordDeathTrigger(__instance);
-            __instance.data.health = (int)(__instance.getMaxHealth() * 0.2f);
-            if (__instance.data.health < 1) __instance.data.health = 1;
+            xn.access.ActorAccess.GetData(__instance).health = (int)(__instance.getMaxHealth() * 0.2f);
+            if (xn.access.ActorAccess.GetData(__instance).health < 1) xn.access.ActorAccess.GetData(__instance).health = 1;
             return false; 
         }
     }

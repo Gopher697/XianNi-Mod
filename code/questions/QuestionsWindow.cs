@@ -32,6 +32,12 @@ namespace xn.questions
         private static readonly Color COL_SUBTLE = new(0.55f, 0.55f, 0.62f);
         private const float PANEL_W = 480f;
         private const float PANEL_H = 420f;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void Init()
         {
             if (_inited) return;
@@ -109,10 +115,10 @@ namespace xn.questions
                 iconImg.preserveAspect = true;
             }
             MakeText("Title", parent, new Vector2(0, y), new Vector2(PANEL_W - 40, 24),
-                "常见问题", 16, TextAnchor.MiddleCenter, COL_TITLE);
+                T("questions_window_title", "Frequently Asked Questions"), 16, TextAnchor.MiddleCenter, COL_TITLE);
             y -= 22f;
             MakeText("Subtitle", parent, new Vector2(0, y), new Vector2(PANEL_W - 40, 16),
-                "点击问题查看解答", 10, TextAnchor.MiddleCenter, COL_SUBTLE);
+                T("questions_window_subtitle", "Click a question to view the answer"), 10, TextAnchor.MiddleCenter, COL_SUBTLE);
             y -= 16f;
             var div = CreateUI("Divider", parent);
             var divRect = div.GetComponent<RectTransform>();
@@ -169,7 +175,7 @@ namespace xn.questions
             _loadingText.fontSize = 11;
             _loadingText.alignment = TextAnchor.MiddleCenter;
             _loadingText.color = COL_SUBTLE;
-            _loadingText.text = "加载中...";
+            _loadingText.text = T("questions_loading", "Loading...");
             LoadQuestions();
         }
         private static void LoadQuestions()
@@ -196,7 +202,7 @@ namespace xn.questions
                 emptyTxt.fontSize = 12;
                 emptyTxt.alignment = TextAnchor.MiddleCenter;
                 emptyTxt.color = COL_SUBTLE;
-                emptyTxt.text = "暂无问题\n请稍后再试";
+                emptyTxt.text = T("questions_empty", "No questions yet\nPlease try again later");
                 return;
             }
             for (int i = 0; i < items.Count; i++)

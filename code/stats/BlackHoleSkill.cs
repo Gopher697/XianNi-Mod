@@ -68,16 +68,16 @@ namespace cultivation
                 return false;
             }
             int nieli;
-            suppressor.data.get(KEY_NIELI, out nieli, 0);
+            xn.access.ActorAccess.GetData(suppressor).get(KEY_NIELI, out nieli, 0);
             if (nieli < MIN_NIELI)
             {
                 return false;
             }
             float lastCd;
-            suppressor.data.get(KEY_BLACKHOLE_CD, out lastCd, 0f);
+            xn.access.ActorAccess.GetData(suppressor).get(KEY_BLACKHOLE_CD, out lastCd, 0f);
             if (Time.time - lastCd < COOLDOWN) return false;
             int active;
-            suppressor.data.get(KEY_BLACKHOLE_ACTIVE, out active, 0);
+            xn.access.ActorAccess.GetData(suppressor).get(KEY_BLACKHOLE_ACTIVE, out active, 0);
             if (active == 1) return false;
             Actor targetActor = FindTargetActor(suppressedTargets);
             if (targetActor == null) return false;
@@ -102,14 +102,14 @@ namespace cultivation
         private static void StartBlackHole(Actor caster, Actor targetActor, List<Actor> targets, int casterNieli)
         {
             Register();
-            caster.data.set(KEY_BLACKHOLE_CD, Time.time);
-            caster.data.set(KEY_BLACKHOLE_ACTIVE, 1);
-            caster.data.set(KEY_NIELI, casterNieli / 2);
+            xn.access.ActorAccess.GetData(caster).set(KEY_BLACKHOLE_CD, Time.time);
+            xn.access.ActorAccess.GetData(caster).set(KEY_BLACKHOLE_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_NIELI, casterNieli / 2);
             if (caster.is_moving) caster.stopMovement();
-            if (caster.has_attack_target) caster.clearAttackTarget();
+            if (xn.access.ActorAccess.HasAttackTarget(caster)) caster.clearAttackTarget();
             caster.cancelAllBeh();
             WorldTile centerTile = targetActor.current_tile;
-            float effectScale = targetActor.actor_scale;
+            float effectScale = xn.access.ActorAccess.GetActorScale(targetActor);
             Vector2 pos = new Vector2(centerTile.pos.x, centerTile.pos.y + EFFECT_Y_OFFSET);
             var effect = EffectsLibrary.spawnAt(FX_BLACKHOLE, pos, effectScale);
             if (effect != null)
@@ -167,7 +167,7 @@ namespace cultivation
                     continue;
                 }
                 if (data.caster.is_moving) data.caster.stopMovement();
-                if (data.caster.has_attack_target) data.caster.clearAttackTarget();
+                if (xn.access.ActorAccess.HasAttackTarget(data.caster)) data.caster.clearAttackTarget();
                 PullTargets(data);
                 if (data.currentFrame >= DAMAGE_FRAME && !data.damageDealt)
                 {
@@ -203,7 +203,7 @@ namespace cultivation
                 if (unit == null || !unit.isAlive()) continue;
                 if (unit == data.caster) continue;
                 int suppressed;
-                unit.data.get(KEY_SUPPRESSED, out suppressed, 0);
+                xn.access.ActorAccess.GetData(unit).get(KEY_SUPPRESSED, out suppressed, 0);
                 if (suppressed != 1) continue;
                 if (!data.targets.Contains(unit))
                     data.targets.Add(unit);
@@ -273,7 +273,7 @@ namespace cultivation
                     World.world.units.scheduleDestroyOnPlay(target);
                     continue;
                 }
-                target.data.health = Mathf.Max(0, target.data.health - damage);
+                xn.access.ActorAccess.GetData(target).health = Mathf.Max(0, xn.access.ActorAccess.GetData(target).health - damage);
                 target.startColorEffect(ActorColorEffect.Red);
                 if (!target.hasHealth())
                 {
@@ -304,7 +304,7 @@ namespace cultivation
         {
             if (actor == null) return false;
             int active;
-            actor.data.get(KEY_BLACKHOLE_ACTIVE, out active, 0);
+            xn.access.ActorAccess.GetData(actor).get(KEY_BLACKHOLE_ACTIVE, out active, 0);
             return active == 1;
         }
     }

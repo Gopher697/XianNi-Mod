@@ -55,83 +55,83 @@ namespace xn.bloodline
         public static bool HasBloodline(Actor a)
         {
             if (a == null) return false;
-            a.data.get(BloodlineDataKeys.KEY_TYPE, out string type, "");
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_TYPE, out string type, "");
             return !string.IsNullOrEmpty(type);
         }
         public static string GetBloodlineType(Actor a)
         {
             if (a == null) return "";
-            a.data.get(BloodlineDataKeys.KEY_TYPE, out string type, "");
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_TYPE, out string type, "");
             return type;
         }
         public static float GetConcentration(Actor a)
         {
             if (a == null) return 0f;
-            a.data.get(BloodlineDataKeys.KEY_CONCENTRATION, out float conc, 0f);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_CONCENTRATION, out float conc, 0f);
             return conc;
         }
         public static int GetGeneration(Actor a)
         {
             if (a == null) return 0;
-            a.data.get(BloodlineDataKeys.KEY_GENERATION, out int gen, 0);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_GENERATION, out int gen, 0);
             return gen;
         }
         public static long GetFounderId(Actor a)
         {
             if (a == null) return -1;
-            a.data.get(BloodlineDataKeys.KEY_FOUNDER_ID, out long id, -1);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_FOUNDER_ID, out long id, -1);
             return id;
         }
         public static string GetFounderName(Actor a)
         {
             if (a == null) return "";
-            a.data.get(BloodlineDataKeys.KEY_FOUNDER_NAME, out string name, "");
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_FOUNDER_NAME, out string name, "");
             return name;
         }
         public static bool IsFounder(Actor a)
         {
             if (a == null) return false;
-            a.data.get(BloodlineDataKeys.KEY_IS_FOUNDER, out int isFounder, 0);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_IS_FOUNDER, out int isFounder, 0);
             return isFounder == 1;
         }
         public static bool IsAwakened(Actor a)
         {
             if (a == null) return false;
-            a.data.get(BloodlineDataKeys.KEY_AWAKENED, out int awakened, 0);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_AWAKENED, out int awakened, 0);
             return awakened == 1;
         }
         public static bool IsAtavism(Actor a)
         {
             if (a == null) return false;
-            a.data.get(BloodlineDataKeys.KEY_IS_ATAVISM, out int isAtavism, 0);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_IS_ATAVISM, out int isAtavism, 0);
             return isAtavism == 1;
         }
         public static void SetBloodline(Actor a, string type, float concentration, int generation,
             long founderId, string founderName, bool isFounder = false, bool isAtavism = false)
         {
             if (a == null) return;
-            a.data.set(BloodlineDataKeys.KEY_TYPE, type);
-            a.data.set(BloodlineDataKeys.KEY_CONCENTRATION, concentration);
-            a.data.set(BloodlineDataKeys.KEY_GENERATION, generation);
-            a.data.set(BloodlineDataKeys.KEY_FOUNDER_ID, founderId);
-            a.data.set(BloodlineDataKeys.KEY_FOUNDER_NAME, founderName);
-            a.data.set(BloodlineDataKeys.KEY_IS_FOUNDER, isFounder ? 1 : 0);
-            a.data.set(BloodlineDataKeys.KEY_IS_ATAVISM, isAtavism ? 1 : 0);
-            a.data.set(BloodlineDataKeys.KEY_AWAKENED, 1);
-            a.data.set(BloodlineDataKeys.KEY_AWAKENED_YEAR, Date.getCurrentYear());
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_TYPE, type);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_CONCENTRATION, concentration);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_GENERATION, generation);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_FOUNDER_ID, founderId);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_FOUNDER_NAME, founderName);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_IS_FOUNDER, isFounder ? 1 : 0);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_IS_ATAVISM, isAtavism ? 1 : 0);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_AWAKENED, 1);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_AWAKENED_YEAR, Date.getCurrentYear());
             if (isFounder)
             {
-                a.data.set(BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, Date.getCurrentYear());
+                xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, Date.getCurrentYear());
             }
             if (a.hasClan())
             {
-                a.data.set(BloodlineDataKeys.KEY_CLAN_ID, a.clan.getID());
+                xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_CLAN_ID, a.clan.getID());
             }
         }
         public static void UpdateConcentration(Actor a, float newConcentration)
         {
             if (a == null) return;
-            a.data.set(BloodlineDataKeys.KEY_CONCENTRATION, Mathf.Clamp(newConcentration, 0f, 100f));
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_CONCENTRATION, Mathf.Clamp(newConcentration, 0f, 100f));
         }
         #endregion
         #region 境界检测
@@ -245,7 +245,7 @@ namespace xn.bloodline
             if (a == null) return false;
             if (HasBloodline(a)) return false; 
             int isTianyunzi;
-            a.data.get("xn_is_tianyunzi", out isTianyunzi, 0);
+            xn.access.ActorAccess.GetData(a).get("xn_is_tianyunzi", out isTianyunzi, 0);
             if (isTianyunzi == 1) return false;
             int cultivationType = GetCultivationType(a);
             if (cultivationType == 0) return false; 
@@ -307,7 +307,7 @@ namespace xn.bloodline
             if (cultivationType == 1) initialPurifyRealm = GetRealmIndex(a);
             else if (cultivationType == 2) initialPurifyRealm = GetBeastStage(a);
             else if (cultivationType == 3) initialPurifyRealm = GetAncientStar(a);
-            a.data.set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, initialPurifyRealm);
+            xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, initialPurifyRealm);
             string typeName = BloodlineTypes.GetLocaleName(bloodlineType);
             XNHistoryRegistry.LogBroadcastForActor(a, $"{a.getName()} 证道成功，觉醒了 {typeName}，浓度 {concentration:F1}%！");
             TryGenerateChildAfterAwaken(a);
@@ -321,7 +321,7 @@ namespace xn.bloodline
             if (baby != null)
             {
                 baby.addTrait("miracle_born");
-                baby.data.set(BloodlineDataKeys.KEY_AWAKENED, 0);
+                xn.access.ActorAccess.GetData(baby).set(BloodlineDataKeys.KEY_AWAKENED, 0);
                 XNHistoryRegistry.LogBroadcastForActor(baby,
                     $"{founder.getName()} 证道后天赐麟儿，{baby.getName()} 诞生，继承了血脉！");
             }
@@ -566,7 +566,7 @@ namespace xn.bloodline
         private static void CheckFounderBreakthrough(Actor a, long actorId)
         {
             int cultivationType = GetCultivationType(a);
-            a.data.get(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, out int lastPurifyRealm, 0);
+            xn.access.ActorAccess.GetData(a).get(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, out int lastPurifyRealm, 0);
             if (cultivationType == 1) 
             {
                 int currentRealm = GetRealmIndex(a);
@@ -577,7 +577,7 @@ namespace xn.bloodline
                     if (newConc > oldConc)
                     {
                         UpdateConcentration(a, newConc);
-                        a.data.set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentRealm);
+                        xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentRealm);
                         OnFounderBreakthrough(a, oldConc, newConc);
                         string typeName = BloodlineTypes.GetLocaleName(GetBloodlineType(a));
                         XNHistoryRegistry.LogBroadcastForActor(a, $"{a.getName()} 境界突破，{typeName}浓度提升至 {newConc:F1}%！后代血脉得到提纯。");
@@ -594,7 +594,7 @@ namespace xn.bloodline
                     if (newConc > oldConc)
                     {
                         UpdateConcentration(a, newConc);
-                        a.data.set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentStage);
+                        xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentStage);
                         OnFounderBreakthrough(a, oldConc, newConc);
                     }
                 }
@@ -609,7 +609,7 @@ namespace xn.bloodline
                     if (newConc > oldConc)
                     {
                         UpdateConcentration(a, newConc);
-                        a.data.set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentStar);
+                        xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentStar);
                         OnFounderBreakthrough(a, oldConc, newConc);
                     }
                 }

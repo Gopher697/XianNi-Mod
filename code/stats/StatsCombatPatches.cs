@@ -158,11 +158,11 @@ namespace cultivation
         {
             if (a == null) return false;
             if (!a.hasTrait(id)) return false; 
-            int v; a.data.get(KEY_ACTIVE_PREFIX + id, out v, 0);
+            int v; xn.access.ActorAccess.GetData(a).get(KEY_ACTIVE_PREFIX + id, out v, 0);
             return v == 1;
         }
     private static bool SpendLingli(Actor a, int amount)
-        { if (a == null || amount <= 0) return true; int cur; a.data.get(KEY_LINGLI, out cur, 0); if (cur < amount) return false; a.data.set(KEY_LINGLI, cur - amount); return true; }
+        { if (a == null || amount <= 0) return true; int cur; xn.access.ActorAccess.GetData(a).get(KEY_LINGLI, out cur, 0); if (cur < amount) return false; xn.access.ActorAccess.GetData(a).set(KEY_LINGLI, cur - amount); return true; }
         private static int NowTs() => (int)World.world.getCurWorldTime();
         private static int CurYear() => Date.getCurrentYear();
         private static int GetRealmIndex(Actor a)
@@ -171,7 +171,7 @@ namespace cultivation
         {
             if (a == null || !a.isAlive()) return;
             if (years <= 0) years = 1;
-            float perYear = a.stats["Healback"];
+            float perYear = xn.access.BaseSimObjectAccess.GetStats(a)["Healback"];
             if (perYear > 0f)
             {
                 int heal = (int)(perYear * years);
@@ -185,13 +185,13 @@ namespace cultivation
         {
             if (a == null || !a.isAlive()) return;
             if (years <= 0) years = 1;
-            int add = (int)(a.stats[regenStatKey] * years);
+            int add = (int)(xn.access.BaseSimObjectAccess.GetStats(a)[regenStatKey] * years);
             if (add <= 0) return;
-            int cap = (int)a.stats[maxStatKey];
-            int cur; a.data.get(dataKey, out cur, 0);
+            int cap = (int)xn.access.BaseSimObjectAccess.GetStats(a)[maxStatKey];
+            int cur; xn.access.ActorAccess.GetData(a).get(dataKey, out cur, 0);
             long next = (long)cur + (long)add;
             if (cap > 0 && next > cap) next = cap;
-            a.data.set(dataKey, (int)next);
+            xn.access.ActorAccess.GetData(a).set(dataKey, (int)next);
         }
         [HarmonyPatch(typeof(Actor), "getHit", new System.Type[] { typeof(float), typeof(bool), typeof(AttackType), typeof(BaseSimObject), typeof(bool), typeof(bool), typeof(bool) })]
         private static class GetHitPatch
@@ -202,34 +202,34 @@ namespace cultivation
             {
                 if (!__instance.hasHealth()) return false;
                 Actor attacker = null;
-                if (pAttacker != null && pAttacker.isActor())
+                if (pAttacker != null && xn.access.BaseSimObjectAccess.IsActor(pAttacker))
                 {
-                    attacker = pAttacker.a;
+                    attacker = xn.access.BaseSimObjectAccess.GetActor(pAttacker);
                 }
                 Actor realmCheckAttacker = attacker ?? s_currentDelegateAttacker;
                 AttackType atkType = pAttackType;
-                if (attacker != null) __instance.attackedBy = attacker;
-                __instance._last_attack_type = atkType;
-                float atkDmg = attacker != null ? attacker.stats["damage"] : 0f;
-                float defArmor0 = __instance.stats["armor"];
-                D($"Enter atk={(attacker != null ? attacker.getName() : "<null>")}#{(attacker != null ? (int)attacker.data.id : 0)} " +
-                  $"-> def={__instance.getName()}#{(int)__instance.data.id} base={pDamage:F2} atkDmg={atkDmg:F1} defArmor={defArmor0:F1}");
+                if (attacker != null) xn.access.ActorAccess.SetAttackedBy(__instance, attacker);
+                xn.access.ActorAccess.SetLastAttackType(__instance, atkType);
+                float atkDmg = attacker != null ? xn.access.BaseSimObjectAccess.GetStats(attacker)["damage"] : 0f;
+                float defArmor0 = xn.access.BaseSimObjectAccess.GetStats(__instance)["armor"];
+                D($"Enter atk={(attacker != null ? attacker.getName() : "<null>")}#{(attacker != null ? (int)xn.access.ActorAccess.GetData(attacker).id : 0)} " +
+                  $"-> def={__instance.getName()}#{(int)xn.access.ActorAccess.GetData(__instance).id} base={pDamage:F2} atkDmg={atkDmg:F1} defArmor={defArmor0:F1}");
                 int onMetal = 0, onWood = 0;
                 if (attacker != null) {
-                    attacker.data.get(KEY_BY_METAL, out onMetal, 0);
-                    attacker.data.get(KEY_BY_WOOD,  out onWood,  0);
+                    xn.access.ActorAccess.GetData(attacker).get(KEY_BY_METAL, out onMetal, 0);
+                    xn.access.ActorAccess.GetData(attacker).get(KEY_BY_WOOD,  out onWood,  0);
                 }
                 float originalDamage = pDamage;
                 {
-                    int invuln; __instance.data.get(KEY_REBIRTH_INVULN_UNTIL, out invuln, 0);
+                    int invuln; xn.access.ActorAccess.GetData(__instance).get(KEY_REBIRTH_INVULN_UNTIL, out invuln, 0);
                     if (invuln > 0 && NowTs() < invuln) { D("Invuln(护命无敌) SKIP"); return false; }
                 }
                 if (attacker != null && __instance.isAlive())
                 {
-                    float acc = attacker.stats["Accuracy"];
+                    float acc = xn.access.BaseSimObjectAccess.GetStats(attacker)["Accuracy"];
                     if (IsIntentActive(attacker, INTENT_QIANHUAN)) acc += 15f;  
-                    float dodge = __instance.stats["Dodge"];
-                    int defWater; __instance.data.get(KEY_BY_WATER, out defWater, 0);
+                    float dodge = xn.access.BaseSimObjectAccess.GetStats(__instance)["Dodge"];
+                    int defWater; xn.access.ActorAccess.GetData(__instance).get(KEY_BY_WATER, out defWater, 0);
                     if (defWater == 1 && __instance.hasTrait(ATTR_WATER)) dodge += 15f;
                     float missChance = Mathf.Clamp(dodge - acc, 0f, 100f) / 100f;
                     if (Randy.randomChance(missChance))
@@ -241,9 +241,9 @@ namespace cultivation
                     else { D($"Hit acc={acc:F1} dodge={dodge:F1} miss={missChance:P0}"); }
                 }
                 {
-                    float armorPen = attacker != null ? attacker.stats["ArmorPenPercent"] : 0f;
-                    float effArmor = Mathf.Max(__instance.stats["armor"] - armorPen, 0f);
-                    int defEarth; __instance.data.get(KEY_BY_EARTH, out defEarth, 0);
+                    float armorPen = attacker != null ? xn.access.BaseSimObjectAccess.GetStats(attacker)["ArmorPenPercent"] : 0f;
+                    float effArmor = Mathf.Max(xn.access.BaseSimObjectAccess.GetStats(__instance)["armor"] - armorPen, 0f);
+                    int defEarth; xn.access.ActorAccess.GetData(__instance).get(KEY_BY_EARTH, out defEarth, 0);
                     if (defEarth == 1 && __instance.hasTrait(ATTR_EARTH)) effArmor += 30f;
                     if (onMetal == 1) 
                     {
@@ -278,22 +278,22 @@ namespace cultivation
                 {
                     if (onMetal == 1 && attacker.hasTrait(ATTR_METAL) && __instance.hasTrait(ATTR_WOOD)) pDamage *= 1.5f;
                     if (onWood  == 1 && attacker.hasTrait(ATTR_WOOD)  && __instance.hasTrait(ATTR_EARTH)) pDamage *= 1.5f;
-                    int onWater; attacker.data.get(KEY_BY_WATER, out onWater, 0);
-                    int onFire;  attacker.data.get(KEY_BY_FIRE,  out onFire,  0);
-                    int onEarth; attacker.data.get(KEY_BY_EARTH, out onEarth, 0);
+                    int onWater; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_WATER, out onWater, 0);
+                    int onFire;  xn.access.ActorAccess.GetData(attacker).get(KEY_BY_FIRE,  out onFire,  0);
+                    int onEarth; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_EARTH, out onEarth, 0);
                     if (onWater == 1 && attacker.hasTrait(ATTR_WATER) && __instance.hasTrait(ATTR_FIRE))  pDamage *= 1.5f;
                     if (onFire  == 1 && attacker.hasTrait(ATTR_FIRE)  && __instance.hasTrait(ATTR_METAL)) pDamage *= 1.5f;
                     if (onEarth == 1 && attacker.hasTrait(ATTR_EARTH) && __instance.hasTrait(ATTR_WATER)) pDamage *= 1.5f;
                     D($"Elements onM={onMetal} onW={onWood} onWa={onWater} onF={onFire} onE={onEarth} -> {pDamage:F2}");
                 }
                 {
-                    int onShield; __instance.data.get(KEY_ART_SHIELD_ACTIVE, out onShield, 0);
+                    int onShield; xn.access.ActorAccess.GetData(__instance).get(KEY_ART_SHIELD_ACTIVE, out onShield, 0);
                     if (onShield == 1)
                     {
                         pDamage *= 0.6f; 
                         if (attacker != null && attacker.isAlive())
                         {
-                            int reflect = Mathf.FloorToInt(__instance.stats["damage"] * 0.8f);
+                            int reflect = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(__instance)["damage"] * 0.8f);
                             if (reflect > MAX_SAFE_DAMAGE) reflect = MAX_SAFE_DAMAGE;
                             if (reflect > 0) attacker.changeHealth(-reflect);
                             if (!attacker.hasHealth()) attacker.batch.c_check_deaths.Add(attacker);
@@ -302,11 +302,11 @@ namespace cultivation
                     }
                 }
                 {
-                    int linkOn; __instance.data.get(KEY_ART_LINK_ACTIVE, out linkOn, 0);
+                    int linkOn; xn.access.ActorAccess.GetData(__instance).get(KEY_ART_LINK_ACTIVE, out linkOn, 0);
                     if (linkOn == 1)
                     {
-                        float end; __instance.data.get(KEY_ART_LINK_END, out end, 0f);
-                        int tid;   __instance.data.get(KEY_ART_LINK_TID, out tid, 0);
+                        float end; xn.access.ActorAccess.GetData(__instance).get(KEY_ART_LINK_END, out end, 0f);
+                        int tid;   xn.access.ActorAccess.GetData(__instance).get(KEY_ART_LINK_TID, out tid, 0);
                         if (end > 0f && Time.time < end && tid != 0)
                         {
                             var tile = __instance.current_tile;
@@ -314,28 +314,28 @@ namespace cultivation
                             {
                                 Actor partner = null;
                                 foreach (var u in Finder.getUnitsFromChunk(tile, 2, 8f))
-                                { if (u != null && u.isAlive() && (int)u.data.id == tid) { partner = u; break; } }
+                                { if (u != null && u.isAlive() && (int)xn.access.ActorAccess.GetData(u).id == tid) { partner = u; break; } }
                                 if (partner != null && partner.isAlive())
                                 {
                                     int copy = Mathf.CeilToInt(pDamage);
                                     if (copy > 0) partner.changeHealth(-copy);
                                     if (!partner.hasHealth()) partner.batch.c_check_deaths.Add(partner);
-                                    D($"Link copy={copy} to {partner.getName()}#{(int)partner.data.id}");
+                                    D($"Link copy={copy} to {partner.getName()}#{(int)xn.access.ActorAccess.GetData(partner).id}");
                                 }
                                 else
                                 {
-                                    __instance.data.set(KEY_ART_LINK_ACTIVE, 0);
-                                    __instance.data.set(KEY_ART_LINK_TID, 0);
-                                    __instance.data.set(KEY_ART_LINK_END, 0f);
+                                    xn.access.ActorAccess.GetData(__instance).set(KEY_ART_LINK_ACTIVE, 0);
+                                    xn.access.ActorAccess.GetData(__instance).set(KEY_ART_LINK_TID, 0);
+                                    xn.access.ActorAccess.GetData(__instance).set(KEY_ART_LINK_END, 0f);
                                     D("Link end (partner lost)");
                                 }
                             }
                         }
                         else
                         {
-                            __instance.data.set(KEY_ART_LINK_ACTIVE, 0);
-                            __instance.data.set(KEY_ART_LINK_TID, 0);
-                            __instance.data.set(KEY_ART_LINK_END, 0f);
+                            xn.access.ActorAccess.GetData(__instance).set(KEY_ART_LINK_ACTIVE, 0);
+                            xn.access.ActorAccess.GetData(__instance).set(KEY_ART_LINK_TID, 0);
+                            xn.access.ActorAccess.GetData(__instance).set(KEY_ART_LINK_END, 0f);
                             D("Link end (timeout)");
                         }
                     }
@@ -448,7 +448,7 @@ namespace cultivation
                     {
                         if (Randy.randomChance(0.00001f))
                         {
-                            if (attacker != null) attacker.data.kills++;
+                            if (attacker != null) xn.access.ActorAccess.GetData(attacker).kills++;
                             xn.world.BroadcastSystem.PostActor(attacker, $"{attacker?.getName() ?? "踏天强者"}使用天劫之力绞杀孽畜");
                             World.world.units.destroyObject(__instance);
                             D($"Tatian instant kill: NoRealm target erased from world (0.1% chance)");
@@ -476,9 +476,9 @@ namespace cultivation
                 if (attacker != null && IsIntentActive(attacker, INTENT_KILLING)) D($"Killing +10% -> {pDamage:F2}");
                 if (attacker != null)
                 {
-                    int until; attacker.data.get(KEY_QH_UNTIL, out until, 0);
-                    if (until > 0 && NowTs() > until) { attacker.data.set(KEY_QH_LAYERS, 0); attacker.data.set(KEY_QH_UNTIL, 0); }
-                    int layers; attacker.data.get(KEY_QH_LAYERS, out layers, 0);
+                    int until; xn.access.ActorAccess.GetData(attacker).get(KEY_QH_UNTIL, out until, 0);
+                    if (until > 0 && NowTs() > until) { xn.access.ActorAccess.GetData(attacker).set(KEY_QH_LAYERS, 0); xn.access.ActorAccess.GetData(attacker).set(KEY_QH_UNTIL, 0); }
+                    int layers; xn.access.ActorAccess.GetData(attacker).get(KEY_QH_LAYERS, out layers, 0);
                     if (layers > 0) pDamage *= (1f + 0.05f * Mathf.Min(layers, 5));
                     if (layers > 0) D($"Qianhuan layers={layers} -> {pDamage:F2}");
                 }
@@ -486,12 +486,12 @@ namespace cultivation
                 {
                     if (onMetal == 1)
                     {
-                        __instance.data.set(KEY_NOHEAL_END, Time.time + 3f);
+                        xn.access.ActorAccess.GetData(__instance).set(KEY_NOHEAL_END, Time.time + 3f);
                         D("Metal hit: no-heal 3s");
                     }
                     if (onWood == 1 && attacker.hasTrait(ATTR_WOOD))
                     {
-                        int targetMetal; __instance.data.get(KEY_BY_METAL, out targetMetal, 0);
+                        int targetMetal; xn.access.ActorAccess.GetData(__instance).get(KEY_BY_METAL, out targetMetal, 0);
                         if (targetMetal != 1) 
                         {
                             if (Randy.randomChance(0.30f)) __instance.makeStunned(5);
@@ -501,7 +501,7 @@ namespace cultivation
                 }
                 if (attacker != null)
                 {
-                    int until; attacker.data.get(KEY_REVERSE_BOOST_UNTIL, out until, 0);
+                    int until; xn.access.ActorAccess.GetData(attacker).get(KEY_REVERSE_BOOST_UNTIL, out until, 0);
                     if (until > NowTs()) pDamage *= 1.20f;
                     if (until > NowTs()) D($"Reverse buff +20% -> {pDamage:F2}");
                 }
@@ -515,7 +515,7 @@ namespace cultivation
                     if (IsIntentActive(__instance, INTENT_ANGEL))
                     {
                         float defPct = 0f;
-                        __instance.data.get(KEY_TMP_DEF_PCT, out defPct, 0f);
+                        xn.access.ActorAccess.GetData(__instance).get(KEY_TMP_DEF_PCT, out defPct, 0f);
                         if (defPct > 0f)
                         {
                             defPct = Mathf.Clamp(defPct, 0f, 0.8f); 
@@ -525,17 +525,17 @@ namespace cultivation
                     }
                 }
                 {
-                    int ldOn; __instance.data.get(KEY_LD_ACTIVE, out ldOn, 0);
+                    int ldOn; xn.access.ActorAccess.GetData(__instance).get(KEY_LD_ACTIVE, out ldOn, 0);
                     if (ldOn == 1 && __instance.hasTrait(INTENT_LIFE_DEATH))
                         pDamage *= 0.6f;
                     if (ldOn == 1 && __instance.hasTrait(INTENT_LIFE_DEATH)) D($"LifeDeath -40% -> {pDamage:F2}");
                 }
                 if (attacker != null)
                 {
-                    bool attackerInCombat = attacker.has_attack_target;
+                    bool attackerInCombat = xn.access.ActorAccess.HasAttackTarget(attacker);
                     if (!attackerInCombat)
                     {
-                        var task = attacker.ai?.task as BehaviourTaskActor;
+                        var task = xn.access.ActorAccess.GetAI(attacker)?.task as BehaviourTaskActor;
                         if (task != null)
                         {
                             attackerInCombat = task.in_combat || task.id == "fighting";
@@ -546,61 +546,61 @@ namespace cultivation
                         bool attackerIsCultivator = !IsAncient(attacker) && !IsBeast(attacker);
                         if (attackerIsCultivator && attackerInCombat)
                         {
-                            int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_EXTREME, out active, 0);
+                            int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_EXTREME, out active, 0);
                             if (active == 0)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_EXTREME, 1);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_EXTREME, 1);
                             }
                         }
                         else if (!attackerInCombat)
                         {
-                            attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_EXTREME, 0);
+                            xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_EXTREME, 0);
                         }
                     }
                     if (!attackerInCombat)
                     {
                         if (attacker.hasTrait(INTENT_QIANHUAN))
                         {
-                            int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, out active, 0);
+                            int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, out active, 0);
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                         if (attacker.hasTrait(INTENT_KILLING))
                         {
-                            int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_KILLING, out active, 0);
+                            int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_KILLING, out active, 0);
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_KILLING, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_KILLING, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                         if (attacker.hasTrait(INTENT_REVERSE))
                         {
-                            int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_REVERSE, out active, 0);
+                            int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_REVERSE, out active, 0);
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_REVERSE, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_REVERSE, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                         if (attacker.hasTrait(INTENT_CHAOS))
                         {
-                            int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_CHAOS, out active, 0);
+                            int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_CHAOS, out active, 0);
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_CHAOS, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_CHAOS, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                         if (attacker.hasTrait(INTENT_MADNESS))
                         {
-                            int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_MADNESS, out active, 0);
+                            int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_MADNESS, out active, 0);
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_MADNESS, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_MADNESS, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
@@ -608,12 +608,12 @@ namespace cultivation
                     }
                     if (attacker.hasTrait(INTENT_QIANHUAN))
                     {
-                        int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, out active, 0);
+                        int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, out active, 0);
                         if (SpendLingli(attacker, 60)) 
                         {
                             if (active == 0)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, 1);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, 1);
                                 YijingFX.StartLoop(attacker);
                             }
                             else
@@ -625,19 +625,19 @@ namespace cultivation
                         {
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_QIANHUAN, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                     }
                     if (attacker.hasTrait(INTENT_KILLING))
                     {
-                        int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_KILLING, out active, 0);
+                        int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_KILLING, out active, 0);
                         if (SpendLingli(attacker, 50)) 
                         {
                             if (active == 0)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_KILLING, 1);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_KILLING, 1);
                                 YijingFX.StartLoop(attacker);
                             }
                             else
@@ -649,19 +649,19 @@ namespace cultivation
                         {
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_KILLING, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_KILLING, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                     }
                     if (attacker.hasTrait(INTENT_REVERSE))
                     {
-                        int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_REVERSE, out active, 0);
+                        int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_REVERSE, out active, 0);
                         if (SpendLingli(attacker, 70)) 
                         {
                             if (active == 0)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_REVERSE, 1);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_REVERSE, 1);
                                 YijingFX.StartLoop(attacker);
                             }
                             else
@@ -673,19 +673,19 @@ namespace cultivation
                         {
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_REVERSE, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_REVERSE, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                     }
                     if (attacker.hasTrait(INTENT_CHAOS))
                     {
-                        int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_CHAOS, out active, 0);
+                        int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_CHAOS, out active, 0);
                         if (SpendLingli(attacker, 100)) 
                         {
                             if (active == 0)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_CHAOS, 1);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_CHAOS, 1);
                                 YijingFX.StartLoop(attacker);
                             }
                             else
@@ -697,19 +697,19 @@ namespace cultivation
                         {
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_CHAOS, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_CHAOS, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
                     }
                     if (attacker.hasTrait(INTENT_MADNESS))
                     {
-                        int active; attacker.data.get(KEY_ACTIVE_PREFIX + INTENT_MADNESS, out active, 0);
+                        int active; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_PREFIX + INTENT_MADNESS, out active, 0);
                         if (SpendLingli(attacker, 50)) 
                         {
                             if (active == 0)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_MADNESS, 1);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_MADNESS, 1);
                                 YijingFX.StartLoop(attacker);
                             }
                             else
@@ -721,7 +721,7 @@ namespace cultivation
                         {
                             if (active == 1)
                             {
-                                attacker.data.set(KEY_ACTIVE_PREFIX + INTENT_MADNESS, 0);
+                                xn.access.ActorAccess.GetData(attacker).set(KEY_ACTIVE_PREFIX + INTENT_MADNESS, 0);
                                 YijingFX.StopLoop(attacker);
                             }
                         }
@@ -749,7 +749,7 @@ namespace cultivation
                 }
                 if (__instance != null && __instance.isAlive() && __instance.hasTrait(INTENT_REINCARNATION) && !extremeExecuted)
                 {
-                    int cd; __instance.data.get(KEY_REBIRTH_CD_UNTIL_YEAR, out cd, 0);
+                    int cd; xn.access.ActorAccess.GetData(__instance).get(KEY_REBIRTH_CD_UNTIL_YEAR, out cd, 0);
                     if (CurYear() >= cd)
                     {
                         float hp = __instance.getHealth();
@@ -758,14 +758,14 @@ namespace cultivation
                             int heal = Mathf.FloorToInt(__instance.getMaxHealth() * 0.5f);
                             if (heal > 0) __instance.changeHealth(heal);
                             pDamage = Mathf.Max(0f, hp - 1f);
-                            __instance.data.set(KEY_REBIRTH_INVULN_UNTIL, NowTs() + 20);
-                            __instance.data.set(KEY_REBIRTH_CD_UNTIL_YEAR, CurYear() + 300);
+                            xn.access.ActorAccess.GetData(__instance).set(KEY_REBIRTH_INVULN_UNTIL, NowTs() + 20);
+                            xn.access.ActorAccess.GetData(__instance).set(KEY_REBIRTH_CD_UNTIL_YEAR, CurYear() + 300);
                             D("Rebirth: save to 1 HP");
                         }
                     }
                 }
                 {
-                    int defWater; __instance.data.get(KEY_BY_WATER, out defWater, 0);
+                    int defWater; xn.access.ActorAccess.GetData(__instance).get(KEY_BY_WATER, out defWater, 0);
                     if (defWater == 1 && __instance.hasTrait(ATTR_WATER))
                     {
                         pDamage *= 0.6f; 
@@ -774,10 +774,10 @@ namespace cultivation
                     }
                 }
                 {
-                    int defFire; __instance.data.get(KEY_BY_FIRE, out defFire, 0);
+                    int defFire; xn.access.ActorAccess.GetData(__instance).get(KEY_BY_FIRE, out defFire, 0);
                     if (defFire == 1 && __instance.hasTrait(ATTR_FIRE) && attacker != null && attacker.hasTrait(ATTR_METAL))
                     {
-                        int atkMetal; attacker.data.get(KEY_BY_METAL, out atkMetal, 0);
+                        int atkMetal; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_METAL, out atkMetal, 0);
                         if (atkMetal == 1) pDamage *= 0.5f;
                         if (defFire == 1 && attacker != null && attacker.hasTrait(ATTR_METAL)) D($"Fire DEF vs Metal ATK -50% -> {pDamage:F2}");
                     }
@@ -812,9 +812,9 @@ namespace cultivation
                 D($"DEALT {dealt}  -> defHP={__instance.getHealth():F0}");
                 if (attacker != null && attacker.isAlive())
                 {
-                    int atkWater; attacker.data.get(KEY_BY_WATER, out atkWater, 0);
-                    int atkFire;  attacker.data.get(KEY_BY_FIRE,  out atkFire,  0);
-                    int atkEarth; attacker.data.get(KEY_BY_EARTH, out atkEarth, 0);
+                    int atkWater; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_WATER, out atkWater, 0);
+                    int atkFire;  xn.access.ActorAccess.GetData(attacker).get(KEY_BY_FIRE,  out atkFire,  0);
+                    int atkEarth; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_EARTH, out atkEarth, 0);
                     if (atkWater == 1)
                     {
                         __instance.addStatusEffect("slowness", 3f);
@@ -823,9 +823,9 @@ namespace cultivation
                     if (atkFire == 1)
                     {
                         __instance.addStatusEffect("burning", 5f);
-                        int stacks; __instance.data.get(KEY_FIRE_DOT_STACKS, out stacks, 0);
-                        __instance.data.set(KEY_FIRE_DOT_STACKS, stacks + 1);
-                        __instance.data.set(KEY_FIRE_DOT_UNTIL, Time.time + 5f);
+                        int stacks; xn.access.ActorAccess.GetData(__instance).get(KEY_FIRE_DOT_STACKS, out stacks, 0);
+                        xn.access.ActorAccess.GetData(__instance).set(KEY_FIRE_DOT_STACKS, stacks + 1);
+                        xn.access.ActorAccess.GetData(__instance).set(KEY_FIRE_DOT_UNTIL, Time.time + 5f);
                         D($"Fire hit: burning + dot stacks={(stacks + 1)}");
                     }
                     if (atkEarth == 1)
@@ -835,7 +835,7 @@ namespace cultivation
                     }
                 }
                 {
-                    int defEarth2; __instance.data.get(KEY_BY_EARTH, out defEarth2, 0);
+                    int defEarth2; xn.access.ActorAccess.GetData(__instance).get(KEY_BY_EARTH, out defEarth2, 0);
                     if (defEarth2 == 1 && __instance.hasTrait(ATTR_EARTH) && attacker != null && attacker.isAlive())
                     {
                         int rebound = Mathf.CeilToInt(dealt * 0.3f);
@@ -847,37 +847,37 @@ namespace cultivation
                 }
                 if (attacker != null && !__instance.hasHealth())
                 {
-                    int on; attacker.data.get(KEY_ACTIVE_KILLING, out on, 0);
+                    int on; xn.access.ActorAccess.GetData(attacker).get(KEY_ACTIVE_KILLING, out on, 0);
                     if (on == 1)
                     {
-                        int layers; attacker.data.get(KEY_KILLING_LAYERS, out layers, 0);
-                        if (layers < 20) attacker.data.set(KEY_KILLING_LAYERS, layers + 1);
-                        D($"Killing add layer -> {(on == 1 ? (int)attacker.data.id : 0)} layers+1");
+                        int layers; xn.access.ActorAccess.GetData(attacker).get(KEY_KILLING_LAYERS, out layers, 0);
+                        if (layers < 20) xn.access.ActorAccess.GetData(attacker).set(KEY_KILLING_LAYERS, layers + 1);
+                        D($"Killing add layer -> {(on == 1 ? (int)xn.access.ActorAccess.GetData(attacker).id : 0)} layers+1");
                     }
                 }
                 if (attacker != null && IsIntentActive(attacker, INTENT_QIANHUAN))
                 {
-                    int layers; attacker.data.get(KEY_QH_LAYERS, out layers, 0);
+                    int layers; xn.access.ActorAccess.GetData(attacker).get(KEY_QH_LAYERS, out layers, 0);
                     if (layers < 5) layers++;
-                    attacker.data.set(KEY_QH_LAYERS, layers);
-                    attacker.data.set(KEY_QH_UNTIL, NowTs() + 5);
+                    xn.access.ActorAccess.GetData(attacker).set(KEY_QH_LAYERS, layers);
+                    xn.access.ActorAccess.GetData(attacker).set(KEY_QH_UNTIL, NowTs() + 5);
                 }
                 if (attacker != null && attacker.isAlive() && dealt > 0)
                 {
-                    int woodOn = 0; attacker.data.get(KEY_BY_WOOD, out woodOn, 0);
+                    int woodOn = 0; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_WOOD, out woodOn, 0);
                     if (woodOn == 1 && attacker.hasTrait(ATTR_WOOD))
                     {
                         int healWood = Mathf.CeilToInt(dealt * 0.5f);
                         if (healWood > 0) attacker.changeHealth(healWood);
                         D($"Wood leech heal={healWood} (based on dealt={dealt})");
                     }
-                    float vamp = attacker.stats["Vampire"]; 
+                    float vamp = xn.access.BaseSimObjectAccess.GetStats(attacker)["Vampire"]; 
                     if (vamp > 0f)
                     {
                         int heal = Mathf.FloorToInt(dealt * vamp / 100f);
                         if (heal > 0) attacker.changeHealth(heal);
                     }
-                    int ldOnAtk; attacker.data.get(KEY_LD_ACTIVE, out ldOnAtk, 0);
+                    int ldOnAtk; xn.access.ActorAccess.GetData(attacker).get(KEY_LD_ACTIVE, out ldOnAtk, 0);
                     if (ldOnAtk == 1)
                     {
                         int heal2 = Mathf.FloorToInt(dealt * 0.30f);
@@ -885,7 +885,7 @@ namespace cultivation
                     }
                 }
                 __instance.startColorEffect(ActorColorEffect.Red);
-                __instance.timer_action = 0.002f;
+                xn.access.ActorAccess.SetTimerAction(__instance, 0.002f);
                 if (!__instance.hasHealth()) __instance.batch.c_check_deaths.Add(__instance);
                 return false;
             }
@@ -897,9 +897,9 @@ namespace cultivation
             private static bool Prefix(AttackData pData, BaseSimObject pTargetToCheck, float pMod = 1f, bool pCheckCancelJobOnLand = false)
             {
                 float force = pData.knockback * pMod;
-                if (force <= 0f || pTargetToCheck == null || !pTargetToCheck.isActor()) return true; 
-                var target = pTargetToCheck.a;
-                var attacker = (pData.initiator != null && pData.initiator.isActor()) ? pData.initiator.a : null;
+                if (force <= 0f || pTargetToCheck == null || !xn.access.BaseSimObjectAccess.IsActor(pTargetToCheck)) return true; 
+                var target = xn.access.BaseSimObjectAccess.GetActor(pTargetToCheck);
+                var attacker = (pData.initiator != null && xn.access.BaseSimObjectAccess.IsActor(pData.initiator)) ? xn.access.BaseSimObjectAccess.GetActor(pData.initiator) : null;
                 if (attacker != null && target != null)
                 {
                     int ar = GetUnifiedRealmIndex(attacker);
@@ -907,12 +907,14 @@ namespace cultivation
                     if (ar < 0 && dr >= 0) return false;
                     if (ar >= 0 && dr >= 0 && ar <= dr - 2) return false;
                 }
-                float resist = target.stats["Resist"];   
+                BaseStats targetStats = xn.access.BaseSimObjectAccess.GetStats(target);
+                if (targetStats == null) return true;
+                float resist = targetStats["Resist"];   
                 force = Mathf.Max(force - resist, 0f);
-                float kbReduce = target.stats[strings.S.knockback_reduction]; 
+                float kbReduce = targetStats[strings.S.knockback_reduction]; 
                 if (kbReduce > 0f)
                     force *= Mathf.Max(0f, 1f - kbReduce / 100f);
-                Vector2 pos = target.cur_transform_position;
+                Vector2 pos = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(target);
                 Vector2 hit = pos + new Vector2(0.1f, 0f);                
                 target.calculateForce(pos.x, pos.y, hit.x, hit.y, force, 0f, pCheckCancelJobOnLand);
                 return false; 
@@ -985,13 +987,13 @@ namespace cultivation
             private static void Prefix(BaseSimObject __instance, ref int pValue)
             {
                 if (pValue >= 0) return;
-                if (!__instance.isActor()) return;
-                Actor target = __instance.a;
+                if (!xn.access.BaseSimObjectAccess.IsActor(__instance)) return;
+                Actor target = xn.access.BaseSimObjectAccess.GetActor(__instance);
                 if (target == null || !target.isAlive()) return;
                 Actor attacker = null;
-                if (target.attackedBy != null && target.attackedBy.isActor())
+                if (xn.access.ActorAccess.GetAttackedBy(target) != null && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(target)))
                 {
-                    attacker = target.attackedBy.a;
+                    attacker = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(target));
                 }
                 if (attacker == null)
                 {
@@ -1025,9 +1027,9 @@ namespace cultivation
             private static bool Prefix(Actor __instance, ref float pX, ref float pY, ref float pHeight)
             {
                 Actor attacker = null;
-                if (__instance.attackedBy != null && __instance.attackedBy.isActor())
+                if (xn.access.ActorAccess.GetAttackedBy(__instance) != null && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(__instance)))
                 {
-                    attacker = __instance.attackedBy.a;
+                    attacker = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(__instance));
                 }
                 if (attacker == null)
                 {

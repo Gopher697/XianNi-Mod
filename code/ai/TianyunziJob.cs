@@ -43,8 +43,8 @@ namespace cultivation.ai
             public override BehResult execute(Actor pActor)
             {
                 if (pActor == null || !pActor.isAlive()) return BehResult.Stop;
-                BaseSimObject targetObj = pActor.beh_actor_target;
-                Actor currentTarget = (targetObj != null && targetObj.isActor()) ? targetObj.a : null;
+                BaseSimObject targetObj = xn.access.ActorAccess.GetBehActorTarget(pActor);
+                Actor currentTarget = (targetObj != null && xn.access.BaseSimObjectAccess.IsActor(targetObj)) ? xn.access.BaseSimObjectAccess.GetActor(targetObj) : null;
                 if (currentTarget != null && currentTarget.isAlive())
                 {
                     pActor.setAttackTarget(currentTarget);
@@ -54,9 +54,9 @@ namespace cultivation.ai
                     }
                     else
                     {
-                        if (!pActor.isUsingPath() || pActor.beh_actor_target != targetObj)
+                        if (!xn.access.ActorAccess.IsUsingPath(pActor) || xn.access.ActorAccess.GetBehActorTarget(pActor) != targetObj)
                         {
-                            pActor.beh_actor_target = targetObj;
+                            xn.access.ActorAccess.SetBehActorTarget(pActor, targetObj);
                             pActor.goTo(currentTarget.current_tile);
                         }
                     }
@@ -65,7 +65,7 @@ namespace cultivation.ai
                 Actor newTarget = FindNearestVisibleTarget(pActor);
                 if (newTarget != null)
                 {
-                    pActor.beh_actor_target = newTarget;
+                    xn.access.ActorAccess.SetBehActorTarget(pActor, newTarget);
                     pActor.setAttackTarget(newTarget);
                     if (pActor.isInAttackRange(newTarget))
                     {
@@ -77,7 +77,7 @@ namespace cultivation.ai
                     }
                     return BehResult.Continue;
                 }
-                if (!pActor.isUsingPath())
+                if (!xn.access.ActorAccess.IsUsingPath(pActor))
                 {
                     WorldTile randomTile = GetRandomNearbyTile(pActor);
                     if (randomTile != null)
@@ -123,13 +123,13 @@ namespace cultivation.ai
             {
                 if (__instance == null || !__instance.isAlive()) return true;
                 int isTianyunzi;
-                __instance.data.get(KEY_TYZ_FLAG, out isTianyunzi, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_TYZ_FLAG, out isTianyunzi, 0);
                 if (isTianyunzi != 1) return true;
                 int stop;
-                __instance.data.get("xn.cultivation.stop", out stop, 0);
+                xn.access.ActorAccess.GetData(__instance).get("xn.cultivation.stop", out stop, 0);
                 if (stop == 1) return true;
                 int trialActive;
-                __instance.data.get("xn.trial.active", out trialActive, 0);
+                xn.access.ActorAccess.GetData(__instance).get("xn.trial.active", out trialActive, 0);
                 if (trialActive == 1) return true;
                 RegisterJob();
                 __result = "job_xn_tianyunzi";
@@ -146,9 +146,10 @@ namespace cultivation.ai
             {
                 if (__instance == null || !__instance.isAlive()) return;
                 int isTianyunzi;
-                __instance.data.get(KEY_TYZ_FLAG, out isTianyunzi, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_TYZ_FLAG, out isTianyunzi, 0);
                 if (isTianyunzi != 1) return;
-                if (__instance.ai.job != null && __instance.ai.job.id == "job_xn_tianyunzi")
+                var actorAI = xn.access.ActorAccess.GetAI(__instance);
+                if (actorAI != null && actorAI.job != null && actorAI.job.id == "job_xn_tianyunzi")
                 {
                     if (pCleanJob)
                     {
@@ -167,13 +168,13 @@ namespace cultivation.ai
             {
                 if (__result) return;
                 if (__instance == null || !__instance.isAlive()) return;
-                if (!__instance.isActor() || pTarget == null || !pTarget.isActor()) return;
-                Actor actor = __instance.a;
+                if (!xn.access.BaseSimObjectAccess.IsActor(__instance) || pTarget == null || !xn.access.BaseSimObjectAccess.IsActor(pTarget)) return;
+                Actor actor = xn.access.BaseSimObjectAccess.GetActor(__instance);
                 if (actor == null) return;
                 int isTianyunzi;
-                actor.data.get(KEY_TYZ_FLAG, out isTianyunzi, 0);
+                xn.access.ActorAccess.GetData(actor).get(KEY_TYZ_FLAG, out isTianyunzi, 0);
                 if (isTianyunzi != 1) return;
-                Actor target = pTarget.a;
+                Actor target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
                 if (target != null && target.isAlive())
                 {
                     if (target != actor)

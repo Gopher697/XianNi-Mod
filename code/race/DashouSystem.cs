@@ -65,10 +65,10 @@ namespace xn.race
             {
                 __instance.addTrait(starTrait);
             }
-            __instance.data.set(KEY_ANC_POWER, minPower);
-            __instance.data.set(KEY_BEHAVIOR_MODE, xn.config.ModConfigHooks.DashouBehaviorMode);
-            __instance.data.set("xn.dashou.no_auto_fav", 1);
-            __instance.data.set("xn.dashou.no_title", 1);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_ANC_POWER, minPower);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_BEHAVIOR_MODE, xn.config.ModConfigHooks.DashouBehaviorMode);
+            xn.access.ActorAccess.GetData(__instance).set("xn.dashou.no_auto_fav", 1);
+            xn.access.ActorAccess.GetData(__instance).set("xn.dashou.no_title", 1);
             ApplyBehaviorJob(__instance);
         }
         [HarmonyPrefix]
@@ -77,9 +77,9 @@ namespace xn.race
             if (__instance == null || __instance.asset == null || __instance.asset.id != ACTOR_ID)
                 return;
             Actor killer = null;
-            if (!__instance.attackedBy.isRekt() && __instance.attackedBy.isActor())
+            if (!xn.access.ActorAccess.GetAttackedBy(__instance).isRekt() && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(__instance)))
             {
-                killer = __instance.attackedBy.a;
+                killer = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(__instance));
             }
             if (killer == null || !killer.isAlive())
                 return;
@@ -99,7 +99,7 @@ namespace xn.race
             if (__instance == null || __instance.asset == null || __instance.asset.id != ACTOR_ID)
                 return true; 
             int mode;
-            __instance.data.get(KEY_BEHAVIOR_MODE, out mode, 0);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_BEHAVIOR_MODE, out mode, 0);
             if (mode == 2)
             {
                 __instance.stopMovement();
@@ -115,7 +115,7 @@ namespace xn.race
             {
                 if (actor == null || !actor.isAlive() || actor.asset == null || actor.asset.id != ACTOR_ID)
                     continue;
-                actor.data.set(KEY_BEHAVIOR_MODE, mode);
+                xn.access.ActorAccess.GetData(actor).set(KEY_BEHAVIOR_MODE, mode);
                 ApplyBehaviorJob(actor);
                 count++;
             }
@@ -125,10 +125,10 @@ namespace xn.race
         {
             if (actor == null || !actor.isAlive()) return;
             int mode;
-            actor.data.get(KEY_BEHAVIOR_MODE, out mode, 0);
+            xn.access.ActorAccess.GetData(actor).get(KEY_BEHAVIOR_MODE, out mode, 0);
             if (mode == 1)
             {
-                actor.ai.setJob("job_dashou_killer");
+                xn.access.ActorAccess.GetAI(actor)?.setJob("job_dashou_killer");
             }
             else if (mode == 2)
             {
@@ -137,16 +137,16 @@ namespace xn.race
                 actor.endJob(); 
                 if (!actor.hasTag("ignore_fights"))
                 {
-                    actor.stats.addTag("ignore_fights");
+                    xn.access.BaseSimObjectAccess.GetStats(actor).addTag("ignore_fights");
                     actor.setStatsDirty();
                 }
             }
             else
             {
                 actor.endJob(); 
-                if (actor.hasTag("ignore_fights") && actor.stats._tags != null)
+                if (actor.hasTag("ignore_fights"))
                 {
-                    actor.stats._tags.Remove("ignore_fights");
+                    xn.access.BaseStatsAccess.RemoveTag(xn.access.BaseSimObjectAccess.GetStats(actor), "ignore_fights");
                     actor.setStatsDirty();
                 }
             }

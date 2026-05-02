@@ -41,14 +41,14 @@ namespace xn.race
     {
         public override BehResult execute(Actor pActor)
         {
-            if (pActor.beh_actor_target != null && pActor.beh_actor_target.isAlive() && pActor.beh_actor_target.isActor())
+            if (xn.access.ActorAccess.GetBehActorTarget(pActor) != null && xn.access.ActorAccess.GetBehActorTarget(pActor).isAlive() && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetBehActorTarget(pActor)))
             {
                 return BehResult.Continue;
             }
             Actor target = FindClosestAnyActor(pActor);
             if (target != null)
             {
-                pActor.beh_actor_target = target;
+                xn.access.ActorAccess.SetBehActorTarget(pActor, target);
                 return BehResult.Continue;
             }
             pActor.makeWait(1f);

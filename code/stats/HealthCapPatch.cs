@@ -11,7 +11,7 @@ namespace xn.stats
     {
         static void Postfix(BaseSimObject __instance, ref int __result)
         {
-            float raw = __instance.stats["health"];
+            float raw = xn.access.BaseSimObjectAccess.GetStats(__instance)["health"];
             if (raw > HealthCapConfig.MAX_HP_CAP)
             {
                 __result = HealthCapConfig.MAX_HP_CAP;

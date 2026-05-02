@@ -76,11 +76,11 @@ namespace xn.expand
             if (!__result) return; 
             if (pTarget == null || pTarget.isRekt()) return;
             WorldTile targetTile = null;
-            if (pTarget.isActor())
+            if (xn.access.BaseSimObjectAccess.IsActor(pTarget))
             {
-                targetTile = pTarget.a.current_tile;
+                targetTile = xn.access.BaseSimObjectAccess.GetActor(pTarget).current_tile;
             }
-            else if (pTarget.isBuilding())
+            else if (xn.access.BaseSimObjectAccess.IsBuilding(pTarget))
             {
                 targetTile = pTarget.b.current_tile;
             }
@@ -92,8 +92,8 @@ namespace xn.expand
             int ancientIndex = GetCurrentAncientIndex(__instance);
             int beastIndex = GetCurrentBeastIndex(__instance);
             if (realmIndex < 0 && ancientIndex < 0 && beastIndex < 0) return;
-            __instance.data.set(KEY_OWN_EFFECT_IMMUNE, 1);
-            __instance.data.set(KEY_OWN_EFFECT_TIME, Time.time);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_IMMUNE, 1);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_TIME, Time.time);
             s_immuneActors.Add(__instance.id);
             if (realmIndex >= 0)
             {
@@ -125,17 +125,17 @@ namespace xn.expand
         private static void Postfix_Projectile_targetReached(Projectile __instance)
         {
             if (__instance == null) return;
-            if (__instance.by_who == null || !__instance.by_who.isActor()) return;
-            Actor attacker = __instance.by_who.a;
+            if (xn.access.ProjectileAccess.GetByWho(__instance) == null || !xn.access.BaseSimObjectAccess.IsActor(xn.access.ProjectileAccess.GetByWho(__instance))) return;
+            Actor attacker = xn.access.BaseSimObjectAccess.GetActor(xn.access.ProjectileAccess.GetByWho(__instance));
             if (attacker == null || !attacker.isAlive()) return;
-            WorldTile targetTile = __instance.getCurrentTilePosition() ?? attacker.current_tile;
+            WorldTile targetTile = xn.access.ProjectileAccess.GetCurrentTilePosition(__instance) ?? attacker.current_tile;
             int realmIndex = GetCurrentRealmIndex(attacker);
             int ancientIndex = GetCurrentAncientIndex(attacker);
             int beastIndex = GetCurrentBeastIndex(attacker);
             if (realmIndex < 0 && ancientIndex < 0 && beastIndex < 0) return;
-            attacker.data.set(KEY_OWN_EFFECT_IMMUNE, 1);
-            attacker.data.set(KEY_OWN_EFFECT_TIME, Time.time);
-            s_immuneActors.Add(attacker.data.id);
+            xn.access.ActorAccess.GetData(attacker).set(KEY_OWN_EFFECT_IMMUNE, 1);
+            xn.access.ActorAccess.GetData(attacker).set(KEY_OWN_EFFECT_TIME, Time.time);
+            s_immuneActors.Add(xn.access.ActorAccess.GetData(attacker).id);
             if (realmIndex >= 0)
             {
                 int maxRolls = GetMaxRollsForRealm(realmIndex);
@@ -322,18 +322,18 @@ namespace xn.expand
             if (realmIndex >= 15) return true;
             float baseCooldown = GetCooldownForRealm(realmIndex);
             float lastCooldown;
-            actor.data.get(KEY_SKILL_COOLDOWN, out lastCooldown, 0f);
+            xn.access.ActorAccess.GetData(actor).get(KEY_SKILL_COOLDOWN, out lastCooldown, 0f);
             float elapsed = Time.time - lastCooldown;
             if (elapsed >= baseCooldown)
             {
-                actor.data.set(KEY_SKILL_COOLDOWN, Time.time);
+                xn.access.ActorAccess.GetData(actor).set(KEY_SKILL_COOLDOWN, Time.time);
                 return true;
             }
             float remainingCD = baseCooldown - elapsed;
             float reducedCD = TryReduceCooldownWithLingli(actor, realmIndex, baseCooldown, remainingCD);
             if (reducedCD <= 0f)
             {
-                actor.data.set(KEY_SKILL_COOLDOWN, Time.time);
+                xn.access.ActorAccess.GetData(actor).set(KEY_SKILL_COOLDOWN, Time.time);
                 return true;
             }
             return false; 
@@ -343,7 +343,7 @@ namespace xn.expand
             if (actor == null || realmIndex < 2) return remainingCD;
             int lingliMax = GetLingliMax(actor, realmIndex);
             if (lingliMax <= 0) return remainingCD;
-            actor.data.get(KEY_LINGLI, out int currentLingli, 0);
+            xn.access.ActorAccess.GetData(actor).get(KEY_LINGLI, out int currentLingli, 0);
             if (currentLingli <= 0) return remainingCD;
             float costPercent;      
             float cdReduction;      
@@ -382,7 +382,7 @@ namespace xn.expand
             if (actualTimes > 0)
             {
                 int totalCost = actualTimes * costPerReduction;
-                actor.data.set(KEY_LINGLI, currentLingli - totalCost);
+                xn.access.ActorAccess.GetData(actor).set(KEY_LINGLI, currentLingli - totalCost);
                 float actualReduction = actualTimes * cdReduction;
                 remainingCD -= actualReduction;
             }
@@ -478,7 +478,7 @@ namespace xn.expand
                     {
                         int maxHealth = target.getMaxHealth();
                         int trueDamage = (int)(maxHealth * trueDamagePercent);
-                        target.data.health = Mathf.Max(0, target.data.health - trueDamage);
+                        xn.access.ActorAccess.GetData(target).health = Mathf.Max(0, xn.access.ActorAccess.GetData(target).health - trueDamage);
                         target.startColorEffect(ActorColorEffect.Red);
                         if (!target.hasHealth())
                         {
@@ -521,9 +521,10 @@ namespace xn.expand
         private static void SpawnHeatRay(Actor actor, WorldTile tile, float duration)
         {
             if (actor == null || tile == null) return;
-            if (World.world.heat_ray_fx == null) return;
+            HeatRayEffect heatRayFx = xn.access.MapBoxAccess.GetHeatRayFx(World.world);
+            if (heatRayFx == null) return;
             Vector2Int pos = tile.pos;
-            World.world.heat_ray_fx.play(new Vector2(pos.x, pos.y), 10);
+            xn.access.HeatRayEffectAccess.Play(heatRayFx, new Vector2(pos.x, pos.y), 10);
             s_heatRayTiles[tile] = Time.time + duration;
             s_heatRayLastTick[tile] = Time.time;
         }
@@ -559,9 +560,11 @@ namespace xn.expand
                     }
                     if (now - lastTick >= HEAT_RAY_TICK_INTERVAL)
                     {
-                        if (World.world.heat_ray_fx != null && World.world.heat_ray_fx.isReady())
+                        HeatRayEffect heatRayFx = xn.access.MapBoxAccess.GetHeatRayFx(World.world);
+                        Heat heat = xn.access.MapBoxAccess.GetHeat(World.world);
+                        if (heatRayFx != null && xn.access.HeatRayEffectAccess.IsReady(heatRayFx) && heat != null)
                         {
-                            World.world.heat.addTile(tile, Randy.randomInt(1, 3));
+                            xn.access.HeatAccess.AddTile(heat, tile, Randy.randomInt(1, 3));
                         }
                         s_heatRayLastTick[tile] = now;
                     }
@@ -578,23 +581,23 @@ namespace xn.expand
             if (__instance == null) return true;
             if (!s_immuneActors.Contains(__instance.id)) return true;
             int ownEffectImmune;
-            __instance.data.get(KEY_OWN_EFFECT_IMMUNE, out ownEffectImmune, 0);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_OWN_EFFECT_IMMUNE, out ownEffectImmune, 0);
             if (ownEffectImmune != 1)
             {
                 s_immuneActors.Remove(__instance.id);
                 return true;
             }
             float effectTime;
-            __instance.data.get(KEY_OWN_EFFECT_TIME, out effectTime, 0f);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_OWN_EFFECT_TIME, out effectTime, 0f);
             float timeSinceEffect = Time.time - effectTime;
             if (timeSinceEffect > IMMUNE_DURATION)
             {
-                __instance.data.set(KEY_OWN_EFFECT_IMMUNE, 0);
-                __instance.data.set(KEY_OWN_EFFECT_TIME, 0f);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_IMMUNE, 0);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_TIME, 0f);
                 s_immuneActors.Remove(__instance.id);
                 return true;
             }
-            if (pAttacker != null && pAttacker.isActor() && pAttacker.a == __instance)
+            if (pAttacker != null && xn.access.BaseSimObjectAccess.IsActor(pAttacker) && xn.access.BaseSimObjectAccess.GetActor(pAttacker) == __instance)
             {
                 return false; 
             }
@@ -613,19 +616,19 @@ namespace xn.expand
             if (pStatusAsset.id != "burning" && pStatusAsset.id != "stunned") return true;
             if (!s_immuneActors.Contains(__instance.id)) return true;
             int ownEffectImmune;
-            __instance.data.get(KEY_OWN_EFFECT_IMMUNE, out ownEffectImmune, 0);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_OWN_EFFECT_IMMUNE, out ownEffectImmune, 0);
             if (ownEffectImmune != 1)
             {
                 s_immuneActors.Remove(__instance.id);
                 return true;
             }
             float effectTime;
-            __instance.data.get(KEY_OWN_EFFECT_TIME, out effectTime, 0f);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_OWN_EFFECT_TIME, out effectTime, 0f);
             float timeSinceEffect = Time.time - effectTime;
             if (timeSinceEffect > IMMUNE_DURATION)
             {
-                __instance.data.set(KEY_OWN_EFFECT_IMMUNE, 0);
-                __instance.data.set(KEY_OWN_EFFECT_TIME, 0f);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_IMMUNE, 0);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_TIME, 0f);
                 s_immuneActors.Remove(__instance.id);
                 return true;
             }

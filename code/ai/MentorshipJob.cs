@@ -133,7 +133,7 @@ namespace xn.world
         static int GetDisciplesCount(Actor master)
         {
             string idsStr;
-            master.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+            xn.access.ActorAccess.GetData(master).get(KEY_DISCIPLES_IDS, out idsStr, "");
             if (string.IsNullOrEmpty(idsStr)) return 0;
             string[] parts = idsStr.Split(',');
             int count = 0;
@@ -151,7 +151,7 @@ namespace xn.world
         {
             List<long> list = new List<long>();
             string idsStr;
-            master.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+            xn.access.ActorAccess.GetData(master).get(KEY_DISCIPLES_IDS, out idsStr, "");
             if (string.IsNullOrEmpty(idsStr)) return list;
             string[] parts = idsStr.Split(',');
             foreach (var part in parts)
@@ -167,25 +167,25 @@ namespace xn.world
         static void AddDisciple(Actor master, Actor disciple)
         {
             List<long> list = GetDisciplesList(master);
-            if (!list.Contains(disciple.data.id))
+            if (!list.Contains(xn.access.ActorAccess.GetData(disciple).id))
             {
-                list.Add(disciple.data.id);
-                master.data.set(KEY_DISCIPLES_IDS, string.Join(",", list));
+                list.Add(xn.access.ActorAccess.GetData(disciple).id);
+                xn.access.ActorAccess.GetData(master).set(KEY_DISCIPLES_IDS, string.Join(",", list));
             }
-            disciple.data.set(KEY_MASTER_ID, master.data.id);
-            s_mentorshipUnits.Add(master.data.id);
-            s_mentorshipUnits.Add(disciple.data.id);
+            xn.access.ActorAccess.GetData(disciple).set(KEY_MASTER_ID, xn.access.ActorAccess.GetData(master).id);
+            s_mentorshipUnits.Add(xn.access.ActorAccess.GetData(master).id);
+            s_mentorshipUnits.Add(xn.access.ActorAccess.GetData(disciple).id);
         }
         static void RemoveDisciple(Actor master, long discipleId)
         {
             List<long> list = GetDisciplesList(master);
             list.Remove(discipleId);
-            master.data.set(KEY_DISCIPLES_IDS, list.Count > 0 ? string.Join(",", list) : "");
+            xn.access.ActorAccess.GetData(master).set(KEY_DISCIPLES_IDS, list.Count > 0 ? string.Join(",", list) : "");
             if (list.Count == 0)
             {
                 long masterId;
-                master.data.get(KEY_MASTER_ID, out masterId, 0L);
-                if (masterId <= 0) s_mentorshipUnits.Remove(master.data.id);
+                xn.access.ActorAccess.GetData(master).get(KEY_MASTER_ID, out masterId, 0L);
+                if (masterId <= 0) s_mentorshipUnits.Remove(xn.access.ActorAccess.GetData(master).id);
             }
         }
         static int s_tick_index = 0; 
@@ -199,17 +199,17 @@ namespace xn.world
                 var a = allUnits[i];
                 if (a == null || !a.isAlive()) continue;
                 long masterId;
-                a.data.get(KEY_MASTER_ID, out masterId, 0L);
+                xn.access.ActorAccess.GetData(a).get(KEY_MASTER_ID, out masterId, 0L);
                 if (masterId > 0)
                 {
-                    s_mentorshipUnits.Add(a.data.id);
+                    s_mentorshipUnits.Add(xn.access.ActorAccess.GetData(a).id);
                     continue;
                 }
                 string idsStr;
-                a.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+                xn.access.ActorAccess.GetData(a).get(KEY_DISCIPLES_IDS, out idsStr, "");
                 if (!string.IsNullOrEmpty(idsStr))
                 {
-                    s_mentorshipUnits.Add(a.data.id);
+                    s_mentorshipUnits.Add(xn.access.ActorAccess.GetData(a).id);
                 }
             }
         }
@@ -242,7 +242,7 @@ namespace xn.world
                 if (a != null && a.isAlive() && !a.isInsideSomething() && a.isSapient() && IsCultivatorRealmOnly(a))
                 {
                     int nextYear;
-                    a.data.get(KEY_SCAN_NEXT_YEAR, out nextYear, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_SCAN_NEXT_YEAR, out nextYear, 0);
                     bool isInCooldown = nextYear > curYear;
                     if (!isInCooldown || GetDisciplesCount(a) < GetMaxDisciples(a))
                     {
@@ -269,36 +269,36 @@ namespace xn.world
             int masterRealm = GetRealmIndex(master);
             if (masterRealm < 1) return; 
             int nextYear;
-            master.data.get(KEY_SCAN_NEXT_YEAR, out nextYear, 0);
+            xn.access.ActorAccess.GetData(master).get(KEY_SCAN_NEXT_YEAR, out nextYear, 0);
             if (nextYear > curYear) return;
             int cooldownUntil;
-            master.data.get(KEY_SCAN_COOLDOWN_UNTIL, out cooldownUntil, 0);
+            xn.access.ActorAccess.GetData(master).get(KEY_SCAN_COOLDOWN_UNTIL, out cooldownUntil, 0);
             if (cooldownUntil > curYear) return;
             int maxDisc = GetMaxDisciples(master);
             int curDisc = GetDisciplesCount(master);
             if (curDisc >= maxDisc)
             {
-                master.data.set(KEY_SCAN_NEXT_YEAR, curYear + 10);
+                xn.access.ActorAccess.GetData(master).set(KEY_SCAN_NEXT_YEAR, curYear + 10);
                 return;
             }
-            if (master.has_attack_target) return;
+            if (xn.access.ActorAccess.HasAttackTarget(master)) return;
             Actor candidate = FindDiscipleCandidate(master, masterRealm);
             if (candidate == null)
             {
-                master.data.set(KEY_SCAN_NEXT_YEAR, curYear + 10);
+                xn.access.ActorAccess.GetData(master).set(KEY_SCAN_NEXT_YEAR, curYear + 10);
                 return;
             }
             int cooldown = Randy.randomInt(SCAN_COOLDOWN_MIN, SCAN_COOLDOWN_MAX + 1);
             if (!Randy.randomChance(PROB_TAKE_DISCIPLE))
             {
-                master.data.set(KEY_SCAN_COOLDOWN_UNTIL, curYear + cooldown);
-                master.data.set(KEY_SCAN_NEXT_YEAR, curYear + cooldown);
+                xn.access.ActorAccess.GetData(master).set(KEY_SCAN_COOLDOWN_UNTIL, curYear + cooldown);
+                xn.access.ActorAccess.GetData(master).set(KEY_SCAN_NEXT_YEAR, curYear + cooldown);
                 return;
             }
             AddDisciple(master, candidate);
             BroadcastSystem.MentorshipTake(master, candidate);
-            master.data.set(KEY_SCAN_NEXT_YEAR, curYear + cooldown);
-            candidate.data.set(KEY_SCAN_NEXT_YEAR, curYear + cooldown);
+            xn.access.ActorAccess.GetData(master).set(KEY_SCAN_NEXT_YEAR, curYear + cooldown);
+            xn.access.ActorAccess.GetData(candidate).set(KEY_SCAN_NEXT_YEAR, curYear + cooldown);
         }
         static Actor FindDiscipleCandidate(Actor master, int masterRealm)
         {
@@ -326,7 +326,7 @@ namespace xn.world
             if (candRealm < 0) return false; 
             if (masterRealm - candRealm < 1) return false; 
             long masterId;
-            candidate.data.get(KEY_MASTER_ID, out masterId, 0L);
+            xn.access.ActorAccess.GetData(candidate).get(KEY_MASTER_ID, out masterId, 0L);
             if (masterId > 0) return false;
             List<long> discList = GetDisciplesList(candidate);
             if (discList.Count > 0) return false;
@@ -357,10 +357,10 @@ namespace xn.world
             List<long> discList = GetDisciplesList(master);
             if (discList.Count == 0) return;
             int nextYear;
-            master.data.get(KEY_TRANS_NEXT_YEAR, out nextYear, 0);
+            xn.access.ActorAccess.GetData(master).get(KEY_TRANS_NEXT_YEAR, out nextYear, 0);
             if (nextYear > curYear) return;
             int lingli;
-            master.data.get(KEY_LINGLI, out lingli, 0);
+            xn.access.ActorAccess.GetData(master).get(KEY_LINGLI, out lingli, 0);
             if (lingli < TRANS_MIN_LINGLI) return;
             int masterRealm = GetRealmIndex(master);
             if (masterRealm < 0) return; 
@@ -388,30 +388,30 @@ namespace xn.world
             }
             float multiplier = Randy.randomFloat(TRANS_MULTIPLIER_MIN, TRANS_MULTIPLIER_MAX);
             long xpPerDisciple = (long)(lingli * multiplier / selected.Count);
-            master.data.set(KEY_LINGLI, 0);
+            xn.access.ActorAccess.GetData(master).set(KEY_LINGLI, 0);
             foreach (var discId in selected)
             {
                 var disc = World.world.units.get(discId);
                 if (disc != null && !disc.isRekt())
                 {
                     long curXp;
-                    disc.data.get(KEY_XP, out curXp, 0L);
-                    disc.data.set(KEY_XP, curXp + xpPerDisciple);
+                    xn.access.ActorAccess.GetData(disc).get(KEY_XP, out curXp, 0L);
+                    xn.access.ActorAccess.GetData(disc).set(KEY_XP, curXp + xpPerDisciple);
                     BroadcastSystem.MentorshipTrans(master, disc, xpPerDisciple);
                 }
             }
             int cooldown = Randy.randomInt(TRANS_COOLDOWN_MIN, TRANS_COOLDOWN_MAX + 1);
-            master.data.set(KEY_TRANS_NEXT_YEAR, curYear + cooldown);
+            xn.access.ActorAccess.GetData(master).set(KEY_TRANS_NEXT_YEAR, curYear + cooldown);
         }
         static void TryConsumeDisciple(Actor master, int curYear)
         {
             List<long> discList = GetDisciplesList(master);
             if (discList.Count == 0) return;
             int nextYear;
-            master.data.get(KEY_CONSUME_NEXT_YEAR, out nextYear, 0);
+            xn.access.ActorAccess.GetData(master).get(KEY_CONSUME_NEXT_YEAR, out nextYear, 0);
             if (nextYear > curYear) return;
             int age = master.getAge();
-            float lifespan = master.stats["lifespan"];
+            float lifespan = xn.access.BaseSimObjectAccess.GetStats(master)["lifespan"];
             if (lifespan <= 0f || age < lifespan * 0.8f) return; 
             if (!Randy.randomChance(PROB_CONSUME)) return;
             int idx = Randy.randomInt(0, discList.Count);
@@ -421,36 +421,36 @@ namespace xn.world
             if (Randy.randomChance(PROB_REBELLION))
             {
                 long masterXp;
-                master.data.get(KEY_XP, out masterXp, 0L);
+                xn.access.ActorAccess.GetData(master).get(KEY_XP, out masterXp, 0L);
                 long discXp;
-                disc.data.get(KEY_XP, out discXp, 0L);
-                disc.data.set(KEY_XP, discXp + (long)(masterXp * REBELLION_XP_GAIN));
+                xn.access.ActorAccess.GetData(disc).get(KEY_XP, out discXp, 0L);
+                xn.access.ActorAccess.GetData(disc).set(KEY_XP, discXp + (long)(masterXp * REBELLION_XP_GAIN));
                 BroadcastSystem.Custom(disc.getName() + " 弑师证道，获得 " + master.getName() + " 一半修为");
                 RemoveDisciple(master, discId);
-                disc.data.set(KEY_MASTER_ID, 0L);
+                xn.access.ActorAccess.GetData(disc).set(KEY_MASTER_ID, 0L);
                 master.die(pDestroy: false, AttackType.Other, pCountDeath: true, pLogFavorite: true);
                 return;
             }
             long masterXp2;
-            master.data.get(KEY_XP, out masterXp2, 0L);
+            xn.access.ActorAccess.GetData(master).get(KEY_XP, out masterXp2, 0L);
             long discXp2;
-            disc.data.get(KEY_XP, out discXp2, 0L);
-            master.data.set(KEY_XP, masterXp2 + discXp2);
+            xn.access.ActorAccess.GetData(disc).get(KEY_XP, out discXp2, 0L);
+            xn.access.ActorAccess.GetData(master).set(KEY_XP, masterXp2 + discXp2);
             IncreaseLifespan(master, CONSUME_LIFE_BONUS);
             BroadcastSystem.MentorshipConsume(master);
             RemoveDisciple(master, discId);
             disc.die();
-            master.data.set(KEY_CONSUME_NEXT_YEAR, curYear + CONSUME_INTERVAL_YEARS);
+            xn.access.ActorAccess.GetData(master).set(KEY_CONSUME_NEXT_YEAR, curYear + CONSUME_INTERVAL_YEARS);
         }
         static void IncreaseLifespan(Actor actor, float bonusPercent)
         {
             if (actor == null || actor.isRekt()) return;
-            float currentLifespan = actor.stats["lifespan"];
+            float currentLifespan = xn.access.BaseSimObjectAccess.GetStats(actor)["lifespan"];
             if (currentLifespan <= 0f) return;
             float lifespanBonus = currentLifespan * bonusPercent;
             ActorTrait lifespanTrait = new ActorTrait
             {
-                id = "xn_temp_lifespan_bonus_" + actor.data.id, 
+                id = "xn_temp_lifespan_bonus_" + xn.access.ActorAccess.GetData(actor).id, 
                 path_icon = "zhanwei", 
                 base_stats = new BaseStats()
             };
@@ -473,13 +473,14 @@ namespace xn.world
             {
                 if (__instance == null || !__instance.isRekt()) return;
                 long masterId;
-                __instance.data.get(KEY_MASTER_ID, out masterId, 0L);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_MASTER_ID, out masterId, 0L);
                 if (masterId > 0)
                 {
                     Actor master = World.world.units.get(masterId);
                     if (master != null && !master.isRekt() && master.current_tile != null && __instance.current_tile != null && master.current_tile.isSameIsland(__instance.current_tile))
                     {
-                        long killerId = __instance.attackedBy?.a?.data.id ?? 0L;
+                        Actor killerActor = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(__instance));
+                        long killerId = xn.access.ActorAccess.GetData(killerActor)?.id ?? 0L;
                         if (killerId > 0)
                         {
                             var killer = World.world.units.get(killerId);
@@ -489,7 +490,7 @@ namespace xn.world
                                 int masterRealm = GetRealmIndex(master);
                                 if (killerRealm <= masterRealm)
                                 {
-                                    master.data.set(KEY_REVENGE_TARGET, killerId);
+                                    xn.access.ActorAccess.GetData(master).set(KEY_REVENGE_TARGET, killerId);
                                     master.setAttackTarget(killer);
                                     BroadcastSystem.MentorshipVow(master);
                                 }
@@ -500,7 +501,8 @@ namespace xn.world
                 List<long> discList = GetDisciplesList(__instance);
                 if (discList.Count > 0)
                 {
-                    long killerId2 = __instance.attackedBy?.a?.data.id ?? 0L;
+                    Actor killerActor2 = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(__instance));
+                    long killerId2 = xn.access.ActorAccess.GetData(killerActor2)?.id ?? 0L;
                     Actor inheritor = null;
                     long maxXp = -1;
                     foreach (var discId in discList)
@@ -516,7 +518,7 @@ namespace xn.world
                                 int discRealm = GetRealmIndex(disc);
                                 if (killerRealm <= discRealm)
                                 {
-                                    disc.data.set(KEY_REVENGE_TARGET, killerId2);
+                                    xn.access.ActorAccess.GetData(disc).set(KEY_REVENGE_TARGET, killerId2);
                                     disc.setAttackTarget(killer);
                                 }
                             }
@@ -529,27 +531,27 @@ namespace xn.world
                             }
                         }
                         long discXp;
-                        disc.data.get(KEY_XP, out discXp, 0L);
+                        xn.access.ActorAccess.GetData(disc).get(KEY_XP, out discXp, 0L);
                         if (discXp > maxXp)
                         {
                             maxXp = discXp;
                             inheritor = disc;
                         }
                         RemoveDisciple(__instance, discId);
-                        disc.data.set(KEY_MASTER_ID, 0L);
+                        xn.access.ActorAccess.GetData(disc).set(KEY_MASTER_ID, 0L);
                     }
                     if (inheritor != null)
                     {
                         int shiLing;
-                        __instance.data.get("xn.stat.shiling", out shiLing, 0);
+                        xn.access.ActorAccess.GetData(__instance).get("xn.stat.shiling", out shiLing, 0);
                         int jiPinShiLing;
-                        __instance.data.get("xn.stat.jipinshiling", out jiPinShiLing, 0);
+                        xn.access.ActorAccess.GetData(__instance).get("xn.stat.jipinshiling", out jiPinShiLing, 0);
                         int inheritorShiLing;
-                        inheritor.data.get("xn.stat.shiling", out inheritorShiLing, 0);
+                        xn.access.ActorAccess.GetData(inheritor).get("xn.stat.shiling", out inheritorShiLing, 0);
                         int inheritorJiPin;
-                        inheritor.data.get("xn.stat.jipinshiling", out inheritorJiPin, 0);
-                        inheritor.data.set("xn.stat.shiling", inheritorShiLing + shiLing);
-                        inheritor.data.set("xn.stat.jipinshiling", inheritorJiPin + jiPinShiLing);
+                        xn.access.ActorAccess.GetData(inheritor).get("xn.stat.jipinshiling", out inheritorJiPin, 0);
+                        xn.access.ActorAccess.GetData(inheritor).set("xn.stat.shiling", inheritorShiLing + shiLing);
+                        xn.access.ActorAccess.GetData(inheritor).set("xn.stat.jipinshiling", inheritorJiPin + jiPinShiLing);
                         BroadcastSystem.Custom(inheritor.getName() + " 继承了 " + __instance.getName() + " 的所有灵石");
                     }
                     BroadcastSystem.Custom(__instance.getName() + " 陨落，其徒弟发誓将来复仇");

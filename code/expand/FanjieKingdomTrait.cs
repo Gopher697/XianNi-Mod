@@ -43,7 +43,7 @@ namespace xn.expand
         public static bool CityHasFanjieTrait(City city)
         {
             if (city == null) return false;
-            return HasFanjieTrait(city.kingdom);
+            return HasFanjieTrait(xn.access.CityAccess.GetKingdom(city));
         }
         public static bool ActorHasFanjieTrait(Actor actor)
         {

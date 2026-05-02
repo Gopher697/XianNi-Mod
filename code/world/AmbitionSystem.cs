@@ -51,9 +51,9 @@ namespace xn.world
             if (tile == null) return false;
             Actor demon = World.world.units.createNewUnit("demon", tile, pMiracleSpawn: false, 0f, null, null, pSpawnWithItems: false, pAdultAge: true);
             if (demon == null) return false;
-            demon.data.age_overgrowth = 18;
+            xn.access.ActorAccess.GetData(demon).age_overgrowth = 18;
             demon.setName("天运子分身");
-            demon.data.set(KEY_AMB_DEMON, 1);
+            xn.access.ActorAccess.GetData(demon).set(KEY_AMB_DEMON, 1);
             Actor src = PickRandomFromTop15ByPower();
             if (src != null)
             {
@@ -71,13 +71,14 @@ namespace xn.world
             Actor dragon = World.world.units.createNewUnit("dragon", tile, pMiracleSpawn: false, 0f, null, null, pSpawnWithItems: false);
             if (dragon == null) return false;
             dragon.setName("天运子");
-            dragon.stats["speed"] = 60f;
+            xn.access.BaseSimObjectAccess.GetStats(dragon)["speed"] = 60f;
             dragon.precalcMovementSpeed(true);
-            dragon.data.set(KEY_AMB_DRAGON, 1);
-            dragon.data.set("xn_is_tianyunzi", 1);
+            xn.access.ActorAccess.GetData(dragon).set(KEY_AMB_DRAGON, 1);
+            xn.access.ActorAccess.GetData(dragon).set("xn_is_tianyunzi", 1);
             dragon.addTrait("realm_15_half_tatian");
             cultivation.ai.TianyunziJob.Init(); 
-            if (dragon.ai != null) dragon.ai.setJob("job_xn_tianyunzi");
+            var dragonAI = xn.access.ActorAccess.GetAI(dragon);
+            if (dragonAI != null) dragonAI.setJob("job_xn_tianyunzi");
             GiveRandomDivine(dragon, 5);
             GiveRandomImmortalArts(dragon, 5);
             GiveRandomIntentExcludingExtreme(dragon, 1);
@@ -149,7 +150,7 @@ namespace xn.world
         {
             if (killer == null || killer.isRekt()) return;
             int mark;
-            killer.data.get(KEY_AMB_DEMON, out mark, 0);
+            xn.access.ActorAccess.GetData(killer).get(KEY_AMB_DEMON, out mark, 0);
             if (mark == 1)
             {
                 int add = Randy.randomInt(10, 100);
@@ -278,11 +279,11 @@ namespace xn.world
         }
         private static long CalcPowerLong(Actor u)
         {
-            double dmg   = u.stats["damage"];          if (dmg   < 0) dmg = 0;   if (dmg   > 2_100_000_000d) dmg   = 2_100_000_000d;
-            double aspd  = u.stats["attack_speed"];    if (aspd  < 0) aspd = 0;
-            double cRate = u.stats["critical_chance"]; if (cRate < 0) cRate = 0; if (cRate > 1) cRate = 1;
-            double cMult = u.stats["critical_damage_multiplier"]; if (cMult < 1) cMult = 1;
-            double armor = u.stats["armor"];           if (armor < 0) armor = 0;
+            double dmg   = xn.access.BaseSimObjectAccess.GetStats(u)["damage"];          if (dmg   < 0) dmg = 0;   if (dmg   > 2_100_000_000d) dmg   = 2_100_000_000d;
+            double aspd  = xn.access.BaseSimObjectAccess.GetStats(u)["attack_speed"];    if (aspd  < 0) aspd = 0;
+            double cRate = xn.access.BaseSimObjectAccess.GetStats(u)["critical_chance"]; if (cRate < 0) cRate = 0; if (cRate > 1) cRate = 1;
+            double cMult = xn.access.BaseSimObjectAccess.GetStats(u)["critical_damage_multiplier"]; if (cMult < 1) cMult = 1;
+            double armor = xn.access.BaseSimObjectAccess.GetStats(u)["armor"];           if (armor < 0) armor = 0;
             double hpMax = u.getMaxHealth();           if (hpMax < 0) hpMax = 0; if (hpMax > 2_100_000_000d) hpMax = 2_100_000_000d;
             double dps  = dmg * aspd * (1.0 + cRate * cMult);
             double bulk = hpMax * 0.1 + armor * 1.5;

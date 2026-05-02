@@ -106,18 +106,18 @@ namespace xn.world
             [HarmonyPostfix]
             private static void Postfix(Actor pActor)
             {
-                if (pActor == null || pActor.data == null) return;
+                if (pActor == null || xn.access.ActorAccess.GetData(pActor) == null) return;
                 int existingWuxin;
-                pActor.data.get(KEY_WUXIN, out existingWuxin, -1);
+                xn.access.ActorAccess.GetData(pActor).get(KEY_WUXIN, out existingWuxin, -1);
                 if (existingWuxin < 0)
                 {
-                    pActor.data.set(KEY_WUXIN, s_independentRandom.Next(0, 101));
+                    xn.access.ActorAccess.GetData(pActor).set(KEY_WUXIN, s_independentRandom.Next(0, 101));
                 }
                 int existingLuck;
-                pActor.data.get(KEY_LUCK, out existingLuck, -1);
+                xn.access.ActorAccess.GetData(pActor).get(KEY_LUCK, out existingLuck, -1);
                 if (existingLuck < 0)
                 {
-                    pActor.data.set(KEY_LUCK, s_independentRandom.Next(0, 101));
+                    xn.access.ActorAccess.GetData(pActor).set(KEY_LUCK, s_independentRandom.Next(0, 101));
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace xn.world
         {
             if (DisableCondense) return;
             if (a.kingdom == null || a.city == null) return;
-            if (a.is_inside_boat) return;
+            if (xn.access.ActorAccess.IsInsideBoat(a)) return;
             if (a.asset != null && a.asset.is_boat) return;
             if (HasAnySpiritRoot(a)) return;
             if (HasAnyAncientInheritance(a)) return;
@@ -170,7 +170,7 @@ namespace xn.world
             if (used >= quota) return;
             curYear = Date.getCurrentYear();
             int nextYear;
-            a.data.get(KEY_NEXT_TRY_YEAR, out nextYear, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_NEXT_TRY_YEAR, out nextYear, 0);
             if (nextYear > curYear)
                 return;
             c = a.city;
@@ -182,7 +182,7 @@ namespace xn.world
             int newAura = Mathf.Max(0, aura - cost);
             c.data.set(KEY_CITY_AURA, newAura);
             c.data.set(KEY_CITY_ROOT_USED, used + 1);
-            a.data.set(KEY_CONDENSE_READY, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_CONDENSE_READY, 1);
         }
         private static bool HasAnySpiritRoot(Actor a)
         {
@@ -217,7 +217,7 @@ namespace xn.world
             RefreshRootCoeffAnnual(a);
             int curYear = Date.getCurrentYear();
             int damagedUntil;
-            a.data.get("xn.daobase.damaged_until", out damagedUntil, 0);
+            xn.access.ActorAccess.GetData(a).get("xn.daobase.damaged_until", out damagedUntil, 0);
             if (damagedUntil > 0) 
             {
                 if (damagedUntil <= curYear)
@@ -234,8 +234,8 @@ namespace xn.world
                             }
                         }
                     }
-                    a.data.set("xn.daobase.damaged_until", 0);
-                    a.data.set(KEY_STOP, 0);
+                    xn.access.ActorAccess.GetData(a).set("xn.daobase.damaged_until", 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
                 }
                 else
                 {
@@ -244,7 +244,7 @@ namespace xn.world
             }
             if (HasTraitId(a, "path_03_beast")) return;
             if (HasAnyAncientInheritance(a)) return;
-            int halfTatianLocked; a.data.get(KEY_HALF_TATIAN_LOCKED, out halfTatianLocked, 0);
+            int halfTatianLocked; xn.access.ActorAccess.GetData(a).get(KEY_HALF_TATIAN_LOCKED, out halfTatianLocked, 0);
             if (halfTatianLocked == 1) return;
             if (a.city == null) return;
             {
@@ -253,10 +253,10 @@ namespace xn.world
                 if (curIndex >= 3 && HasTraitId(a, "intent_01_extreme"))
                     return;                           
             }
-            int stop; a.data.get(KEY_STOP, out stop, 0);
+            int stop; xn.access.ActorAccess.GetData(a).get(KEY_STOP, out stop, 0);
             if (stop == 1)
             {
-                long curXP; a.data.get(KEY_XP, out curXP, 0L);
+                long curXP; xn.access.ActorAccess.GetData(a).get(KEY_XP, out curXP, 0L);
                 int idx = NextRealmIndex(a);
                 if (idx >= 0)
                 {
@@ -264,21 +264,21 @@ namespace xn.world
                     if (curXP >= capNow)
                         return; 
                 }
-                a.data.set(KEY_STOP, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
             }
             int aura;
             a.city.data.get(KEY_CITY_AURA, out aura, 0);
             if (aura <= 0) return;
             int wx;
-            a.data.get(KEY_WUXIN, out wx, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
             float coeff = 0f;
-            a.data.get(KEY_COEFF, out coeff, 0f);
+            xn.access.ActorAccess.GetData(a).get(KEY_COEFF, out coeff, 0f);
             if (coeff <= 0f && HasBrokenRoot(a)) coeff = 0f;
             if (coeff <= 0f) return; 
             double gain = (double)aura * ((double)wx / 100.0) * (double)coeff;
             if (gain <= 0) return;
             long cur;
-            a.data.get(KEY_XP, out cur, 0L);
+            xn.access.ActorAccess.GetData(a).get(KEY_XP, out cur, 0L);
             long next = cur + (long)gain;
             int nextIndex = NextRealmIndex(a);
             if (nextIndex >= 0 && nextIndex < REALM_THRESHOLDS.Length)
@@ -286,16 +286,16 @@ namespace xn.world
                 long cap = REALM_THRESHOLDS[nextIndex];
                 if (cur >= cap)
                 {
-                    a.data.set(KEY_STOP, 1);
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 1);
                     return;
                 }
                 if (next >= cap)
                 {
                     next = cap; 
-                    a.data.set(KEY_STOP, 1); 
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 1); 
                 }
             }
-            a.data.set(KEY_XP, next);
+            xn.access.ActorAccess.GetData(a).set(KEY_XP, next);
             RefreshRootCoeffAnnual(a);
         }
         private static bool HasBrokenRoot(Actor a)
@@ -335,7 +335,7 @@ namespace xn.world
         {
             if (HasBrokenRoot(a))
             {
-                a.data.set(KEY_COEFF, 0f);
+                xn.access.ActorAccess.GetData(a).set(KEY_COEFF, 0f);
                 return;
             }
             int idxFound = -1;
@@ -357,21 +357,21 @@ namespace xn.world
             }
             if (idxFound < 0)
             {
-                a.data.set(KEY_COEFF, 0f);
+                xn.access.ActorAccess.GetData(a).set(KEY_COEFF, 0f);
                 return;
             }
             var range = ROOT_COEFF_RANGE[idxFound];
             float coeff = UnityEngine.Random.Range(range.x, range.y);
-            a.data.set(KEY_COEFF, coeff);
+            xn.access.ActorAccess.GetData(a).set(KEY_COEFF, coeff);
         }
         private static void GainAncientBeastAnnual(Actor a)
         {
-            int wx; a.data.get(KEY_WUXIN, out wx, 0);
-            int qy; a.data.get(KEY_LUCK, out qy, 0);
+            int wx; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
+            int qy; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out qy, 0);
             int wq = wx + qy;
             if (wq < 0) wq = 0;
-            int kills; a.data.get(KEY_KILLS, out kills, 0);
-            int killsPrev; a.data.get(KEY_KILLS_PREV, out killsPrev, 0);
+            int kills; xn.access.ActorAccess.GetData(a).get(KEY_KILLS, out kills, 0);
+            int killsPrev; xn.access.ActorAccess.GetData(a).get(KEY_KILLS_PREV, out killsPrev, 0);
             if (kills < 0) kills = 0;
             if (killsPrev < 0) killsPrev = 0;
             if (HasAnyAncientInheritance(a))
@@ -396,23 +396,23 @@ namespace xn.world
                 if (totalAncientGain > 0)
                 {
                     totalAncientGain *= xn.config.ModConfigHooks.AncientBeastMultiplier;
-                    int ap; a.data.get(KEY_ANC_POWER, out ap, 0);
+                    int ap; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out ap, 0);
                     long next = (long)ap + totalAncientGain;
                     if (next > int.MaxValue) next = int.MaxValue;
-                    a.data.set(KEY_ANC_POWER, (int)next);
+                    xn.access.ActorAccess.GetData(a).set(KEY_ANC_POWER, (int)next);
                 }
                 int curStar = GetCurrentAncientStarIndex(a);     
                 int nextStar = curStar + 1;
                 if (nextStar >= 0 && nextStar < ANC_THRESHOLDS.Length)
                 {
-                    int ap; a.data.get(KEY_ANC_POWER, out ap, 0);
+                    int ap; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out ap, 0);
                     if (nextStar >= 2)
                     {
                         int cap = ANC_THRESHOLDS[nextStar];
                         if (ap >= cap)
                         {
-                            a.data.set(KEY_ANC_POWER, cap);
-                            a.data.set(KEY_ANC_STOP, 1); 
+                            xn.access.ActorAccess.GetData(a).set(KEY_ANC_POWER, cap);
+                            xn.access.ActorAccess.GetData(a).set(KEY_ANC_STOP, 1); 
                         }
                     }
                     else
@@ -420,7 +420,7 @@ namespace xn.world
                         for (int s = nextStar; s < 2 && s < ANC_THRESHOLDS.Length; s++)
                         {
                             int cap = ANC_THRESHOLDS[s];
-                            a.data.get(KEY_ANC_POWER, out ap, 0);
+                            xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out ap, 0);
                             if (ap >= cap)
                             {
                                 ReplaceTraitInSet(a, ANC_STAR_IDS, ANC_STAR_IDS[s]);
@@ -454,23 +454,23 @@ namespace xn.world
                 if (totalBeastGain > 0)
                 {
                     totalBeastGain *= xn.config.ModConfigHooks.AncientBeastMultiplier;
-                    int bp; a.data.get(KEY_BEAST_POWER, out bp, 0);
+                    int bp; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out bp, 0);
                     long next = (long)bp + totalBeastGain;
                     if (next > int.MaxValue) next = int.MaxValue;
-                    a.data.set(KEY_BEAST_POWER, (int)next);
+                    xn.access.ActorAccess.GetData(a).set(KEY_BEAST_POWER, (int)next);
                 }
                 int curStage = GetCurrentBeastStageIndex(a);
                 int nextStage = curStage + 1;
                 if (nextStage >= 0 && nextStage < ANC_THRESHOLDS.Length)
                 {
-                    int bp; a.data.get(KEY_BEAST_POWER, out bp, 0);
+                    int bp; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out bp, 0);
                     if (nextStage >= 2)
                     {
                         int cap = ANC_THRESHOLDS[nextStage];
                         if (bp >= cap)
                         {
-                            a.data.set(KEY_BEAST_POWER, cap);
-                            a.data.set(KEY_BEAST_STOP, 1); 
+                            xn.access.ActorAccess.GetData(a).set(KEY_BEAST_POWER, cap);
+                            xn.access.ActorAccess.GetData(a).set(KEY_BEAST_STOP, 1); 
                         }
                     }
                     else
@@ -478,7 +478,7 @@ namespace xn.world
                         for (int s = nextStage; s < 2 && s < ANC_THRESHOLDS.Length; s++)
                         {
                             int cap = ANC_THRESHOLDS[s];
-                            a.data.get(KEY_BEAST_POWER, out bp, 0);
+                            xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out bp, 0);
                             if (bp >= cap)
                             {
                                 ReplaceTraitInSet(a, BEAST_STAGE_IDS, BEAST_STAGE_IDS[s]);
@@ -489,7 +489,7 @@ namespace xn.world
                     }
                 }
             }
-            a.data.set(KEY_KILLS_PREV, kills);
+            xn.access.ActorAccess.GetData(a).set(KEY_KILLS_PREV, kills);
         }
         private static float GetAncientInheritCoeff(Actor a)
         {
@@ -565,10 +565,10 @@ namespace xn.world
             if (!HasTrait(a, "path_01_demonic")) return;
             int year = Date.getCurrentYear();
             if (year <= 0 || (year % 20) != 0) return;
-            int xinmo; a.data.get(KEY_XINMO, out xinmo, 0);
+            int xinmo; xn.access.ActorAccess.GetData(a).get(KEY_XINMO, out xinmo, 0);
             if (xinmo <= 0) return;
-            a.stats["damage"] += xinmo;
-            a.stats["health"] += xinmo;
+            xn.access.BaseSimObjectAccess.GetStats(a)["damage"] += xinmo;
+            xn.access.BaseSimObjectAccess.GetStats(a)["health"] += xinmo;
         }
     }
 }

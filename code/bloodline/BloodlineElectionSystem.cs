@@ -31,17 +31,17 @@ namespace xn.bloodline
         {
             if (founder == null || !founder.isAlive()) return;
             if (!BloodlineSystem.IsFounder(founder)) return;
-            founder.data.get(BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, out int createdYear, 0);
+            xn.access.ActorAccess.GetData(founder).get(BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, out int createdYear, 0);
             if (createdYear == 0)
             {
-                founder.data.set(BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, currentYear);
+                xn.access.ActorAccess.GetData(founder).set(BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, currentYear);
                 createdYear = currentYear;
             }
             if (currentYear - createdYear < BloodlineDataKeys.FAMILY_CREATION_COOLDOWN_YEARS)
             {
                 return; 
             }
-            founder.data.get(BloodlineDataKeys.KEY_LAST_ELECTION_YEAR, out int lastElectionYear, 0);
+            xn.access.ActorAccess.GetData(founder).get(BloodlineDataKeys.KEY_LAST_ELECTION_YEAR, out int lastElectionYear, 0);
             if (lastElectionYear > 0 && currentYear - lastElectionYear < BloodlineDataKeys.ELECTION_COOLDOWN_YEARS)
             {
                 return; 
@@ -79,21 +79,21 @@ namespace xn.bloodline
             {
                 if (member == null || member.isRekt()) continue;
                 if (BloodlineSystem.IsFounder(member)) continue;
-                member.data.set(BloodlineDataKeys.KEY_POSITION, 0);
+                xn.access.ActorAccess.GetData(member).set(BloodlineDataKeys.KEY_POSITION, 0);
             }
             string electionResults = "";
             for (int i = 0; i < candidates.Count && i < 9; i++)
             {
                 var candidate = candidates[i];
                 int position = i + 1; 
-                candidate.data.set(BloodlineDataKeys.KEY_POSITION, position);
+                xn.access.ActorAccess.GetData(candidate).set(BloodlineDataKeys.KEY_POSITION, position);
                 string positionName = GetPositionName(position);
                 if (i == 0)
                 {
                     electionResults = $"{candidate.getName()} 当选为{positionName}";
                 }
             }
-            founder.data.set(BloodlineDataKeys.KEY_LAST_ELECTION_YEAR, currentYear);
+            xn.access.ActorAccess.GetData(founder).set(BloodlineDataKeys.KEY_LAST_ELECTION_YEAR, currentYear);
             string bloodlineType = BloodlineSystem.GetBloodlineType(founder);
             string typeName = BloodlineTypes.GetLocaleName(bloodlineType);
             if (!string.IsNullOrEmpty(electionResults))
@@ -134,7 +134,7 @@ namespace xn.bloodline
         {
             if (actor == null) return 0;
             if (BloodlineSystem.IsFounder(actor)) return -1; 
-            actor.data.get(BloodlineDataKeys.KEY_POSITION, out int position, 0);
+            xn.access.ActorAccess.GetData(actor).get(BloodlineDataKeys.KEY_POSITION, out int position, 0);
             return position;
         }
         public static string GetPositionNameForActor(Actor actor)

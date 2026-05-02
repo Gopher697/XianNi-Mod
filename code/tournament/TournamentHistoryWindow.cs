@@ -9,13 +9,19 @@ namespace xn.tournament
         private static ScrollWindow _window;
         private static Text _contentText;
         public const string WINDOW_ID = "xn_tournament_history";
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void Init()
         {
             if (_inited) return;
             _inited = true;
             try
             {
-                _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, "对战历史");
+                _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, T("tournament_history_window_title", "Match History"));
                 var winRT = _window.transform as RectTransform;
                 if (winRT != null)
                 {
@@ -47,7 +53,7 @@ namespace xn.tournament
             }
             catch (System.Exception e)
             {
-                Debug.LogError("[TournamentHistoryWindow] 初始化失败: " + e.Message);
+                Debug.LogError("[TournamentHistoryWindow] Init failed: " + e.Message);
             }
         }
         public static void Open()
@@ -77,7 +83,7 @@ namespace xn.tournament
             var histories = TournamentHistoryStorage.GetAllHistories();
             if (histories.Count == 0)
             {
-                _contentText.text = "暂无比武大会历史记录";
+                _contentText.text = T("tournament_history_empty", "No tournament history records yet");
                 return;
             }
             var sb = new System.Text.StringBuilder();
@@ -85,17 +91,17 @@ namespace xn.tournament
             {
                 var history = histories[i];
                 sb.AppendLine("━━━━━━━━━━━━━━━━━━━━");
-                sb.AppendLine($"<b><size=16>第{history.Edition}届比武大会（{history.Year}年-{history.EndYear}年）</size></b>");
-                sb.AppendLine($"参赛人数：{history.ParticipantNames.Count}人");
-                sb.AppendLine($"总轮次：{history.TotalRounds}轮");
-                sb.AppendLine($"冠军：<color=#FFD700><b>{history.ChampionName}</b></color>");
+                sb.AppendLine(T("tournament_history_header_format", "<b><size=16>Tournament #{0} ({1}-{2})</size></b>", history.Edition, history.Year, history.EndYear));
+                sb.AppendLine(T("tournament_history_participants_format", "Participants: {0}", history.ParticipantNames.Count));
+                sb.AppendLine(T("tournament_history_rounds_format", "Total Rounds: {0}", history.TotalRounds));
+                sb.AppendLine(T("tournament_history_champion_format", "Champion: <color=#FFD700><b>{0}</b></color>", history.ChampionName));
                 if (!string.IsNullOrEmpty(history.RunnerUpName))
                 {
-                    sb.AppendLine($"亚军：<color=#C0C0C0><b>{history.RunnerUpName}</b></color>");
+                    sb.AppendLine(T("tournament_history_runner_up_format", "Runner-up: <color=#C0C0C0><b>{0}</b></color>", history.RunnerUpName));
                 }
                 if (!string.IsNullOrEmpty(history.ThirdPlaceName))
                 {
-                    sb.AppendLine($"季军：<color=#CD7F32><b>{history.ThirdPlaceName}</b></color>");
+                    sb.AppendLine(T("tournament_history_third_place_format", "Third Place: <color=#CD7F32><b>{0}</b></color>", history.ThirdPlaceName));
                 }
                 sb.AppendLine();
                 if (!string.IsNullOrEmpty(history.Summary))

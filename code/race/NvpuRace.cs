@@ -45,7 +45,7 @@ namespace xn.race
             asset.texture_asset = new ActorTextureSubAsset(TEXTURE_BASE_PATH, asset.has_advanced_textures);
             asset.texture_asset.prevent_unconscious_rotation = asset.prevent_unconscious_rotation;
             asset.texture_asset.render_heads_for_children = asset.render_heads_for_babies;
-            asset.texture_asset._base_path = TEXTURE_BASE_PATH;
+            ActorTextureSubAssetAccess.SetTextureBasePath(asset.texture_asset, TEXTURE_BASE_PATH);
             asset.texture_asset.texture_path_base = TEXTURE_BASE_PATH;
             asset.texture_asset.texture_path_main = TEXTURE_PATH;
             if (asset.shadow)
@@ -87,12 +87,12 @@ namespace xn.race
             }
             if (asset.shadow && asset.texture_asset.shadow)
             {
-                asset.texture_asset.loadShadow();
+                ActorTextureSubAssetAccess.LoadShadow(asset.texture_asset);
             }
             var textureSprites = SpriteTextureLoader.getSpriteList(TEXTURE_PATH);
             if (textureSprites != null && textureSprites.Length > 0)
             {
-                asset._cached_sprite = textureSprites[0];
+                ActorAssetAccess.SetCachedSprite(asset, textureSprites[0]);
                 asset.icon = "iconHuman"; 
             }
             else
@@ -101,7 +101,7 @@ namespace xn.race
                 if (iconSprite != null)
                 {
                     asset.icon = "nvpu";
-                    asset._cached_sprite = iconSprite;
+                    ActorAssetAccess.SetCachedSprite(asset, iconSprite);
                 }
                 else
                 {
@@ -131,7 +131,7 @@ namespace xn.race
             power.set_used_camera_drag_on_long_move = template.set_used_camera_drag_on_long_move;
             power.actor_asset_id = ACTOR_ID;
             power.name = "女仆";
-            power.click_action = AssetManager.powers.spawnUnit;
+            power.click_action = PowerLibraryAccess.SpawnUnit;
             lib.add(power);
         }
     }

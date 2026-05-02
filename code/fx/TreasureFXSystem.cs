@@ -45,7 +45,7 @@ namespace xn.fx
             if (asset == null || string.IsNullOrEmpty(asset.id)) return null;
             if (!asset.id.StartsWith(ITEM_ID_PREFIX)) return null;
             string shortId = asset.id.Substring(ITEM_ID_PREFIX.Length);
-            long actorId = actor.data.id;
+            long actorId = xn.access.ActorAccess.GetData(actor).id;
             TreasureEntry entry;
             if (s_treasures.TryGetValue(actorId, out entry) && entry.shortId == shortId && entry.sprite != null)
             {
@@ -93,8 +93,9 @@ namespace xn.fx
                     Vector3 currentScale = actor.current_scale;
                     Vector3 actorPos = actor.updatePos();
                     Vector3 rotation = actor.updateRotation();
-                    float headX = frameData.pos_head.x;
-                    float headY = frameData.pos_head.y;
+                    Vector2 posHead = xn.access.AnimationFrameDataAccess.GetPosHead(frameData);
+                    float headX = posHead.x;
+                    float headY = posHead.y;
                     float posX = actorPos.x + headX * currentScale.x;
                     float posY = actorPos.y + headY * currentScale.y;
                     float posZ = -0.01f + headY * currentScale.y; 
@@ -136,7 +137,7 @@ namespace xn.fx
             static void Postfix(ActorEquipment __instance, Item pItem, Actor pActor)
             {
                 if (pActor == null) return;
-                long actorId = pActor.data.id;
+                long actorId = xn.access.ActorAccess.GetData(pActor).id;
                 s_treasures.Remove(actorId); 
             }
         }

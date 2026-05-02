@@ -95,27 +95,27 @@ namespace cultivation.ai
         {
             if (xn.world.SpaceRiftSystem.IsSpaceActiveFor(__instance)) return true;
             int mark;
-            __instance.data.get(AmbitionSystem.KEY_AMB_DRAGON, out mark, 0);
+            xn.access.ActorAccess.GetData(__instance).get(AmbitionSystem.KEY_AMB_DRAGON, out mark, 0);
             if (mark == 1) return true;
-            __instance.data.get(AmbitionSystem.KEY_AMB_DEMON, out mark, 0);
+            xn.access.ActorAccess.GetData(__instance).get(AmbitionSystem.KEY_AMB_DEMON, out mark, 0);
             if (mark == 1) return true;
-            __instance.data.get(KEY_REINC_BRUSH, out mark, 0);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_REINC_BRUSH, out mark, 0);
             if (mark == 1) return true;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, out mark, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, out mark, 0);
             if (mark == 1) return true;
-            __instance.data.get(KEY_POS_RESOLVE_DEATH, out mark, 0);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_POS_RESOLVE_DEATH, out mark, 0);
             if (mark == 1) return true;
             int isMainChar;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             if (isMainChar == 1)
             {
                 int lives;
-                __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, out lives, 0);
+                xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, out lives, 0);
                 if (lives > 0) return true; 
             }
             if (!pDestroy)
             {
-                int alreadyActive; __instance.data.get(KEY_POS_ACTIVE, out alreadyActive, 0);
+                int alreadyActive; xn.access.ActorAccess.GetData(__instance).get(KEY_POS_ACTIVE, out alreadyActive, 0);
                 if (alreadyActive == 1) return false;
                 int idx = GetRealmIndex(__instance);
                 if (idx >= 3) 
@@ -123,9 +123,9 @@ namespace cultivation.ai
                     float prob = GetTriggerProbByRealmIndex(idx);
                     if (prob > 0f && Randy.randomChance(prob))
                     {
-                        __instance.data.set(KEY_POS_ACTIVE, 1);
-                        __instance.data.set(KEY_POS_DEADLINE, Time.time + 15f); 
-                        __instance.ai.setJob("job_xn_possession");
+                        xn.access.ActorAccess.GetData(__instance).set(KEY_POS_ACTIVE, 1);
+                        xn.access.ActorAccess.GetData(__instance).set(KEY_POS_DEADLINE, Time.time + 15f); 
+                        xn.access.ActorAccess.GetAI(__instance)?.setJob("job_xn_possession");
                         return false; 
                     }
                 }
@@ -139,39 +139,39 @@ namespace cultivation.ai
             foreach (var a in units)
             {
                 if (a == null) continue;
-                int active; a.data.get(KEY_POS_ACTIVE, out active, 0);
+                int active; xn.access.ActorAccess.GetData(a).get(KEY_POS_ACTIVE, out active, 0);
                 if (active != 1) continue; 
-                float deadline; a.data.get(KEY_POS_DEADLINE, out deadline, 0f);
+                float deadline; xn.access.ActorAccess.GetData(a).get(KEY_POS_DEADLINE, out deadline, 0f);
                 if (deadline > 0f && now > deadline)
                 {
-                    long tidTimeout; a.data.get(KEY_POS_TARGET, out tidTimeout, 0L);
+                    long tidTimeout; xn.access.ActorAccess.GetData(a).get(KEY_POS_TARGET, out tidTimeout, 0L);
                     if (tidTimeout != 0L)
                     {
                         var targetTimeout = World.world.units.get(tidTimeout);
                         if (targetTimeout != null && targetTimeout.isAlive())
                         {
-                            targetTimeout.data.set(KEY_POS_BEING_POSSESSED, 0);
+                            xn.access.ActorAccess.GetData(targetTimeout).set(KEY_POS_BEING_POSSESSED, 0);
                         }
                     }
                     ReincarnationSystem.OnEligibleDeath(a); 
                     ForceDestroySoul(a);
                     continue;
                 }
-                long tid; a.data.get(KEY_POS_TARGET, out tid, 0L);
+                long tid; xn.access.ActorAccess.GetData(a).get(KEY_POS_TARGET, out tid, 0L);
                 if (tid == 0)
                 {
                     var t = PickTarget(a);
                     if (t == null) continue;
-                    int beingPossessed; t.data.get(KEY_POS_BEING_POSSESSED, out beingPossessed, 0);
+                    int beingPossessed; xn.access.ActorAccess.GetData(t).get(KEY_POS_BEING_POSSESSED, out beingPossessed, 0);
                     if (beingPossessed != 0) continue; 
-                    t.data.set(KEY_POS_BEING_POSSESSED, 1);
+                    xn.access.ActorAccess.GetData(t).set(KEY_POS_BEING_POSSESSED, 1);
                     FreezeDuringFX(a, t);
                     DuoSheFX.PlayOnce(t);
-                    a.data.set(KEY_POS_TARGET, t.getID());
-                    a.data.set(KEY_POS_RESOLVE, now + DuoSheFX.GetDuration());
+                    xn.access.ActorAccess.GetData(a).set(KEY_POS_TARGET, t.getID());
+                    xn.access.ActorAccess.GetData(a).set(KEY_POS_RESOLVE, now + DuoSheFX.GetDuration());
                     continue;
                 }
-                float resolveAt; a.data.get(KEY_POS_RESOLVE, out resolveAt, 0f);
+                float resolveAt; xn.access.ActorAccess.GetData(a).get(KEY_POS_RESOLVE, out resolveAt, 0f);
                 if (now >= resolveAt && resolveAt > 0f)
                 {
                     var t = World.world.units.get(tid);
@@ -181,20 +181,20 @@ namespace cultivation.ai
         }
         private static void ResolvePossession(Actor soul, Actor target)
         {
-            soul.data.set(KEY_POS_ACTIVE, 0);
-            long tid = 0L; soul.data.get(KEY_POS_TARGET, out tid, 0L);
-            soul.data.set(KEY_POS_TARGET, 0L);
-            soul.data.set(KEY_POS_RESOLVE, 0f);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_ACTIVE, 0);
+            long tid = 0L; xn.access.ActorAccess.GetData(soul).get(KEY_POS_TARGET, out tid, 0L);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_TARGET, 0L);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_RESOLVE, 0f);
             if (target != null && target.isAlive())
             {
-                target.data.set(KEY_POS_BEING_POSSESSED, 0);
+                xn.access.ActorAccess.GetData(target).set(KEY_POS_BEING_POSSESSED, 0);
             }
             else if (tid != 0L)
             {
                 var targetById = World.world.units.get(tid);
                 if (targetById != null && targetById.isAlive())
                 {
-                    targetById.data.set(KEY_POS_BEING_POSSESSED, 0);
+                    xn.access.ActorAccess.GetData(targetById).set(KEY_POS_BEING_POSSESSED, 0);
                 }
             }
             if (target == null || !target.isAlive())
@@ -203,10 +203,10 @@ namespace cultivation.ai
                 ForceDestroySoul(soul);
                 return;
             }
-            int sw; soul.data.get(KEY_WUXIN, out sw, 0);
-            int sl; soul.data.get(KEY_LUCK,  out sl, 0);
-            int tw; target.data.get(KEY_WUXIN, out tw, 0);
-            int tl; target.data.get(KEY_LUCK,  out tl, 0);
+            int sw; xn.access.ActorAccess.GetData(soul).get(KEY_WUXIN, out sw, 0);
+            int sl; xn.access.ActorAccess.GetData(soul).get(KEY_LUCK,  out sl, 0);
+            int tw; xn.access.ActorAccess.GetData(target).get(KEY_WUXIN, out tw, 0);
+            int tl; xn.access.ActorAccess.GetData(target).get(KEY_LUCK,  out tl, 0);
             int realmIdx = GetRealmIndex(soul);
             float floor = 0.10f; 
             if (realmIdx >= 3)
@@ -219,13 +219,13 @@ namespace cultivation.ai
             {
                 SavePreviousLifeSnapshot(soul, target);
                 ApplyPossessionSuccess(soul, target);
-                int rc; soul.data.get(KEY_REINC, out rc, 0);
-                target.data.set(KEY_REINC, rc);
-                target.data.set(KEY_POS_TAKEN, 1);
-                target.data.set(KEY_STOP, 1);
-                target.data.set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + 10);
+                int rc; xn.access.ActorAccess.GetData(soul).get(KEY_REINC, out rc, 0);
+                xn.access.ActorAccess.GetData(target).set(KEY_REINC, rc);
+                xn.access.ActorAccess.GetData(target).set(KEY_POS_TAKEN, 1);
+                xn.access.ActorAccess.GetData(target).set(KEY_STOP, 1);
+                xn.access.ActorAccess.GetData(target).set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + 10);
                 BroadcastSystem.PossessionSuccess(soul, target);
-                soul.data.set("xn.reinc.enq", 1); 
+                xn.access.ActorAccess.GetData(soul).set("xn.reinc.enq", 1); 
                 ForceDestroySoul(soul);
             }
             else
@@ -244,7 +244,7 @@ namespace cultivation.ai
         private static void ForceDestroySoul(Actor soul)
         {
             if (soul == null) return;
-            soul.data.set(KEY_POS_RESOLVE_DEATH, 1);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_RESOLVE_DEATH, 1);
             soul.dieAndDestroy(AttackType.Other);
             if (soul.isAlive())
             {
@@ -259,26 +259,26 @@ namespace cultivation.ai
             string soulName = soul.getName();
             int realmIdx = GetRealmIndex(soul);
             string realmName = (realmIdx >= 0 && realmIdx < REALM_IDS.Length) ? REALM_IDS[realmIdx] : "";
-            long xp; soul.data.get(KEY_XP, out xp, 0L);
-            int wuxin; soul.data.get(KEY_WUXIN, out wuxin, 0);
-            int luck; soul.data.get(KEY_LUCK, out luck, 0);
+            long xp; xn.access.ActorAccess.GetData(soul).get(KEY_XP, out xp, 0L);
+            int wuxin; xn.access.ActorAccess.GetData(soul).get(KEY_WUXIN, out wuxin, 0);
+            int luck; xn.access.ActorAccess.GetData(soul).get(KEY_LUCK, out luck, 0);
             string kingdomName = soul.hasKingdom() ? soul.kingdom.name : "";
             string speciesId = "";
             if (soul.asset != null && !string.IsNullOrEmpty(soul.asset.id))
             {
                 speciesId = soul.asset.id;
             }
-            else if (soul.data != null && !string.IsNullOrEmpty(soul.data.asset_id))
+            else if (xn.access.ActorAccess.GetData(soul) != null && !string.IsNullOrEmpty(xn.access.ActorAccess.GetData(soul).asset_id))
             {
-                speciesId = soul.data.asset_id;
+                speciesId = xn.access.ActorAccess.GetData(soul).asset_id;
             }
             int year = Date.getCurrentYear();
             string snapshot = $"{soulId}|{soulName}|{realmName}|{xp}|{wuxin}|{luck}|{kingdomName}|{speciesId}|{year}";
-            target.data.set(KEY_POS_PREV_INFO, snapshot);
+            xn.access.ActorAccess.GetData(target).set(KEY_POS_PREV_INFO, snapshot);
         }
         private static void ApplyPossessionSuccess(Actor src, Actor dst)
         {
-            bool dstFavorite = dst.data.favorite;
+            bool dstFavorite = xn.access.ActorAccess.GetData(dst).favorite;
             TransferBloodlineData(src, dst);
             TitleSystem.ClearTitleData(dst);
             string srcBase = ExtractBaseNameOnly(src);
@@ -287,13 +287,13 @@ namespace cultivation.ai
             City dstCity = dst.hasCity() ? dst.city : null;
             Kingdom srcKingdom = src.hasKingdom() ? src.kingdom : null;
             Kingdom dstKingdom = dst.hasKingdom() ? dst.kingdom : null;
-            long xp; src.data.get(KEY_XP, out xp, 0L);
-            dst.data.set(KEY_XP, xp);
+            long xp; xn.access.ActorAccess.GetData(src).get(KEY_XP, out xp, 0L);
+            xn.access.ActorAccess.GetData(dst).set(KEY_XP, xp);
             if (!HasAnyCultivationRealm(dst))
             {
                 var qi = AssetManager.traits.get("realm_01_qi") as ActorTrait;
                 if (qi != null) dst.addTrait(qi);
-                dst.data.set(KEY_XP, 0L);
+                xn.access.ActorAccess.GetData(dst).set(KEY_XP, 0L);
             }
             var removeBuf = new List<ActorTrait>(16);
             var tsDst = dst.getTraits();
@@ -328,30 +328,30 @@ namespace cultivation.ai
                     if (newRealmIdx < REALM_THRESHOLDS.Length)
                     {
                         long newXP = REALM_THRESHOLDS[newRealmIdx];
-                        dst.data.set(KEY_XP, newXP);
+                        xn.access.ActorAccess.GetData(dst).set(KEY_XP, newXP);
                     }
                 }
             }
             if (srcCity != null && !srcCity.isRekt())
             {
-                dst.setCity(srcCity);
+                xn.access.ActorAccess.SetCity(dst, srcCity);
             }
             else if (dstCity != null && !dstCity.isRekt())
             {
-                dst.setCity(null); 
-                dst.setCity(dstCity); 
+                xn.access.ActorAccess.SetCity(dst, null); 
+                xn.access.ActorAccess.SetCity(dst, dstCity); 
             }
             else if (srcKingdom != null && !srcKingdom.isRekt())
             {
-                dst.setKingdom(srcKingdom);
+                xn.access.ActorAccess.SetKingdom(dst, srcKingdom);
             }
             else if (dstKingdom != null && !dstKingdom.isRekt())
             {
-                dst.setKingdom(dstKingdom);
+                xn.access.ActorAccess.SetKingdom(dst, dstKingdom);
             }
             if (dstFavorite)
             {
-                dst.data.favorite = true;
+                xn.access.ActorAccess.GetData(dst).favorite = true;
             }
             TransferMainCharacterStatus(src, dst);
         }
@@ -359,16 +359,14 @@ namespace cultivation.ai
         {
             if (src == null || dst == null) return;
             int isMainChar;
-            src.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(src).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             if (isMainChar != 1) return; 
-            dst.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, 1);
-            dst.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, 3); 
-            dst.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, 0); 
-            if (World.world.map_stats.custom_data == null)
-            {
-                World.world.map_stats.custom_data = new SaveCustomData();
-            }
-            World.world.map_stats.custom_data.set("xn.world.main_char_id", dst.getID());
+            xn.access.ActorAccess.GetData(dst).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, 1);
+            xn.access.ActorAccess.GetData(dst).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, 3); 
+            xn.access.ActorAccess.GetData(dst).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, 0); 
+            var customData = xn.access.MapBoxAccess.EnsureCustomData(World.world);
+            if (customData != null)
+                customData.set("xn.world.main_char_id", dst.getID());
             if (!dst.isFavorite())
             {
                 dst.switchFavorite();
@@ -385,11 +383,11 @@ namespace cultivation.ai
             {
                 if (u == null || !u.isAlive() || u == soul) continue;
                 if (HasAnyAncientOrBeast(u)) continue;
-                int taken; u.data.get(KEY_POS_TAKEN, out taken, 0);
+                int taken; xn.access.ActorAccess.GetData(u).get(KEY_POS_TAKEN, out taken, 0);
                 if (taken != 0) continue;
-                int beingPossessed; u.data.get(KEY_POS_BEING_POSSESSED, out beingPossessed, 0);
+                int beingPossessed; xn.access.ActorAccess.GetData(u).get(KEY_POS_BEING_POSSESSED, out beingPossessed, 0);
                 if (beingPossessed != 0) continue;
-                int age = u.data.getAge(); 
+                int age = xn.access.ActorAccess.GetData(u).getAge(); 
                 if (age < 18) continue;
                 int score = -Mathf.Abs(age - 24);
                 if (HasAnyCultivationRealm(u))
@@ -441,7 +439,7 @@ namespace cultivation.ai
         {
             if (a != null)
             {
-                a.data.get("xn.title.base_name", out string storedBase, "");
+                xn.access.ActorAccess.GetData(a).get("xn.title.base_name", out string storedBase, "");
                 if (!string.IsNullOrEmpty(storedBase))
                 {
                     return storedBase;
@@ -474,7 +472,7 @@ namespace cultivation.ai
         private static void TransferBloodlineData(Actor src, Actor dst)
         {
             if (src == null || dst == null) return;
-            src.data.get("xn.bloodline.type", out string bloodlineType, "");
+            xn.access.ActorAccess.GetData(src).get("xn.bloodline.type", out string bloodlineType, "");
             if (string.IsNullOrEmpty(bloodlineType))
             {
                 return;
@@ -487,16 +485,16 @@ namespace cultivation.ai
             };
             foreach (var key in stringKeys)
             {
-                src.data.get(key, out string value, "");
+                xn.access.ActorAccess.GetData(src).get(key, out string value, "");
                 if (!string.IsNullOrEmpty(value))
                 {
-                    dst.data.set(key, value);
+                    xn.access.ActorAccess.GetData(dst).set(key, value);
                 }
             }
-            src.data.get("xn.bloodline.concentration", out float concentration, 0f);
+            xn.access.ActorAccess.GetData(src).get("xn.bloodline.concentration", out float concentration, 0f);
             if (concentration > 0f)
             {
-                dst.data.set("xn.bloodline.concentration", concentration);
+                xn.access.ActorAccess.GetData(dst).set("xn.bloodline.concentration", concentration);
             }
             string[] intKeys = new string[]
             {
@@ -511,8 +509,8 @@ namespace cultivation.ai
             };
             foreach (var key in intKeys)
             {
-                src.data.get(key, out int value, 0);
-                dst.data.set(key, value);
+                xn.access.ActorAccess.GetData(src).get(key, out int value, 0);
+                xn.access.ActorAccess.GetData(dst).set(key, value);
             }
             string[] longKeys = new string[]
             {
@@ -520,12 +518,12 @@ namespace cultivation.ai
             };
             foreach (var key in longKeys)
             {
-                src.data.get(key, out long value, -1L);
-                dst.data.set(key, value);
+                xn.access.ActorAccess.GetData(src).get(key, out long value, -1L);
+                xn.access.ActorAccess.GetData(dst).set(key, value);
             }
             if (src.hasClan())
             {
-                dst.data.set("xn.bloodline.clan_id", src.clan.getID());
+                xn.access.ActorAccess.GetData(dst).set("xn.bloodline.clan_id", src.clan.getID());
                 if (src.clan.isAlive())
                 {
                     dst.setClan(src.clan);
@@ -533,7 +531,7 @@ namespace cultivation.ai
             }
             else if (dst.hasClan())
             {
-                dst.data.set("xn.bloodline.clan_id", dst.clan.getID());
+                xn.access.ActorAccess.GetData(dst).set("xn.bloodline.clan_id", dst.clan.getID());
             }
         }
     }

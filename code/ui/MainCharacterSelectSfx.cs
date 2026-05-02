@@ -17,8 +17,8 @@ namespace xn.ui
                 if (!xn.config.ModConfigHooks.EnableMcSelectSfx)
                     return true;
                 int mc;
-                pActor.data.get(MainCharacterBrushTool.KEY_MAIN_CHARACTER, out mc, 0);
-                if (SelectedUnit._unit_main != pActor)
+                xn.access.ActorAccess.GetData(pActor).get(MainCharacterBrushTool.KEY_MAIN_CHARACTER, out mc, 0);
+                if (xn.access.SelectedUnitAccess.GetUnitMain() != pActor)
                 {
                     if (mc == 1)
                     {
@@ -38,7 +38,7 @@ namespace xn.ui
                         pActor.makeSpawnSound(pFromUI: true);
                     }
                 }
-                SelectedUnit._unit_main = pActor;
+                xn.access.SelectedUnitAccess.SetUnitMain(pActor);
                 return false; 
             }
             private static async System.Threading.Tasks.Task PlayWithDeepSeekOptimization(string rawText)

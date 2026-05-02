@@ -10,6 +10,13 @@ namespace xn.ui.charts
     {
         private static bool _isGenerating = false;
         private const string WORLD_KEY_LEGEND_GENERATED = "xn.ranking.legend_generated";
+        private const string LegendMarker = "---\u6218\u529b\u6392\u884c\u699c\u4f20\u5947---";
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         private static string GetAPIKey()
         {
             if (IsUsingCustomConfig())
@@ -23,16 +30,16 @@ namespace xn.ui.charts
         }
         public static bool HasGenerated()
         {
-            if (World.world?.map_stats?.custom_data == null) return false;
-            World.world.map_stats.custom_data.get(WORLD_KEY_LEGEND_GENERATED, out int generated, 0);
+            var customData = xn.access.MapBoxAccess.GetCustomData(World.world);
+            if (customData == null) return false;
+            customData.get(WORLD_KEY_LEGEND_GENERATED, out int generated, 0);
             return generated > 0;
         }
         private static void MarkAsGenerated()
         {
-            if (World.world?.map_stats == null) return;
-            if (World.world.map_stats.custom_data == null)
-                World.world.map_stats.custom_data = new SaveCustomData();
-            World.world.map_stats.custom_data.set(WORLD_KEY_LEGEND_GENERATED, 1);
+            var customData = xn.access.MapBoxAccess.EnsureCustomData(World.world);
+            if (customData == null) return;
+            customData.set(WORLD_KEY_LEGEND_GENERATED, 1);
         }
         public static bool CanGenerate()
         {
@@ -68,7 +75,9 @@ namespace xn.ui.charts
         {
             if (!CanGenerate() && !CanRegenerate())
             {
-                string msg = _isGenerating ? "正在生成中，请稍候..." : "默认密匙只能生成一次，请配置自定义API密匙";
+                string msg = _isGenerating
+                    ? T("ranking_legend_generating_wait", "Generating, please wait...")
+                    : T("ranking_legend_default_key_limit", "The default key can generate only once. Configure a custom API key.");
                 callback?.Invoke(msg);
                 return;
             }
@@ -87,7 +96,7 @@ namespace xn.ui.charts
             }
             catch (Exception e)
             {
-                callback?.Invoke($"生成失败：{e.Message}");
+                callback?.Invoke(T("ai_generation_failed_with_error", "Generation failed: {0}", e.Message));
             }
             finally
             {
@@ -97,8 +106,13 @@ namespace xn.ui.charts
         private static string CollectTop3Data(Actor[] top3, long[] scores, int currentYear)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"【战力排行榜前三名】（当前世界年份：第{currentYear}年）\n");
-            string[] titles = { "第一名（天下第一）", "第二名（绝世强者）", "第三名（盖世豪杰）" };
+            sb.AppendLine(T("ranking_legend_data_header", "[Top 3 Power Ranking] (Current world year: Year {0})\n", currentYear));
+            string[] titles =
+            {
+                T("ranking_legend_rank_1", "First Place (Unrivaled Under Heaven)"),
+                T("ranking_legend_rank_2", "Second Place (Peerless Powerhouse)"),
+                T("ranking_legend_rank_3", "Third Place (World-Shaking Hero)")
+            };
             for (int i = 0; i < top3.Length && i < 3; i++)
             {
                 var actor = top3[i];
@@ -107,26 +121,26 @@ namespace xn.ui.charts
                 string title = xn.world.TitleSystem.GetTitle(actor);
                 string suffix = xn.world.TitleSystem.GetSuffix(actor);
                 sb.AppendLine($"=== {titles[i]} ===");
-                sb.AppendLine($"名字：{baseName}");
+                sb.AppendLine(T("ranking_legend_data_name", "Name: {0}", baseName));
                 if (!string.IsNullOrEmpty(title))
-                    sb.AppendLine($"称号：{title}");
+                    sb.AppendLine(T("ranking_legend_data_title", "Title: {0}", title));
                 if (!string.IsNullOrEmpty(suffix))
-                    sb.AppendLine($"境界后缀：{suffix}");
-                sb.AppendLine($"战力分：{FormatNumber(scores[i])}");
-                sb.AppendLine($"年龄：{actor.getAge()}岁");
-                sb.AppendLine($"性别：{(actor.data.sex == ActorSex.Male ? "男" : "女")}");
-                sb.AppendLine($"击杀：{actor.data.kills}");
-                sb.AppendLine($"等级：{actor.level}");
+                    sb.AppendLine(T("ranking_legend_data_realm_suffix", "Realm Suffix: {0}", suffix));
+                sb.AppendLine(T("ranking_legend_data_power_score", "Power Score: {0}", FormatNumber(scores[i])));
+                sb.AppendLine(T("ranking_legend_data_age", "Age: {0}", actor.getAge()));
+                sb.AppendLine(T("ranking_legend_data_gender", "Gender: {0}", xn.access.ActorAccess.GetData(actor).sex == ActorSex.Male ? T("ranking_legend_gender_male", "Male") : T("ranking_legend_gender_female", "Female")));
+                sb.AppendLine(T("ranking_legend_data_kills", "Kills: {0}", xn.access.ActorAccess.GetData(actor).kills));
+                sb.AppendLine(T("ranking_legend_data_level", "Level: {0}", actor.level));
                 if (actor.asset != null)
                 {
                     string raceName = LocalizedTextManager.getText(actor.asset.id);
                     if (string.IsNullOrEmpty(raceName) || raceName == actor.asset.id)
                         raceName = actor.asset.id;
-                    sb.AppendLine($"种族：{raceName}");
+                    sb.AppendLine(T("ranking_legend_data_race", "Race: {0}", raceName));
                 }
                 string realm = GetRealm(actor);
                 if (!string.IsNullOrEmpty(realm))
-                    sb.AppendLine($"境界：{realm}");
+                    sb.AppendLine(T("ranking_legend_data_realm", "Realm: {0}", realm));
                 var traits = actor.getTraits();
                 if (traits != null && traits.Count > 0)
                 {
@@ -141,19 +155,19 @@ namespace xn.ui.charts
                         }
                     }
                     if (traitNames.Count > 0)
-                        sb.AppendLine($"特质：{string.Join("、", traitNames)}");
+                        sb.AppendLine(T("ranking_legend_data_traits", "Traits: {0}", string.Join(", ", traitNames)));
                 }
                 if (xn.bloodline.BloodlineSystem.HasBloodline(actor))
                 {
                     string bloodlineType = xn.bloodline.BloodlineSystem.GetBloodlineType(actor);
                     string typeName = xn.bloodline.BloodlineTypes.GetLocaleName(bloodlineType);
                     float concentration = xn.bloodline.BloodlineSystem.GetConcentration(actor);
-                    sb.AppendLine($"血脉：{typeName}（浓度：{concentration:F1}%）");
+                    sb.AppendLine(T("ranking_legend_data_bloodline", "Bloodline: {0} (Concentration: {1:F1}%)", typeName, concentration));
                 }
                 if (actor.kingdom != null && !actor.kingdom.isRekt())
-                    sb.AppendLine($"国家：{actor.kingdom.data.name}");
+                    sb.AppendLine(T("ranking_legend_data_kingdom", "Kingdom: {0}", actor.kingdom.data.name));
                 if (actor.city != null && !actor.city.isRekt())
-                    sb.AppendLine($"城市：{actor.city.data.name}");
+                    sb.AppendLine(T("ranking_legend_data_city", "City: {0}", actor.city.data.name));
                 sb.AppendLine();
             }
             return sb.ToString();
@@ -181,35 +195,29 @@ namespace xn.ui.charts
         }
         private static string FormatNumber(long num)
         {
-            if (num >= 1_000_000_000_000) return $"{num / 1_000_000_000_000f:F1}兆";
-            if (num >= 100_000_000) return $"{num / 100_000_000f:F1}亿";
-            if (num >= 10_000) return $"{num / 10_000f:F1}万";
+            if (num >= 1_000_000_000_000) return T("number_unit_trillion_format", "{0:F1}T", num / 1_000_000_000_000f);
+            if (num >= 100_000_000) return T("number_unit_hundred_million_format", "{0:F1}B", num / 100_000_000f);
+            if (num >= 10_000) return T("number_unit_ten_thousand_format", "{0:F1}K", num / 10_000f);
             return num.ToString();
         }
         private static async Task<string> GenerateLegendFromAPI(string actorData, string apiKey, string previousContent = null, int currentYear = 0, int previousYear = 0)
         {
             var (endpoint, model) = xn.voice.DeepSeekTextGenerator.GetProviderConfig();
-            string systemPrompt = @"你是一位修仙(仙逆)小说作家。根据仙逆战力排行榜前三名数据，对这三位强者进行评价。
-要求：
-1. 字数控制在100-800字
-2. 以第三人称叙述，分别评价这三位强者
-3. 语言大气磅礴，符合修仙小说风格
-4. 根据他们的境界、战力分、特质、血脉等数据进行点评
-5. 突出每个人的特点和传奇之处";
+            string systemPrompt = T("ranking_legend_system_prompt", "You are a cultivation (Renegade Immortal) novelist. Based on the top three Power Ranking data, evaluate these three mighty figures.\nRequirements:\n1. Keep it between 100 and 800 words\n2. Narrate in third person and evaluate each of the three separately\n3. Use grand, sweeping language that fits a cultivation novel\n4. Comment based on their realm, power score, traits, bloodline, and other data\n5. Highlight each person's defining qualities and legendary aspects");
             string userPrompt;
             if (!string.IsNullOrEmpty(previousContent))
             {
                 string previousStory = previousContent;
-                int idx = previousContent.IndexOf("---战力排行榜传奇---");
+                int idx = previousContent.IndexOf(LegendMarker);
                 if (idx >= 0)
-                    previousStory = previousContent.Substring(idx + "---战力排行榜传奇---".Length).Trim();
+                    previousStory = previousContent.Substring(idx + LegendMarker.Length).Trim();
                 int yearsPassed = (previousYear > 0 && currentYear > previousYear) ? (currentYear - previousYear) : 0;
-                string yearsInfo = yearsPassed > 0 ? $"距离上次排行榜更新已过去{yearsPassed}年。" : "";
-                userPrompt = $"请根据以下战力排行榜前三名数据，重新创作一篇修仙传奇故事。\n\n【上一次生成的内容】（第{previousYear}年）\n{previousStory}\n\n【当前排行榜数据】\n{actorData}\n\n{yearsInfo}请参考上一次的内容和排行榜更新情况，要有所创新和变化，不要简单复制。";
+                string yearsInfo = yearsPassed > 0 ? T("ranking_legend_years_since_update", "{0} years have passed since the previous ranking update.", yearsPassed) : "";
+                userPrompt = T("ranking_legend_regenerate_user_prompt", "Based on the following top three Power Ranking data, rewrite a cultivation legend.\n\n[Previous generated content] (Year {0})\n{1}\n\n[Current ranking data]\n{2}\n\n{3}Use the previous content and the ranking changes as reference. Create something fresh and varied; do not simply copy it.", previousYear, previousStory, actorData, yearsInfo);
             }
             else
             {
-                userPrompt = $"请根据以下战力排行榜前三名数据，创作一篇修仙传奇故事：\n\n{actorData}";
+                userPrompt = T("ranking_legend_user_prompt", "Based on the following top three Power Ranking data, write a cultivation legend:\n\n{0}", actorData);
             }
             var request = new ChatRequest
             {
@@ -248,11 +256,11 @@ namespace xn.ui.charts
                 else
                 {
                     string errorBody = await response.Content.ReadAsStringAsync();
-                    Debug.LogWarning($"[XN-RankingLegend] API调用失败: {response.StatusCode}");
-                    throw new Exception($"API调用失败: {response.StatusCode}");
+                    Debug.LogWarning($"[XN-RankingLegend] API call failed: {response.StatusCode}");
+                    throw new Exception(T("ai_api_call_failed", "API call failed: {0}", response.StatusCode));
                 }
             }
-            throw new Exception("API返回数据为空");
+            throw new Exception(T("ai_api_empty_response", "API returned empty data"));
         }
     }
 }

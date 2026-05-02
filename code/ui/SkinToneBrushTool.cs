@@ -126,10 +126,10 @@ namespace xn.ui
                             SpriteAnimation spriteAnim = actor.getSpriteAnimation();
                             if (spriteAnim != null && spriteAnim.frames != null && spriteAnim.frames.Length > 0)
                             {
-                                spriteAnim.phenotype = phenotype;
+                                xn.access.SpriteAnimationAccess.SetPhenotype(spriteAnim, phenotype);
                                 spriteAnim.updateFrame();
-                                actor.data.phenotype_index = phenotypeIndex;
-                                actor.data.phenotype_shade = Actor.getRandomPhenotypeShade();
+                                xn.access.ActorAccess.GetData(actor).phenotype_index = phenotypeIndex;
+                                xn.access.ActorAccess.GetData(actor).phenotype_shade = Actor.getRandomPhenotypeShade();
                                 actor.clearGraphicsFully();
                                 actor.setStatsDirty();
                             }
@@ -153,17 +153,17 @@ namespace xn.ui
                         Subspecies subspecies = actor.subspecies;
                         if (subspecies != null)
                         {
-                            if (!subspecies._phenotypes_set_indexes.Contains(phenotypeIndex))
+                            if (!xn.access.SubspeciesAccess.ContainsPhenotypeIndex(subspecies, phenotypeIndex))
                             {
-                                subspecies.cachePhenotype(phenotype);
+                                xn.access.SubspeciesAccess.CachePhenotype(subspecies, phenotype);
                             }
                         }
                     }
                     else
                     {
                     }
-                    actor.data.phenotype_index = phenotypeIndex;
-                    actor.data.phenotype_shade = Actor.getRandomPhenotypeShade();
+                    xn.access.ActorAccess.GetData(actor).phenotype_index = phenotypeIndex;
+                    xn.access.ActorAccess.GetData(actor).phenotype_shade = Actor.getRandomPhenotypeShade();
                     actor.clearGraphicsFully();
                     actor.setStatsDirty();
                     if (asset.has_avatar_prefab && actor.avatar != null)

@@ -18,11 +18,11 @@ namespace xn.world
             if (__instance == null || pTrait == null) return;
             if (__instance.asset != null && __instance.asset.id == "dashou")
                 return;
-            int done; __instance.data.get(KEY_AUTO_FAV_DONE, out done, 0);
+            int done; xn.access.ActorAccess.GetData(__instance).get(KEY_AUTO_FAV_DONE, out done, 0);
             if (done == 1) return;
             if (__instance.isFavorite())
             {
-                __instance.data.set(KEY_AUTO_FAV_DONE, 1);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_AUTO_FAV_DONE, 1);
                 return;
             }
             string g = pTrait.group_id;
@@ -81,7 +81,7 @@ namespace xn.world
         {
             if (!a.isFavorite())
                 a.switchFavorite(); 
-            a.data.set(KEY_AUTO_FAV_DONE, 1); 
+            xn.access.ActorAccess.GetData(a).set(KEY_AUTO_FAV_DONE, 1); 
         }
         private static int GetAncientStar(Actor a)
         {

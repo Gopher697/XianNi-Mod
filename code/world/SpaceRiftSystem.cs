@@ -68,20 +68,20 @@ namespace xn.world
         {
             if (a == null) return false;
             int v;
-            a.data.get(KEY_AMB_DEMON, out v, 0);   if (v == 1) return true;
-            a.data.get(KEY_AMB_DRAGON, out v, 0);  if (v == 1) return true;
+            xn.access.ActorAccess.GetData(a).get(KEY_AMB_DEMON, out v, 0);   if (v == 1) return true;
+            xn.access.ActorAccess.GetData(a).get(KEY_AMB_DRAGON, out v, 0);  if (v == 1) return true;
             return false;
         }
         private static bool IsSpaceParticipant(Actor a)
         {
             if (a == null) return false;
             if (!s_active) return false;
-            return a.data.id == s_attackerId || a.data.id == s_targetId;
+            return xn.access.ActorAccess.GetData(a).id == s_attackerId || xn.access.ActorAccess.GetData(a).id == s_targetId;
         }
         internal static bool IsSpaceActiveFor(Actor a)
         {
             if (!s_active || a == null) return false;
-            int flag; a.data.get(KEY_SPACE_ACTIVE, out flag, 0);
+            int flag; xn.access.ActorAccess.GetData(a).get(KEY_SPACE_ACTIVE, out flag, 0);
             return flag == 1;
         }
         [HarmonyPatch(typeof(Actor), "getHit", new Type[] {
@@ -97,28 +97,28 @@ namespace xn.world
                 var target = __instance;
                 if (xn.tournament.TournamentManager.IsRunning &&
                     (xn.tournament.TournamentManager.IsParticipant(__instance) ||
-                     (pAttacker != null && pAttacker.a != null && xn.tournament.TournamentManager.IsParticipant(pAttacker.a))))
+                     (pAttacker != null && xn.access.BaseSimObjectAccess.GetActor(pAttacker) != null && xn.tournament.TournamentManager.IsParticipant(xn.access.BaseSimObjectAccess.GetActor(pAttacker)))))
                     return;
-                Actor attacker = pAttacker != null ? pAttacker.a : null;
-                if (attacker == null && target.attackedBy != null) attacker = target.attackedBy.a;
+                Actor attacker = pAttacker != null ? xn.access.BaseSimObjectAccess.GetActor(pAttacker) : null;
+                if (attacker == null && xn.access.ActorAccess.GetAttackedBy(target) != null) attacker = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(target));
                 if (attacker == null || target == null) return;
                 if (!attacker.isAlive() || !target.isAlive()) return;
                 if (!IsRealmTianzunOrHigher(attacker)) return;
                 if (IsAmbitionUnit(attacker) || IsAmbitionUnit(target)) return;
                 if (!IsRealmDifferenceAllowed(attacker, target)) return;
                 if (!attacker.areFoes(target)) return;
-                int cdUntil; attacker.data.get(KEY_CD_UNTIL_YEAR, out cdUntil, 0);
+                int cdUntil; xn.access.ActorAccess.GetData(attacker).get(KEY_CD_UNTIL_YEAR, out cdUntil, 0);
                 if (cdUntil > 0 && Date.getCurrentYear() < cdUntil) return;
                 WorldTile center;
                 if (!TryPickOceanAndBuildIsland(out center))
                 {
                     BroadcastSystem.PostActor(attacker, attacker.getName() + " 尝试开辟空间失败：未找到足够大的海域");
-                    attacker.data.set(KEY_CD_UNTIL_YEAR, Date.getCurrentYear() + 1);
+                    xn.access.ActorAccess.GetData(attacker).set(KEY_CD_UNTIL_YEAR, Date.getCurrentYear() + 1);
                     return;
                 }
                 s_active = true;
-                s_attackerId = attacker.data.id;
-                s_targetId = target.data.id;
+                s_attackerId = xn.access.ActorAccess.GetData(attacker).id;
+                s_targetId = xn.access.ActorAccess.GetData(target).id;
                 s_center = center.pos;
                 s_tick = 0;
                 s_startYear = Date.getCurrentYear(); 
@@ -128,11 +128,11 @@ namespace xn.world
                 target.cancelAllBeh();
                 TeleportToIsland(attacker, true);
                 TeleportToIsland(target, false);
-                attacker.data.set(KEY_SPACE_ACTIVE, 1);
-                target.data.set(KEY_SPACE_ACTIVE, 1);
+                xn.access.ActorAccess.GetData(attacker).set(KEY_SPACE_ACTIVE, 1);
+                xn.access.ActorAccess.GetData(target).set(KEY_SPACE_ACTIVE, 1);
                 attacker.startFightingWith(target); 
                 target.startFightingWith(attacker);
-                attacker.data.set(KEY_CD_UNTIL_YEAR, Date.getCurrentYear() + COOLDOWN_YEARS);
+                xn.access.ActorAccess.GetData(attacker).set(KEY_CD_UNTIL_YEAR, Date.getCurrentYear() + COOLDOWN_YEARS);
                 xn.world.TerritoryFX.StartFor(attacker);
                 xn.world.TerritoryFX.StartFor(target);
                 BroadcastSystem.PostAtTile(center, attacker.getName() + " 对 " + target.getName() + " 开辟了空间（" + s_center.x + "," + s_center.y + "）");
@@ -166,8 +166,8 @@ namespace xn.world
                     EndAndRestore(a1, a2);
                     return;
                 }
-                int a1SpaceFlag; a1.data.get(KEY_SPACE_ACTIVE, out a1SpaceFlag, 0);
-                int a2SpaceFlag; a2.data.get(KEY_SPACE_ACTIVE, out a2SpaceFlag, 0);
+                int a1SpaceFlag; xn.access.ActorAccess.GetData(a1).get(KEY_SPACE_ACTIVE, out a1SpaceFlag, 0);
+                int a2SpaceFlag; xn.access.ActorAccess.GetData(a2).get(KEY_SPACE_ACTIVE, out a2SpaceFlag, 0);
                 if (a1SpaceFlag != 1 || a2SpaceFlag != 1)
                 {
                     EndAndRestore(a1, a2);
@@ -181,7 +181,7 @@ namespace xn.world
                     int dx = p.x - s_center.x;
                     int dy = p.y - s_center.y;
                     int d2 = dx*dx + dy*dy;
-                    bool isParticipant = (u.data.id == s_attackerId || u.data.id == s_targetId);
+                    bool isParticipant = (xn.access.ActorAccess.GetData(u).id == s_attackerId || xn.access.ActorAccess.GetData(u).id == s_targetId);
                     if (isParticipant)
                     {
                         if (d2 > innerDist2)
@@ -191,7 +191,7 @@ namespace xn.world
                             {
                                 u.cancelAllBeh();
                                 u.setCurrentTile(inTile);
-                                Actor other = (u.data.id == s_attackerId) ? a2 : a1;
+                                Actor other = (xn.access.ActorAccess.GetData(u).id == s_attackerId) ? a2 : a1;
                                 if (other != null && other.isAlive())
                                 {
                                     u.startFightingWith(other);
@@ -217,7 +217,7 @@ namespace xn.world
             {
                 if (!s_active) return;
                 if (__instance == null) return;
-                if (__instance.data.id == s_attackerId || __instance.data.id == s_targetId)
+                if (xn.access.ActorAccess.GetData(__instance).id == s_attackerId || xn.access.ActorAccess.GetData(__instance).id == s_targetId)
                 {
                     var a1 = World.world.units.get(s_attackerId);
                     var a2 = World.world.units.get(s_targetId);
@@ -236,11 +236,11 @@ namespace xn.world
             {
                 if (!s_active) return true;
                 var target = __instance;
-                Actor attacker = (pAttacker != null) ? pAttacker.a : null;
-                if (attacker == null && target.attackedBy != null) attacker = target.attackedBy.a;
+                Actor attacker = (pAttacker != null) ? xn.access.BaseSimObjectAccess.GetActor(pAttacker) : null;
+                if (attacker == null && xn.access.ActorAccess.GetAttackedBy(target) != null) attacker = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(target));
                 if (attacker == null) return true; 
-                bool attackerIsParticipant = (attacker.data.id == s_attackerId || attacker.data.id == s_targetId);
-                bool targetIsParticipant = (target.data.id == s_attackerId || target.data.id == s_targetId);
+                bool attackerIsParticipant = (xn.access.ActorAccess.GetData(attacker).id == s_attackerId || xn.access.ActorAccess.GetData(attacker).id == s_targetId);
+                bool targetIsParticipant = (xn.access.ActorAccess.GetData(target).id == s_attackerId || xn.access.ActorAccess.GetData(target).id == s_targetId);
                 if (!attackerIsParticipant && targetIsParticipant)
                     return false;
                 return true;
@@ -308,8 +308,8 @@ namespace xn.world
         private static void EndAndRestore(Actor a1, Actor a2)
         {
             s_active = false;
-            if (a1 != null) a1.data.set(KEY_SPACE_ACTIVE, 0);
-            if (a2 != null) a2.data.set(KEY_SPACE_ACTIVE, 0);
+            if (a1 != null) xn.access.ActorAccess.GetData(a1).set(KEY_SPACE_ACTIVE, 0);
+            if (a2 != null) xn.access.ActorAccess.GetData(a2).set(KEY_SPACE_ACTIVE, 0);
             if (a1 != null) xn.world.TerritoryFX.StopFor(a1);
             if (a2 != null) xn.world.TerritoryFX.StopFor(a2);
             if (a1 != null && a1.isAlive()) { RestoreBackPos(a1); a1.cancelAllBeh(); }
@@ -329,15 +329,15 @@ namespace xn.world
         private static void SaveBackPos(Actor a)
         {
             var p = a.current_tile.pos;
-            a.data.set(KEY_BACK_X, p.x);
-            a.data.set(KEY_BACK_Y, p.y);
+            xn.access.ActorAccess.GetData(a).set(KEY_BACK_X, p.x);
+            xn.access.ActorAccess.GetData(a).set(KEY_BACK_Y, p.y);
         }
         private static void RestoreBackPos(Actor a)
         {
-            int x; a.data.get(KEY_BACK_X, out x, a.current_tile.pos.x);
-            int y; a.data.get(KEY_BACK_Y, out y, a.current_tile.pos.y);
+            int x; xn.access.ActorAccess.GetData(a).get(KEY_BACK_X, out x, a.current_tile.pos.x);
+            int y; xn.access.ActorAccess.GetData(a).get(KEY_BACK_Y, out y, a.current_tile.pos.y);
             var t = World.world.GetTileSimple(x, y);
-            if (t != null) a.setCurrentTilePosition(t); 
+            if (t != null) xn.access.ActorAccess.SetCurrentTilePosition(a, t); 
         }
         private static void TeleportToIsland(Actor a, bool leftSide)
         {
@@ -346,7 +346,7 @@ namespace xn.world
             int ty = s_center.y;
             var t = World.world.GetTileSimple(tx, ty);
             if (t == null) t = World.world.GetTileSimple(s_center.x, s_center.y);
-            if (t != null) a.setCurrentTilePosition(t); 
+            if (t != null) xn.access.ActorAccess.SetCurrentTilePosition(a, t); 
         }
         private static WorldTile ClampIntoCircle(Vector2Int p, Vector2Int c, int r)
         {

@@ -33,7 +33,7 @@ namespace xn.expand
                 }
                 else
                 {
-                    var mapStats = World.world?.map_stats;
+                    var mapStats = xn.access.MapBoxAccess.GetMapStats(World.world);
                     if (mapStats != null)
                     {
                         string fallback = $"{mapStats.name}_{mapStats.world_time}";

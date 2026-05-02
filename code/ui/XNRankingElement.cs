@@ -271,7 +271,7 @@ namespace xn.ui
             textName.text = actor.coloredName;
             SetRealmDisplay(actor);
             textLevel.text = actor.level.ToString();
-            textKills.text = actor.data.kills.ToString();
+            textKills.text = xn.access.ActorAccess.GetData(actor).kills.ToString();
             textAge.text = actor.getAge().ToString();
             textPower.text = FormatPower(power);
             if (actor.asset.inspect_sex)

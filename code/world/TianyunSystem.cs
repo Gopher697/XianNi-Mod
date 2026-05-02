@@ -43,6 +43,12 @@ namespace xn.world
         }
         static System.Text.StringBuilder s_detailBuf;
         static string s_detailName;
+        static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         static string ExtractDetail(string raw, string actorName)
         {
             if (string.IsNullOrEmpty(raw)) return "";
@@ -54,7 +60,7 @@ namespace xn.world
                 int p = t.IndexOf(actorName);
                 if (p >= 0) t = t.Remove(p, actorName.Length).Trim();
             }
-            if (t.EndsWith("。") || t.EndsWith(".")) t = t.Substring(0, t.Length - 1);
+            if (t.EndsWith("\u3002") || t.EndsWith(".")) t = t.Substring(0, t.Length - 1);
             return t;
         }
         public static void Init(Harmony h)
@@ -70,11 +76,11 @@ namespace xn.world
             {
                 var a = list[i];
                 if (a == null || !a.isAlive()) continue;
-                int until = 0; a.data.get(KEY_SEAL_UNTIL_YEAR, out until, 0);
+                int until = 0; xn.access.ActorAccess.GetData(a).get(KEY_SEAL_UNTIL_YEAR, out until, 0);
                 if (until > 0 && year >= until)
                 {
-                    a.data.set(KEY_SEAL_UNTIL_YEAR, 0);
-                    a.data.set(KEY_STOP, 0); 
+                    xn.access.ActorAccess.GetData(a).set(KEY_SEAL_UNTIL_YEAR, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0); 
                 }
             }
             int interval = ModConfigHooks.TianyunIntervalYears; 
@@ -123,7 +129,7 @@ namespace xn.world
                         if (beastMad)
                         {
                             AddTrait(a, "madness"); 
-                            extra = "天运子把妖兽" + NameOf(a) + " 当宠物狗一样玩弄并释放出来咬人了";
+                            extra = T("tianyun_extra_beast_pet_attack", "Tian Yunzi toyed with demon beast {0} like a pet hound, then let it loose to bite people", NameOf(a));
                             ambLeft--; 
                         }
                         else if (canS)
@@ -131,7 +137,7 @@ namespace xn.world
                             ambLeft--; 
                             if (Randy.randomChance(0.20f))
                             {
-                                extra = "天运子阴谋被" + NameOf(a) + " 发现了，使用躲避术，天运子算计失误，野心值下降5%";
+                                extra = T("tianyun_extra_plot_dodged", "{0} saw through Tian Yunzi's scheme and dodged it; Tian Yunzi miscalculated, ambition drops by 5%", NameOf(a));
                                 AmbitionSystem.DecPercent(5);
                             }
                             else
@@ -139,12 +145,12 @@ namespace xn.world
                                 KillInstant(a); 
                                 if (!a.hasHealth()) a.batch.c_check_deaths.Add(a);
                                 AmbitionSystem.Add(amb);
-                                extra = NameOf(a) + " 被天运子使用仙术传送到了仙界并收为亲传弟子";
+                                extra = T("tianyun_extra_transmitted_disciple", "{0} was spirited away to the immortal realm by Tian Yunzi's art and taken as a personal disciple", NameOf(a));
                             }
                         }
                         else
                         {
-                            extra = "天运子阴谋被" + NameOf(a) + " 发现了，使用躲避术，天运子算计失误，野心值下降5%";
+                            extra = T("tianyun_extra_plot_dodged", "{0} saw through Tian Yunzi's scheme and dodged it; Tian Yunzi miscalculated, ambition drops by 5%", NameOf(a));
                             AmbitionSystem.DecPercent(5);
                         }
                     }
@@ -153,8 +159,8 @@ namespace xn.world
                         affected++; IncTianyunCount(a);
                         string body = string.IsNullOrEmpty(extra) ? details
                                     : string.IsNullOrEmpty(details) ? extra
-                                    : details + "；" + extra;
-                        BroadcastSystem.PostActor(a, "[天运·赏赐] " + NameOf(a) + " " + body);
+                                    : details + "; " + extra;
+                        BroadcastSystem.PostActor(a, T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), body));
                     }
                 }
                 else
@@ -172,7 +178,7 @@ namespace xn.world
                         if (beastMad)
                         {
                             AddTrait(a, "madness");
-                            extra = "妖兽" + NameOf(a) + " 被天运子施加咒语陷入了疯狂";
+                            extra = T("tianyun_extra_beast_madness", "Demon beast {0} was cursed by Tian Yunzi and driven mad", NameOf(a));
                             ambLeft--;
                         }
                         else if (canS)
@@ -180,7 +186,7 @@ namespace xn.world
                             ambLeft--;
                             if (Randy.randomChance(0.20f))
                             {
-                                extra = "天运子阴谋被" + NameOf(a) + " 发现了，使用躲避术，天运子算计失误，野心值下降5%";
+                                extra = T("tianyun_extra_plot_dodged", "{0} saw through Tian Yunzi's scheme and dodged it; Tian Yunzi miscalculated, ambition drops by 5%", NameOf(a));
                                 AmbitionSystem.DecPercent(5);
                             }
                             else
@@ -188,12 +194,12 @@ namespace xn.world
                                 KillInstant(a); 
                                 if (!a.hasHealth()) a.batch.c_check_deaths.Add(a);
                                 AmbitionSystem.Add(amb);
-                                extra = NameOf(a) + " 被天运子吞噬了，野心值增加了 " + amb;
+                                extra = T("tianyun_extra_devoured_ambition", "{0} was devoured by Tian Yunzi; ambition increased by {1}", NameOf(a), amb);
                             }
                         }
                         else
                         {
-                            extra = "天运子阴谋被" + NameOf(a) + " 发现了，使用躲避术，天运子算计失误，野心值下降5%";
+                            extra = T("tianyun_extra_plot_dodged", "{0} saw through Tian Yunzi's scheme and dodged it; Tian Yunzi miscalculated, ambition drops by 5%", NameOf(a));
                             AmbitionSystem.DecPercent(5);
                         }
                     }
@@ -202,8 +208,8 @@ namespace xn.world
                         affected++; IncTianyunCount(a);
                         string body = string.IsNullOrEmpty(extra) ? details
                                     : string.IsNullOrEmpty(details) ? extra
-                                    : details + "；" + extra;
-                        BroadcastSystem.PostActor(a, "[天运·反噬] " + NameOf(a) + " " + body);
+                                    : details + "; " + extra;
+                        BroadcastSystem.PostActor(a, T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), body));
                     }
                 }
             }
@@ -253,33 +259,33 @@ namespace xn.world
                 case 1:
                     { 
                         long beforeXP = 0, afterXP = 0; int beforeAP = 0, afterAP = 0, beforeBP = 0, afterBP = 0;
-                        a.data.get(KEY_XP, out beforeXP, 0L); a.data.get(KEY_ANC_POWER, out beforeAP, 0); a.data.get(KEY_BEAST_POWER, out beforeBP, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_XP, out beforeXP, 0L); xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out beforeAP, 0); xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out beforeBP, 0);
                         bool ok = Reward_XP_Or_Power(a);
-                        a.data.get(KEY_XP, out afterXP, 0L); a.data.get(KEY_ANC_POWER, out afterAP, 0); a.data.get(KEY_BEAST_POWER, out afterBP, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_XP, out afterXP, 0L); xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out afterAP, 0); xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out afterBP, 0);
                         if (ok)
                         {
-                            if (IsAncient(a)) LogHist($"[天运·赏赐] {NameOf(a)} 古神之力 +{afterAP - beforeAP}");
-                            else if (IsBeast(a)) LogHist($"[天运·赏赐] {NameOf(a)} 妖力 +{afterBP - beforeBP}");
-                            else LogHist($"[天运·赏赐] {NameOf(a)} 修为 +{afterXP - beforeXP}");
+                            if (IsAncient(a)) LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_ancient_power", "Ancient God power +{0}", afterAP - beforeAP)));
+                            else if (IsBeast(a)) LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_beast_power", "beast power +{0}", afterBP - beforeBP)));
+                            else LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_cultivation", "cultivation +{0}", afterXP - beforeXP)));
                         }
                         return ok;
                     }
                 case 2:
                     { 
-                        int before; a.data.get(KEY_WUXIN, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out before, 0);
                         int add = Randy.randomInt(5, 10);
                         bool ok = AddIntClamped(a, KEY_WUXIN, add, 0, 100);
-                        int after; a.data.get(KEY_WUXIN, out after, 0);
-                        if (ok) LogHist($"[天运·赏赐] {NameOf(a)} 悟性 +{after - before}");
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out after, 0);
+                        if (ok) LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_insight", "insight +{0}", after - before)));
                         return ok;
                     }
                 case 3:
                     { 
-                        int before; a.data.get(KEY_LUCK, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out before, 0);
                         int add = Randy.randomInt(5, 10);
                         bool ok = AddIntClamped(a, KEY_LUCK, add, 0, 100);
-                        int after; a.data.get(KEY_LUCK, out after, 0);
-                        if (ok) LogHist($"[天运·赏赐] {NameOf(a)} 气运 +{after - before}");
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out after, 0);
+                        if (ok) LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_luck", "luck +{0}", after - before)));
                         return ok;
                     }
                 case 4:
@@ -294,20 +300,20 @@ namespace xn.world
                     }
                 case 6:
                     { 
-                        int before; a.data.get(KEY_LINGSHI, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI, out before, 0);
                         int add = Randy.randomInt(1, 1000);
                         bool ok = AddStones(a, KEY_LINGSHI, add);
-                        int after; a.data.get(KEY_LINGSHI, out after, 0);
-                        if (ok) LogHist($"[天运·赏赐] {NameOf(a)} 灵石 +{after - before}");
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI, out after, 0);
+                        if (ok) LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_spirit_stones", "spirit stones +{0}", after - before)));
                         return ok;
                     }
                 case 7:
                     { 
-                        int before; a.data.get(KEY_LINGSHI_SUPREME, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI_SUPREME, out before, 0);
                         int add = Randy.randomInt(1, 100);
                         bool ok = AddStones(a, KEY_LINGSHI_SUPREME, add);
-                        int after; a.data.get(KEY_LINGSHI_SUPREME, out after, 0);
-                        if (ok) LogHist($"[天运·赏赐] {NameOf(a)} 至上灵石 +{after - before}");
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI_SUPREME, out after, 0);
+                        if (ok) LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_supreme_spirit_stones", "supreme spirit stones +{0}", after - before)));
                         return ok;
                     }
                 case 8:
@@ -326,89 +332,89 @@ namespace xn.world
                 case 1:
                     { 
                         long beforeXP = 0, afterXP = 0; int beforeAP = 0, afterAP = 0, beforeBP = 0, afterBP = 0;
-                        a.data.get(KEY_XP, out beforeXP, 0L); a.data.get(KEY_ANC_POWER, out beforeAP, 0); a.data.get(KEY_BEAST_POWER, out beforeBP, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_XP, out beforeXP, 0L); xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out beforeAP, 0); xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out beforeBP, 0);
                         bool ok = Backlash_XP_Or_Power(a);
-                        a.data.get(KEY_XP, out afterXP, 0L); a.data.get(KEY_ANC_POWER, out afterAP, 0); a.data.get(KEY_BEAST_POWER, out afterBP, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_XP, out afterXP, 0L); xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out afterAP, 0); xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out afterBP, 0);
                         if (ok)
                         {
-                            if (IsAncient(a)) LogHist($"[天运·反噬] {NameOf(a)} 古神之力 -{beforeAP - afterAP}");
-                            else if (IsBeast(a)) LogHist($"[天运·反噬] {NameOf(a)} 妖力 -{beforeBP - afterBP}");
-                            else LogHist($"[天运·反噬] {NameOf(a)} 修为 -{beforeXP - afterXP}");
+                            if (IsAncient(a)) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_ancient_power", "Ancient God power -{0}", beforeAP - afterAP)));
+                            else if (IsBeast(a)) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_beast_power", "beast power -{0}", beforeBP - afterBP)));
+                            else LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_cultivation", "cultivation -{0}", beforeXP - afterXP)));
                         }
                         return ok;
                     }
                 case 2:
                     { 
                         bool ok = ReduceBaseStatHealth(a, 0.8f);
-                        if (ok) LogHist($"[天运·反噬] {NameOf(a)} 生命上限降低 20%");
+                        if (ok) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_health_cap", "maximum health cut by 20%")));
                         return ok;
                     }
                 case 3:
                     { 
                         bool ok = SealForYears(a, 10);
-                        if (ok) LogHist($"[天运·反噬] {NameOf(a)} 被封印 10 年");
+                        if (ok) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_sealed", "sealed for 10 years")));
                         return ok;
                     }
                 case 4:
                     { 
                         bool ok = MindWipe(a);
-                        if (ok) LogHist($"[天运·反噬] {NameOf(a)} 意识被抹除（忠诚清零，可能陷入疯狂）");
+                        if (ok) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_mind_wipe_possible_madness", "mind wiped, loyalty cleared, may slip into madness")));
                         return ok;
                     }
                 case 5:
                     { 
-                        int before; a.data.get(KEY_LUCK, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out before, 0);
                         bool ok = LuckStrip(a);
-                        int after; a.data.get(KEY_LUCK, out after, 0);
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out after, 0);
                         if (ok)
                         {
-                            if (after == 1 && before != 1) LogHist($"[天运·反噬] {NameOf(a)} 气运被剥离至 1");
-                            else LogHist($"[天运·反噬] {NameOf(a)} 气运 -{before - after}");
+                            if (after == 1 && before != 1) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_luck_stripped", "luck stripped down to 1")));
+                            else LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_luck_loss", "luck -{0}", before - after)));
                         }
                         return ok;
                     }
                 case 6:
                     { 
-                        int before; a.data.get(KEY_WUXIN, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out before, 0);
                         bool ok = WuxinStrip(a);
-                        int after; a.data.get(KEY_WUXIN, out after, 0);
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out after, 0);
                         if (ok)
                         {
-                            if (after == 1 && before != 1) LogHist($"[天运·反噬] {NameOf(a)} 悟性被剥离至 1");
-                            else LogHist($"[天运·反噬] {NameOf(a)} 悟性 -{before - after}");
+                            if (after == 1 && before != 1) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_insight_stripped", "insight stripped down to 1")));
+                            else LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_insight_loss", "insight -{0}", before - after)));
                         }
                         return ok;
                     }
                 case 7:
                     { 
-                        int b1; a.data.get(KEY_LINGSHI, out b1, 0);
-                        int b2; a.data.get(KEY_LINGSHI_SUPREME, out b2, 0);
+                        int b1; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI, out b1, 0);
+                        int b2; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI_SUPREME, out b2, 0);
                         bool ok = KillOrClearStonesOrNothing(a);
                         if (ok)
                         {
-                            if (a.isRekt()) LogHist($"[天运·反噬] {NameOf(a)} 当场陨落");
+                            if (a.isRekt()) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_died", "died on the spot")));
                             else
                             {
-                                int a1; a.data.get(KEY_LINGSHI, out a1, 0);
-                                int a2; a.data.get(KEY_LINGSHI_SUPREME, out a2, 0);
+                                int a1; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI, out a1, 0);
+                                int a2; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI_SUPREME, out a2, 0);
                                 if (a1 == 0 && a2 == 0 && (b1 > 0 || b2 > 0))
-                                    LogHist($"[天运·反噬] {NameOf(a)} 灵石被清空");
+                                    LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_stones_cleared", "spirit stones wiped clean")));
                             }
                         }
                         return ok;
                     }
                 case 8:
                     { 
-                        int before; a.data.get(KEY_XINMO, out before, 0);
+                        int before; xn.access.ActorAccess.GetData(a).get(KEY_XINMO, out before, 0);
                         bool ok = AddInt(a, KEY_XINMO, 50);
-                        int after; a.data.get(KEY_XINMO, out after, 0);
-                        if (ok) LogHist($"[天运·反噬] {NameOf(a)} 心魔 +{after - before}");
+                        int after; xn.access.ActorAccess.GetData(a).get(KEY_XINMO, out after, 0);
+                        if (ok) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_heart_demon", "heart demon +{0}", after - before)));
                         return ok;
                     }
                 case 9:
                     { 
                         bool ok = AddTrait(a, "root_07_broken");
-                        if (ok) LogHist($"[天运·反噬] {NameOf(a)} 获得【断根】");
+                        if (ok) LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_broken_root", "gained [Broken Root]")));
                         return ok;
                     }
             }
@@ -416,9 +422,9 @@ namespace xn.world
         }
         static bool Reward_XP_Or_Power(Actor a)
         {
-            if (IsAncient(a)) { int cur; a.data.get(KEY_ANC_POWER, out cur, 0); int add = (int)(GetRealmThreshold(a) * 0.30f); a.data.set(KEY_ANC_POWER, cur + add); LogHist($"[天运·赏赐] {NameOf(a)} 古神之力 +{add}"); return true; }
-            if (IsBeast(a)) { int cur; a.data.get(KEY_BEAST_POWER, out cur, 0); int add = (int)(GetRealmThreshold(a) * 0.30f); a.data.set(KEY_BEAST_POWER, cur + add); LogHist($"[天运·赏赐] {NameOf(a)} 妖力 +{add}"); return true; }
-            int successYear; a.data.get(KEY_BREAK_SUCCESS_YEAR, out successYear, 0);
+            if (IsAncient(a)) { int cur; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out cur, 0); int add = (int)(GetRealmThreshold(a) * 0.30f); xn.access.ActorAccess.GetData(a).set(KEY_ANC_POWER, cur + add); LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_ancient_power", "Ancient God power +{0}", add))); return true; }
+            if (IsBeast(a)) { int cur; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out cur, 0); int add = (int)(GetRealmThreshold(a) * 0.30f); xn.access.ActorAccess.GetData(a).set(KEY_BEAST_POWER, cur + add); LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_beast_power", "beast power +{0}", add))); return true; }
+            int successYear; xn.access.ActorAccess.GetData(a).get(KEY_BREAK_SUCCESS_YEAR, out successYear, 0);
             if (successYear > 0)
             {
                 int curYear = Date.getCurrentYear();
@@ -427,13 +433,13 @@ namespace xn.world
                     return false; 
                 }
             }
-            long xp; a.data.get(KEY_XP, out xp, 0L); long addL = (long)(GetRealmThreshold(a) * 0.30f); a.data.set(KEY_XP, xp + addL); LogHist($"[天运·赏赐] {NameOf(a)} 修为 +{addL}"); return true;
+            long xp; xn.access.ActorAccess.GetData(a).get(KEY_XP, out xp, 0L); long addL = (long)(GetRealmThreshold(a) * 0.30f); xn.access.ActorAccess.GetData(a).set(KEY_XP, xp + addL); LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_cultivation", "cultivation +{0}", addL))); return true;
         }
         static bool Backlash_XP_Or_Power(Actor a)
         {
-            if (IsAncient(a)) { int cur; a.data.get(KEY_ANC_POWER, out cur, 0); int dec = cur / 2; a.data.set(KEY_ANC_POWER, Math.Max(0, cur - dec)); LogHist($"[天运·反噬] {NameOf(a)} 古神之力 -{dec}"); return true; }
-            if (IsBeast(a)) { int cur; a.data.get(KEY_BEAST_POWER, out cur, 0); int dec = cur / 2; a.data.set(KEY_BEAST_POWER, Math.Max(0, cur - dec)); LogHist($"[天运·反噬] {NameOf(a)} 妖力 -{dec}"); return true; }
-            long xp; a.data.get(KEY_XP, out xp, 0L); long decL = xp / 2; a.data.set(KEY_XP, Math.Max(0, xp - decL)); LogHist($"[天运·反噬] {NameOf(a)} 修为 -{decL}"); return true;
+            if (IsAncient(a)) { int cur; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out cur, 0); int dec = cur / 2; xn.access.ActorAccess.GetData(a).set(KEY_ANC_POWER, Math.Max(0, cur - dec)); LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_ancient_power", "Ancient God power -{0}", dec))); return true; }
+            if (IsBeast(a)) { int cur; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out cur, 0); int dec = cur / 2; xn.access.ActorAccess.GetData(a).set(KEY_BEAST_POWER, Math.Max(0, cur - dec)); LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_beast_power", "beast power -{0}", dec))); return true; }
+            long xp; xn.access.ActorAccess.GetData(a).get(KEY_XP, out xp, 0L); long decL = xp / 2; xn.access.ActorAccess.GetData(a).set(KEY_XP, Math.Max(0, xp - decL)); LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_cultivation", "cultivation -{0}", decL))); return true;
         }
         static long GetRealmThreshold(Actor a)
         {
@@ -448,32 +454,32 @@ namespace xn.world
         static bool IsAncient(Actor a) { foreach (var t in a.getTraits()) { if (t != null && t.id.StartsWith("ancient_")) return true; } return false; }
         static bool IsBeast(Actor a) { foreach (var t in a.getTraits()) { if (t != null && t.id.StartsWith("beast_")) return true; } return false; }
         static bool AddIntClamped(Actor a, string key, int add, int min, int max)
-        { int cur; a.data.get(key, out cur, 0); int v = cur + add; if (v < min) v = min; if (v > max) v = max; a.data.set(key, v); return true; }
+        { int cur; xn.access.ActorAccess.GetData(a).get(key, out cur, 0); int v = cur + add; if (v < min) v = min; if (v > max) v = max; xn.access.ActorAccess.GetData(a).set(key, v); return true; }
         static bool AddInt(Actor a, string key, int add)
-        { int cur; a.data.get(key, out cur, 0); a.data.set(key, cur + add); return true; }
+        { int cur; xn.access.ActorAccess.GetData(a).get(key, out cur, 0); xn.access.ActorAccess.GetData(a).set(key, cur + add); return true; }
         static bool LuckStrip(Actor a)
         {
-            if (Randy.randomChance(0.5f)) { a.data.set(KEY_LUCK, 1); return true; }
+            if (Randy.randomChance(0.5f)) { xn.access.ActorAccess.GetData(a).set(KEY_LUCK, 1); return true; }
             return AddIntClamped(a, KEY_LUCK, -Randy.randomInt(5, 10), 0, 100);
         }
         static bool WuxinStrip(Actor a)
         {
-            if (Randy.randomChance(0.5f)) { a.data.set(KEY_WUXIN, 1); return true; }
+            if (Randy.randomChance(0.5f)) { xn.access.ActorAccess.GetData(a).set(KEY_WUXIN, 1); return true; }
             return AddIntClamped(a, KEY_WUXIN, -Randy.randomInt(5, 10), 0, 100);
         }
         static bool SealForYears(Actor a, int years)
         {
-            a.data.set(KEY_STOP, 1);
-            a.data.set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + years);
+            xn.access.ActorAccess.GetData(a).set(KEY_STOP, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + years);
             a.addStatusEffect("slowness", 3f);
             a.makeStunned(2f);
             return true;
         }
         static bool ReduceBaseStatHealth(Actor a, float ratio)
         {
-            float hpF = a.stats["health"];
+            float hpF = xn.access.BaseSimObjectAccess.GetStats(a)["health"];
             int nhp = Mathf.Max(1, Mathf.FloorToInt(hpF * ratio));
-            if (nhp < hpF) a.stats["health"] = nhp;
+            if (nhp < hpF) xn.access.BaseSimObjectAccess.GetStats(a)["health"] = nhp;
             return true;
         }
         static bool RollGiveTrait(Actor a, bool isDivine, float p)
@@ -489,8 +495,8 @@ namespace xn.world
                 {
                     a.addTrait(t);
                     string traitName = GetTraitDisplayName(t);
-                    string typeName = isDivine ? "神通" : "仙术";
-                    LogHist($"[天运·赏赐] {NameOf(a)} 获得{typeName}【{traitName}】");
+                    string typeName = isDivine ? T("tianyun_type_divine", "divine ability") : T("tianyun_type_art", "immortal art");
+                    LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_trait", "obtained {0} [{1}]", typeName, traitName)));
                     return true;
                 }
             }
@@ -498,9 +504,9 @@ namespace xn.world
         }
         static string GetTraitDisplayName(ActorTrait t)
         {
-            if (t == null) return "未知";
+            if (t == null) return "Unknown";
             string id = t.id;
-            if (string.IsNullOrEmpty(id)) return "未知";
+            if (string.IsNullOrEmpty(id)) return "Unknown";
             string localizedName = LocalizedTextManager.getText("trait_" + id);
             if (!string.IsNullOrEmpty(localizedName) && localizedName != ("trait_" + id))
             {
@@ -522,7 +528,7 @@ namespace xn.world
             var t = s_poolRoots[Randy.randomInt(0, s_poolRoots.Length - 1)];
             if (t == null) return false;
             a.addTrait(t);
-            LogHist($"[天运·赏赐] {NameOf(a)} 获得灵根");
+            LogHist(T("broadcast_tianyun_reward", "[Heavenly Fate - Reward] {0} {1}", NameOf(a), T("tianyun_reward_spirit_root", "obtained a spirit root")));
             return true;
         }
         static bool KillOrClearStonesOrNothing(Actor a)
@@ -536,14 +542,14 @@ namespace xn.world
             }
             if (r < 0.60f)
             {
-                a.data.set(KEY_LINGSHI, 0);
-                a.data.set(KEY_LINGSHI_SUPREME, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_LINGSHI, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_LINGSHI_SUPREME, 0);
                 return true;
             }
             return false; 
         }
         static bool AddStones(Actor a, string key, int add)
-        { int cur; a.data.get(key, out cur, 0); a.data.set(key, cur + add); return true; }
+        { int cur; xn.access.ActorAccess.GetData(a).get(key, out cur, 0); xn.access.ActorAccess.GetData(a).set(key, cur + add); return true; }
         static bool AddTrait(Actor a, string traitId)
         {
             var t = AssetManager.traits.get(traitId) as ActorTrait;
@@ -555,10 +561,11 @@ namespace xn.world
         static bool MindWipe(Actor a)
         {
             if (a == null || !a.isAlive()) return false;
-            a.stats["loyalty_traits"] = 0f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["loyalty_traits"] = 0f;
             bool mad = false;
             if (Randy.randomChance(0.5f)) { AddTrait(a, "madness"); mad = true; }
-            LogHist($"[天运·反噬] {NameOf(a)} 意识抹除，忠诚清零{(mad ? "，陷入疯狂" : "")}");
+            string madSuffix = mad ? T("tianyun_backlash_mind_wipe_mad_suffix", ", slipped into madness") : "";
+            LogHist(T("broadcast_tianyun_backlash", "[Heavenly Fate - Backlash] {0} {1}", NameOf(a), T("tianyun_backlash_mind_wipe", "mind wiped, loyalty cleared{0}", madSuffix)));
             return true;
         }
         static void LogHist(string text)
@@ -567,20 +574,20 @@ namespace xn.world
             string piece = ExtractDetail(text, s_detailName);
             if (!string.IsNullOrEmpty(piece))
             {
-                if (s_detailBuf.Length > 0) s_detailBuf.Append('；'); 
+                if (s_detailBuf.Length > 0) s_detailBuf.Append("; "); 
                 s_detailBuf.Append(piece);
             }
         }
         static string NameOf(Actor a)
         {
             var n = a.getName();
-            return string.IsNullOrEmpty(n) ? "无名修士" : n;
+            return string.IsNullOrEmpty(n) ? "Unnamed Cultivator" : n;
         }
         static bool FalseSafe() { return false; }
         static void IncTianyunCount(Actor a)
         {
-            int c; a.data.get(KEY_TY_COUNT, out c, 0);
-            a.data.set(KEY_TY_COUNT, c + 1);
+            int c; xn.access.ActorAccess.GetData(a).get(KEY_TY_COUNT, out c, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_TY_COUNT, c + 1);
         }
         static void BuildPoolsIfNeeded()
         {

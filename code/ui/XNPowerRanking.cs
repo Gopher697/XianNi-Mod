@@ -28,17 +28,17 @@ namespace xn.ui
         }
         internal static long CalcPowerScoreLongInternal(Actor a)
         {
-            double dmg   = a.stats["damage"];          if (dmg   < 0) dmg = 0;   if (dmg   > 2_100_000_000d) dmg   = 2_100_000_000d;
-            double aspd  = a.stats["attack_speed"];    if (aspd  < 0) aspd = 0;
-            double cRate = a.stats["critical_chance"]; if (cRate < 0) cRate = 0; if (cRate > 1) cRate = 1;
-            double cMult = a.stats["critical_damage_multiplier"]; if (cMult < 1) cMult = 1;
-            double armor = a.stats["armor"];           if (armor < 0) armor = 0;
+            double dmg   = xn.access.BaseSimObjectAccess.GetStats(a)["damage"];          if (dmg   < 0) dmg = 0;   if (dmg   > 2_100_000_000d) dmg   = 2_100_000_000d;
+            double aspd  = xn.access.BaseSimObjectAccess.GetStats(a)["attack_speed"];    if (aspd  < 0) aspd = 0;
+            double cRate = xn.access.BaseSimObjectAccess.GetStats(a)["critical_chance"]; if (cRate < 0) cRate = 0; if (cRate > 1) cRate = 1;
+            double cMult = xn.access.BaseSimObjectAccess.GetStats(a)["critical_damage_multiplier"]; if (cMult < 1) cMult = 1;
+            double armor = xn.access.BaseSimObjectAccess.GetStats(a)["armor"];           if (armor < 0) armor = 0;
             double hpMax = a.getMaxHealth();           if (hpMax < 0) hpMax = 0; if (hpMax > 2_100_000_000d) hpMax = 2_100_000_000d;
             double dps  = dmg * aspd * (1.0 + cRate * cMult);
             double bulk = hpMax * 0.1 + armor * 1.5;
             double basePower = dps + bulk;
-            int kills = a.data.kills; if (kills < 0) kills = 0;
-            int age = a.data.getAge(); if (age < 0) age = 0;
+            int kills = xn.access.ActorAccess.GetData(a).kills; if (kills < 0) kills = 0;
+            int age = xn.access.ActorAccess.GetData(a).getAge(); if (age < 0) age = 0;
             if (age > 20) age = 20;
             double multiplier = (1.0 + kills * 0.0025) * (1.0 + age * 0.001);
             double powered = basePower * multiplier;

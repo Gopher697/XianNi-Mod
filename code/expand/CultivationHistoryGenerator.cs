@@ -21,18 +21,17 @@ namespace xn.expand
         private static bool _isGenerating = false;
         private static int GetGenerationCount()
         {
-            if (World.world?.map_stats?.custom_data == null)
-                return 0;
-            World.world.map_stats.custom_data.get(WORLD_KEY_HISTORY_COUNT, out int count, 0);
+            var customData = xn.access.MapBoxAccess.GetCustomData(World.world);
+            if (customData == null) return 0;
+            customData.get(WORLD_KEY_HISTORY_COUNT, out int count, 0);
             return count;
         }
         private static void IncrementGenerationCount()
         {
-            if (World.world?.map_stats == null) return;
-            if (World.world.map_stats.custom_data == null)
-                World.world.map_stats.custom_data = new SaveCustomData();
+            var customData = xn.access.MapBoxAccess.EnsureCustomData(World.world);
+            if (customData == null) return;
             int current = GetGenerationCount();
-            World.world.map_stats.custom_data.set(WORLD_KEY_HISTORY_COUNT, current + 1);
+            customData.set(WORLD_KEY_HISTORY_COUNT, current + 1);
         }
         private static bool IsUsingCustomConfig()
         {
@@ -63,6 +62,15 @@ namespace xn.expand
         {
             _isGenerating = false;
         }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
+        private static string F(string key, string fallback, params object[] args)
+        {
+            return string.Format(T(key, fallback), args);
+        }
         public static int GetRemainingGenerations()
         {
             if (IsUsingCustomConfig())
@@ -81,7 +89,9 @@ namespace xn.expand
         {
             if (!CanGenerate())
             {
-                string message = _isGenerating ? "正在生成中，请稍候..." : $"本局游戏已达到生成上限（{MAX_GENERATIONS}次）";
+                string message = _isGenerating
+                    ? T("cultivation_history_generating", "Generating, please wait...")
+                    : F("cultivation_history_limit_reached_format", "This world has reached the generation limit ({0} times)", MAX_GENERATIONS);
                 callback?.Invoke(message);
                 return;
             }
@@ -97,7 +107,7 @@ namespace xn.expand
             }
             catch (Exception e)
             {
-                callback?.Invoke($"生成失败：{e.Message}");
+                callback?.Invoke(F("ai_generation_failed_with_error", "Generation failed: {0}", e.Message));
             }
             finally
             {
@@ -107,37 +117,37 @@ namespace xn.expand
         private static string CollectActorData(Actor actor)
         {
             if (actor == null || actor.isRekt())
-                return "未知角色";
+                return T("cultivation_history_unknown_actor", "Unknown actor");
             var sb = new StringBuilder();
             string baseName = xn.world.TitleSystem.GetBaseName(actor);
             string title = xn.world.TitleSystem.GetTitle(actor);
             string suffix = xn.world.TitleSystem.GetSuffix(actor);
-            sb.AppendLine($"名字：{baseName}");
+            sb.AppendLine(F("cultivation_history_data_name", "Name: {0}", baseName));
             if (!string.IsNullOrEmpty(title))
-                sb.AppendLine($"称号：{title}");
+                sb.AppendLine(F("cultivation_history_data_title", "Title: {0}", title));
             if (!string.IsNullOrEmpty(suffix))
-                sb.AppendLine($"境界后缀：{suffix}");
-            sb.AppendLine($"年龄：{actor.getAge()}岁");
-            sb.AppendLine($"性别：{(actor.data.sex == ActorSex.Male ? "男" : "女")}");
+                sb.AppendLine(F("cultivation_history_data_realm_suffix", "Realm Suffix: {0}", suffix));
+            sb.AppendLine(F("cultivation_history_data_age", "Age: {0}", actor.getAge()));
+            sb.AppendLine(F("cultivation_history_data_gender", "Gender: {0}", xn.access.ActorAccess.GetData(actor).sex == ActorSex.Male ? T("cultivation_history_gender_male", "Male") : T("cultivation_history_gender_female", "Female")));
             var actorAsset = actor.asset;
             if (actorAsset != null && !string.IsNullOrEmpty(actorAsset.id))
             {
                 string raceName = LocalizedTextManager.getText(actorAsset.id);
                 if (string.IsNullOrEmpty(raceName) || raceName == actorAsset.id)
                     raceName = actorAsset.id;
-                sb.AppendLine($"种族：{raceName}");
+                sb.AppendLine(F("cultivation_history_data_race", "Race: {0}", raceName));
             }
             string realmName = GetActorRealm(actor);
-            sb.AppendLine($"境界：{realmName}");
-            actor.data.get("xn.stat.xiuwei", out long xiuwei, 0L);
-            sb.AppendLine($"修为：{FormatNumber(xiuwei)}");
-            var stats = actor.stats;
+            sb.AppendLine(F("cultivation_history_data_realm", "Realm: {0}", realmName));
+            xn.access.ActorAccess.GetData(actor).get("xn.stat.xiuwei", out long xiuwei, 0L);
+            sb.AppendLine(F("cultivation_history_data_cultivation", "Cultivation: {0}", FormatNumber(xiuwei)));
+            var stats = xn.access.BaseSimObjectAccess.GetStats(actor);
             if (stats != null)
             {
-                sb.AppendLine($"生命：{Mathf.RoundToInt(stats["health"])}");
-                sb.AppendLine($"攻击：{Mathf.RoundToInt(stats["damage"])}");
-                sb.AppendLine($"防御：{Mathf.RoundToInt(stats["armor"])}");
-                sb.AppendLine($"速度：{Mathf.RoundToInt(stats["speed"])}");
+                sb.AppendLine(F("cultivation_history_data_health", "Health: {0}", Mathf.RoundToInt(stats["health"])));
+                sb.AppendLine(F("cultivation_history_data_attack", "Attack: {0}", Mathf.RoundToInt(stats["damage"])));
+                sb.AppendLine(F("cultivation_history_data_defense", "Defense: {0}", Mathf.RoundToInt(stats["armor"])));
+                sb.AppendLine(F("cultivation_history_data_speed", "Speed: {0}", Mathf.RoundToInt(stats["speed"])));
             }
             var traits = actor.getTraits();
             if (traits != null && traits.Count > 0)
@@ -153,70 +163,70 @@ namespace xn.expand
                     }
                 }
                 if (cultivationTraits.Count > 0)
-                    sb.AppendLine($"特质：{string.Join("、", cultivationTraits)}");
+                    sb.AppendLine(F("cultivation_history_data_traits", "Traits: {0}", string.Join(T("cultivation_history_trait_separator", ", "), cultivationTraits)));
             }
             var kingdom = actor.kingdom;
             if (kingdom != null && !kingdom.isRekt())
-                sb.AppendLine($"国家：{kingdom.data.name}");
+                sb.AppendLine(F("cultivation_history_data_kingdom", "Kingdom: {0}", kingdom.data.name));
             var city = actor.city;
             if (city != null && !city.isRekt())
-                sb.AppendLine($"城市：{city.data.name}");
+                sb.AppendLine(F("cultivation_history_data_city", "City: {0}", city.data.name));
             var citizenJob = actor.citizen_job;
             if (citizenJob != null && !string.IsNullOrEmpty(citizenJob.id))
             {
                 string jobName = LocalizedTextManager.getText(citizenJob.id);
                 if (string.IsNullOrEmpty(jobName) || jobName == citizenJob.id)
                     jobName = citizenJob.id;
-                sb.AppendLine($"职业：{jobName}");
+                sb.AppendLine(F("cultivation_history_data_job", "Occupation: {0}", jobName));
             }
-            sb.AppendLine($"击杀：{actor.data.kills}");
-            sb.AppendLine($"生育次数：{actor.data.births}");
-            actor.data.get("xn.possession.taken", out int possession, 0);
+            sb.AppendLine(F("cultivation_history_data_kills", "Kills: {0}", xn.access.ActorAccess.GetData(actor).kills));
+            sb.AppendLine(F("cultivation_history_data_births", "Births: {0}", xn.access.ActorAccess.GetData(actor).births));
+            xn.access.ActorAccess.GetData(actor).get("xn.possession.taken", out int possession, 0);
             if (possession > 0)
-                sb.AppendLine("经历：曾被夺舍");
-            actor.data.get("xn.reincarnation.count", out int reincarnation, 0);
+                sb.AppendLine(T("cultivation_history_data_possessed", "Experience: Was once possessed"));
+            xn.access.ActorAccess.GetData(actor).get("xn.reincarnation.count", out int reincarnation, 0);
             if (reincarnation > 0)
-                sb.AppendLine($"轮回：{reincarnation}次");
-            actor.data.get("xn.tianyun.count", out int tianyun, 0);
+                sb.AppendLine(F("cultivation_history_data_reincarnation", "Reincarnations: {0}", reincarnation));
+            xn.access.ActorAccess.GetData(actor).get("xn.tianyun.count", out int tianyun, 0);
             if (tianyun > 0)
-                sb.AppendLine($"天运：{tianyun}次");
+                sb.AppendLine(F("cultivation_history_data_tianyun", "Heavenly Fate Encounters: {0}", tianyun));
             if (xn.bloodline.BloodlineSystem.HasBloodline(actor))
             {
                 string bloodlineType = xn.bloodline.BloodlineSystem.GetBloodlineType(actor);
                 string typeName = xn.bloodline.BloodlineTypes.GetLocaleName(bloodlineType);
                 float concentration = xn.bloodline.BloodlineSystem.GetConcentration(actor);
-                sb.AppendLine($"血脉：{typeName}（浓度：{concentration:F1}%）");
+                sb.AppendLine(F("cultivation_history_data_bloodline", "Bloodline: {0} (Concentration: {1:F1}%)", typeName, concentration));
             }
             if (actor.hasTrait("realm_14_gtianzun") || actor.hasTrait("realm_15_half_tatian") || actor.hasTrait("realm_16_tatian"))
             {
-                actor.data.get("xn.trial.bridge", out long bridgeL, 0L);
-                sb.AppendLine($"踏天九桥：{(int)bridgeL}/9");
+                xn.access.ActorAccess.GetData(actor).get("xn.trial.bridge", out long bridgeL, 0L);
+                sb.AppendLine(F("cultivation_history_data_heaven_trampling_bridges", "Heaven Trampling Bridges: {0}/9", (int)bridgeL));
             }
             string ancientRealm = GetAncientRealm(actor);
             if (!string.IsNullOrEmpty(ancientRealm))
             {
-                sb.AppendLine($"古神境界：{ancientRealm}");
-                actor.data.get("xn.stat.gushen_power", out int gushenPower, 0);
+                sb.AppendLine(F("cultivation_history_data_ancient_god_realm", "Ancient God Realm: {0}", ancientRealm));
+                xn.access.ActorAccess.GetData(actor).get("xn.stat.gushen_power", out int gushenPower, 0);
                 if (gushenPower > 0)
-                    sb.AppendLine($"古神之力：{gushenPower}");
+                    sb.AppendLine(F("cultivation_history_data_ancient_god_power", "Ancient God Power: {0}", gushenPower));
             }
             string beastRealm = GetBeastRealm(actor);
             if (!string.IsNullOrEmpty(beastRealm))
             {
-                sb.AppendLine($"妖修境界：{beastRealm}");
-                actor.data.get("xn.stat.yaoli", out int yaoli, 0);
+                sb.AppendLine(F("cultivation_history_data_beast_realm", "Beast Realm: {0}", beastRealm));
+                xn.access.ActorAccess.GetData(actor).get("xn.stat.yaoli", out int yaoli, 0);
                 if (yaoli > 0)
-                    sb.AppendLine($"妖力：{yaoli}");
+                    sb.AppendLine(F("cultivation_history_data_beast_power", "Beast Power: {0}", yaoli));
             }
-            actor.data.get("xn.stat.wuxin", out int wuxin, 0);
+            xn.access.ActorAccess.GetData(actor).get("xn.stat.wuxin", out int wuxin, 0);
             if (wuxin > 0)
-                sb.AppendLine($"悟性：{wuxin}");
-            actor.data.get("xn.stat.qiyun", out int qiyun, 0);
+                sb.AppendLine(F("cultivation_history_data_comprehension", "Comprehension: {0}", wuxin));
+            xn.access.ActorAccess.GetData(actor).get("xn.stat.qiyun", out int qiyun, 0);
             if (qiyun != 0)
-                sb.AppendLine($"气运：{qiyun}");
-            actor.data.get("xn.stat.xinmo", out int xinmo, 0);
+                sb.AppendLine(F("cultivation_history_data_luck", "Luck/Fate: {0}", qiyun));
+            xn.access.ActorAccess.GetData(actor).get("xn.stat.xinmo", out int xinmo, 0);
             if (xinmo > 0)
-                sb.AppendLine($"心魔：{xinmo}");
+                sb.AppendLine(F("cultivation_history_data_inner_demon", "Inner Demon: {0}", xinmo));
             return sb.ToString();
         }
         private static string GetAncientRealm(Actor actor)
@@ -277,7 +287,7 @@ namespace xn.expand
                     }
                 }
             }
-            return "无境界";
+            return T("cultivation_history_no_realm", "No realm");
         }
         private static string FormatNumber(long num)
         {
@@ -289,15 +299,8 @@ namespace xn.expand
         private static async Task<string> GenerateHistoryFromAPI(string actorData, string apiKey)
         {
             var (endpoint, model) = xn.voice.DeepSeekTextGenerator.GetProviderConfig();
-            string systemPrompt = @"你是一位专业的修仙(仙逆)小说作家。根据提供的角色数据，创作一段简短的修仙历程故事。
-要求：
-1. 字数控制在50-550字之间
-2. 故事要有起承转合，包含修炼、突破、历练等元素
-3. 根据角色的境界、特质、经历等数据，编织出合理的故事情节
-4. 语言要生动有趣，符合修仙小说风格
-5. 故事要完整，不要留下悬念
-6. 不要重复角色数据，而是将数据融入故事中";
-            string userPrompt = $"请根据以下角色数据，创作一段修仙历程故事：\n\n{actorData}";
+            string systemPrompt = T("cultivation_history_system_prompt", "You are a professional cultivation (Renegade Immortal) novelist. Based on the provided character data, write a short cultivation-history story.\nRequirements:\n1. Keep it between 50 and 550 words\n2. The story should have a beginning, development, turn, and conclusion, including cultivation, breakthroughs, trials, and wandering experience\n3. Use the character's realm, traits, experiences, and other data to weave a plausible plot\n4. Use vivid, flavorful language that fits a cultivation novel\n5. Make the story complete and leave no unresolved suspense\n6. Do not repeat the raw character data; weave it naturally into the story");
+            string userPrompt = F("cultivation_history_user_prompt", "Based on the following character data, write a cultivation-history story:\n\n{0}", actorData);
             var request = new ChatRequest
             {
                 messages = new[]
@@ -335,12 +338,12 @@ namespace xn.expand
                 else
                 {
                     string errorBody = await response.Content.ReadAsStringAsync();
-                    Debug.LogWarning($"[XN-History] API调用失败: {response.StatusCode} (Model: {model})");
-                    Debug.LogWarning($"[XN-History] 错误详情: {errorBody}");
-                    throw new Exception($"API调用失败: {response.StatusCode}");
+                    Debug.LogWarning(F("cultivation_history_api_call_failed_log", "[XN-History] API call failed: {0} (Model: {1})", response.StatusCode, model));
+                    Debug.LogWarning(F("cultivation_history_api_error_detail_log", "[XN-History] Error details: {0}", errorBody));
+                    throw new Exception(F("ai_api_call_failed", "API call failed: {0}", response.StatusCode));
                 }
             }
-            throw new Exception("API返回数据为空");
+            throw new Exception(T("ai_api_empty_response", "API returned empty data"));
         }
     }
 }

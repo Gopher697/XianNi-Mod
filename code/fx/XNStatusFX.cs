@@ -182,28 +182,28 @@ namespace xn.fx
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (caster == null || !caster.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_duoshe", caster.current_position, caster.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_duoshe", caster.current_position, xn.access.ActorAccess.GetActorScale(caster), FX_Y_OFFSET);
         }
         public static void PlayBenyuanOpen(Actor caster)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (caster == null || !caster.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_benyuan_open", caster.current_position, caster.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_benyuan_open", caster.current_position, xn.access.ActorAccess.GetActorScale(caster), FX_Y_OFFSET);
         }
         public static void PlayJijing(Actor target)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_yijing_jijing", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_yijing_jijing", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlaySanmei(Actor target)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_sanmei", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_sanmei", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayWanjian(WorldTile center, float scale = 1f)
         {
@@ -217,21 +217,21 @@ namespace xn.fx
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_xuankongpo", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_xuankongpo", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayZhenkongquan(Actor target)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_zhenkongquan", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_zhenkongquan", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayJiuyin(Actor target)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_jiuyin", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_jiuyin", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayDuqi(WorldTile center, float scale = 1f)
         {
@@ -245,14 +245,14 @@ namespace xn.fx
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_jianzhan", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_jianzhan", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayXsSlash(Actor target)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_xs_slash", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_xs_slash", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayXsQuake(WorldTile center, float scale = 1f)
         {
@@ -266,7 +266,7 @@ namespace xn.fx
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (caster == null || !caster.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_xs_waves", caster.current_position, caster.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_xs_waves", caster.current_position, xn.access.ActorAccess.GetActorScale(caster), FX_Y_OFFSET);
         }
         public static void PlayXsConvert(WorldTile center, float scale = 1f)
         {
@@ -280,7 +280,7 @@ namespace xn.fx
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_xs_missile", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_xs_missile", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayXsPalm(WorldTile center, float scale = 1f)
         {
@@ -294,14 +294,14 @@ namespace xn.fx
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_xs_breaker", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_xs_breaker", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         public static void PlayXsLink(Actor target)
         {
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
             if (target == null || !target.isAlive()) return;
             Register();
-            SpawnOnceAt("fx_xs_link", target.current_position, target.actor_scale, FX_Y_OFFSET);
+            SpawnOnceAt("fx_xs_link", target.current_position, xn.access.ActorAccess.GetActorScale(target), FX_Y_OFFSET);
         }
         private static void SpawnOnceAt(string fxId, Vector2 pos, float scale, float yOffset)
         {

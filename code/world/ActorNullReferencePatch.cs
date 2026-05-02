@@ -21,32 +21,34 @@ namespace xn.world
                 {
                     return false; 
                 }
-                if (__instance.is_inside_boat)
+                if (xn.access.ActorAccess.IsInsideBoat(__instance))
                 {
-                    if (__instance.inside_boat == null)
+                    Boat insideBoat = xn.access.ActorAccess.GetInsideBoat(__instance);
+                    if (insideBoat == null)
                     {
-                        __instance.is_inside_boat = false;
+                        xn.access.ActorAccess.SetIsInsideBoat(__instance, false);
                         LogWarning(__instance, "had is_inside_boat=true but inside_boat was null");
                         return false;
                     }
-                    if (__instance.inside_boat.actor == null)
+                    Actor boatActor = xn.access.ActorSimpleComponentAccess.GetActor(insideBoat);
+                    if (boatActor == null)
                     {
-                        __instance.is_inside_boat = false;
-                        __instance.inside_boat = null;
+                        xn.access.ActorAccess.SetIsInsideBoat(__instance, false);
+                        xn.access.ActorAccess.SetInsideBoat(__instance, null);
                         LogWarning(__instance, "inside_boat.actor was null");
                         return false;
                     }
-                    if (__instance.inside_boat.actor.current_tile == null)
+                    if (boatActor.current_tile == null)
                     {
-                        __instance.is_inside_boat = false;
-                        __instance.inside_boat = null;
+                        xn.access.ActorAccess.SetIsInsideBoat(__instance, false);
+                        xn.access.ActorAccess.SetInsideBoat(__instance, null);
                         LogWarning(__instance, "inside_boat.actor.current_tile was null");
                         return false;
                     }
                 }
-                if (__instance.is_inside_building && __instance.inside_building == null)
+                if (xn.access.ActorAccess.IsInsideBuilding(__instance) && xn.access.ActorAccess.GetInsideBuilding(__instance) == null)
                 {
-                    __instance.is_inside_building = false;
+                    xn.access.ActorAccess.SetIsInsideBuilding(__instance, false);
                     LogWarning(__instance, "had is_inside_building=true but inside_building was null");
                 }
                 return true;
@@ -55,7 +57,7 @@ namespace xn.world
             {
                 if (xn.config.ModConfigHooks.EnableLog)
                 {
-                    Debug.LogError($"[XN-Patch] Exception in Pre_u1_checkInside for Actor {__instance?.data?.id}: {ex.Message}");
+                    Debug.LogError($"[XN-Patch] Exception in Pre_u1_checkInside for Actor {xn.access.ActorAccess.GetData(__instance)?.id}: {ex.Message}");
                 }
                 return false;
             }
@@ -64,7 +66,7 @@ namespace xn.world
         {
             if (xn.config.ModConfigHooks.EnableLog && actor != null)
             {
-                Debug.LogWarning($"[XN-Patch] Actor {actor.data.id} {message}. Cleaning up.");
+                Debug.LogWarning($"[XN-Patch] Actor {xn.access.ActorAccess.GetData(actor).id} {message}. Cleaning up.");
             }
         }
     }

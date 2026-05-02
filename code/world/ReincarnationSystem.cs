@@ -32,6 +32,19 @@ namespace xn.world
         }
         static readonly List<Soul> s_pool = new List<Soul>(64);
         const string KEY_REINC_PREV_INFO = "xn.reincarnation.prev_info";
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
+        private static string F(string key, string fallback, params object[] args)
+        {
+            return string.Format(T(key, fallback), args);
+        }
+        private static string Unknown()
+        {
+            return T("value_unknown", "Unknown");
+        }
         public static void Init(Harmony h)
         {
             h.Patch(AccessTools.Method(typeof(BabyMaker), "makeBaby",
@@ -41,20 +54,20 @@ namespace xn.world
         public static void OnEligibleDeath(Actor a)
         {
             if (a == null) return;
-            int demonMark; a.data.get(AmbitionSystem.KEY_AMB_DEMON, out demonMark, 0);
-            int dragonMark; a.data.get(AmbitionSystem.KEY_AMB_DRAGON, out dragonMark, 0);
+            int demonMark; xn.access.ActorAccess.GetData(a).get(AmbitionSystem.KEY_AMB_DEMON, out demonMark, 0);
+            int dragonMark; xn.access.ActorAccess.GetData(a).get(AmbitionSystem.KEY_AMB_DRAGON, out dragonMark, 0);
             if (demonMark == 1 || dragonMark == 1)
             {
                 return; 
             }
             int removed;
-            a.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, out removed, 0);
+            xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, out removed, 0);
             if (removed == 1)
             {
                 return; 
             }
             int isMainChar;
-            a.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             bool isMainCharacter = (isMainChar == 1);
             int idx = GetRealmIndex(a);
             bool hasReincarnationIntent = a.hasTrait("intent_07_reincarnation");
@@ -75,36 +88,36 @@ namespace xn.world
                 }
             }
             if (!shouldEnterPool) return;
-            int enq; a.data.get(KEY_ENQUEUED, out enq, 0);
+            int enq; xn.access.ActorAccess.GetData(a).get(KEY_ENQUEUED, out enq, 0);
             if (enq == 1) return; 
             string baseName = ExtractBaseName(a);
-            int wx; a.data.get(KEY_WUXIN, out wx, 0);
-            int lk; a.data.get(KEY_LUCK,  out lk, 0);
-            int rc; a.data.get(KEY_REINC, out rc, 0);
+            int wx; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
+            int lk; xn.access.ActorAccess.GetData(a).get(KEY_LUCK,  out lk, 0);
+            int rc; xn.access.ActorAccess.GetData(a).get(KEY_REINC, out rc, 0);
             string snapshot = BuildReincarnationSnapshot(a, idx);
             string speciesId = GetSpeciesId(a);
-            bool fav = a.data.favorite;
+            bool fav = xn.access.ActorAccess.GetData(a).favorite;
             s_pool.Add(new Soul { baseName = baseName, reinc = rc, wuxin = wx, luck = lk, realmIndex = idx, snapshot = snapshot, speciesId = speciesId, favorite = fav, isMainCharacter = isMainCharacter });
-            a.data.set(KEY_ENQUEUED, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_ENQUEUED, 1);
         }
         public static void ForceAddToPool(Actor a)
         {
             if (a == null) return;
-            int enq; a.data.get(KEY_ENQUEUED, out enq, 0);
+            int enq; xn.access.ActorAccess.GetData(a).get(KEY_ENQUEUED, out enq, 0);
             if (enq == 1) return; 
             int idx = GetRealmIndex(a);
             string baseName = ExtractBaseName(a);
-            int wx; a.data.get(KEY_WUXIN, out wx, 0);
-            int lk; a.data.get(KEY_LUCK, out lk, 0);
-            int rc; a.data.get(KEY_REINC, out rc, 0);
+            int wx; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
+            int lk; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out lk, 0);
+            int rc; xn.access.ActorAccess.GetData(a).get(KEY_REINC, out rc, 0);
             string snapshot = BuildReincarnationSnapshot(a, idx);
             string speciesId = GetSpeciesId(a);
-            bool fav = a.data.favorite;
+            bool fav = xn.access.ActorAccess.GetData(a).favorite;
             int isMainChar;
-            a.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             bool isMainCharacter = (isMainChar == 1);
             s_pool.Add(new Soul { baseName = baseName, reinc = rc, wuxin = wx, luck = lk, realmIndex = idx, snapshot = snapshot, speciesId = speciesId, favorite = fav, isMainCharacter = isMainCharacter });
-            a.data.set(KEY_ENQUEUED, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_ENQUEUED, 1);
         }
         static void Post_BabyMaker_makeBaby(Actor __result, Actor pParent1, Actor pParent2)
         {
@@ -133,23 +146,23 @@ namespace xn.world
             float chance = soul.isMainCharacter ? 1.0f : GetReincarnationChance(soul.realmIndex);
             if (!Randy.randomChance(chance)) return; 
             int newCount = soul.reinc + 1;
-            string suffix = Build世Suffix(newCount);
-            string newName = string.IsNullOrEmpty(soul.baseName) ? "无名" + suffix : soul.baseName + suffix;
+            string suffix = BuildGenerationSuffix(newCount);
+            string newName = string.IsNullOrEmpty(soul.baseName) ? T("reincarnation_unnamed_base", "Nameless") + suffix : soul.baseName + suffix;
             __result.setName(newName);
             int wx = soul.wuxin + Randy.randomInt(1, 51); 
             int lk = soul.luck + Randy.randomInt(1, 51);  
             if (wx < 0) wx = 0;
             if (lk < 0) lk = 0;
-            __result.data.set(KEY_WUXIN, wx);
-            __result.data.set(KEY_LUCK,  lk);
-            __result.data.set(KEY_REINC, newCount);
+            xn.access.ActorAccess.GetData(__result).set(KEY_WUXIN, wx);
+            xn.access.ActorAccess.GetData(__result).set(KEY_LUCK,  lk);
+            xn.access.ActorAccess.GetData(__result).set(KEY_REINC, newCount);
             if (!string.IsNullOrEmpty(soul.snapshot))
             {
-                __result.data.set(KEY_REINC_PREV_INFO, soul.snapshot);
+                xn.access.ActorAccess.GetData(__result).set(KEY_REINC_PREV_INFO, soul.snapshot);
             }
             if (soul.favorite)
             {
-                __result.data.favorite = true;
+                xn.access.ActorAccess.GetData(__result).favorite = true;
             }
             if (soul.isMainCharacter)
             {
@@ -162,20 +175,18 @@ namespace xn.world
         private static void RestoreMainCharacterStatus(Actor newActor)
         {
             if (newActor == null || !newActor.isAlive()) return;
-            newActor.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, 1);
-            newActor.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, 3); 
-            newActor.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, 0); 
-            if (World.world.map_stats.custom_data == null)
-            {
-                World.world.map_stats.custom_data = new SaveCustomData();
-            }
-            World.world.map_stats.custom_data.set("xn.world.main_char_id", newActor.getID());
+            xn.access.ActorAccess.GetData(newActor).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, 1);
+            xn.access.ActorAccess.GetData(newActor).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, 3); 
+            xn.access.ActorAccess.GetData(newActor).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, 0); 
+            var customData = xn.access.MapBoxAccess.EnsureCustomData(World.world);
+            if (customData != null)
+                customData.set("xn.world.main_char_id", newActor.getID());
             if (!newActor.isFavorite())
             {
                 newActor.switchFavorite();
             }
-            string name = newActor.getName() ?? "未知";
-            BroadcastSystem.Custom($"主角{name}轮回转世成功，继续拥有主角光环");
+            string name = newActor.getName() ?? Unknown();
+            BroadcastSystem.Custom(F("broadcast_main_character_reincarnated", "The protagonist {0} reincarnated successfully and retained the protagonist halo", name));
         }
         static float GetReincarnationChance(int realmIndex)
         {
@@ -197,14 +208,14 @@ namespace xn.world
         {
             if (a != null)
             {
-                a.data.get("xn.title.base_name", out string storedBase, "");
+                xn.access.ActorAccess.GetData(a).get("xn.title.base_name", out string storedBase, "");
                 if (!string.IsNullOrEmpty(storedBase))
                 {
-                    return RemoveShiSuffix(storedBase);
+                    return RemoveGenerationSuffix(storedBase);
                 }
             }
             string name = a != null ? a.getName() : "";
-            if (string.IsNullOrEmpty(name)) return "无名";
+            if (string.IsNullOrEmpty(name)) return T("reincarnation_unnamed_base", "Nameless");
             string rest = name.Trim();
             int lastBracket = rest.LastIndexOf(']');
             if (lastBracket >= 0 && lastBracket + 1 < rest.Length)
@@ -225,26 +236,27 @@ namespace xn.world
             }
             int dash = rest.IndexOf('-');
             string baseName = dash >= 0 ? rest.Substring(0, dash).Trim() : rest.Trim();
-            baseName = RemoveShiSuffix(baseName);
+            baseName = RemoveGenerationSuffix(baseName);
             return string.IsNullOrEmpty(baseName) ? name.Trim() : baseName;
         }
-        static string RemoveShiSuffix(string name)
+        static string RemoveGenerationSuffix(string name)
         {
             if (string.IsNullOrEmpty(name)) return name;
-            if (!name.EndsWith("世")) return name;
-            string[] shiPrefixes = new string[]
+            string[] generationSuffixes = new string[]
             {
-                "二世", "三世", "四世", "五世", "六世", "七世", "八世", "九世", "十世",
-                "十一世", "十二世", "十三世", "十四世", "十五世", "十六世", "十七世", "十八世", "十九世", "二十世",
-                "二十一世", "二十二世", "二十三世", "二十四世", "二十五世", "二十六世", "二十七世", "二十八世", "二十九世", "三十世"
+                " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", " X", " XI",
+                "\u4e8c\u4e16", "\u4e09\u4e16", "\u56db\u4e16", "\u4e94\u4e16", "\u516d\u4e16", "\u4e03\u4e16", "\u516b\u4e16", "\u4e5d\u4e16", "\u5341\u4e16",
+                "\u5341\u4e00\u4e16", "\u5341\u4e8c\u4e16", "\u5341\u4e09\u4e16", "\u5341\u56db\u4e16", "\u5341\u4e94\u4e16", "\u5341\u516d\u4e16", "\u5341\u4e03\u4e16", "\u5341\u516b\u4e16", "\u5341\u4e5d\u4e16", "\u4e8c\u5341\u4e16",
+                "\u4e8c\u5341\u4e00\u4e16", "\u4e8c\u5341\u4e8c\u4e16", "\u4e8c\u5341\u4e09\u4e16", "\u4e8c\u5341\u56db\u4e16", "\u4e8c\u5341\u4e94\u4e16", "\u4e8c\u5341\u516d\u4e16", "\u4e8c\u5341\u4e03\u4e16", "\u4e8c\u5341\u516b\u4e16", "\u4e8c\u5341\u4e5d\u4e16", "\u4e09\u5341\u4e16"
             };
-            foreach (var prefix in shiPrefixes)
+            foreach (var suffix in generationSuffixes)
             {
-                if (name.EndsWith(prefix))
+                if (name.EndsWith(suffix))
                 {
-                    return name.Substring(0, name.Length - prefix.Length).Trim();
+                    return name.Substring(0, name.Length - suffix.Length).Trim();
                 }
             }
+            if (!name.EndsWith("\u4e16")) return name;
             int i = name.Length - 2; 
             while (i >= 0 && char.IsDigit(name[i]))
             {
@@ -256,21 +268,21 @@ namespace xn.world
             }
             return name;
         }
-        static string Build世Suffix(int count)
+        static string BuildGenerationSuffix(int count)
         {
-            switch (count)
+            if (count <= 0) return "";
+            return $" ({Ordinal(count + 1)} Life)";
+        }
+        private static string Ordinal(int value)
+        {
+            int mod100 = value % 100;
+            if (mod100 >= 11 && mod100 <= 13) return value + "th";
+            switch (value % 10)
             {
-                case 1: return "二世";  
-                case 2: return "三世";  
-                case 3: return "四世";  
-                case 4: return "五世";
-                case 5: return "六世";
-                case 6: return "七世";
-                case 7: return "八世";
-                case 8: return "九世";
-                case 9: return "十世";
-                case 10: return "十一世";
-                default: return count.ToString() + "世";
+                case 1: return value + "st";
+                case 2: return value + "nd";
+                case 3: return value + "rd";
+                default: return value + "th";
             }
         }
         static int GetRealmIndex(Actor a)
@@ -290,9 +302,9 @@ namespace xn.world
             {
                 return a.asset.id;
             }
-            if (a.data != null && !string.IsNullOrEmpty(a.data.asset_id))
+            if (xn.access.ActorAccess.GetData(a) != null && !string.IsNullOrEmpty(xn.access.ActorAccess.GetData(a).asset_id))
             {
-                return a.data.asset_id;
+                return xn.access.ActorAccess.GetData(a).asset_id;
             }
             return "";
         }
@@ -303,9 +315,9 @@ namespace xn.world
             string actorName = a.getName();
             string realmName = (realmIndex >= 0 && realmIndex < REALM_IDS.Length) ? REALM_IDS[realmIndex] : "";
             const string KEY_XP = "xn.stat.xiuwei";
-            long xp; a.data.get(KEY_XP, out xp, 0L);
-            int wuxin; a.data.get(KEY_WUXIN, out wuxin, 0);
-            int luck; a.data.get(KEY_LUCK, out luck, 0);
+            long xp; xn.access.ActorAccess.GetData(a).get(KEY_XP, out xp, 0L);
+            int wuxin; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wuxin, 0);
+            int luck; xn.access.ActorAccess.GetData(a).get(KEY_LUCK, out luck, 0);
             string kingdomName = a.hasKingdom() ? a.kingdom.name : "";
             string speciesId = GetSpeciesId(a);
             int year = Date.getCurrentYear();
@@ -338,7 +350,7 @@ namespace xn.world
                         s_pendingDeathActor = null;
                         return; 
                     }
-                    int enq; __instance.data.get(KEY_ENQUEUED, out enq, 0);
+                    int enq; xn.access.ActorAccess.GetData(__instance).get(KEY_ENQUEUED, out enq, 0);
                     if (enq == 1)
                     {
                         s_pendingDeathActor = null;

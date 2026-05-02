@@ -8,6 +8,14 @@ namespace xn.feedback
     public static class FeedbackSender
     {
         private const string FEEDBACK_URL = "https://1334698288-1wpjyathul.ap-guangzhou.tencentscf.com/feedback";
+        private const string EmptyContent = "(\u65e0\u5185\u5bb9)";
+        private const string FeedbackType = "\u8bc4\u4ef7";
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         [Serializable]
         private class FeedbackData
         {
@@ -27,9 +35,9 @@ namespace xn.feedback
             var data = new FeedbackData
             {
                 rating = rating,
-                content = string.IsNullOrEmpty(content) ? "(无内容)" : content,
+                content = string.IsNullOrEmpty(content) ? EmptyContent : content,
                 version = version,
-                type = "评价"
+                type = FeedbackType
             };
             string json = JsonUtility.ToJson(data);
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
@@ -47,28 +55,28 @@ namespace xn.feedback
                         var response = JsonUtility.FromJson<FeedbackResponse>(request.downloadHandler.text);
                         if (response != null)
                         {
-                            callback?.Invoke(response.success, response.message ?? "提交成功，感谢您的反馈！");
+                            callback?.Invoke(response.success, response.message ?? T("feedback_submit_success", "Submitted successfully. Thank you for your feedback!"));
                         }
                         else
                         {
-                            callback?.Invoke(true, "提交成功，感谢您的反馈！");
+                            callback?.Invoke(true, T("feedback_submit_success", "Submitted successfully. Thank you for your feedback!"));
                         }
                     }
                     catch
                     {
-                        callback?.Invoke(true, "提交成功，感谢您的反馈！");
+                        callback?.Invoke(true, T("feedback_submit_success", "Submitted successfully. Thank you for your feedback!"));
                     }
                 }
                 else
                 {
-                    string errorMsg = "提交失败，请稍后重试";
+                    string errorMsg = T("feedback_submit_failed", "Submission failed. Please try again later.");
                     if (request.result == UnityWebRequest.Result.ConnectionError)
                     {
-                        errorMsg = "网络连接失败，请检查网络";
+                        errorMsg = T("feedback_connection_failed", "Network connection failed. Please check your connection.");
                     }
                     else if (request.responseCode == 429)
                     {
-                        errorMsg = "您今天已经评价过了，感谢支持！";
+                        errorMsg = T("feedback_already_submitted_today", "You have already submitted feedback today. Thank you for the support!");
                         callback?.Invoke(true, errorMsg); 
                         yield break;
                     }

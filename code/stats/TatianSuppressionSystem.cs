@@ -108,14 +108,14 @@ namespace cultivation
         private static void ApplySuppression(Actor target, Actor suppressor)
         {
             if (target == null || !target.isAlive()) return;
-            if (suppressor == null || suppressor.data == null) return;
-            target.data.set(KEY_SUPPRESSED, 1);
-            target.data.set(KEY_SUPPRESSOR_ID, (int)suppressor.data.id);
+            if (suppressor == null || xn.access.ActorAccess.GetData(suppressor) == null) return;
+            xn.access.ActorAccess.GetData(target).set(KEY_SUPPRESSED, 1);
+            xn.access.ActorAccess.GetData(target).set(KEY_SUPPRESSOR_ID, (int)xn.access.ActorAccess.GetData(suppressor).id);
             if (target.is_moving)
             {
                 target.stopMovement();
             }
-            if (target.has_attack_target)
+            if (xn.access.ActorAccess.HasAttackTarget(target))
             {
                 target.clearAttackTarget();
             }
@@ -124,8 +124,8 @@ namespace cultivation
         private static void RemoveSuppression(Actor target)
         {
             if (target == null) return;
-            target.data.set(KEY_SUPPRESSED, 0);
-            target.data.set(KEY_SUPPRESSOR_ID, 0);
+            xn.access.ActorAccess.GetData(target).set(KEY_SUPPRESSED, 0);
+            xn.access.ActorAccess.GetData(target).set(KEY_SUPPRESSOR_ID, 0);
         }
         private static float GetSuppressionRange(Actor suppressor)
         {
@@ -171,11 +171,11 @@ namespace cultivation
                 }
                 else
                 {
-                    int suppressed; target.data.get(KEY_SUPPRESSED, out suppressed, 0);
+                    int suppressed; xn.access.ActorAccess.GetData(target).get(KEY_SUPPRESSED, out suppressed, 0);
                     if (suppressed == 1)
                     {
-                        int suppressorId; target.data.get(KEY_SUPPRESSOR_ID, out suppressorId, 0);
-                        if (suppressorId == (int)suppressor.data.id)
+                        int suppressorId; xn.access.ActorAccess.GetData(target).get(KEY_SUPPRESSOR_ID, out suppressorId, 0);
+                        if (suppressorId == (int)xn.access.ActorAccess.GetData(suppressor).id)
                         {
                             RemoveSuppression(target);
                         }
@@ -216,7 +216,9 @@ namespace cultivation
                 {
                     var actor = list[i];
                     if (actor == null) continue;
-                    int suppressed; actor.data.get(KEY_SUPPRESSED, out suppressed, 0);
+                    var actorData = xn.access.ActorAccess.GetData(actor);
+                    if (actorData == null) continue;
+                    int suppressed; actorData.get(KEY_SUPPRESSED, out suppressed, 0);
                     if (suppressed == 1)
                     {
                         if (!actor.isAlive())
@@ -224,13 +226,14 @@ namespace cultivation
                             RemoveSuppression(actor);
                             continue;
                         }
-                        int suppressorId; actor.data.get(KEY_SUPPRESSOR_ID, out suppressorId, 0);
+                        int suppressorId; actorData.get(KEY_SUPPRESSOR_ID, out suppressorId, 0);
                         if (suppressorId != 0)
                         {
                             Actor suppressor = null;
                             foreach (var candidate in list)
                             {
-                                if (candidate != null && candidate.isAlive() && (int)candidate.data.id == suppressorId)
+                                var candidateData = xn.access.ActorAccess.GetData(candidate);
+                                if (candidate != null && candidate.isAlive() && candidateData != null && (int)candidateData.id == suppressorId)
                                 {
                                     suppressor = candidate;
                                     break;
@@ -263,7 +266,7 @@ namespace cultivation
                 {
                     return false;
                 }
-                int suppressed; __instance.data.get(KEY_SUPPRESSED, out suppressed, 0);
+                int suppressed; xn.access.ActorAccess.GetData(__instance).get(KEY_SUPPRESSED, out suppressed, 0);
                 if (suppressed == 1)
                 {
                     return false; 
@@ -285,7 +288,7 @@ namespace cultivation
                     }
                     return false;
                 }
-                int suppressed; __instance.data.get(KEY_SUPPRESSED, out suppressed, 0);
+                int suppressed; xn.access.ActorAccess.GetData(__instance).get(KEY_SUPPRESSED, out suppressed, 0);
                 if (suppressed == 1)
                 {
                     if (__instance.is_moving)
@@ -303,7 +306,7 @@ namespace cultivation
             [HarmonyPrefix]
             private static bool Prefix(Actor __instance)
             {
-                __instance.data.get(KEY_SUPPRESSED, out int suppressed, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_SUPPRESSED, out int suppressed, 0);
                 if (suppressed == 1) return false; 
                 return true;
             }

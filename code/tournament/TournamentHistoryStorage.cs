@@ -38,7 +38,7 @@ namespace xn.tournament
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogWarning($"[XN-Tournament] 保存历史记录失败: {e.Message}");
+                UnityEngine.Debug.LogWarning($"[XN-Tournament] Failed to save history records: {e.Message}");
             }
         }
         public static void LoadFromPath(string savePath)
@@ -62,7 +62,7 @@ namespace xn.tournament
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogWarning($"[XN-Tournament] 加载历史记录失败: {e.Message}");
+                UnityEngine.Debug.LogWarning($"[XN-Tournament] Failed to load history records: {e.Message}");
             }
             int maxEdition = 0;
             foreach (var history in _histories)

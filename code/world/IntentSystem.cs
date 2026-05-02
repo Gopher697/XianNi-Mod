@@ -85,7 +85,7 @@ namespace cultivation
                 if (a.kingdom == null || a.kingdom.wild) continue;
                 if (HasAnyIntent(a))
                 {
-                    s_intentUnits.Add(a.data.id);
+                    s_intentUnits.Add(xn.access.ActorAccess.GetData(a).id);
                 }
             }
         }
@@ -137,18 +137,18 @@ namespace cultivation
                             SetActive(a, INTENT_ANGEL, true);
                             HealAllies(a, RADIUS_TILES, ANGEL_HEAL_PCT);
                             float defPct = Mathf.Min(friendsCnt, FRIENDS_MAX) * ANGEL_DEF_PER_FRIEND;
-                            a.data.set(KEY_TMP_DEF_PCT, defPct);
+                            xn.access.ActorAccess.GetData(a).set(KEY_TMP_DEF_PCT, defPct);
                         }
                         else
                         {
                             SetActive(a, INTENT_ANGEL, false);
-                            a.data.set(KEY_TMP_DEF_PCT, 0f);
+                            xn.access.ActorAccess.GetData(a).set(KEY_TMP_DEF_PCT, 0f);
                         }
                     }
                     else
                     {
                         SetActive(a, INTENT_ANGEL, false);
-                        a.data.set(KEY_TMP_DEF_PCT, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TMP_DEF_PCT, 0f);
                     }
                 }
                 if (HasIntent(a, INTENT_QIANHUAN))
@@ -163,18 +163,18 @@ namespace cultivation
                     if (!inCombat)
                     {
                         int last, nowTs = (int)World.world.getCurWorldTime();
-                        a.data.get(KEY_LAST_COMBAT_TS, out last, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_LAST_COMBAT_TS, out last, 0);
                         if (nowTs - last > 10)
                         {
-                            int layers; a.data.get(KEY_KILLING_LAYERS, out layers, 0);
-                            if (layers > 0) a.data.set(KEY_KILLING_LAYERS, layers - 1);
+                            int layers; xn.access.ActorAccess.GetData(a).get(KEY_KILLING_LAYERS, out layers, 0);
+                            if (layers > 0) xn.access.ActorAccess.GetData(a).set(KEY_KILLING_LAYERS, layers - 1);
                         }
                         SetActive(a, INTENT_KILLING, false);
                     }
                 }
                 if (HasIntent(a, INTENT_REVERSE))
                 {
-                    bool hasNeg = firstNegative.ContainsKey(a.data.id);
+                    bool hasNeg = firstNegative.ContainsKey(xn.access.ActorAccess.GetData(a).id);
                     if (!inCombat && !hasNeg)
                     {
                         SetActive(a, INTENT_REVERSE, false);
@@ -199,25 +199,25 @@ namespace cultivation
                     {
                         if (SpendLingli(a, COST_SEC_LIFEDEATH))
                         {
-                            a.data.set(KEY_LD_ACTIVE, 1);
+                            xn.access.ActorAccess.GetData(a).set(KEY_LD_ACTIVE, 1);
                             SetActive(a, INTENT_LIFE_DEATH, true);
                         }
                         else
                         {
-                            a.data.set(KEY_LD_ACTIVE, 0);
+                            xn.access.ActorAccess.GetData(a).set(KEY_LD_ACTIVE, 0);
                             SetActive(a, INTENT_LIFE_DEATH, false);
                         }
                     }
                     else if (needClose)
                     {
-                        a.data.set(KEY_LD_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_LD_ACTIVE, 0);
                         SetActive(a, INTENT_LIFE_DEATH, false);
                     }
                     else if (active)
                     {
                         if (!SpendLingli(a, COST_SEC_LIFEDEATH))
                         {
-                            a.data.set(KEY_LD_ACTIVE, 0);
+                            xn.access.ActorAccess.GetData(a).set(KEY_LD_ACTIVE, 0);
                             SetActive(a, INTENT_LIFE_DEATH, false);
                         }
                     }
@@ -233,7 +233,7 @@ namespace cultivation
                 {
                     if (!inCombat)
                     {
-                        a.data.set(KEY_MADNESS_ATKSPD_ON, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_MADNESS_ATKSPD_ON, 0);
                         SetActive(a, INTENT_MADNESS, false);
                     }
                     else
@@ -241,12 +241,12 @@ namespace cultivation
                         bool active = GetActive(a, INTENT_MADNESS);
                         if (active)
                         {
-                            a.data.set(KEY_MADNESS_ATKSPD_ON, 1); 
+                            xn.access.ActorAccess.GetData(a).set(KEY_MADNESS_ATKSPD_ON, 1); 
                             TryMadnessSelfLose(a);                
                         }
                         else
                         {
-                            a.data.set(KEY_MADNESS_ATKSPD_ON, 0);
+                            xn.access.ActorAccess.GetData(a).set(KEY_MADNESS_ATKSPD_ON, 0);
                         }
                     }
                 }
@@ -268,10 +268,10 @@ namespace cultivation
             foreach (var t in list) { if (t != null && t.id == id) return true; }
             return false;
         }
-        private static bool GetActive(Actor a, string id) { int v; a.data.get(KEY_ACTIVE_PREFIX + id, out v, 0); return v == 1; }
+        private static bool GetActive(Actor a, string id) { int v; xn.access.ActorAccess.GetData(a).get(KEY_ACTIVE_PREFIX + id, out v, 0); return v == 1; }
         private static void SetActive(Actor a, string id, bool on)
         {
-            a.data.set(KEY_ACTIVE_PREFIX + id, on ? 1 : 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ACTIVE_PREFIX + id, on ? 1 : 0);
             if (id != INTENT_EXTREME && id != INTENT_REINCARNATION)
             {
                 if (on) YijingFX.StartLoop(a);
@@ -281,8 +281,8 @@ namespace cultivation
         private static bool IsInCombat(Actor a)
         {
             if (a == null || !a.isAlive()) return false;
-            if (a.has_attack_target) return true;
-            var task = a.ai?.task as BehaviourTaskActor;
+            if (xn.access.ActorAccess.HasAttackTarget(a)) return true;
+            var task = xn.access.ActorAccess.GetAI(a)?.task as BehaviourTaskActor;
             if (task != null)
             {
                 if (task.in_combat) return true;
@@ -293,9 +293,9 @@ namespace cultivation
         private static bool SpendLingli(Actor a, int amount)
         {
             if (amount <= 0) return true;
-            int cur; a.data.get(KEY_LINGLI, out cur, 0);
+            int cur; xn.access.ActorAccess.GetData(a).get(KEY_LINGLI, out cur, 0);
             if (cur < amount) return false;
-            a.data.set(KEY_LINGLI, cur - amount);
+            xn.access.ActorAccess.GetData(a).set(KEY_LINGLI, cur - amount);
             return true;
         }
         private static bool HasWoundedAllyNearby(Actor a, float radiusTiles, out int friendsCount)
@@ -340,23 +340,26 @@ namespace cultivation
             {
                 if (st == null || st.is_finished) continue;
                 var sim = st.sim_object;
-                if (sim == null || !sim.isActor()) continue;
+                if (sim == null || !xn.access.BaseSimObjectAccess.IsActor(sim)) continue;
                 string sid = st.asset.id;
                 bool neg = false;
                 for (int k = 0; k < NEGATIVE_STATUSES.Length; k++)
                     if (NEGATIVE_STATUSES[k] == sid) { neg = true; break; }
                 if (!neg) continue;
-                long aid = sim.a.data.id;
+                Actor actor = xn.access.BaseSimObjectAccess.GetActor(sim);
+                ActorData actorData = xn.access.ActorAccess.GetData(actor);
+                if (actorData == null) continue;
+                long aid = actorData.id;
                 if (!map.ContainsKey(aid)) map[aid] = st; 
             }
             return map;
         }
         private static void TryMadnessSelfLose(Actor a)
         {
-            int nextTs; a.data.get(KEY_MADNESS_NEXT, out nextTs, 0);
+            int nextTs; xn.access.ActorAccess.GetData(a).get(KEY_MADNESS_NEXT, out nextTs, 0);
             int now = (int)World.world.getCurWorldTime();
             if (now < nextTs) return;
-            a.data.set(KEY_MADNESS_NEXT, now + MADNESS_SELF_LOSS_EVERY);
+            xn.access.ActorAccess.GetData(a).set(KEY_MADNESS_NEXT, now + MADNESS_SELF_LOSS_EVERY);
             int lose = Mathf.FloorToInt(a.getHealth() * MADNESS_SELF_LOSS_PCT);
             if (lose > 0) a.changeHealth(-lose);
             if (!a.hasHealth()) a.batch.c_check_deaths.Add(a);
@@ -364,21 +367,21 @@ namespace cultivation
         private static void TryCleanOneNegative(Actor a, Dictionary<long, Status> firstNeg)
         {
             Status st;
-            if (firstNeg.TryGetValue(a.data.id, out st))
+            if (firstNeg.TryGetValue(xn.access.ActorAccess.GetData(a).id, out st))
             {
-                int next; a.data.get(KEY_REVERSE_NEXT, out next, 0);
+                int next; xn.access.ActorAccess.GetData(a).get(KEY_REVERSE_NEXT, out next, 0);
                 int now = (int)World.world.getCurWorldTime();
                 if (now >= next)
                 {
                     st.finish(); 
-                    a.data.set(KEY_REVERSE_NEXT, now + REVERSE_CHECK_INTERVAL);
+                    xn.access.ActorAccess.GetData(a).set(KEY_REVERSE_NEXT, now + REVERSE_CHECK_INTERVAL);
                 }
             }
         }
         private static void MarkReverseBoost5s(Actor a)
         {
             int now = (int)World.world.getCurWorldTime();
-            a.data.set("xn.intent.reverse_boost_until", now + 5); 
+            xn.access.ActorAccess.GetData(a).set("xn.intent.reverse_boost_until", now + 5); 
         }
     }
 }

@@ -17,7 +17,7 @@ namespace xn.world
             _isProcessing = true;
             try
             {
-                __result = __instance.tryToMakeWarrior(bestActor);
+                __result = xn.access.CityAccess.TryToMakeWarrior(__instance, bestActor);
             }
             finally
             {

@@ -68,19 +68,19 @@ namespace cultivation.ai
             public override BehResult execute(Actor pActor)
             {
                 long targetId;
-                pActor.data.get(KEY_HUNT_TARGET, out targetId, -1L);
+                xn.access.ActorAccess.GetData(pActor).get(KEY_HUNT_TARGET, out targetId, -1L);
                 if (targetId <= 0)
                 {
-                    pActor.data.set(KEY_HUNT_ACTIVE, 0);
-                    s_activeHunters.Remove(pActor.data.id);
+                    xn.access.ActorAccess.GetData(pActor).set(KEY_HUNT_ACTIVE, 0);
+                    s_activeHunters.Remove(xn.access.ActorAccess.GetData(pActor).id);
                     pActor.cancelAllBeh();
                     return BehResult.Stop;
                 }
                 Actor target = World.world.units.get(targetId);
                 if (target == null || !target.isAlive())
                 {
-                    pActor.data.set(KEY_HUNT_ACTIVE, 0);
-                    s_activeHunters.Remove(pActor.data.id);
+                    xn.access.ActorAccess.GetData(pActor).set(KEY_HUNT_ACTIVE, 0);
+                    s_activeHunters.Remove(xn.access.ActorAccess.GetData(pActor).id);
                     OnHuntSuccess(pActor);
                     pActor.cancelAllBeh();
                     return BehResult.Stop;
@@ -92,9 +92,9 @@ namespace cultivation.ai
                 }
                 else
                 {
-                    if (!pActor.isUsingPath() || pActor.beh_actor_target != target)
+                    if (!xn.access.ActorAccess.IsUsingPath(pActor) || xn.access.ActorAccess.GetBehActorTarget(pActor) != target)
                     {
-                        pActor.beh_actor_target = target;
+                        xn.access.ActorAccess.SetBehActorTarget(pActor, target);
                         pActor.goTo(target.current_tile);
                     }
                 }
@@ -104,20 +104,20 @@ namespace cultivation.ai
         private static void OnHuntSuccess(Actor hunter)
         {
             if (hunter == null || !hunter.isAlive()) return;
-            hunter.stats["damage"] += 30f;
+            xn.access.BaseSimObjectAccess.GetStats(hunter)["damage"] += 30f;
             int curRealmIdx = GetCurrentRealmIndex(hunter);
             if (curRealmIdx >= 0 && curRealmIdx < REALM_THRESHOLDS.Length)
             {
                 long curXp;
-                hunter.data.get("xn.stat.xiuwei", out curXp, 0L);
+                xn.access.ActorAccess.GetData(hunter).get("xn.stat.xiuwei", out curXp, 0L);
                 long threshold = REALM_THRESHOLDS[curRealmIdx];
                 long gain = (long)(threshold * 0.2f);
-                hunter.data.set("xn.stat.xiuwei", curXp + gain);
+                xn.access.ActorAccess.GetData(hunter).set("xn.stat.xiuwei", curXp + gain);
             }
             int curXinmo;
-            hunter.data.get(KEY_XINMO, out curXinmo, 0);
+            xn.access.ActorAccess.GetData(hunter).get(KEY_XINMO, out curXinmo, 0);
             int xinmoGain = UnityEngine.Random.Range(10, 31);
-            hunter.data.set(KEY_XINMO, curXinmo + xinmoGain);
+            xn.access.ActorAccess.GetData(hunter).set(KEY_XINMO, curXinmo + xinmoGain);
         }
         private static void OnHuntFailed(Actor hunter)
         {
@@ -134,14 +134,14 @@ namespace cultivation.ai
                 if (__instance.kingdom == null || __instance.city == null) return true;
                 if (!HasTrait(__instance, "path_01_demonic")) return true;
                 int active;
-                __instance.data.get(KEY_HUNT_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_HUNT_ACTIVE, out active, 0);
                 if (active == 1)
                 {
                     int stop;
-                    __instance.data.get("xn.cultivation.stop", out stop, 0);
+                    xn.access.ActorAccess.GetData(__instance).get("xn.cultivation.stop", out stop, 0);
                     if (stop == 1) return true;
                     int trialActive;
-                    __instance.data.get("xn.trial.active", out trialActive, 0);
+                    xn.access.ActorAccess.GetData(__instance).get("xn.trial.active", out trialActive, 0);
                     if (trialActive == 1) return true;
                     RegisterJob();
                     __result = "job_xn_demonic_hunt";
@@ -162,9 +162,10 @@ namespace cultivation.ai
                 if (__instance.kingdom == null || __instance.city == null) return;
                 if (!HasTrait(__instance, "path_01_demonic")) return;
                 int active;
-                __instance.data.get(KEY_HUNT_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_HUNT_ACTIVE, out active, 0);
                 if (active != 1) return;
-                if (__instance.ai.job != null && __instance.ai.job.id == "job_xn_demonic_hunt")
+                var actorAI = xn.access.ActorAccess.GetAI(__instance);
+                if (actorAI != null && actorAI.job != null && actorAI.job.id == "job_xn_demonic_hunt")
                 {
                     if (pCleanJob)
                     {
@@ -183,17 +184,17 @@ namespace cultivation.ai
             {
                 if (__result) return;
                 if (__instance == null || !__instance.isAlive()) return;
-                if (!__instance.isActor() || pTarget == null || !pTarget.isActor()) return;
-                Actor actor = __instance.a;
+                if (!xn.access.BaseSimObjectAccess.IsActor(__instance) || pTarget == null || !xn.access.BaseSimObjectAccess.IsActor(pTarget)) return;
+                Actor actor = xn.access.BaseSimObjectAccess.GetActor(__instance);
                 if (actor == null || actor.kingdom == null || actor.city == null) return;
                 if (!HasTrait(actor, "path_01_demonic")) return;
                 int active;
-                actor.data.get(KEY_HUNT_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(actor).get(KEY_HUNT_ACTIVE, out active, 0);
                 if (active != 1) return;
                 long targetId;
-                actor.data.get(KEY_HUNT_TARGET, out targetId, -1L);
-                Actor target = pTarget.a;
-                if (target != null && target.data.id == targetId)
+                xn.access.ActorAccess.GetData(actor).get(KEY_HUNT_TARGET, out targetId, -1L);
+                Actor target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
+                if (target != null && xn.access.ActorAccess.GetData(target).id == targetId)
                 {
                     __result = true;
                 }
@@ -211,16 +212,16 @@ namespace cultivation.ai
             {
                 if (__instance == null || !__instance.isAlive()) return; 
                 if (pAttacker == null) return;
-                Actor attacker = pAttacker.a;
+                Actor attacker = xn.access.BaseSimObjectAccess.GetActor(pAttacker);
                 if (attacker == null || !attacker.isAlive()) return;
                 int active;
-                attacker.data.get(KEY_HUNT_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(attacker).get(KEY_HUNT_ACTIVE, out active, 0);
                 if (active != 1) return;
                 long targetId;
-                attacker.data.get(KEY_HUNT_TARGET, out targetId, -1L);
-                if (targetId != __instance.data.id) return;
-                attacker.data.set(KEY_HUNT_ACTIVE, 0);
-                s_activeHunters.Remove(attacker.data.id);
+                xn.access.ActorAccess.GetData(attacker).get(KEY_HUNT_TARGET, out targetId, -1L);
+                if (targetId != xn.access.ActorAccess.GetData(__instance).id) return;
+                xn.access.ActorAccess.GetData(attacker).set(KEY_HUNT_ACTIVE, 0);
+                s_activeHunters.Remove(xn.access.ActorAccess.GetData(attacker).id);
                 string hunterName = attacker.getName();
                 string targetName = __instance.getName();
                 string text;
@@ -285,13 +286,13 @@ namespace cultivation.ai
                     if (a.kingdom == null || a.city == null) continue;
                     if (!HasTrait(a, "path_01_demonic")) continue;
                     int active;
-                    a.data.get(KEY_HUNT_ACTIVE, out active, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_HUNT_ACTIVE, out active, 0);
                     if (active == 1) continue;
                     int stop;
-                    a.data.get("xn.cultivation.stop", out stop, 0);
+                    xn.access.ActorAccess.GetData(a).get("xn.cultivation.stop", out stop, 0);
                     if (stop == 1) continue;
                     int trialActive;
-                    a.data.get("xn.trial.active", out trialActive, 0);
+                    xn.access.ActorAccess.GetData(a).get("xn.trial.active", out trialActive, 0);
                     if (trialActive == 1) continue;
                     demonicCandidates.Add(a);
                 }
@@ -309,13 +310,13 @@ namespace cultivation.ai
                     Actor a = demonicCandidates[i];
                     Actor target = FindSuitableTarget(a);
                     if (target == null) continue;
-                    a.data.set(KEY_HUNT_TARGET, target.data.id);
-                    a.data.set(KEY_HUNT_YEAR, curYear);
-                    a.data.set(KEY_HUNT_ACTIVE, 1);
-                    s_activeHunters.Add(a.data.id);
+                    xn.access.ActorAccess.GetData(a).set(KEY_HUNT_TARGET, xn.access.ActorAccess.GetData(target).id);
+                    xn.access.ActorAccess.GetData(a).set(KEY_HUNT_YEAR, curYear);
+                    xn.access.ActorAccess.GetData(a).set(KEY_HUNT_ACTIVE, 1);
+                    s_activeHunters.Add(xn.access.ActorAccess.GetData(a).id);
                     RegisterJob();
                     a.endJob();
-                    a.ai.setJob("job_xn_demonic_hunt");
+                    xn.access.ActorAccess.GetAI(a)?.setJob("job_xn_demonic_hunt");
                     string hunterName = a.getName();
                     string targetName = target.getName();
                     string broadcastText;
@@ -342,7 +343,7 @@ namespace cultivation.ai
             foreach (Actor a in units)
             {
                 if (a == null || !a.isAlive()) continue;
-                if (a.data.id == hunter.data.id) continue;
+                if (xn.access.ActorAccess.GetData(a).id == xn.access.ActorAccess.GetData(hunter).id) continue;
                 if (a.kingdom == null) continue;
                 if (hunterIsFemale)
                 {
@@ -393,7 +394,7 @@ namespace cultivation.ai
                     continue;
                 }
                 int active;
-                a.data.get(KEY_HUNT_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_HUNT_ACTIVE, out active, 0);
                 if (active != 1)
                 {
                     if (toRemove == null) toRemove = new List<long>();
@@ -401,7 +402,7 @@ namespace cultivation.ai
                     continue;
                 }
                 int startYear;
-                a.data.get(KEY_HUNT_YEAR, out startYear, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_HUNT_YEAR, out startYear, 0);
                 if (startYear <= 0) continue;
                 if (curYear >= startYear + 10)
                 {
@@ -419,8 +420,8 @@ namespace cultivation.ai
                 for (int i = 0; i < toFail.Count; i++)
                 {
                     Actor a = toFail[i];
-                    a.data.set(KEY_HUNT_ACTIVE, 0);
-                    s_activeHunters.Remove(a.data.id);
+                    xn.access.ActorAccess.GetData(a).set(KEY_HUNT_ACTIVE, 0);
+                    s_activeHunters.Remove(xn.access.ActorAccess.GetData(a).id);
                     string failText;
                     if (a.isSexFemale())
                     {

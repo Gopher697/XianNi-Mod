@@ -305,18 +305,18 @@ namespace xn.bloodline
         public static void ProcessParasiteDOT(Actor a)
         {
             if (a == null || !a.isAlive()) return;
-            a.data.get(KEY_PARASITE_END_TIME, out int endTimeTick, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_PARASITE_END_TIME, out int endTimeTick, 0);
             if (endTimeTick <= 0) return;
             int currentTimeTick = GetCurrentTimeTick();
             if (currentTimeTick >= endTimeTick)
             {
-                a.data.set(KEY_PARASITE_END_TIME, 0);
-                a.data.set(KEY_PARASITE_CASTER_ID, 0L);
-                a.data.set(KEY_PARASITE_DAMAGE, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_PARASITE_END_TIME, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_PARASITE_CASTER_ID, 0L);
+                xn.access.ActorAccess.GetData(a).set(KEY_PARASITE_DAMAGE, 0);
                 return;
             }
-            a.data.get(KEY_PARASITE_CASTER_ID, out long casterId, 0L);
-            a.data.get(KEY_PARASITE_DAMAGE, out int dotDamageInt, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_PARASITE_CASTER_ID, out long casterId, 0L);
+            xn.access.ActorAccess.GetData(a).get(KEY_PARASITE_DAMAGE, out int dotDamageInt, 0);
             float dotDamage = dotDamageInt / 10f; 
             if (casterId <= 0 || dotDamage <= 0) return;
             var caster = World.world.units.get(casterId);
@@ -343,8 +343,8 @@ namespace xn.bloodline
         private static void ApplyTaiguPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["multiplier_damage"] += 0.1f;
-            a.stats["armor"] += 10f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["multiplier_damage"] += 0.1f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["armor"] += 10f;
         }
         private static void ApplyTaiguAura(Actor a, float concentration)
         {
@@ -365,7 +365,9 @@ namespace xn.bloodline
                     if (unitType == BloodlineTypes.TAIGU) continue; 
                 }
                 if (!IsTargetRealmLowerOrEqual(a, unit)) continue;
-                unit.stats["armor"] -= 25f;
+                BaseStats unitStats = xn.access.BaseSimObjectAccess.GetStats(unit);
+                if (unitStats == null) continue;
+                unitStats["armor"] -= 25f;
             }
         }
         private static void ApplyTaiguAttackTrigger(Actor attacker, Actor target, float concentration)
@@ -405,7 +407,7 @@ namespace xn.bloodline
             }
             if (isOnGrassOrForest)
             {
-                a.stats["health_regen"] += a.stats["health_regen"] * 0.5f;
+                xn.access.BaseSimObjectAccess.GetStats(a)["health_regen"] += xn.access.BaseSimObjectAccess.GetStats(a)["health_regen"] * 0.5f;
             }
         }
         private static void ApplyCaomuAttackTrigger(Actor attacker, Actor target, float concentration, float damage)
@@ -415,19 +417,19 @@ namespace xn.bloodline
             float dotDamage = damage * 0.2f;
             if (dotDamage < 1f) dotDamage = 1f;
             int endTimeTick = GetFutureTimeTick(5);
-            target.data.set(KEY_PARASITE_CASTER_ID, attacker.getID());
-            target.data.set(KEY_PARASITE_END_TIME, endTimeTick);
-            target.data.set(KEY_PARASITE_DAMAGE, (int)(dotDamage * 10)); 
+            xn.access.ActorAccess.GetData(target).set(KEY_PARASITE_CASTER_ID, attacker.getID());
+            xn.access.ActorAccess.GetData(target).set(KEY_PARASITE_END_TIME, endTimeTick);
+            xn.access.ActorAccess.GetData(target).set(KEY_PARASITE_DAMAGE, (int)(dotDamage * 10)); 
         }
         private static void ApplyCaomuGetHitTrigger(Actor victim, float concentration)
         {
             if (concentration < 80f) return;
             float healthPercent = (float)victim.getHealth() / (float)victim.getMaxHealth();
             if (healthPercent >= 0.3f) return;
-            victim.data.get(KEY_TREE_REALM_CD, out int cdEndTimeTick, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_TREE_REALM_CD, out int cdEndTimeTick, 0);
             int currentTimeTick = GetCurrentTimeTick();
             if (currentTimeTick < cdEndTimeTick) return;
-            victim.data.set(KEY_TREE_REALM_CD, GetFutureTimeTick(180));
+            xn.access.ActorAccess.GetData(victim).set(KEY_TREE_REALM_CD, GetFutureTimeTick(180));
             var tile = victim.current_tile;
             if (tile == null) return;
             int treesConverted = 0;
@@ -445,7 +447,7 @@ namespace xn.bloodline
                 {
                     if (victim.kingdom != null)
                     {
-                        treant.setKingdom(victim.kingdom);
+                        xn.access.ActorAccess.SetKingdom(treant, victim.kingdom);
                     }
                     treant.setName("树人", false);
                     treesConverted++;
@@ -458,13 +460,13 @@ namespace xn.bloodline
         private static void ApplyMeihuoPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["Dodge"] += 15f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["Dodge"] += 15f;
         }
         private static void ApplyMeihuoGetHitTrigger(Actor victim, float concentration, BaseSimObject attacker)
         {
             if (concentration < 50f) return;
-            if (attacker == null || !attacker.isActor()) return;
-            Actor attackerActor = attacker.a;
+            if (attacker == null || !xn.access.BaseSimObjectAccess.IsActor(attacker)) return;
+            Actor attackerActor = xn.access.BaseSimObjectAccess.GetActor(attacker);
             if (attackerActor == null || !attackerActor.isAlive()) return;
             if (!IsTargetRealmLowerOrEqual(victim, attackerActor)) return;
             if (UnityEngine.Random.value < 0.2f)
@@ -484,7 +486,7 @@ namespace xn.bloodline
             if (concentration < 80f) return;
             if (victim.hasTrait("leader") || victim.isKing()) return;
             if (!IsTargetRealmLowerOrEqual(killer, victim)) return;
-            killer.data.get(KEY_MINDSLAVE_COUNT, out int slaveCount, 0);
+            xn.access.ActorAccess.GetData(killer).get(KEY_MINDSLAVE_COUNT, out int slaveCount, 0);
             if (slaveCount >= 3) return;
             if (UnityEngine.Random.value >= 0.3f) return;
             var tile = victim.current_tile;
@@ -495,10 +497,10 @@ namespace xn.bloodline
             {
                 if (killer.kingdom != null)
                 {
-                    mindslave.setKingdom(killer.kingdom);
+                    xn.access.ActorAccess.SetKingdom(mindslave, killer.kingdom);
                 }
                 mindslave.setName($"{victim.getName()}(心奴)", false);
-                killer.data.set(KEY_MINDSLAVE_COUNT, slaveCount + 1);
+                xn.access.ActorAccess.GetData(killer).set(KEY_MINDSLAVE_COUNT, slaveCount + 1);
             }
         }
         #endregion
@@ -506,8 +508,8 @@ namespace xn.bloodline
         private static void ApplyHouyiPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["range"] += 2f;
-            a.stats["accuracy"] += 20f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["range"] += 2f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["accuracy"] += 20f;
         }
         private static void ApplyHouyiAttackTrigger(Actor attacker, Actor target, float concentration)
         {
@@ -562,10 +564,10 @@ namespace xn.bloodline
             }
             if (isNightEra)
             {
-                a.stats["damage"] += a.stats["damage"] * 0.15f;
-                a.stats["armor"] += 15f;
-                a.stats["speed"] += a.stats["speed"] * 0.15f;
-                a.stats["health"] += a.stats["health"] * 0.15f;
+                xn.access.BaseSimObjectAccess.GetStats(a)["damage"] += xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * 0.15f;
+                xn.access.BaseSimObjectAccess.GetStats(a)["armor"] += 15f;
+                xn.access.BaseSimObjectAccess.GetStats(a)["speed"] += xn.access.BaseSimObjectAccess.GetStats(a)["speed"] * 0.15f;
+                xn.access.BaseSimObjectAccess.GetStats(a)["health"] += xn.access.BaseSimObjectAccess.GetStats(a)["health"] * 0.15f;
             }
         }
         public static void ApplyHuangquanKillTrigger(Actor killer, Actor victim)
@@ -585,10 +587,10 @@ namespace xn.bloodline
             {
                 if (killer.kingdom != null)
                 {
-                    skeleton.setKingdom(killer.kingdom);
+                    xn.access.ActorAccess.SetKingdom(skeleton, killer.kingdom);
                 }
                 skeleton.setName("拘魂骷髅", false);
-                skeleton.data.set("xn.bloodline.skeleton_expire", GetFutureTimeTick(30));
+                xn.access.ActorAccess.GetData(skeleton).set("xn.bloodline.skeleton_expire", GetFutureTimeTick(30));
             }
         }
         public static bool ApplyHuangquanDeathTrigger(Actor victim)
@@ -599,24 +601,24 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.HUANGQUAN) return false;
             float concentration = BloodlineSystem.GetConcentration(victim);
             if (concentration < 80f) return false;
-            victim.data.get(KEY_MINGHE_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_MINGHE_ACTIVE, out int active, 0);
             if (active == 1) return false; 
-            victim.data.set(KEY_MINGHE_ACTIVE, 1);
-            victim.data.set(KEY_MINGHE_END_TIME, GetFutureTimeTick(10));
+            xn.access.ActorAccess.GetData(victim).set(KEY_MINGHE_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(victim).set(KEY_MINGHE_END_TIME, GetFutureTimeTick(10));
             victim.restoreHealth(1);
             return true;
         }
         public static void ProcessMingheState(Actor a)
         {
             if (a == null || !a.isAlive()) return;
-            a.data.get(KEY_MINGHE_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_MINGHE_ACTIVE, out int active, 0);
             if (active != 1) return;
-            a.data.get(KEY_MINGHE_END_TIME, out int endTime, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_MINGHE_END_TIME, out int endTime, 0);
             int currentTime = GetCurrentTimeTick();
             if (currentTime >= endTime)
             {
-                a.data.set(KEY_MINGHE_ACTIVE, 0);
-                a.data.set(KEY_MINGHE_END_TIME, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_MINGHE_ACTIVE, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_MINGHE_END_TIME, 0);
                 a.die(true, AttackType.Other, true, true);
             }
             else
@@ -640,8 +642,8 @@ namespace xn.bloodline
             string bloodlineType = BloodlineSystem.GetBloodlineType(victim);
             if (bloodlineType != BloodlineTypes.ZUZHOU) return;
             if (conc < 20f) return;
-            if (attacker == null || !attacker.isActor()) return;
-            Actor attackerActor = attacker.a;
+            if (attacker == null || !xn.access.BaseSimObjectAccess.IsActor(attacker)) return;
+            Actor attackerActor = xn.access.BaseSimObjectAccess.GetActor(attacker);
             if (attackerActor == null || !attackerActor.isAlive()) return;
             int reflectDamage = (int)(damage * 0.05f);
             if (reflectDamage > 0)
@@ -661,8 +663,10 @@ namespace xn.bloodline
                 if (a.kingdom == null || unit.kingdom == null) continue;
                 if (!a.kingdom.isEnemy(unit.kingdom)) continue;
                 if (!IsTargetRealmLowerOrEqual(a, unit)) continue;
-                unit.stats["damage"] -= unit.stats["damage"] * 0.2f;
-                unit.stats["speed"] -= unit.stats["speed"] * 0.2f;
+                BaseStats unitStats = xn.access.BaseSimObjectAccess.GetStats(unit);
+                if (unitStats == null) continue;
+                unitStats["damage"] -= unitStats["damage"] * 0.2f;
+                unitStats["speed"] -= unitStats["speed"] * 0.2f;
             }
         }
         public static void ApplyZuzhouKillTrigger(Actor killer, Actor victim)
@@ -675,12 +679,12 @@ namespace xn.bloodline
             float concentration = BloodlineSystem.GetConcentration(killer);
             if (concentration < 80f) return;
             if (!IsTargetRealmLowerOrEqual(killer, victim)) return;
-            victim.data.set(KEY_SOUL_DESTROYED, 1);
+            xn.access.ActorAccess.GetData(victim).set(KEY_SOUL_DESTROYED, 1);
         }
         public static bool IsSoulDestroyed(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_SOUL_DESTROYED, out int destroyed, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_SOUL_DESTROYED, out int destroyed, 0);
             return destroyed == 1;
         }
         #endregion
@@ -689,7 +693,7 @@ namespace xn.bloodline
         private static void ApplyJihanPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["fire_resistance"] += 50f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["fire_resistance"] += 50f;
         }
         private static void ApplyJihanFreezeAttackTrigger(Actor attacker, Actor target, float concentration)
         {
@@ -698,7 +702,7 @@ namespace xn.bloodline
             if (UnityEngine.Random.value < 0.2f)
             {
                 int endTimeTick = GetFutureTimeTick(5);
-                target.data.set(KEY_FROZEN_END_TIME, endTimeTick);
+                xn.access.ActorAccess.GetData(target).set(KEY_FROZEN_END_TIME, endTimeTick);
                 target.makeWait(5f);
                 target.addStatusEffect("frozen", 5f);
                 target.startColorEffect(ActorColorEffect.White);
@@ -713,18 +717,18 @@ namespace xn.bloodline
         {
             if (concentration < 80f) return;
             if (!IsTargetRealmLowerOrEqual(attacker, target)) return;
-            target.data.get(KEY_FROZEN_END_TIME, out int frozenEndTime, 0);
+            xn.access.ActorAccess.GetData(target).get(KEY_FROZEN_END_TIME, out int frozenEndTime, 0);
             int currentTime = GetCurrentTimeTick();
             if (frozenEndTime > 0 && currentTime < frozenEndTime)
             {
                 target.getHit(damage, true, AttackType.Other, attacker);
-                target.data.set(KEY_FROZEN_END_TIME, 0);
+                xn.access.ActorAccess.GetData(target).set(KEY_FROZEN_END_TIME, 0);
             }
         }
         public static bool IsFrozen(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_FROZEN_END_TIME, out int frozenEndTime, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_FROZEN_END_TIME, out int frozenEndTime, 0);
             int currentTime = GetCurrentTimeTick();
             return frozenEndTime > 0 && currentTime < frozenEndTime;
         }
@@ -734,14 +738,14 @@ namespace xn.bloodline
         private static void ApplyJumoPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["health"] += a.stats["health"] * 0.2f;
-            a.stats["scale"] += 0.2f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["health"] += xn.access.BaseSimObjectAccess.GetStats(a)["health"] * 0.2f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["scale"] += 0.2f;
             if (concentration >= 50f)
             {
-                bool inCombat = a.has_attack_target || a.attackedBy != null;
+                bool inCombat = xn.access.ActorAccess.HasAttackTarget(a) || xn.access.ActorAccess.GetAttackedBy(a) != null;
                 if (inCombat)
                 {
-                    a.stats["armor"] += 20f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["armor"] += 20f;
                 }
             }
         }
@@ -750,10 +754,10 @@ namespace xn.bloodline
             if (concentration < 80f) return;
             float healthPercent = (float)victim.getHealth() / (float)victim.getMaxHealth();
             if (healthPercent >= 0.15f) return;
-            victim.data.get(KEY_JUMO_TELEPORT_CD, out int cdEndTimeTick, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_JUMO_TELEPORT_CD, out int cdEndTimeTick, 0);
             int currentTimeTick = GetCurrentTimeTick();
             if (currentTimeTick < cdEndTimeTick) return;
-            victim.data.set(KEY_JUMO_TELEPORT_CD, GetFutureTimeTick(500));
+            xn.access.ActorAccess.GetData(victim).set(KEY_JUMO_TELEPORT_CD, GetFutureTimeTick(500));
             var tile = victim.current_tile;
             if (tile == null) return;
             int teleportedCount = 0;
@@ -795,11 +799,11 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.NIEPAN) return false;
             float concentration = BloodlineSystem.GetConcentration(victim);
             if (concentration < 50f) return false;
-            victim.data.get(KEY_NIEPAN_EGG_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_NIEPAN_EGG_ACTIVE, out int active, 0);
             if (active == 1) return false; 
-            victim.data.set(KEY_NIEPAN_EGG_ACTIVE, 1);
-            victim.data.set(KEY_NIEPAN_EGG_END_TIME, GetFutureTimeTick(10)); 
-            victim.data.set(KEY_NIEPAN_EGG_MAX_HEALTH, victim.getMaxHealth());
+            xn.access.ActorAccess.GetData(victim).set(KEY_NIEPAN_EGG_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(victim).set(KEY_NIEPAN_EGG_END_TIME, GetFutureTimeTick(10)); 
+            xn.access.ActorAccess.GetData(victim).set(KEY_NIEPAN_EGG_MAX_HEALTH, victim.getMaxHealth());
             victim.restoreHealth(1);
             victim.addStatusEffect("frozen", 10f);
             return true;
@@ -807,32 +811,32 @@ namespace xn.bloodline
         public static void ProcessNiepanEggState(Actor a)
         {
             if (a == null || !a.isAlive()) return;
-            a.data.get(KEY_NIEPAN_EGG_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_NIEPAN_EGG_ACTIVE, out int active, 0);
             if (active != 1) return;
-            a.data.get(KEY_NIEPAN_EGG_END_TIME, out int endTime, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_NIEPAN_EGG_END_TIME, out int endTime, 0);
             int currentTime = GetCurrentTimeTick();
             if (currentTime >= endTime)
             {
-                a.data.set(KEY_NIEPAN_EGG_ACTIVE, 0);
-                a.data.set(KEY_NIEPAN_EGG_END_TIME, 0);
-                a.data.get(KEY_NIEPAN_EGG_MAX_HEALTH, out int maxHealth, 100);
+                xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_EGG_ACTIVE, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_EGG_END_TIME, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_NIEPAN_EGG_MAX_HEALTH, out int maxHealth, 100);
                 int reviveHealth = maxHealth / 2;
                 a.restoreHealth(reviveHealth);
                 a.finishStatusEffect("frozen");
-                a.data.set(KEY_NIEPAN_JUST_REVIVED, 1);
+                xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_JUST_REVIVED, 1);
                 float concentration = BloodlineSystem.GetConcentration(a);
                 if (concentration >= 80f)
                 {
                     ApplyNiepanFireburstTrigger(a, concentration);
                 }
-                a.data.set(KEY_NIEPAN_JUST_REVIVED, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_JUST_REVIVED, 0);
             }
             else
             {
                 if (a.getHealth() <= 0)
                 {
-                    a.data.set(KEY_NIEPAN_EGG_ACTIVE, 0);
-                    a.data.set(KEY_NIEPAN_EGG_END_TIME, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_EGG_ACTIVE, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_EGG_END_TIME, 0);
                     a.finishStatusEffect("frozen");
                     a.die(true, AttackType.Other, true, true);
                 }
@@ -862,7 +866,7 @@ namespace xn.bloodline
         public static bool IsInNiepanEggState(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_NIEPAN_EGG_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_NIEPAN_EGG_ACTIVE, out int active, 0);
             return active == 1;
         }
         #endregion
@@ -894,18 +898,20 @@ namespace xn.bloodline
                 if (a.kingdom == null || unit.kingdom == null) continue;
                 if (!a.kingdom.isEnemy(unit.kingdom)) continue;
                 if (!IsTargetRealmLowerOrEqual(a, unit)) continue;
-                bool isMage = unit.stats["mana"] > 0 ||
+                BaseStats unitStats = xn.access.BaseSimObjectAccess.GetStats(unit);
+                if (unitStats == null) continue;
+                bool isMage = unitStats["mana"] > 0 ||
                               unit.hasTrait("mage") ||
                               unit.hasTrait("wizard") ||
                               (unit.asset.spells != null && unit.asset.spells.hasAny());
                 if (isMage)
                 {
-                    if (!unit.hasStatus("slowness"))
+                    if (!xn.access.BaseSimObjectAccess.HasStatus(unit, "slowness"))
                     {
                         unit.addStatusEffect("slowness", 1f);
                     }
-                    unit.stats["speed"] = 0.1f;
-                    unit.data.set(KEY_JINFA_SILENCED, 1);
+                    unitStats["speed"] = 0.1f;
+                    xn.access.ActorAccess.GetData(unit).set(KEY_JINFA_SILENCED, 1);
                 }
             }
         }
@@ -918,13 +924,14 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.JINFA) return false;
             float concentration = BloodlineSystem.GetConcentration(jinfaOwner);
             if (concentration < 80f) return false;
+            Vector3 projectilePosition = xn.access.ProjectileAccess.GetCurrentPosition3D(projectile);
             float dist = UnityEngine.Vector2.Distance(
-                new UnityEngine.Vector2(projectile._current_position_3d.x, projectile._current_position_3d.y),
+                new UnityEngine.Vector2(projectilePosition.x, projectilePosition.y),
                 jinfaOwner.current_position
             );
             if (dist > 10f) return false;
-            if (projectile.kingdom == null || jinfaOwner.kingdom == null) return false;
-            if (!jinfaOwner.kingdom.isEnemy(projectile.kingdom)) return false;
+            if (xn.access.ProjectileAccess.GetKingdom(projectile) == null || jinfaOwner.kingdom == null) return false;
+            if (!jinfaOwner.kingdom.isEnemy(xn.access.ProjectileAccess.GetKingdom(projectile))) return false;
             return true;
         }
         public static float GetJinfaProjectileSpeedMultiplier()
@@ -937,12 +944,12 @@ namespace xn.bloodline
         private static void ApplyGutiPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["armor"] += 40f;
-            a.stats["speed"] -= a.stats["speed"] * 0.6f;
-            a.stats["mass"] += 1000f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["armor"] += 40f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["speed"] -= xn.access.BaseSimObjectAccess.GetStats(a)["speed"] * 0.6f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["mass"] += 1000f;
             if (concentration >= 50f)
             {
-                a.data.set(KEY_GUTI_MANA_SHIELD_ACTIVE, 1);
+                xn.access.ActorAccess.GetData(a).set(KEY_GUTI_MANA_SHIELD_ACTIVE, 1);
             }
         }
         public static float ApplyGutiManaShield(Actor victim, float damage)
@@ -953,17 +960,17 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.GUTI) return damage;
             float concentration = BloodlineSystem.GetConcentration(victim);
             if (concentration < 50f) return damage;
-            float currentMana = victim.stats["mana"];
+            float currentMana = xn.access.BaseSimObjectAccess.GetStats(victim)["mana"];
             if (currentMana <= 0) return damage; 
             if (currentMana >= damage)
             {
-                victim.stats["mana"] -= damage;
+                xn.access.BaseSimObjectAccess.GetStats(victim)["mana"] -= damage;
                 return 0f; 
             }
             else
             {
                 float remainingDamage = damage - currentMana;
-                victim.stats["mana"] = 0;
+                xn.access.BaseSimObjectAccess.GetStats(victim)["mana"] = 0;
                 return remainingDamage;
             }
         }
@@ -989,17 +996,17 @@ namespace xn.bloodline
         private static void ApplySuiyuePassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["lifespan"] += a.stats["lifespan"] * 0.2f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["lifespan"] += xn.access.BaseSimObjectAccess.GetStats(a)["lifespan"] * 0.2f;
             if (concentration >= 80f)
             {
                 int currentAge = a.getAge();
                 if (currentAge >= 1000)
                 {
-                    a.data.get(KEY_SUIYUE_AGE_LOCKED, out int locked, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_SUIYUE_AGE_LOCKED, out int locked, 0);
                     if (locked == 0)
                     {
-                        a.data.set(KEY_SUIYUE_AGE_LOCKED, 1);
-                        a.data.set(KEY_SUIYUE_LOCKED_AGE, currentAge);
+                        xn.access.ActorAccess.GetData(a).set(KEY_SUIYUE_AGE_LOCKED, 1);
+                        xn.access.ActorAccess.GetData(a).set(KEY_SUIYUE_LOCKED_AGE, currentAge);
                     }
                 }
             }
@@ -1011,9 +1018,9 @@ namespace xn.bloodline
             if (UnityEngine.Random.value < 0.05f)
             {
                 int currentAge = target.getAge();
-                int maxAge = (int)target.stats["lifespan"];
-                target.stats["lifespan"] -= 10f;
-                if (target.stats["lifespan"] <= currentAge)
+                int maxAge = (int)xn.access.BaseSimObjectAccess.GetStats(target)["lifespan"];
+                xn.access.BaseSimObjectAccess.GetStats(target)["lifespan"] -= 10f;
+                if (xn.access.BaseSimObjectAccess.GetStats(target)["lifespan"] <= currentAge)
                 {
                     target.die(true, AttackType.Age, true, true);
                 }
@@ -1030,21 +1037,21 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.SUIYUE) return;
             float concentration = BloodlineSystem.GetConcentration(a);
             if (concentration < 80f) return;
-            a.data.get(KEY_SUIYUE_AGE_LOCKED, out int locked, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_SUIYUE_AGE_LOCKED, out int locked, 0);
             if (locked != 1) return;
-            a.data.get(KEY_SUIYUE_LOCKED_AGE, out int lockedAge, 1000);
+            xn.access.ActorAccess.GetData(a).get(KEY_SUIYUE_LOCKED_AGE, out int lockedAge, 1000);
             int currentAge = a.getAge();
             if (currentAge > lockedAge)
             {
                 int currentYear = Date.getCurrentYear();
                 int targetBirthYear = currentYear - lockedAge;
-                a.data.set("born_year", targetBirthYear);
+                xn.access.ActorAccess.GetData(a).set("born_year", targetBirthYear);
             }
         }
         public static bool IsImmortal(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_SUIYUE_AGE_LOCKED, out int locked, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_SUIYUE_AGE_LOCKED, out int locked, 0);
             return locked == 1;
         }
         #endregion
@@ -1055,28 +1062,28 @@ namespace xn.bloodline
         private static void ApplyKuangzhanshiPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["courage"] = 100f; 
+            xn.access.BaseSimObjectAccess.GetStats(a)["courage"] = 100f; 
             if (concentration >= 50f)
             {
                 float healthPercent = (float)a.getHealth() / (float)a.getMaxHealth() * 100f;
                 float lostHealthPercent = 100f - healthPercent;
                 float attackSpeedBonus = (lostHealthPercent / 5f) * 0.01f;
-                a.stats["attack_speed"] += a.stats["attack_speed"] * attackSpeedBonus;
+                xn.access.BaseSimObjectAccess.GetStats(a)["attack_speed"] += xn.access.BaseSimObjectAccess.GetStats(a)["attack_speed"] * attackSpeedBonus;
             }
             ProcessKuangzhanshiBuquState(a, concentration);
         }
         private static void ProcessKuangzhanshiBuquState(Actor a, float concentration)
         {
             if (concentration < 80f) return;
-            a.data.get(KEY_KUANGZHANSHI_BUQU_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_KUANGZHANSHI_BUQU_ACTIVE, out int active, 0);
             if (active == 1)
             {
-                a.data.get(KEY_KUANGZHANSHI_BUQU_END, out int endTime, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_KUANGZHANSHI_BUQU_END, out int endTime, 0);
                 int currentTime = GetCurrentTimeTick();
                 if (currentTime >= endTime)
                 {
-                    a.data.set(KEY_KUANGZHANSHI_BUQU_ACTIVE, 0);
-                    a.data.set(KEY_KUANGZHANSHI_BUQU_END, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_KUANGZHANSHI_BUQU_ACTIVE, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_KUANGZHANSHI_BUQU_END, 0);
                 }
                 else
                 {
@@ -1095,21 +1102,21 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.KUANGZHANSHI) return false;
             float concentration = BloodlineSystem.GetConcentration(victim);
             if (concentration < 80f) return false;
-            victim.data.get(KEY_KUANGZHANSHI_BUQU_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_KUANGZHANSHI_BUQU_ACTIVE, out int active, 0);
             if (active == 1) return false; 
-            victim.data.get(KEY_KUANGZHANSHI_BUQU_CD, out int cdEndTime, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_KUANGZHANSHI_BUQU_CD, out int cdEndTime, 0);
             int currentTime = GetCurrentTimeTick();
             if (currentTime < cdEndTime) return false;
-            victim.data.set(KEY_KUANGZHANSHI_BUQU_ACTIVE, 1);
-            victim.data.set(KEY_KUANGZHANSHI_BUQU_END, GetFutureTimeTick(5));
-            victim.data.set(KEY_KUANGZHANSHI_BUQU_CD, GetFutureTimeTick(300));
+            xn.access.ActorAccess.GetData(victim).set(KEY_KUANGZHANSHI_BUQU_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(victim).set(KEY_KUANGZHANSHI_BUQU_END, GetFutureTimeTick(5));
+            xn.access.ActorAccess.GetData(victim).set(KEY_KUANGZHANSHI_BUQU_CD, GetFutureTimeTick(300));
             victim.restoreHealth(1);
             return true;
         }
         public static bool IsInBuquState(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_KUANGZHANSHI_BUQU_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_KUANGZHANSHI_BUQU_ACTIVE, out int active, 0);
             return active == 1;
         }
         #endregion
@@ -1119,19 +1126,19 @@ namespace xn.bloodline
         private static void ApplyLeifaPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.stats["lightning_resistance"] += 100f;
-            a.stats["speed"] += a.stats["speed"] * 0.1f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["lightning_resistance"] += 100f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["speed"] += xn.access.BaseSimObjectAccess.GetStats(a)["speed"] * 0.1f;
         }
         public static void ApplyLeifaGetHitTrigger(Actor victim, float concentration, BaseSimObject attacker)
         {
             if (concentration < 50f) return;
-            if (attacker == null || !attacker.isActor()) return;
-            Actor attackerActor = attacker.a;
+            if (attacker == null || !xn.access.BaseSimObjectAccess.IsActor(attacker)) return;
+            Actor attackerActor = xn.access.BaseSimObjectAccess.GetActor(attacker);
             if (attackerActor == null || !attackerActor.isAlive()) return;
             if (!IsTargetRealmLowerOrEqual(victim, attackerActor)) return;
             if (UnityEngine.Random.value < 0.3f)
             {
-                float lightningDamage = victim.stats["damage"] * 1.5f;
+                float lightningDamage = xn.access.BaseSimObjectAccess.GetStats(victim)["damage"] * 1.5f;
                 if (lightningDamage < 10f) lightningDamage = 10f;
                 attackerActor.getHit(lightningDamage, true, AttackType.Other, victim);
                 if (attackerActor.current_tile != null)
@@ -1152,22 +1159,22 @@ namespace xn.bloodline
             float healthPercent = (float)a.getHealth() / (float)a.getMaxHealth();
             if (healthPercent < 0.15f)
             {
-                a.data.set(KEY_LEIFA_LEICHI_ACTIVE, 1);
+                xn.access.ActorAccess.GetData(a).set(KEY_LEIFA_LEICHI_ACTIVE, 1);
             }
             else
             {
-                a.data.set(KEY_LEIFA_LEICHI_ACTIVE, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_LEIFA_LEICHI_ACTIVE, 0);
                 return;
             }
-            a.data.get(KEY_LEIFA_LEICHI_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_LEIFA_LEICHI_ACTIVE, out int active, 0);
             if (active != 1) return;
-            a.data.get(KEY_LEIFA_LEICHI_TICK, out int lastTick, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_LEIFA_LEICHI_TICK, out int lastTick, 0);
             int currentTick = GetCurrentTimeTick();
             if (currentTick - lastTick < 1) return; 
-            a.data.set(KEY_LEIFA_LEICHI_TICK, currentTick);
+            xn.access.ActorAccess.GetData(a).set(KEY_LEIFA_LEICHI_TICK, currentTick);
             var tile = a.current_tile;
             if (tile == null) return;
-            float lightningDamage = a.stats["damage"] * 0.8f;
+            float lightningDamage = xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * 0.8f;
             if (lightningDamage < 5f) lightningDamage = 5f;
             foreach (var unit in Finder.getUnitsFromChunk(tile, 2, 8f))
             {
@@ -1192,33 +1199,33 @@ namespace xn.bloodline
         private static void ApplyXuanwuPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
-            a.data.get(KEY_XUANWU_LAST_POS_X, out int lastX, -99999);
-            a.data.get(KEY_XUANWU_LAST_POS_Y, out int lastY, -99999);
+            xn.access.ActorAccess.GetData(a).get(KEY_XUANWU_LAST_POS_X, out int lastX, -99999);
+            xn.access.ActorAccess.GetData(a).get(KEY_XUANWU_LAST_POS_Y, out int lastY, -99999);
             int currentX = (int)(a.current_position.x * 100);
             int currentY = (int)(a.current_position.y * 100);
             if (lastX == currentX && lastY == currentY)
             {
-                a.data.get(KEY_XUANWU_STILL_TICKS, out int stillTicks, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_XUANWU_STILL_TICKS, out int stillTicks, 0);
                 stillTicks++;
-                a.data.set(KEY_XUANWU_STILL_TICKS, stillTicks);
+                xn.access.ActorAccess.GetData(a).set(KEY_XUANWU_STILL_TICKS, stillTicks);
                 if (stillTicks > 10)
                 {
-                    a.stats["health_regen"] += a.stats["health_regen"] * 3f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["health_regen"] += xn.access.BaseSimObjectAccess.GetStats(a)["health_regen"] * 3f;
                 }
             }
             else
             {
-                a.data.set(KEY_XUANWU_STILL_TICKS, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_XUANWU_STILL_TICKS, 0);
             }
-            a.data.set(KEY_XUANWU_LAST_POS_X, currentX);
-            a.data.set(KEY_XUANWU_LAST_POS_Y, currentY);
+            xn.access.ActorAccess.GetData(a).set(KEY_XUANWU_LAST_POS_X, currentX);
+            xn.access.ActorAccess.GetData(a).set(KEY_XUANWU_LAST_POS_Y, currentY);
             ProcessXuanwuDefenseState(a, concentration);
         }
         public static void ApplyXuanwuGetHitTrigger(Actor victim, float concentration, float damage, BaseSimObject attacker)
         {
             if (concentration < 50f) return;
-            if (attacker == null || !attacker.isActor()) return;
-            Actor attackerActor = attacker.a;
+            if (attacker == null || !xn.access.BaseSimObjectAccess.IsActor(attacker)) return;
+            Actor attackerActor = xn.access.BaseSimObjectAccess.GetActor(attacker);
             if (attackerActor == null || !attackerActor.isAlive()) return;
             float dist = UnityEngine.Vector2.Distance(victim.current_position, attackerActor.current_position);
             if (dist > 3f) return; 
@@ -1237,28 +1244,28 @@ namespace xn.bloodline
             if (bloodlineType != BloodlineTypes.XUANWU) return false;
             float concentration = BloodlineSystem.GetConcentration(victim);
             if (concentration < 80f) return false;
-            victim.data.get(KEY_XUANWU_DEFENSE_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_XUANWU_DEFENSE_ACTIVE, out int active, 0);
             if (active == 1) return false; 
-            victim.data.get(KEY_XUANWU_DEFENSE_CD, out int cdEndTime, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_XUANWU_DEFENSE_CD, out int cdEndTime, 0);
             int currentTime = GetCurrentTimeTick();
             if (currentTime < cdEndTime) return false;
-            victim.data.set(KEY_XUANWU_DEFENSE_ACTIVE, 1);
-            victim.data.set(KEY_XUANWU_DEFENSE_END, GetFutureTimeTick(10));
-            victim.data.set(KEY_XUANWU_DEFENSE_CD, GetFutureTimeTick(300));
+            xn.access.ActorAccess.GetData(victim).set(KEY_XUANWU_DEFENSE_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(victim).set(KEY_XUANWU_DEFENSE_END, GetFutureTimeTick(10));
+            xn.access.ActorAccess.GetData(victim).set(KEY_XUANWU_DEFENSE_CD, GetFutureTimeTick(300));
             victim.restoreHealth(1);
             return true;
         }
         private static void ProcessXuanwuDefenseState(Actor a, float concentration)
         {
             if (concentration < 80f) return;
-            a.data.get(KEY_XUANWU_DEFENSE_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_XUANWU_DEFENSE_ACTIVE, out int active, 0);
             if (active != 1) return;
-            a.data.get(KEY_XUANWU_DEFENSE_END, out int endTime, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_XUANWU_DEFENSE_END, out int endTime, 0);
             int currentTime = GetCurrentTimeTick();
             if (currentTime >= endTime)
             {
-                a.data.set(KEY_XUANWU_DEFENSE_ACTIVE, 0);
-                a.data.set(KEY_XUANWU_DEFENSE_END, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_XUANWU_DEFENSE_ACTIVE, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_XUANWU_DEFENSE_END, 0);
             }
             else
             {
@@ -1266,13 +1273,13 @@ namespace xn.bloodline
                 {
                     a.restoreHealth(1);
                 }
-                a.stats["speed"] = 0f;
+                xn.access.BaseSimObjectAccess.GetStats(a)["speed"] = 0f;
             }
         }
         public static bool IsInXuanwuDefenseState(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_XUANWU_DEFENSE_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_XUANWU_DEFENSE_ACTIVE, out int active, 0);
             return active == 1;
         }
         #endregion
@@ -1280,23 +1287,23 @@ namespace xn.bloodline
         private const string KEY_ENAN_POISON_TICK = "xn.bloodline.enan_poison_tick";
         private static void ApplyEnanPassive(Actor a, float concentration)
         {
-            a.stats["diplomacy"] = 0f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["diplomacy"] = 0f;
             int maxHealth = a.getMaxHealth();
             int currentHealth = a.getHealth();
             int healthCap = (int)(maxHealth * 0.99f); 
             if (currentHealth > healthCap)
             {
-                a.data.set("health", healthCap);
+                xn.access.ActorAccess.GetData(a).set("health", healthCap);
             }
         }
         private static void ApplyEnanAura(Actor a, float concentration)
         {
-            bool inCombat = a.has_attack_target || a.attackedBy != null;
+            bool inCombat = xn.access.ActorAccess.HasAttackTarget(a) || xn.access.ActorAccess.GetAttackedBy(a) != null;
             if (!inCombat) return;
-            a.data.get(KEY_ENAN_POISON_TICK, out int lastTick, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ENAN_POISON_TICK, out int lastTick, 0);
             int currentTick = GetCurrentTimeTick();
             if (currentTick - lastTick < 1) return;
-            a.data.set(KEY_ENAN_POISON_TICK, currentTick);
+            xn.access.ActorAccess.GetData(a).set(KEY_ENAN_POISON_TICK, currentTick);
             var tile = a.current_tile;
             if (tile == null) return;
             foreach (var unit in Finder.getUnitsFromChunk(tile, 3, 15f))
@@ -1305,7 +1312,7 @@ namespace xn.bloodline
                 if (unit.getID() == a.getID()) continue;
                 if (a.kingdom == null || unit.kingdom == null) continue;
                 if (!a.kingdom.isEnemy(unit.kingdom)) continue;
-                if (!unit.hasStatus("poisoned"))
+                if (!xn.access.BaseSimObjectAccess.HasStatus(unit, "poisoned"))
                 {
                     unit.addStatusEffect("poisoned", 3f);
                 }
@@ -1317,17 +1324,17 @@ namespace xn.bloodline
         private const string KEY_TIANSHA_COMBAT_ID = "xn.bloodline.tiansha_combat_id";
         private static void ApplyTianshaPassive(Actor a, float concentration)
         {
-            a.stats["luck"] -= a.stats["luck"] * 0.5f;
-            a.data.get(KEY_TIANSHA_KILL_STACK, out int killStack, 0);
+            xn.access.BaseSimObjectAccess.GetStats(a)["luck"] -= xn.access.BaseSimObjectAccess.GetStats(a)["luck"] * 0.5f;
+            xn.access.ActorAccess.GetData(a).get(KEY_TIANSHA_KILL_STACK, out int killStack, 0);
             if (killStack > 0)
             {
                 float damageBonus = killStack * 0.1f;
-                a.stats["damage"] += a.stats["damage"] * damageBonus;
+                xn.access.BaseSimObjectAccess.GetStats(a)["damage"] += xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * damageBonus;
             }
-            bool inCombat = a.has_attack_target || a.attackedBy != null;
+            bool inCombat = xn.access.ActorAccess.HasAttackTarget(a) || xn.access.ActorAccess.GetAttackedBy(a) != null;
             if (!inCombat && killStack > 0)
             {
-                a.data.set(KEY_TIANSHA_KILL_STACK, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_TIANSHA_KILL_STACK, 0);
             }
         }
         private static void ApplyTianshaAura(Actor a, float concentration)
@@ -1341,7 +1348,9 @@ namespace xn.bloodline
                 if (a.kingdom == null || unit.kingdom == null) continue;
                 if (a.kingdom.isEnemy(unit.kingdom)) continue; 
                 if (a.kingdom.getID() != unit.kingdom.getID()) continue; 
-                unit.stats["armor"] -= 40f;
+                BaseStats unitStats = xn.access.BaseSimObjectAccess.GetStats(unit);
+                if (unitStats == null) continue;
+                unitStats["armor"] -= 40f;
             }
         }
         public static void OnAllyDeathForTiansha(Actor tianshaOwner, Actor deadAlly)
@@ -1355,14 +1364,14 @@ namespace xn.bloodline
             if (tianshaOwner.kingdom.getID() != deadAlly.kingdom.getID()) return;
             float dist = UnityEngine.Vector2.Distance(tianshaOwner.current_position, deadAlly.current_position);
             if (dist > 15f) return;
-            tianshaOwner.data.get(KEY_TIANSHA_KILL_STACK, out int killStack, 0);
+            xn.access.ActorAccess.GetData(tianshaOwner).get(KEY_TIANSHA_KILL_STACK, out int killStack, 0);
             killStack++;
-            tianshaOwner.data.set(KEY_TIANSHA_KILL_STACK, killStack);
+            xn.access.ActorAccess.GetData(tianshaOwner).set(KEY_TIANSHA_KILL_STACK, killStack);
         }
         public static int GetTianshaKillStack(Actor a)
         {
             if (a == null) return 0;
-            a.data.get(KEY_TIANSHA_KILL_STACK, out int stack, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_TIANSHA_KILL_STACK, out int stack, 0);
             return stack;
         }
         #endregion
@@ -1373,7 +1382,7 @@ namespace xn.bloodline
         private const string KEY_SHIBIAN_POISON_END = "xn.bloodline.shibian_poison_end";
         private static void ApplyShibianPassive(Actor a, float concentration)
         {
-            a.stats["health_regen"] = 0f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["health_regen"] = 0f;
             var era = World.world_era;
             if (era != null)
             {
@@ -1381,20 +1390,20 @@ namespace xn.bloodline
                                    (era.id != null && (era.id.Contains("hope") || era.id.Contains("miracle")));
                 if (isDebuffEra)
                 {
-                    a.stats["damage"] *= 0.5f;
-                    a.stats["armor"] *= 0.5f;
-                    a.stats["speed"] *= 0.5f;
-                    a.stats["health"] *= 0.5f;
-                    a.stats["attack_speed"] *= 0.5f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["damage"] *= 0.5f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["armor"] *= 0.5f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["speed"] *= 0.5f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["health"] *= 0.5f;
+                    xn.access.BaseSimObjectAccess.GetStats(a)["attack_speed"] *= 0.5f;
                 }
             }
         }
         private static void ApplyShibianAura(Actor a, float concentration)
         {
-            a.data.get(KEY_SHIBIAN_POISON_TICK, out int lastTick, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_SHIBIAN_POISON_TICK, out int lastTick, 0);
             int currentTick = GetCurrentTimeTick();
             if (currentTick - lastTick < 1) return;
-            a.data.set(KEY_SHIBIAN_POISON_TICK, currentTick);
+            xn.access.ActorAccess.GetData(a).set(KEY_SHIBIAN_POISON_TICK, currentTick);
             var tile = a.current_tile;
             if (tile == null) return;
             foreach (var unit in Finder.getUnitsFromChunk(tile, 1, 5f))
@@ -1403,26 +1412,26 @@ namespace xn.bloodline
                 if (unit.getID() == a.getID()) continue;
                 if (a.kingdom == null || unit.kingdom == null) continue;
                 if (!a.kingdom.isEnemy(unit.kingdom)) continue;
-                unit.data.set(KEY_SHIBIAN_POISONED_BY, a.getID());
-                unit.data.set(KEY_SHIBIAN_POISON_END, GetFutureTimeTick(3)); 
+                xn.access.ActorAccess.GetData(unit).set(KEY_SHIBIAN_POISONED_BY, a.getID());
+                xn.access.ActorAccess.GetData(unit).set(KEY_SHIBIAN_POISON_END, GetFutureTimeTick(3)); 
             }
         }
         public static void ProcessShibianPoisonDOT(Actor a)
         {
             if (a == null || !a.isAlive()) return;
-            a.data.get(KEY_SHIBIAN_POISON_END, out int endTimeTick, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_SHIBIAN_POISON_END, out int endTimeTick, 0);
             if (endTimeTick <= 0) return;
             int currentTimeTick = GetCurrentTimeTick();
             if (currentTimeTick >= endTimeTick)
             {
-                a.data.set(KEY_SHIBIAN_POISON_END, 0);
-                a.data.set(KEY_SHIBIAN_POISONED_BY, 0L);
+                xn.access.ActorAccess.GetData(a).set(KEY_SHIBIAN_POISON_END, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_SHIBIAN_POISONED_BY, 0L);
                 return;
             }
             int maxHealth = a.getMaxHealth();
             float dotDamage = maxHealth * 0.01f * 0.1f; 
             if (dotDamage < 1f) dotDamage = 1f;
-            a.data.get(KEY_SHIBIAN_POISONED_BY, out long casterId, 0L);
+            xn.access.ActorAccess.GetData(a).get(KEY_SHIBIAN_POISONED_BY, out long casterId, 0L);
             var caster = casterId > 0 ? World.world.units.get(casterId) : null;
             a.getHit(dotDamage, true, AttackType.Other, caster);
         }
@@ -1433,7 +1442,7 @@ namespace xn.bloodline
             if (!BloodlineSystem.HasBloodline(killer)) return;
             string bloodlineType = BloodlineSystem.GetBloodlineType(killer);
             if (bloodlineType != BloodlineTypes.SHIBIAN) return;
-            killer.data.get(KEY_SHIBIAN_SKELETON_COUNT, out int skeletonCount, 0);
+            xn.access.ActorAccess.GetData(killer).get(KEY_SHIBIAN_SKELETON_COUNT, out int skeletonCount, 0);
             if (skeletonCount >= 20) return; 
             var tile = victim.current_tile;
             if (tile == null) return;
@@ -1442,16 +1451,16 @@ namespace xn.bloodline
             {
                 if (killer.kingdom != null)
                 {
-                    skeleton.setKingdom(killer.kingdom);
+                    xn.access.ActorAccess.SetKingdom(skeleton, killer.kingdom);
                 }
                 skeleton.setName("尸毒骷髅", false);
-                killer.data.set(KEY_SHIBIAN_SKELETON_COUNT, skeletonCount + 1);
+                xn.access.ActorAccess.GetData(killer).set(KEY_SHIBIAN_SKELETON_COUNT, skeletonCount + 1);
             }
         }
         public static bool HasShibianPoison(Actor a)
         {
             if (a == null) return false;
-            a.data.get(KEY_SHIBIAN_POISON_END, out int endTime, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_SHIBIAN_POISON_END, out int endTime, 0);
             int currentTime = GetCurrentTimeTick();
             return endTime > 0 && currentTime < endTime;
         }
@@ -1460,10 +1469,10 @@ namespace xn.bloodline
         private const string KEY_ZAOSHUAI_DEATH_CHECKED = "xn.bloodline.zaoshuai_death_checked";
         private static void ApplyZaoshuaiPassive(Actor a, float concentration)
         {
-            a.stats["cultivation_speed"] += a.stats["cultivation_speed"] * 5f;
-            a.stats["intelligence"] = 100f;
-            a.stats["luck"] = 100f;
-            a.stats["lifespan"] = 100f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["cultivation_speed"] += xn.access.BaseSimObjectAccess.GetStats(a)["cultivation_speed"] * 5f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["intelligence"] = 100f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["luck"] = 100f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["lifespan"] = 100f;
         }
         public static void ProcessZaoshuaiDeathCheck(Actor a)
         {
@@ -1474,9 +1483,9 @@ namespace xn.bloodline
             int currentAge = a.getAge();
             if (currentAge >= 100)
             {
-                a.data.get(KEY_ZAOSHUAI_DEATH_CHECKED, out int checked_, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ZAOSHUAI_DEATH_CHECKED, out int checked_, 0);
                 if (checked_ == 1) return;
-                a.data.set(KEY_ZAOSHUAI_DEATH_CHECKED, 1);
+                xn.access.ActorAccess.GetData(a).set(KEY_ZAOSHUAI_DEATH_CHECKED, 1);
                 a.die(true, AttackType.Age, true, true);
             }
         }
@@ -1490,17 +1499,17 @@ namespace xn.bloodline
         };
         private static void ApplyJibianPassive(Actor a, float concentration)
         {
-            a.stats["intelligence"] = 1f;
+            xn.access.BaseSimObjectAccess.GetStats(a)["intelligence"] = 1f;
             ProcessJibianConfusion(a);
         }
         private static void ProcessJibianConfusion(Actor a)
         {
-            bool inCombat = a.has_attack_target || a.attackedBy != null;
+            bool inCombat = xn.access.ActorAccess.HasAttackTarget(a) || xn.access.ActorAccess.GetAttackedBy(a) != null;
             if (!inCombat) return;
-            a.data.get(KEY_JIBIAN_CONFUSION_TICK, out int lastTick, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_JIBIAN_CONFUSION_TICK, out int lastTick, 0);
             int currentTick = GetCurrentTimeTick();
             if (currentTick - lastTick < 10) return;
-            a.data.set(KEY_JIBIAN_CONFUSION_TICK, currentTick);
+            xn.access.ActorAccess.GetData(a).set(KEY_JIBIAN_CONFUSION_TICK, currentTick);
             if (UnityEngine.Random.value < 0.05f)
             {
                 var tile = a.current_tile;
@@ -1523,7 +1532,7 @@ namespace xn.bloodline
                 }
                 if (nearestAlly != null)
                 {
-                    float damage = a.stats["damage"] * 0.5f; 
+                    float damage = xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * 0.5f; 
                     nearestAlly.getHit(damage, true, AttackType.Other, a);
                 }
             }
@@ -1534,11 +1543,11 @@ namespace xn.bloodline
             if (!BloodlineSystem.HasBloodline(victim)) return;
             string bloodlineType = BloodlineSystem.GetBloodlineType(victim);
             if (bloodlineType != BloodlineTypes.JIBIAN) return;
-            victim.data.get(KEY_JIBIAN_LAST_HIT_TICK, out int lastTick, 0);
+            xn.access.ActorAccess.GetData(victim).get(KEY_JIBIAN_LAST_HIT_TICK, out int lastTick, 0);
             int currentTick = GetCurrentTimeTick();
             if (currentTick - lastTick < 5) return; 
-            victim.data.set(KEY_JIBIAN_LAST_HIT_TICK, currentTick);
-            victim.data.get(KEY_JIBIAN_SUMMON_COUNT, out int summonCount, 0);
+            xn.access.ActorAccess.GetData(victim).set(KEY_JIBIAN_LAST_HIT_TICK, currentTick);
+            xn.access.ActorAccess.GetData(victim).get(KEY_JIBIAN_SUMMON_COUNT, out int summonCount, 0);
             if (summonCount >= 10) return; 
             if (UnityEngine.Random.value >= 0.3f) return;
             var tile = victim.current_tile;
@@ -1551,10 +1560,10 @@ namespace xn.bloodline
             {
                 if (victim.kingdom != null)
                 {
-                    creature.setKingdom(victim.kingdom);
+                    xn.access.ActorAccess.SetKingdom(creature, victim.kingdom);
                 }
                 creature.setName("血肉分身", false);
-                victim.data.set(KEY_JIBIAN_SUMMON_COUNT, summonCount + 1);
+                xn.access.ActorAccess.GetData(victim).set(KEY_JIBIAN_SUMMON_COUNT, summonCount + 1);
             }
         }
         public static void ApplyJibianKillTrigger(Actor killer, Actor victim)
@@ -1877,10 +1886,10 @@ namespace xn.bloodline
             private static bool Prefix(Actor __instance, bool pDestroy)
             {
                 if (__instance == null || !__instance.isAlive()) return true;
-                __instance.data.get(KEY_FORCE_DEATH, out int forceDeath, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_FORCE_DEATH, out int forceDeath, 0);
                 if (forceDeath == 1 || pDestroy)
                 {
-                    __instance.data.set(KEY_FORCE_DEATH, 0);
+                    xn.access.ActorAccess.GetData(__instance).set(KEY_FORCE_DEATH, 0);
                     return true;
                 }
                 if (ApplyNiepanDeathTrigger(__instance))
@@ -1899,10 +1908,10 @@ namespace xn.bloodline
                 {
                     return false; 
                 }
-                var attacker = __instance.attackedBy;
-                if (attacker != null && attacker.isActor())
+                var attacker = xn.access.ActorAccess.GetAttackedBy(__instance);
+                if (attacker != null && xn.access.BaseSimObjectAccess.IsActor(attacker))
                 {
-                    Actor killer = attacker.a;
+                    Actor killer = xn.access.BaseSimObjectAccess.GetActor(attacker);
                     if (killer != null && killer.isAlive())
                     {
                         ApplyMeihuoKillTrigger(killer, __instance);
@@ -1923,10 +1932,10 @@ namespace xn.bloodline
             {
                 if (pTargetToCheck == null) return;
                 if (pData.initiator == null) return;
-                if (!pData.initiator.isActor()) return;
-                if (!pTargetToCheck.isActor()) return;
-                Actor attacker = pData.initiator.a;
-                Actor target = pTargetToCheck.a;
+                if (!xn.access.BaseSimObjectAccess.IsActor(pData.initiator)) return;
+                if (!xn.access.BaseSimObjectAccess.IsActor(pTargetToCheck)) return;
+                Actor attacker = xn.access.BaseSimObjectAccess.GetActor(pData.initiator);
+                Actor target = xn.access.BaseSimObjectAccess.GetActor(pTargetToCheck);
                 if (attacker == null || !attacker.isAlive()) return;
                 if (target == null) return;
                 ApplyAttackTriggerEffects(attacker, target, pData.damage);
@@ -1953,9 +1962,10 @@ namespace xn.bloodline
             private static void Prefix(Projectile __instance)
             {
                 if (__instance == null) return;
-                if (__instance.kingdom == null) return;
-                if (__instance.kingdom.asset == null) return;
-                Vector2 projectilePos = new Vector2(__instance._current_position_3d.x, __instance._current_position_3d.y);
+                if (xn.access.ProjectileAccess.GetKingdom(__instance) == null) return;
+                if (xn.access.ProjectileAccess.GetKingdom(__instance).asset == null) return;
+                Vector3 projectilePosition = xn.access.ProjectileAccess.GetCurrentPosition3D(__instance);
+                Vector2 projectilePos = new Vector2(projectilePosition.x, projectilePosition.y);
                 var tile = World.world.GetTile((int)projectilePos.x, (int)projectilePos.y);
                 if (tile == null) return;
                 foreach (var unit in Finder.getUnitsFromChunk(tile, 2, 10f))
@@ -1963,7 +1973,7 @@ namespace xn.bloodline
                     if (unit == null || !unit.isAlive()) continue;
                     if (unit.kingdom == null) continue;
                     if (unit.kingdom.asset == null) continue;
-                    if (!unit.kingdom.isEnemy(__instance.kingdom)) continue;
+                    if (!unit.kingdom.isEnemy(xn.access.ProjectileAccess.GetKingdom(__instance))) continue;
                     if (!BloodlineSystem.HasBloodline(unit)) continue;
                     string bloodlineType = BloodlineSystem.GetBloodlineType(unit);
                     if (bloodlineType != BloodlineTypes.JINFA) continue;
@@ -1971,7 +1981,7 @@ namespace xn.bloodline
                     if (concentration < 80f) continue;
                     float dist = Vector2.Distance(projectilePos, unit.current_position);
                     if (dist > 10f) continue;
-                    __instance._speed *= GetJinfaProjectileSpeedMultiplier();
+                    xn.access.ProjectileAccess.MultiplySpeed(__instance, GetJinfaProjectileSpeedMultiplier());
                     break; 
                 }
             }

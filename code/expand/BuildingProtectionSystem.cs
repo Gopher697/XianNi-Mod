@@ -11,17 +11,17 @@ namespace xn.expand
         private static bool ShouldProtectBuilding(Building building)
         {
             if (building == null || !building.isAlive()) return false;
-            if (building.asset == null) return false;
+            if (xn.access.BuildingAccess.GetAsset(building) == null) return false;
             if (!xn.config.ModConfigHooks.EnableBuildingProtection) return false;
-            if (building.asset.id == RuinBuildingAssets.ID) return false;
-            if (building.asset.tower) return false;
-            return building.state_ownership == BuildingOwnershipState.Civilization;
+            if (xn.access.BuildingAccess.GetAsset(building).id == RuinBuildingAssets.ID) return false;
+            if (xn.access.BuildingAccess.GetAsset(building).tower) return false;
+            return xn.access.BuildingAccess.GetStateOwnership(building) == BuildingOwnershipState.Civilization;
         }
         private static bool IsRuinBuilding(Building building)
         {
             return building != null 
-                && building.asset != null 
-                && building.asset.id == RuinBuildingAssets.ID;
+                && xn.access.BuildingAccess.GetAsset(building) != null 
+                && xn.access.BuildingAccess.GetAsset(building).id == RuinBuildingAssets.ID;
         }
         #region Harmony Patches
         [HarmonyPatch(typeof(Building), "getHit")]
@@ -58,9 +58,9 @@ namespace xn.expand
                 {
                     pOptions.ignore_buildings = new System.Collections.Generic.List<string>();
                 }
-                if (!pOptions.ignore_buildings.Contains(building.asset.id))
+                if (!pOptions.ignore_buildings.Contains(xn.access.BuildingAccess.GetAsset(building).id))
                 {
-                    pOptions.ignore_buildings.Add(building.asset.id);
+                    pOptions.ignore_buildings.Add(xn.access.BuildingAccess.GetAsset(building).id);
                 }
             }
         }

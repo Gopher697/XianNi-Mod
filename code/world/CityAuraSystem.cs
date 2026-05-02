@@ -60,9 +60,10 @@ namespace xn.world
                 if (xn.config.ModConfigHooks.EnableXiuzhenguoAuraLimit)
                 {
                     int maxAura = 40000; 
-                    if (__instance.kingdom != null && !__instance.kingdom.isRekt())
+                    Kingdom kingdom = xn.access.CityAccess.GetKingdom(__instance);
+                    if (kingdom != null && !kingdom.isRekt())
                     {
-                        maxAura = xn.world.XiuzhenguoSystem.GetMaxAura(__instance.kingdom);
+                        maxAura = xn.world.XiuzhenguoSystem.GetMaxAura(kingdom);
                     }
                     if (maxAura < int.MaxValue && maxAura < max)
                     {
@@ -142,9 +143,10 @@ namespace xn.world
                 if (xn.config.ModConfigHooks.EnableXiuzhenguoAuraLimit)
                 {
                     int maxAura = 40000; 
-                    if (c.kingdom != null && !c.kingdom.isRekt())
+                    Kingdom kingdom = xn.access.CityAccess.GetKingdom(c);
+                    if (kingdom != null && !kingdom.isRekt())
                     {
-                        maxAura = xn.world.XiuzhenguoSystem.GetMaxAura(c.kingdom);
+                        maxAura = xn.world.XiuzhenguoSystem.GetMaxAura(kingdom);
                     }
                     if (maxAura < int.MaxValue && maxAura < cityMax)
                     {

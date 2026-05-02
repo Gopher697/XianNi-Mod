@@ -35,11 +35,11 @@ namespace xn.world
             if (caster == null || target == null) return;
             if (!caster.isAlive()) return;
             if (caster == target) return;
-            long hasSlave; caster.data.get(KEY_SLAVE_ID, out hasSlave, 0L);
+            long hasSlave; xn.access.ActorAccess.GetData(caster).get(KEY_SLAVE_ID, out hasSlave, 0L);
             if (hasSlave > 0) return;
-            long casterMaster; caster.data.get(KEY_MASTER_ID, out casterMaster, 0L);
+            long casterMaster; xn.access.ActorAccess.GetData(caster).get(KEY_MASTER_ID, out casterMaster, 0L);
             if (casterMaster > 0) return;
-            long targetMaster; target.data.get(KEY_MASTER_ID, out targetMaster, 0L);
+            long targetMaster; xn.access.ActorAccess.GetData(target).get(KEY_MASTER_ID, out targetMaster, 0L);
             if (targetMaster > 0) return;
             int cr = GetRealmIndex(caster);
             int tr = GetRealmIndex(target);
@@ -52,17 +52,17 @@ namespace xn.world
             if (!Randy.randomChance(PROB_SEAL_SUCCESS)) return;
             int years = (cr - idxInfant + 1) * 5; 
             int expireYear = Date.getCurrentYear() + years;
-            target.data.set(KEY_MASTER_ID, caster.data.id);
-            target.data.set(KEY_EXPIRE_YEAR, expireYear);
-            caster.data.set(KEY_SLAVE_ID, target.data.id);
+            xn.access.ActorAccess.GetData(target).set(KEY_MASTER_ID, xn.access.ActorAccess.GetData(caster).id);
+            xn.access.ActorAccess.GetData(target).set(KEY_EXPIRE_YEAR, expireYear);
+            xn.access.ActorAccess.GetData(caster).set(KEY_SLAVE_ID, xn.access.ActorAccess.GetData(target).id);
             target.cancelAllBeh();
             caster.cancelAllBeh();
             string tName = target.getName() ?? "未知";
             string cName = caster.getName() ?? "未知";
             xn.world.BroadcastSystem.Custom($"{tName}被{cName}种下了奴印");
-            long xp; target.data.get(KEY_XP, out xp, 0L);
-            target.data.set(KEY_LAST_XP, xp);
-            target.data.set(KEY_SAVE_ONCE, caster.data.id); 
+            long xp; xn.access.ActorAccess.GetData(target).get(KEY_XP, out xp, 0L);
+            xn.access.ActorAccess.GetData(target).set(KEY_LAST_XP, xp);
+            xn.access.ActorAccess.GetData(target).set(KEY_SAVE_ONCE, xn.access.ActorAccess.GetData(caster).id); 
         }
         [HarmonyPatch(typeof(MapBox), "updateSimulation")]
         internal static class Patch_Map_Update
@@ -80,7 +80,7 @@ namespace xn.world
                         {
                             var slave = list[i];
                             if (slave == null || !slave.isAlive()) continue;
-                            long masterId; slave.data.get(KEY_MASTER_ID, out masterId, 0L);
+                            long masterId; xn.access.ActorAccess.GetData(slave).get(KEY_MASTER_ID, out masterId, 0L);
                             if (masterId <= 0) continue;
                             var master = World.world.units.get(masterId);
                             if (master == null || master.isRekt())
@@ -88,52 +88,54 @@ namespace xn.world
                                 ClearRelation(slave, null);
                                 continue;
                             }
-                            int ey; slave.data.get(KEY_EXPIRE_YEAR, out ey, 0);
+                            int ey; xn.access.ActorAccess.GetData(slave).get(KEY_EXPIRE_YEAR, out ey, 0);
                             if (ey > 0 && Date.getCurrentYear() >= ey)
                             {
                                 ClearRelation(slave, master);
                                 xn.world.BroadcastSystem.Custom($"{slave.getName() ?? "未知"}的奴印到期解除了");
                                 continue;
                             }
-                            if (slave.has_attack_target && slave.attack_target != null && slave.attack_target.isActor() && slave.attack_target.a == master)
+                            BaseSimObject slaveAttackTarget = xn.access.ActorAccess.GetAttackTarget(slave);
+                            if (xn.access.ActorAccess.HasAttackTarget(slave) && slaveAttackTarget != null && xn.access.BaseSimObjectAccess.IsActor(slaveAttackTarget) && xn.access.BaseSimObjectAccess.GetActor(slaveAttackTarget) == master)
                             {
                                 slave.cancelAllBeh();
                             }
-                            if (master.has_attack_target && master.attack_target != null && master.attack_target.isActor() && master.attack_target.a == slave)
+                            BaseSimObject masterAttackTarget = xn.access.ActorAccess.GetAttackTarget(master);
+                            if (xn.access.ActorAccess.HasAttackTarget(master) && masterAttackTarget != null && xn.access.BaseSimObjectAccess.IsActor(masterAttackTarget) && xn.access.BaseSimObjectAccess.GetActor(masterAttackTarget) == slave)
                             {
                                 master.cancelAllBeh();
                             }
                             if (slave.current_tile != null && master.current_tile != null)
                             {
-                                if (slave.tile_target != master.current_tile || slave.current_path == null || slave.current_path.Count == 0)
+                                if (xn.access.ActorAccess.GetTileTarget(slave) != master.current_tile || slave.current_path == null || slave.current_path.Count == 0)
                                 {
                                     ActorMove.goTo(slave, master.current_tile, pPathOnLiquid: false, pWalkOnBlocks: true, pPathOnLava: false, pLimitPathfindingRegions: 0);
                                 }
                             }
                             Actor enemy = null;
-                            if (master.attack_target != null && master.attack_target.isActor())
-                                enemy = master.attack_target.a;
-                            else if (master.attackedBy != null && master.attackedBy.isActor())
-                                enemy = master.attackedBy.a;
+                            if (masterAttackTarget != null && xn.access.BaseSimObjectAccess.IsActor(masterAttackTarget))
+                                enemy = xn.access.BaseSimObjectAccess.GetActor(masterAttackTarget);
+                            else if (xn.access.ActorAccess.GetAttackedBy(master) != null && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(master)))
+                                enemy = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(master));
                             if (enemy != null && enemy.isAlive() && enemy != slave && enemy.current_tile != null)
                             {
                                 slave.startFightingWith(enemy);
                                 ActorMove.goTo(slave, enemy.current_tile, pPathOnLiquid: false, pWalkOnBlocks: true, pPathOnLava: false, pLimitPathfindingRegions: 0);
                             }
-                            long cur; slave.data.get(KEY_XP, out cur, 0L);
-                            long last; slave.data.get(KEY_LAST_XP, out last, cur);
+                            long cur; xn.access.ActorAccess.GetData(slave).get(KEY_XP, out cur, 0L);
+                            long last; xn.access.ActorAccess.GetData(slave).get(KEY_LAST_XP, out last, cur);
                             if (cur > last)
                             {
                                 long delta = cur - last;
                                 long tribute = (long)(delta * 0.3f);
                                 if (tribute > 0)
                                 {
-                                    slave.data.set(KEY_XP, cur - tribute);
-                                    long mxp; master.data.get(KEY_XP, out mxp, 0L);
-                                    master.data.set(KEY_XP, mxp + tribute);
+                                    xn.access.ActorAccess.GetData(slave).set(KEY_XP, cur - tribute);
+                                    long mxp; xn.access.ActorAccess.GetData(master).get(KEY_XP, out mxp, 0L);
+                                    xn.access.ActorAccess.GetData(master).set(KEY_XP, mxp + tribute);
                                 }
                             }
-                            slave.data.set(KEY_LAST_XP, cur);
+                            xn.access.ActorAccess.GetData(slave).set(KEY_LAST_XP, cur);
                         }
                     }
                 }
@@ -147,15 +149,17 @@ namespace xn.world
                         {
                             var s = list[i];
                             if (s == null || !s.isAlive()) continue;
-                            long mid; s.data.get(KEY_MASTER_ID, out mid, 0L);
+                            long mid; xn.access.ActorAccess.GetData(s).get(KEY_MASTER_ID, out mid, 0L);
                             if (mid <= 0) continue;
                             var m = World.world.units.get(mid);
                             if (m == null || m.isRekt()) continue;
                             Actor enemy = null;
-                            if (m.attack_target != null && m.attack_target.isActor())
-                                enemy = m.attack_target.a;
-                            else if (m.attackedBy != null && m.attackedBy.isActor())
-                                enemy = m.attackedBy.a;
+                            BaseSimObject attackTarget = xn.access.ActorAccess.GetAttackTarget(m);
+                            BaseSimObject attackedBy = xn.access.ActorAccess.GetAttackedBy(m);
+                            if (attackTarget != null && xn.access.BaseSimObjectAccess.IsActor(attackTarget))
+                                enemy = xn.access.BaseSimObjectAccess.GetActor(attackTarget);
+                            else if (attackedBy != null && xn.access.BaseSimObjectAccess.IsActor(attackedBy))
+                                enemy = xn.access.BaseSimObjectAccess.GetActor(attackedBy);
                             if (enemy == null || !enemy.isAlive()) continue;
                             s.cancelAllBeh();
                             s.startFightingWith(enemy);
@@ -173,9 +177,9 @@ namespace xn.world
             {
                 if (__instance == null) return true;
                 if (pDestroy) return true; 
-                long masterId; __instance.data.get(KEY_SAVE_ONCE, out masterId, 0L);
+                long masterId; xn.access.ActorAccess.GetData(__instance).get(KEY_SAVE_ONCE, out masterId, 0L);
                 if (masterId <= 0) return true;
-                __instance.data.set(KEY_SAVE_ONCE, 0L);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_SAVE_ONCE, 0L);
                 int healSelf = Mathf.CeilToInt(__instance.getMaxHealth() * 0.3f);
                 if (healSelf < 1) healSelf = 1; 
                 __instance.changeHealth(healSelf);
@@ -188,17 +192,17 @@ namespace xn.world
             private static bool Prefix(Actor __instance, BaseSimObject pSimObject)
             {
                 if (__instance == null || pSimObject == null) return true;
-                if (!pSimObject.isActor()) return true; 
-                var pTarget = pSimObject.a;
-                long aMaster; __instance.data.get(KEY_MASTER_ID, out aMaster, 0L);
-                long aSlave; __instance.data.get(KEY_SLAVE_ID, out aSlave, 0L);
-                long bMaster; pTarget.data.get(KEY_MASTER_ID, out bMaster, 0L);
-                long bSlave; pTarget.data.get(KEY_SLAVE_ID, out bSlave, 0L);
+                if (!xn.access.BaseSimObjectAccess.IsActor(pSimObject)) return true; 
+                var pTarget = xn.access.BaseSimObjectAccess.GetActor(pSimObject);
+                long aMaster; xn.access.ActorAccess.GetData(__instance).get(KEY_MASTER_ID, out aMaster, 0L);
+                long aSlave; xn.access.ActorAccess.GetData(__instance).get(KEY_SLAVE_ID, out aSlave, 0L);
+                long bMaster; xn.access.ActorAccess.GetData(pTarget).get(KEY_MASTER_ID, out bMaster, 0L);
+                long bSlave; xn.access.ActorAccess.GetData(pTarget).get(KEY_SLAVE_ID, out bSlave, 0L);
                 bool paired =
-                    (aMaster > 0 && aMaster == pTarget.data.id) ||
-                    (aSlave > 0 && aSlave == pTarget.data.id) ||
-                    (bMaster > 0 && bMaster == __instance.data.id) ||
-                    (bSlave > 0 && bSlave == __instance.data.id);
+                    (aMaster > 0 && aMaster == xn.access.ActorAccess.GetData(pTarget).id) ||
+                    (aSlave > 0 && aSlave == xn.access.ActorAccess.GetData(pTarget).id) ||
+                    (bMaster > 0 && bMaster == xn.access.ActorAccess.GetData(__instance).id) ||
+                    (bSlave > 0 && bSlave == xn.access.ActorAccess.GetData(__instance).id);
                 if (!paired) return true;
                 __instance.cancelAllBeh(); 
                 return false;              
@@ -215,7 +219,7 @@ namespace xn.world
                 float pDamage, bool pFlash, AttackType pAttackType, BaseSimObject pAttacker,
                 bool pSkipIfShake, bool pMetallicWeapon, bool pCheckDamageReduction)
             {
-                var caster = pAttacker?.a;
+                var caster = xn.access.BaseSimObjectAccess.GetActor(pAttacker);
                 var target = __instance;
                 if (caster == null || target == null) return;
                 TrySeal(caster, target);
@@ -225,17 +229,17 @@ namespace xn.world
         {
             if (slave != null)
             {
-                slave.data.set(KEY_MASTER_ID, 0L);
-                slave.data.set(KEY_EXPIRE_YEAR, 0);
-                slave.data.set(KEY_LAST_XP, 0L);
+                xn.access.ActorAccess.GetData(slave).set(KEY_MASTER_ID, 0L);
+                xn.access.ActorAccess.GetData(slave).set(KEY_EXPIRE_YEAR, 0);
+                xn.access.ActorAccess.GetData(slave).set(KEY_LAST_XP, 0L);
             }
             var m = masterOrNull;
             if (m == null && slave != null)
             {
-                long mid; slave.data.get(KEY_MASTER_ID, out mid, 0L);
+                long mid; xn.access.ActorAccess.GetData(slave).get(KEY_MASTER_ID, out mid, 0L);
                 if (mid > 0) m = World.world.units.get(mid);
             }
-            if (m != null) m.data.set(KEY_SLAVE_ID, 0L);
+            if (m != null) xn.access.ActorAccess.GetData(m).set(KEY_SLAVE_ID, 0L);
         }
         private static int GetRealmIndex(Actor a)
         {

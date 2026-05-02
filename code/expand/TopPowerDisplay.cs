@@ -34,10 +34,11 @@ namespace xn.expand
             if (element != null)
             {
                 _powerElements[__instance] = element;
+                Text counterText = xn.access.InterestingPeopleElementAccess.GetCounter(element);
                 var texts = clone.GetComponentsInChildren<Text>(true);
                 foreach (var text in texts)
                 {
-                    if (text != element._counter)
+                    if (text != counterText)
                     {
                         string title = LocalizedTextManager.getText("top_power");
                         if (string.IsNullOrEmpty(title) || title == "top_power")
@@ -60,13 +61,15 @@ namespace xn.expand
                     chartsSprite = SpriteTextureLoader.getSprite("ui/icons/iconCompareStatistics");
                 if (chartsSprite != null)
                 {
+                    Transform gridTransform = xn.access.InterestingPeopleElementAccess.GetGrid(element);
+                    Transform elementTransform = xn.access.InterestingPeopleElementAccess.GetElementTransform(element);
                     foreach (var img in images)
                     {
                         if (img.gameObject == clone)
                             continue;
-                        if (element._grid != null && img.transform.IsChildOf(element._grid))
+                        if (gridTransform != null && img.transform.IsChildOf(gridTransform))
                             continue;
-                        if (element._element != null && img.transform.IsChildOf(element._element.transform))
+                        if (elementTransform != null && img.transform.IsChildOf(elementTransform))
                             continue;
                         var rectTransform = img.GetComponent<RectTransform>();
                         if (rectTransform != null)
@@ -149,9 +152,10 @@ namespace xn.expand
                             yield return new WaitForSecondsRealtime(0.025f);
                         }
                     }
-                    if (powerElement._counter != null)
+                    Text counterText = xn.access.InterestingPeopleElementAccess.GetCounter(powerElement);
+                    if (counterText != null)
                     {
-                        powerElement._counter.text = displayValue;
+                        counterText.text = displayValue;
                     }
                 }
                 else

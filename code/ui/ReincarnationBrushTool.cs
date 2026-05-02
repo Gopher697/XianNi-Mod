@@ -5,6 +5,16 @@ namespace xn.ui
     {
         private static string _currentPowerId = "xn_reincarnation_brush";
         private static PowerButton _powerButton = null;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
+        private static string ActorName(Actor actor)
+        {
+            return actor?.getName() ?? T("value_unknown", "Unknown");
+        }
         public static void Init()
         {
             CreateReincarnationBrushPower();
@@ -58,8 +68,9 @@ namespace xn.ui
         private static bool OnClickAction(WorldTile pTile, string pPowerID)
         {
             if (pTile == null) return false;
-            var selectedButton = World.world.selected_buttons?.selectedButton;
-            if (selectedButton == null || selectedButton.godPower == null || selectedButton.godPower.id != _currentPowerId)
+            var selectedButton = xn.access.MapBoxAccess.GetSelectedButton(World.world);
+            GodPower selectedPower = xn.access.PowerButtonAccess.GetGodPower(selectedButton);
+            if (selectedPower == null || selectedPower.id != _currentPowerId)
             {
                 return false;
             }
@@ -73,31 +84,31 @@ namespace xn.ui
             });
             if (target == null)
             {
-                xn.world.BroadcastSystem.Custom("请点击一个有智慧生物的位置");
+                xn.world.BroadcastSystem.Custom(T("brush_select_sapient_unit", "Click a sapient unit"));
                 return false;
             }
             const string KEY_ENQUEUED = "xn.reinc.enq";
             int enq;
-            target.data.get(KEY_ENQUEUED, out enq, 0);
+            xn.access.ActorAccess.GetData(target).get(KEY_ENQUEUED, out enq, 0);
             if (enq == 1)
             {
-                xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}已经进入轮回池");
+                xn.world.BroadcastSystem.Custom(T("brush_reincarnation_already_in_pool", "{0} has already entered the reincarnation pool", ActorName(target)));
                 return false;
             }
-            int demonMark; target.data.get(xn.world.AmbitionSystem.KEY_AMB_DEMON, out demonMark, 0);
-            int dragonMark; target.data.get(xn.world.AmbitionSystem.KEY_AMB_DRAGON, out dragonMark, 0);
+            int demonMark; xn.access.ActorAccess.GetData(target).get(xn.world.AmbitionSystem.KEY_AMB_DEMON, out demonMark, 0);
+            int dragonMark; xn.access.ActorAccess.GetData(target).get(xn.world.AmbitionSystem.KEY_AMB_DRAGON, out dragonMark, 0);
             if (demonMark == 1 || dragonMark == 1)
             {
-                xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}是天运子，不能进入轮回池");
+                xn.world.BroadcastSystem.Custom(T("brush_reincarnation_tianyunzi_blocked", "{0} is Tian Yunzi and cannot enter the reincarnation pool", ActorName(target)));
                 return false;
             }
             xn.world.ReincarnationSystem.ForceAddToPool(target);
             const string KEY_REINC_BRUSH = "xn.reincarnation.brush";
-            target.data.set(KEY_REINC_BRUSH, 1);
-            string targetName = target.getName() ?? "未知";
+            xn.access.ActorAccess.GetData(target).set(KEY_REINC_BRUSH, 1);
+            string targetName = ActorName(target);
             target.die(false, AttackType.Other, true, true);
-            target.data.set(KEY_REINC_BRUSH, 0);
-            xn.world.BroadcastSystem.Custom($"{targetName}已进入轮回池转世");
+            xn.access.ActorAccess.GetData(target).set(KEY_REINC_BRUSH, 0);
+            xn.world.BroadcastSystem.Custom(T("brush_reincarnation_success", "{0} entered the reincarnation pool to be reborn", targetName));
             return true;
         }
     }

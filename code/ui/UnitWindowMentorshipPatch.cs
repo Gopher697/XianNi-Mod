@@ -11,7 +11,7 @@ namespace xn.ui
         [HarmonyPrefix]
         private static void Prefix(UnitWindow __instance)
         {
-            if (!(__instance.actor?.isAlive() ?? false)) return;
+            if (!(xn.access.UnitWindowAccess.GetActor(__instance)?.isAlive() ?? false)) return;
             if (!s_initialized)
             {
                 s_initialized = true;
@@ -24,8 +24,8 @@ namespace xn.ui
                 var saved_transform_parents = old_component.transform_parents;
                 var saved_transform_siblings = old_component.transform_siblings;
                 var saved_transform_children = old_component.transform_children;
-                var saved_prefab_unfolder = old_component._prefab_unfolder;
-                var saved_sex_icon = old_component._sex_icon;
+                var saved_prefab_unfolder = xn.access.UnitWindowAccess.GetPrefabUnfolder(old_component);
+                var saved_sex_icon = xn.access.UnitWindowAccess.GetSexIcon(old_component);
                 Object.DestroyImmediate(old_component);
                 var content_mentorship = content_mentorship_obj.AddComponent<UnitMentorshipElement>();
                 content_mentorship.prefab_avatar = saved_prefab_avatar;
@@ -118,9 +118,10 @@ namespace xn.ui
                 }
                 mentorship_entry.container = __instance.tabs;
                 mentorship_entry.tab_elements.RemoveAll(t => t.name.ToLower().StartsWith("content_"));
-                if (!__instance.tabs._tabs.Contains(mentorship_entry))
-                    {
-                    __instance.tabs._tabs.Add(mentorship_entry);
+                var tabs = xn.access.UnitWindowAccess.GetTabs(__instance.tabs);
+                if (tabs != null && !tabs.Contains(mentorship_entry))
+                {
+                    tabs.Add(mentorship_entry);
                 }
                 __instance.tabs.addTabContent(mentorship_entry, content_mentorship_obj.transform);
                 __instance.tabs.refillTabsWithContent();

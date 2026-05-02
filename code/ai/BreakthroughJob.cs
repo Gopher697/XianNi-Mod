@@ -15,6 +15,25 @@ namespace cultivation.ai
         {
             RegisterJob();
         }
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
+        private static string Ordinal(int value)
+        {
+            int mod100 = value % 100;
+            if (mod100 >= 11 && mod100 <= 13) return value + "th";
+            switch (value % 10)
+            {
+                case 1: return value + "st";
+                case 2: return value + "nd";
+                case 3: return value + "rd";
+                default: return value + "th";
+            }
+        }
+
         private static void RegisterJob()
         {
             var lib = AssetManager.job_actor;
@@ -160,7 +179,7 @@ namespace cultivation.ai
         private static bool HasDaoBaseDamage(Actor a, int curYear)
         {
             int until;
-            a.data.get(KEY_DAOB_DAMAGED_UNTIL, out until, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_DAOB_DAMAGED_UNTIL, out until, 0);
             return until > curYear;
         }
         private static bool TryDoBreakthrough(Actor a, int curYear)
@@ -172,8 +191,8 @@ namespace cultivation.ai
                 return false;
             if (HasDaoBaseDamage(a, curYear))
                 return false;
-            long xp; a.data.get(KEY_XP, out xp, 0L);
-            int luck; a.data.get(KEY_QIYUN, out luck, 0);
+            long xp; xn.access.ActorAccess.GetData(a).get(KEY_XP, out xp, 0L);
+            int luck; xn.access.ActorAccess.GetData(a).get(KEY_QIYUN, out luck, 0);
             if (luck < 20) luck = 20; 
             if (cur < 1) 
             {
@@ -184,7 +203,7 @@ namespace cultivation.ai
                     float r = UnityEngine.Random.Range(0.1f, 1f);
                     long lose = (long)(xp * r);
                     long left = Math.Max(0, xp - lose);
-                    a.data.set(KEY_XP, left);
+                    xn.access.ActorAccess.GetData(a).set(KEY_XP, left);
                     IncreaseXinmoAndMaybeCorrupt(a); 
                     {
                     int curIdx = GetCurrentRealmIndex(a);   
@@ -198,7 +217,7 @@ namespace cultivation.ai
                             }
                         }
                     }
-                    a.data.set(KEY_STOP, 0); 
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0); 
                     return false;
                 }
                 var trait = AssetManager.traits.get(REALM_IDS[next]) as ActorTrait;
@@ -217,7 +236,7 @@ namespace cultivation.ai
                         a.addTrait(trait);
                     }
                 }
-                a.data.set(KEY_STOP, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
                 if (next >= 3)
                 {
                     BroadcastSystem.RealmUp(a, REALM_IDS[next]);
@@ -236,7 +255,7 @@ namespace cultivation.ai
                     }
                 }
                 if (HasTrait(a, "path_02_immortal") && !HasTrait(a, "path_01_demonic"))
-                    a.data.set(KEY_XINMO, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_XINMO, 0);
                 MaybeGiveAttrForRealm(a, next);
                 if (next == 1) EnsureDaoBaseAfterFoundation(a);
                 GiveRealmBreakthroughRewards(a, next);
@@ -273,8 +292,8 @@ namespace cultivation.ai
             {
                 var trait = AssetManager.traits.get(REALM_IDS[next]) as ActorTrait;
                 if (trait != null) a.addTrait(trait);
-                a.data.set(KEY_STOP, 0);
-                a.data.set(KEY_BREAK_SUCCESS_YEAR, curYear);
+                xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_BREAK_SUCCESS_YEAR, curYear);
                 if (next >= 3)
                 {
                     BroadcastSystem.RealmUp(a, REALM_IDS[next]);
@@ -289,13 +308,13 @@ namespace cultivation.ai
                 float r = UnityEngine.Random.Range(damageLoseMin, damageLoseMax);
                 long lose = (long)(xp * r);
                 long left = Math.Max(0, xp - lose);
-                a.data.set(KEY_XP, left);
+                xn.access.ActorAccess.GetData(a).set(KEY_XP, left);
                 int until = curYear + UnityEngine.Random.Range(1, 21);
-                a.data.set(KEY_DAOB_DAMAGED_UNTIL, until);
+                xn.access.ActorAccess.GetData(a).set(KEY_DAOB_DAMAGED_UNTIL, until);
                 var damaged = AssetManager.traits.get("dao_07_damaged") as ActorTrait;
                 if (damaged != null) a.addTrait(damaged);
                 IncreaseXinmoAndMaybeCorrupt(a);
-                a.data.set(KEY_STOP, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
                 {
                     int curIdx = GetCurrentRealmIndex(a);   
                     if (curIdx >= 0 && curIdx < 4 && !HasTrait(a, "intent_01_extreme"))
@@ -319,16 +338,16 @@ namespace cultivation.ai
                     if (curTrait != null) a.removeTrait(curTrait);
                     if (prevTrait != null) a.addTrait(prevTrait);
                     long half = REALM_THRESHOLDS[cur] / 2;
-                    a.data.set(KEY_XP, half);
-                    a.data.set(KEY_STOP, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_XP, half);
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
                     BroadcastSystem.RealmFailDemote(a, REALM_IDS[cur - 1]);
                 }
                 else
                 {
                     float r = UnityEngine.Random.Range(0.1f, 1.0f);
                     long lose = (long)(xp * r);
-                    a.data.set(KEY_XP, Math.Max(0, xp - lose));
-                    a.data.set(KEY_STOP, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_XP, Math.Max(0, xp - lose));
+                    xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
                 }
                 IncreaseXinmoAndMaybeCorrupt(a);
                 {
@@ -349,42 +368,42 @@ namespace cultivation.ai
         private static void StartHeavenTrial(Actor a, int ttype, int targetIndex)
         {
             if (a == null || !a.isAlive()) return;
-            a.data.set(KEY_TRIAL_ACTIVE, 1);
-            a.data.set(KEY_TRIAL_TYPE, ttype);     
-            a.data.set(KEY_TRIAL_TARGET, targetIndex);
+            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_TYPE, ttype);     
+            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_TARGET, targetIndex);
             if (ttype == 1 || ttype == 2)
             {
                 if (targetIndex == 13) 
                 {
                     bool hasHalfTatian = HasTrait(a, "realm_15_half_tatian");
                     int startBridge = hasHalfTatian ? 5 : 0;
-                    long existingL; a.data.get(KEY_TRIAL_BRIDGE, out existingL, 0L);
+                    long existingL; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_BRIDGE, out existingL, 0L);
                     int existing = (int)existingL;
                     if (existing > 8)
                     {
-                        a.data.set(KEY_TRIAL_BRIDGE, (long)startBridge);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, (long)startBridge);
                     }
                     else if (!hasHalfTatian && existing >= 5)
                     {
-                        a.data.set(KEY_TRIAL_BRIDGE, 0L);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, 0L);
                     }
                     else if (hasHalfTatian && existing < 5)
                     {
-                        a.data.set(KEY_TRIAL_BRIDGE, 5L);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, 5L);
                     }
                     else if (existing < startBridge)
                     {
-                        a.data.set(KEY_TRIAL_BRIDGE, (long)startBridge);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, (long)startBridge);
                     }
                 }
             }
             float now = Time.time;
             a.makeStunned(TRIAL_STUN_LARGE);
-            a.data.set(KEY_TRIAL_END_T, now + TRIAL_DURATION_SECONDS);
-            a.data.set(KEY_TRIAL_NEXT_LIGHTNING, now);
+            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_END_T, now + TRIAL_DURATION_SECONDS);
+            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_NEXT_LIGHTNING, now);
             if (targetIndex == 13) {
-                long bL; a.data.get(KEY_TRIAL_BRIDGE, out bL, 0L); int b = (int)bL; 
-                BroadcastSystem.PostActor(a, a.getName() + " 正在闯踏天" + (b + 1) + "桥");
+                long bL; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_BRIDGE, out bL, 0L); int b = (int)bL; 
+                BroadcastSystem.PostActor(a, T("broadcast_tatian_bridge_attempt", "{0} is attempting the {1} Heaven Trampling Bridge", a.getName(), Ordinal(b + 1)));
             }
             else
             {
@@ -562,33 +581,33 @@ namespace cultivation.ai
             {
                 int curYear = Date.getCurrentYear();
                 if (__instance == null || !__instance.isAlive()) return true;
-                if (__instance.kingdom == null || __instance.city == null || __instance.is_inside_boat) return true;
+                if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance)) return true;
                 RegisterJob();
-                int cdUntil; __instance.data.get(KEY_TRIAL_COOLDOWN_UNTIL, out cdUntil, 0);
+                int cdUntil; xn.access.ActorAccess.GetData(__instance).get(KEY_TRIAL_COOLDOWN_UNTIL, out cdUntil, 0);
                 if (cdUntil > curYear) return true; 
-                int active; __instance.data.get(KEY_TRIAL_ACTIVE, out active, 0);
+                int active; xn.access.ActorAccess.GetData(__instance).get(KEY_TRIAL_ACTIVE, out active, 0);
                 if (active == 1) return true;
-                int ancStop; __instance.data.get(KEY_ANC_STOP, out ancStop, 0);
+                int ancStop; xn.access.ActorAccess.GetData(__instance).get(KEY_ANC_STOP, out ancStop, 0);
                 if (ancStop == 1)
                 {
                     StartHeavenTrial(__instance, 3, GetCurrentAncientIndex(__instance)); 
                     return true;
                 }
-                int bstStop; __instance.data.get(KEY_BEAST_STOP, out bstStop, 0);
+                int bstStop; xn.access.ActorAccess.GetData(__instance).get(KEY_BEAST_STOP, out bstStop, 0);
                 if (bstStop == 1)
                 {
                     StartHeavenTrial(__instance, 4, GetCurrentBeastIndex(__instance));   
                     return true;
                 }
-                int stop; __instance.data.get(KEY_STOP, out stop, 0);
+                int stop; xn.access.ActorAccess.GetData(__instance).get(KEY_STOP, out stop, 0);
                 if (stop != 1) return true;
-                long xp; __instance.data.get(KEY_XP, out xp, 0L);
+                long xp; xn.access.ActorAccess.GetData(__instance).get(KEY_XP, out xp, 0L);
                 int nextIndex = GetNextRealmIndex(__instance);
                 if (nextIndex < 0) return true; 
                 long cap = REALM_THRESHOLDS[Math.Min(nextIndex, REALM_THRESHOLDS.Length - 1)];
                 if (xp < cap) return true;
                 int curRealm = GetCurrentRealmIndex(__instance);
-                int halfTatianLocked; __instance.data.get(KEY_HALF_TATIAN_LOCKED, out halfTatianLocked, 0);
+                int halfTatianLocked; xn.access.ActorAccess.GetData(__instance).get(KEY_HALF_TATIAN_LOCKED, out halfTatianLocked, 0);
                 if (halfTatianLocked == 1 && curRealm >= 14)
                 {
                     return true;
@@ -605,7 +624,7 @@ namespace cultivation.ai
                     return true;
                 if (curRealm >= 1)
                 {
-                    int successYear; __instance.data.get(KEY_BREAK_SUCCESS_YEAR, out successYear, 0);
+                    int successYear; xn.access.ActorAccess.GetData(__instance).get(KEY_BREAK_SUCCESS_YEAR, out successYear, 0);
                     if (successYear > 0)
                     {
                         string daoCode = GetDaoBaseCode(__instance);
@@ -614,9 +633,9 @@ namespace cultivation.ai
                             return true; 
                     }
                 }
-                int triedYear; __instance.data.get(KEY_BREAK_TRIED_YEAR, out triedYear, -1);
+                int triedYear; xn.access.ActorAccess.GetData(__instance).get(KEY_BREAK_TRIED_YEAR, out triedYear, -1);
                 if (triedYear == curYear) return true;
-                __instance.data.set(KEY_BREAK_TRIED_YEAR, curYear);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_BREAK_TRIED_YEAR, curYear);
                 __result = "job_xn_breakthrough";
                 return false;
             }
@@ -648,9 +667,9 @@ namespace cultivation.ai
                 case 12: key = KEY_ATTR_TRY_13; chance = 1.00f; break; 
                 default: return;
             }
-            int tried; a.data.get(key, out tried, 0);
+            int tried; xn.access.ActorAccess.GetData(a).get(key, out tried, 0);
             if (tried == 1) return;     
-            a.data.set(key, 1);         
+            xn.access.ActorAccess.GetData(a).set(key, 1);         
             if (HasAnyFiveAttr(a)) return;
             if (!Randy.randomChance(chance)) return;
             int pick = UnityEngine.Random.Range(0, ATTR_IDS.Length);
@@ -659,11 +678,11 @@ namespace cultivation.ai
         }
         private static void IncreaseXinmoAndMaybeCorrupt(Actor a)
         {
-            int xinmo; a.data.get(KEY_XINMO, out xinmo, 0);
+            int xinmo; xn.access.ActorAccess.GetData(a).get(KEY_XINMO, out xinmo, 0);
             int beforeBucket = xinmo / 100;
             int delta = UnityEngine.Random.Range(1, 21); 
             xinmo += delta;
-            a.data.set(KEY_XINMO, xinmo);
+            xn.access.ActorAccess.GetData(a).set(KEY_XINMO, xinmo);
             if (HasTrait(a, "path_01_demonic")) return;
             int afterBucket = xinmo / 100;
             if (afterBucket > beforeBucket)
@@ -695,23 +714,23 @@ namespace cultivation.ai
                 {
                     var a = list[i];
                     if (a == null || !a.isAlive()) continue;
-                    int active; a.data.get(KEY_TRIAL_ACTIVE, out active, 0);
+                    int active; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_ACTIVE, out active, 0);
                     if (active != 1) continue;
-                    float endT; a.data.get(KEY_TRIAL_END_T, out endT, 0f);
+                    float endT; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_END_T, out endT, 0f);
                     if (now < endT)
                     {
-                        if (!a.hasStatus("stunned"))
+                        if (!xn.access.BaseSimObjectAccess.HasStatus(a, "stunned"))
                         {
                             a.makeStunned(TRIAL_STUN_LARGE);
                         }
-                        float nextLightning; a.data.get(KEY_TRIAL_NEXT_LIGHTNING, out nextLightning, 0f);
+                        float nextLightning; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_NEXT_LIGHTNING, out nextLightning, 0f);
                         if (now >= nextLightning)
                         {
                             if (Randy.randomChance(0.50f))
                             {
                                 SpawnTrialLightning(a);
                             }
-                            a.data.set(KEY_TRIAL_NEXT_LIGHTNING, now + LIGHTNING_INTERVAL);
+                            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_NEXT_LIGHTNING, now + LIGHTNING_INTERVAL);
                         }
                         continue;
                     }
@@ -721,13 +740,13 @@ namespace cultivation.ai
         }
         private static float GetTrialLightningScale(Actor a)
         {
-            int ttype; a.data.get(KEY_TRIAL_TYPE, out ttype, 1);
-            int target; a.data.get(KEY_TRIAL_TARGET, out target, 0);
+            int ttype; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_TYPE, out ttype, 1);
+            int target; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_TARGET, out target, 0);
             if (ttype == 1 || ttype == 2)
             {
                 if (target == 13)
                 {
-                    long bridgeL; a.data.get(KEY_TRIAL_BRIDGE, out bridgeL, 0L);
+                    long bridgeL; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_BRIDGE, out bridgeL, 0L);
                     int bridge = (int)bridgeL;
                     return 0.15f + bridge * 0.05f;
                 }
@@ -766,21 +785,21 @@ namespace cultivation.ai
         }
         private static void FinishHeavenTrial(Actor a, int curYear)
         {
-            a.data.set(KEY_TRIAL_ACTIVE, 0); 
+            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_ACTIVE, 0); 
             a.finishStatusEffect("stunned");
-            int ttype; a.data.get(KEY_TRIAL_TYPE, out ttype, 0);
-            int target; a.data.get(KEY_TRIAL_TARGET, out target, -1);
-            Action clearRealmStop = () => a.data.set(KEY_STOP, 0);
-            Action clearAncStop = () => a.data.set(KEY_ANC_STOP, 0);
-            Action clearBeaStop = () => a.data.set(KEY_BEAST_STOP, 0);
+            int ttype; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_TYPE, out ttype, 0);
+            int target; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_TARGET, out target, -1);
+            Action clearRealmStop = () => xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
+            Action clearAncStop = () => xn.access.ActorAccess.GetData(a).set(KEY_ANC_STOP, 0);
+            Action clearBeaStop = () => xn.access.ActorAccess.GetData(a).set(KEY_BEAST_STOP, 0);
             bool pass = false;
             if (ttype == 1 || ttype == 2)
             {
                 float baseRate = (ttype == 1) ? 40f : 25f;
                 float rootAdd = GetRootHeavenAdd(a) * ((ttype == 1) ? 0.4f : 0.6f);
                 float daoAdd = GetDaoHeavenAdd(a) * ((ttype == 1) ? 0.4f : 0.6f);
-                int wx; a.data.get(KEY_WUXIN, out wx, 0);
-                int qy; a.data.get(KEY_QIYUN, out qy, 0);
+                int wx; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
+                int qy; xn.access.ActorAccess.GetData(a).get(KEY_QIYUN, out qy, 0);
                 float wxAdd;
                 if (ttype == 1)
                 {
@@ -812,14 +831,14 @@ namespace cultivation.ai
                     luckAdd = Mathf.Min((qy / 10) * 3f, 30f);
                     luckAdd *= 0.6f;
                 }
-                int xinmo; a.data.get(KEY_XINMO, out xinmo, 0);
+                int xinmo; xn.access.ActorAccess.GetData(a).get(KEY_XINMO, out xinmo, 0);
                 float xinmoPenalty = (ttype == 1) ? xinmo * 0.3f : Mathf.Min(xinmo, 100) * 0.4f;
                 float extraPenalty = (ttype == 2) ? 15f : 0f;
                 float diff = 0f;
                 if (target == 6) diff = 5f;   
                 if (target == 9) diff = 10f;  
                 if (target == 12) diff = 15f;  
-                long bridgeL; a.data.get(KEY_TRIAL_BRIDGE, out bridgeL, 0L); int bridge = (int)bridgeL;
+                long bridgeL; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_BRIDGE, out bridgeL, 0L); int bridge = (int)bridgeL;
                 if (target == 13)
                 {
                     if (bridge <= 2) diff = 20f;      
@@ -833,7 +852,7 @@ namespace cultivation.ai
                 float maxCap = (ttype == 1) ? 85f : 65f;
                 final = Mathf.Clamp(final, minCap, maxCap);
                 int isMainChar;
-                a.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+                xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
                 if (isMainChar == 1)
                 {
                     pass = true; 
@@ -845,24 +864,24 @@ namespace cultivation.ai
                 if (pass)
                 {
                     if (target != 13) { BroadcastSystem.HeavenSuccess(a); }
-                    if (ttype == 1) a.data.set(KEY_XINMO, 0);
+                    if (ttype == 1) xn.access.ActorAccess.GetData(a).set(KEY_XINMO, 0);
                     if (target == 13) 
                     {
                         bridge++;
-                        a.data.set(KEY_TRIAL_BRIDGE, (long)bridge);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, (long)bridge);
                         if (bridge == 5)
                         {
                             ReplaceRealmTo(a, 14); 
                             BroadcastSystem.HeavenSuccessRealm(a, REALM_IDS[14]); 
-                            a.data.set(KEY_BREAK_SUCCESS_YEAR, curYear);
+                            xn.access.ActorAccess.GetData(a).set(KEY_BREAK_SUCCESS_YEAR, curYear);
                             if (UnityEngine.Random.value < 0.25f)
                             {
-                                a.data.set(KEY_HALF_TATIAN_LOCKED, 1);
-                                BroadcastSystem.PostActor(a, a.getName() + " 突破半步踏天后感悟天道极限，修为永久定格于此境");
+                                xn.access.ActorAccess.GetData(a).set(KEY_HALF_TATIAN_LOCKED, 1);
+                                BroadcastSystem.PostActor(a, T("broadcast_half_tatian_locked", "{0} comprehended the limit of Heaven after breaking through Half-Step Heaven Trampling, cultivation permanently locked at this realm", a.getName()));
                             }
                             else
                             {
-                                BroadcastSystem.PostActor(a, a.getName() + " 突破半步踏天后悟得天机，可继续冲击踏天境");
+                                BroadcastSystem.PostActor(a, T("broadcast_half_tatian_continue", "{0} gained insight after breaking through Half-Step Heaven Trampling, can continue to attempt Heaven Trampling", a.getName()));
                             }
                         }
                         else if (bridge == 9)
@@ -870,10 +889,10 @@ namespace cultivation.ai
                             ReplaceRealmTo(a, 15); 
                             BroadcastSystem.HeavenSuccessRealm(a, REALM_IDS[15]); 
                             GiveTatianAllPowersAndArts(a);
-                            a.data.set(KEY_TRIAL_BRIDGE, 0); 
-                            a.data.set(KEY_BREAK_SUCCESS_YEAR, curYear);
+                            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, 0); 
+                            xn.access.ActorAccess.GetData(a).set(KEY_BREAK_SUCCESS_YEAR, curYear);
                         }
-                        a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                     }
                     else
                     {
@@ -882,8 +901,8 @@ namespace cultivation.ai
                         MaybeGiveAttrForRealm(a, newIdx);
                         BroadcastSystem.HeavenSuccessRealm(a, REALM_IDS[Mathf.Min(target + 1, REALM_IDS.Length - 1)]);
                         clearRealmStop();
-                        a.data.set(KEY_BREAK_SUCCESS_YEAR, curYear);
-                        a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                        xn.access.ActorAccess.GetData(a).set(KEY_BREAK_SUCCESS_YEAR, curYear);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                     }
                 }
                 else
@@ -892,18 +911,18 @@ namespace cultivation.ai
                     {
                         if (bridge < 5 && Randy.randomChance(0.10f))
                         {
-                            BroadcastSystem.PostActor(a, a.getName() + " 感悟道心，原来这就是修仙，桥段保留");
+                            BroadcastSystem.PostActor(a, T("broadcast_bridge_dao_insight", "{0} gained Dao insight, so this is cultivation, bridge progress preserved", a.getName()));
                             clearRealmStop();
-                            a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                            xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                     }
                     else
                     {
-                            BroadcastSystem.PostActor(a, a.getName() + " 经历踏天" + (bridge + 1) + "桥失败咯");
+                            BroadcastSystem.PostActor(a, T("broadcast_bridge_fail", "{0} failed the {1} Heaven Trampling Bridge", a.getName(), Ordinal(bridge + 1)));
                     ApplyImmortalDemonicFailPenalty(a, ttype, target, xinmo);
                     clearRealmStop();
-                    a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                    xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                         int reset = HasTrait(a, "realm_15_half_tatian") ? 5 : 0;
-                        a.data.set(KEY_TRIAL_BRIDGE, (long)reset);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_BRIDGE, (long)reset);
                         }
                     }
                     else
@@ -911,14 +930,14 @@ namespace cultivation.ai
                         BroadcastSystem.HeavenFail(a);
                         ApplyImmortalDemonicFailPenalty(a, ttype, target, xinmo);
                         clearRealmStop();
-                        a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                     }
                 }
             }
             else if (ttype == 3 || ttype == 4)
             {
-                int wx; a.data.get(KEY_WUXIN, out wx, 0);
-                int qy; a.data.get(KEY_QIYUN, out qy, 0);
+                int wx; xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
+                int qy; xn.access.ActorAccess.GetData(a).get(KEY_QIYUN, out qy, 0);
                 float baseRate = 50f;
                 float wxAdd = (wx >= 100) ? 40f :
                               (wx >= 90) ? 32f :
@@ -941,7 +960,7 @@ namespace cultivation.ai
                 }
                 float final = Mathf.Clamp(baseRate + wxAdd + luckAdd - diff, 10f, 90f);
                 int isMainChar;
-                a.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+                xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
                 if (isMainChar == 1)
                 {
                     pass = true; 
@@ -959,7 +978,7 @@ namespace cultivation.ai
                         BroadcastSystem.HeavenFail(a);
                         ApplyAncientBeastFailPenalty(a, ttype, curIdx);
                         if (ttype == 3) clearAncStop(); else clearBeaStop();
-                        a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                     }
                     else
                     {
@@ -974,7 +993,7 @@ namespace cultivation.ai
                             else
                                 BroadcastSystem.BeastUp(a, newIdx + 1);
                         }
-                        a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                        xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                     }
                 }
                 else
@@ -982,7 +1001,7 @@ namespace cultivation.ai
                     BroadcastSystem.HeavenFail(a);
                     ApplyAncientBeastFailPenalty(a, ttype, curIdx);
                     if (ttype == 3) clearAncStop(); else clearBeaStop();
-                    a.data.set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
+                    xn.access.ActorAccess.GetData(a).set(KEY_TRIAL_COOLDOWN_UNTIL, curYear + TRIAL_COOLDOWN_YEARS);
                 }
             }
             HeavenTrialFX.StopFor(a);
@@ -1000,14 +1019,14 @@ namespace cultivation.ai
                     }
                     break;
                 case 2: 
-                    a.data.set(KEY_XINMO, xinmo + 30);
-                    a.data.set("xn.tdao.try_cooldown_until", Date.getCurrentYear() + 3);
+                    xn.access.ActorAccess.GetData(a).set(KEY_XINMO, xinmo + 30);
+                    xn.access.ActorAccess.GetData(a).set("xn.tdao.try_cooldown_until", Date.getCurrentYear() + 3);
                     break;
                 case 3: 
                     DowngradeDaoBase(a);
                     break;
                 case 4: 
-                    a.stats[strings.S.lifespan] = Mathf.Max(0f, a.stats[strings.S.lifespan] - 300f);
+                    xn.access.BaseSimObjectAccess.GetStats(a)[strings.S.lifespan] = Mathf.Max(0f, xn.access.BaseSimObjectAccess.GetStats(a)[strings.S.lifespan] - 300f);
                     break;
                 case 5: 
                     GiveOrReplaceTrait(a, "root_07_broken", xn.Traits.RealmTraitGroup.GroupSpiritRoot);
@@ -1029,21 +1048,21 @@ namespace cultivation.ai
             switch (roll)
             {
                 case 2: 
-                    a.data.set("xn.stat.wuxin", 1);
+                    xn.access.ActorAccess.GetData(a).set("xn.stat.wuxin", 1);
                     break;
                 case 3: 
                     if (Randy.randomChance(0.40f))
                         a.addTrait("madness");
                     break;
                 case 4: 
-                    a.data.set("xn.seal_until", Date.getCurrentYear() + 100);
+                    xn.access.ActorAccess.GetData(a).set("xn.seal_until", Date.getCurrentYear() + 100);
                     break;
                 case 5: 
-                    a.data.set("xn.stat.qiyun", 1);
+                    xn.access.ActorAccess.GetData(a).set("xn.stat.qiyun", 1);
                     ResetAncientOrBeastTo2(a, ttype);
                     break;
                 case 6: 
-                    a.stats[strings.S.lifespan] = Mathf.Max(0f, a.stats[strings.S.lifespan] - 500f);
+                    xn.access.BaseSimObjectAccess.GetStats(a)[strings.S.lifespan] = Mathf.Max(0f, xn.access.BaseSimObjectAccess.GetStats(a)[strings.S.lifespan] - 500f);
                     break;
             }
             if (curIdx >= 6 && Randy.randomChance(0.10f))
@@ -1081,8 +1100,8 @@ namespace cultivation.ai
             ReplaceRealmTo(a, to);
             long cap = (to >= 0 && to < REALM_THRESHOLDS.Length) ? REALM_THRESHOLDS[to] : 0;
             long val = (long)(cap * Mathf.Clamp01(percentOfThreshold));
-            a.data.set("xn.stat.xiuwei", val);
-            a.data.set("xn.cultivation.stop", 0);
+            xn.access.ActorAccess.GetData(a).set("xn.stat.xiuwei", val);
+            xn.access.ActorAccess.GetData(a).set("xn.cultivation.stop", 0);
         }
         private static void GiveOrReplaceTrait(Actor a, string id, string groupId)
         {
@@ -1159,10 +1178,10 @@ namespace cultivation.ai
                 if (cur <= 0) return;
                 int to = Mathf.Max(cur - Mathf.Max(steps, 1), 0);
                 ReplaceTraitInSet(a, ANC_STAR_IDS, to);
-                long curP; a.data.get(KEY_ANC_POWER, out curP, 0L);
+                long curP; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out curP, 0L);
                 long nextP = (long)(curP * Mathf.Clamp01(percentOfCap));
-                a.data.set(KEY_ANC_POWER, nextP);
-                a.data.set(KEY_ANC_STOP, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_ANC_POWER, nextP);
+                xn.access.ActorAccess.GetData(a).set(KEY_ANC_STOP, 0);
             }
             else 
             {
@@ -1170,10 +1189,10 @@ namespace cultivation.ai
                 if (cur <= 0) return;
                 int to = Mathf.Max(cur - Mathf.Max(steps, 1), 0);
                 ReplaceTraitInSet(a, BEAST_STAGE_IDS, to);
-                long curP; a.data.get(KEY_BEAST_POWER, out curP, 0L);
+                long curP; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out curP, 0L);
                 long nextP = (long)(curP * Mathf.Clamp01(percentOfCap));
-                a.data.set(KEY_BEAST_POWER, nextP);
-                a.data.set(KEY_BEAST_STOP, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_BEAST_POWER, nextP);
+                xn.access.ActorAccess.GetData(a).set(KEY_BEAST_STOP, 0);
             }
         }
         private static void ResetAncientOrBeastTo2(Actor a, int ttype )
@@ -1181,16 +1200,16 @@ namespace cultivation.ai
             if (ttype == 3)
             {
                 ReplaceTraitInSet(a, ANC_STAR_IDS, 1); 
-                long curP; a.data.get(KEY_ANC_POWER, out curP, 0L);
-                a.data.set(KEY_ANC_POWER, curP / 2);
-                a.data.set(KEY_ANC_STOP, 0);
+                long curP; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out curP, 0L);
+                xn.access.ActorAccess.GetData(a).set(KEY_ANC_POWER, curP / 2);
+                xn.access.ActorAccess.GetData(a).set(KEY_ANC_STOP, 0);
             }
             else
             {
                 ReplaceTraitInSet(a, BEAST_STAGE_IDS, 1); 
-                long curP; a.data.get(KEY_BEAST_POWER, out curP, 0L);
-                a.data.set(KEY_BEAST_POWER, curP / 2);
-                a.data.set(KEY_BEAST_STOP, 0);
+                long curP; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_POWER, out curP, 0L);
+                xn.access.ActorAccess.GetData(a).set(KEY_BEAST_POWER, curP / 2);
+                xn.access.ActorAccess.GetData(a).set(KEY_BEAST_STOP, 0);
             }
         }
         private static int GetMaxAllowedStarStageIndex(Actor a)
@@ -1265,7 +1284,7 @@ namespace cultivation.ai
                 return;
             if (!a.hasTrait("realm_16_tatian"))
                 return;
-            int rewardedFlag; a.data.get("xn.tatian_rewarded", out rewardedFlag, 0);
+            int rewardedFlag; xn.access.ActorAccess.GetData(a).get("xn.tatian_rewarded", out rewardedFlag, 0);
             if (rewardedFlag == 1)
                 return;
             var allTraits = AssetManager.traits.list; 
@@ -1309,7 +1328,7 @@ namespace cultivation.ai
                 int idx = Randy.randomInt(0, INTENTS_NON_EXTREME.Length - 1);
                 a.addTrait(INTENTS_NON_EXTREME[idx]); 
             }
-            a.data.set("xn.tatian_rewarded", 1);
+            xn.access.ActorAccess.GetData(a).set("xn.tatian_rewarded", 1);
         }
         [HarmonyPatch(typeof(Actor), "addStatusEffect", new Type[] { typeof(StatusAsset), typeof(float), typeof(bool) })]
         private static class Patch_Actor_addStatusEffect_TrialProtection
@@ -1320,9 +1339,9 @@ namespace cultivation.ai
                 if (__instance == null || pStatusAsset == null) return true;
                 if (pStatusAsset.id != "burning") return true;
                 int active;
-                __instance.data.get(KEY_TRIAL_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_TRIAL_ACTIVE, out active, 0);
                 if (active != 1) return true; 
-                int curHealth = __instance.data.health;
+                int curHealth = xn.access.ActorAccess.GetData(__instance).health;
                 int maxHealth = __instance.getMaxHealth();
                 if (maxHealth <= 0) return true;
                 float healthPercent = (float)curHealth / maxHealth;
@@ -1341,13 +1360,13 @@ namespace cultivation.ai
             {
                 if (__instance == null) return;
                 int active;
-                __instance.data.get(KEY_TRIAL_ACTIVE, out active, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_TRIAL_ACTIVE, out active, 0);
                 if (active != 1) return;
-                if (__instance.attackedBy == null)
+                if (xn.access.ActorAccess.GetAttackedBy(__instance) == null)
                 {
-                    BroadcastSystem.PostActor(__instance, __instance.getName() + " 突破中被天劫杀死了");
+                    BroadcastSystem.PostActor(__instance, T("broadcast_tribulation_death", "{0} was killed by heavenly tribulation during breakthrough", __instance.getName()));
                 }
-                __instance.data.set(KEY_TRIAL_ACTIVE, 0);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_TRIAL_ACTIVE, 0);
                 HeavenTrialFX.StopFor(__instance);
             }
         }

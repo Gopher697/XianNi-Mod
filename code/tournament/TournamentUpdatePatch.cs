@@ -9,7 +9,7 @@ namespace xn.tournament
         {
             if (MapBox.instance == null) return;
             if (World.world == null) return;
-            if (World.world.isPaused()) return;
+            if (xn.access.MapBoxAccess.IsPaused(World.world)) return;
             TournamentManager.Update();
         }
     }

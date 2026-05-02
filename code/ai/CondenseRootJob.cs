@@ -101,11 +101,11 @@ namespace cultivation.ai
                     float endTime = Time.time + duration;
                     setTimer(pActor, endTime);
                     pActor.stopMovement();
-                    pActor.timer_action = duration;
+                    xn.access.ActorAccess.SetTimerAction(pActor, duration);
                     return BehResult.Continue;
                 }
                 float timer;
-                pActor.data.get(getTimerKey(), out timer, 0f);
+                xn.access.ActorAccess.GetData(pActor).get(getTimerKey(), out timer, 0f);
                 if (Time.time >= timer)
                 {
                     return BehResult.Continue; 
@@ -119,12 +119,12 @@ namespace cultivation.ai
             private bool hasStarted(Actor pActor)
             {
                 float timer;
-                pActor.data.get(getTimerKey(), out timer, 0f);
+                xn.access.ActorAccess.GetData(pActor).get(getTimerKey(), out timer, 0f);
                 return timer > 0f;
             }
             private void setTimer(Actor pActor, float endTime)
             {
-                pActor.data.set(getTimerKey(), endTime);
+                xn.access.ActorAccess.GetData(pActor).set(getTimerKey(), endTime);
             }
             private string getTimerKey()
             {
@@ -137,7 +137,7 @@ namespace cultivation.ai
             {
                 int curYear = Date.getCurrentYear();
                 int condenseYear;
-                pActor.data.get(KEY_CONDENSE_YEAR, out condenseYear, -1);
+                xn.access.ActorAccess.GetData(pActor).get(KEY_CONDENSE_YEAR, out condenseYear, -1);
                 if (condenseYear == curYear)
                 {
                     TryDoCondense(pActor, curYear);
@@ -159,8 +159,8 @@ namespace cultivation.ai
         private static void TryDoCondense(Actor a, int curYear)
         {
             if (a == null || !a.isAlive()) return;
-            a.data.set(KEY_CONDENSE_READY, 0);
-            if (a.kingdom == null || a.city == null || a.is_inside_boat) return;
+            xn.access.ActorAccess.GetData(a).set(KEY_CONDENSE_READY, 0);
+            if (a.kingdom == null || a.city == null || xn.access.ActorAccess.IsInsideBoat(a)) return;
             if (HasAnySpiritRoot(a) || HasAnyAncientInheritance(a) || HasTraitId(a, "path_03_beast")) return;
             City c = a.city;
             if (c == null || c.data == null) return;
@@ -168,7 +168,7 @@ namespace cultivation.ai
             c.data.get(KEY_CITY_AURA, out aura, 0);
             if (aura < 0) return; 
             int isMainChar;
-            a.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             bool success;
             if (isMainChar == 1)
             {
@@ -180,7 +180,7 @@ namespace cultivation.ai
             }
             if (!success)
             {
-                a.data.set(KEY_NEXT_TRY_YEAR, curYear + 30);
+                xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, curYear + 30);
                 return;
             }
             if (!HasTraitId(a, "path_03_beast") && !HasAnySpiritRoot(a) &&
@@ -191,7 +191,7 @@ namespace cultivation.ai
                 if (inh != null)
                 {
                     a.addTrait(inh);
-                    a.data.set(KEY_NEXT_TRY_YEAR, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, 0);
                     return;
                 }
             }
@@ -205,7 +205,7 @@ namespace cultivation.ai
                         a.addTrait(beast);
                         RemoveAllSpiritRoots(a);
                         RemoveAllAncientInheritance(a);
-                        a.data.set(KEY_NEXT_TRY_YEAR, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, 0);
                         return;
                     }
                 }
@@ -218,9 +218,9 @@ namespace cultivation.ai
             {
                 var range = ROOT_COEFF_RANGE[idx];
                 float coeff = UnityEngine.Random.Range(range.x, range.y);
-                a.data.set(KEY_COEFF, coeff);
+                xn.access.ActorAccess.GetData(a).set(KEY_COEFF, coeff);
             }
-            a.data.set(KEY_NEXT_TRY_YEAR, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, 0);
         }
         [HarmonyPatch(typeof(Actor), "getNextJob")]
         private static class Patch_Actor_GetNextJob
@@ -230,18 +230,18 @@ namespace cultivation.ai
             {
                 int curYear = Date.getCurrentYear();
                 if (__instance == null || !__instance.isAlive()) return true;
-                if (__instance.kingdom == null || __instance.city == null || __instance.is_inside_boat)
+                if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance))
                     return true;
                 if (xn.expand.FanjieKingdomTrait.ActorHasFanjieTrait(__instance))
                     return true;
                 RegisterJob();
                 int ready;
-                __instance.data.get(KEY_CONDENSE_READY, out ready, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_CONDENSE_READY, out ready, 0);
                 if (ready != 1) return true;
                 int condenseYear;
-                __instance.data.get(KEY_CONDENSE_YEAR, out condenseYear, -1);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_CONDENSE_YEAR, out condenseYear, -1);
                 if (condenseYear == curYear) return true;
-                __instance.data.set(KEY_CONDENSE_YEAR, curYear);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_CONDENSE_YEAR, curYear);
                 __result = "job_xn_condense_root";
                 return false;
             }
@@ -317,7 +317,7 @@ namespace cultivation.ai
             }
             for (int i = 0; i < toRemove.Count; i++) 
                 a.removeTrait(toRemove[i]);
-            a.data.set(KEY_COEFF, 0f);
+            xn.access.ActorAccess.GetData(a).set(KEY_COEFF, 0f);
         }
         private static void RemoveAllAncientInheritance(Actor a)
         {

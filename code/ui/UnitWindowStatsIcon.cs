@@ -167,24 +167,26 @@ namespace xn.ui
         }
         private static void RegisterIconToContainer(StatsIconContainer container, string name, StatsIcon icon)
         {
-            if (container == null || container._stats_icons == null) return;
-            if (container._stats_icons.ContainsKey(name))
+            var statsIcons = xn.access.StatsIconContainerAccess.GetStatsIcons(container);
+            if (statsIcons == null) return;
+            if (statsIcons.ContainsKey(name))
             {
-                container._stats_icons[name] = icon;
+                statsIcons[name] = icon;
             }
             else
             {
-                container._stats_icons.Add(name, icon);
+                statsIcons.Add(name, icon);
             }
         }
         private static bool AreIconsRegistered(StatsIconContainer container)
         {
-            if (container == null || container._stats_icons == null) return false;
+            var statsIcons = xn.access.StatsIconContainerAccess.GetStatsIcons(container);
+            if (statsIcons == null) return false;
             int checkCount = Mathf.Min(3, Stats.Length);
             for (int i = 0; i < checkCount; i++)
             {
                 var iconName = Stats[i].name;
-                if (!container._stats_icons.TryGetValue(iconName, out var icon))
+                if (!statsIcons.TryGetValue(iconName, out var icon))
                     return false;
                 if (icon == null || icon.gameObject == null)
                     return false;
@@ -265,12 +267,12 @@ namespace xn.ui
         }
         private static int GetInt(Actor actor, string key, int defVal = 0)
         {
-            int v; actor.data.get(key, out v, defVal);
+            int v; xn.access.ActorAccess.GetData(actor).get(key, out v, defVal);
             return v;
         }
         private static long GetLong(Actor actor, string key, long defVal = 0)
         {
-            long v; actor.data.get(key, out v, defVal);
+            long v; xn.access.ActorAccess.GetData(actor).get(key, out v, defVal);
             return v;
         }
         private static float GetLongAsFloat(Actor actor, string key, long defVal = 0)

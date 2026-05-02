@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 namespace xn.world
@@ -32,6 +33,7 @@ namespace xn.world
         {
             public int level;               
             public string name;             
+            public string localeKey;
             public int requiredRealmIndex;  
             public int requiredCount;       
             public int secondaryRealmIndex; 
@@ -42,44 +44,59 @@ namespace xn.world
         }
         private static readonly LevelConfig[] LEVEL_CONFIGS = new LevelConfig[]
         {
-            new LevelConfig { level=0, name="凡人国度", requiredRealmIndex=-1, requiredCount=0, secondaryRealmIndex=-1, secondaryCount=0, maxAura=40000, speedBonus=0f, autoKing=false },
-            new LevelConfig { level=1, name="一级修真国", requiredRealmIndex=1, requiredCount=5, secondaryRealmIndex=-1, secondaryCount=0, maxAura=100000, speedBonus=0.01f, autoKing=false },  
-            new LevelConfig { level=2, name="二级修真国", requiredRealmIndex=2, requiredCount=3, secondaryRealmIndex=-1, secondaryCount=0, maxAura=300000, speedBonus=0.05f, autoKing=false },  
-            new LevelConfig { level=3, name="三级修真国", requiredRealmIndex=3, requiredCount=2, secondaryRealmIndex=-1, secondaryCount=0, maxAura=500000, speedBonus=0.08f, autoKing=false },  
-            new LevelConfig { level=4, name="四级修真国", requiredRealmIndex=4, requiredCount=2, secondaryRealmIndex=-1, secondaryCount=0, maxAura=800000, speedBonus=0.10f, autoKing=false },  
-            new LevelConfig { level=5, name="五级修真国", requiredRealmIndex=5, requiredCount=1, secondaryRealmIndex=-1, secondaryCount=0, maxAura=1000000, speedBonus=0.12f, autoKing=false },      
-            new LevelConfig { level=6, name="六级修真国", requiredRealmIndex=6, requiredCount=1, secondaryRealmIndex=5, secondaryCount=5, maxAura=-1, speedBonus=0.15f, autoKing=true },       
-            new LevelConfig { level=7, name="七级修真星", requiredRealmIndex=9, requiredCount=1, secondaryRealmIndex=7, secondaryCount=5, maxAura=-1, speedBonus=0.20f, autoKing=true },       
-            new LevelConfig { level=8, name="八级修真星", requiredRealmIndex=13, requiredCount=1, secondaryRealmIndex=10, secondaryCount=10, maxAura=-1, speedBonus=0.25f, autoKing=true },    
-            new LevelConfig { level=9, name="九级修真星", requiredRealmIndex=14, requiredCount=1, secondaryRealmIndex=13, secondaryCount=5, maxAura=-1, speedBonus=0.30f, autoKing=true },     
-            new LevelConfig { level=10, name="顶级修真星", requiredRealmIndex=15, requiredCount=1, secondaryRealmIndex=14, secondaryCount=5, maxAura=-1, speedBonus=0.40f, autoKing=true }     
+            new LevelConfig { level=0, name="Mortal Kingdom", localeKey="xiuzhenguo_level_0", requiredRealmIndex=-1, requiredCount=0, secondaryRealmIndex=-1, secondaryCount=0, maxAura=40000, speedBonus=0f, autoKing=false },
+            new LevelConfig { level=1, name="Rank 1 Cultivation Kingdom", localeKey="xiuzhenguo_level_1", requiredRealmIndex=1, requiredCount=5, secondaryRealmIndex=-1, secondaryCount=0, maxAura=100000, speedBonus=0.01f, autoKing=false },  
+            new LevelConfig { level=2, name="Rank 2 Cultivation Kingdom", localeKey="xiuzhenguo_level_2", requiredRealmIndex=2, requiredCount=3, secondaryRealmIndex=-1, secondaryCount=0, maxAura=300000, speedBonus=0.05f, autoKing=false },  
+            new LevelConfig { level=3, name="Rank 3 Cultivation Kingdom", localeKey="xiuzhenguo_level_3", requiredRealmIndex=3, requiredCount=2, secondaryRealmIndex=-1, secondaryCount=0, maxAura=500000, speedBonus=0.08f, autoKing=false },  
+            new LevelConfig { level=4, name="Rank 4 Cultivation Kingdom", localeKey="xiuzhenguo_level_4", requiredRealmIndex=4, requiredCount=2, secondaryRealmIndex=-1, secondaryCount=0, maxAura=800000, speedBonus=0.10f, autoKing=false },  
+            new LevelConfig { level=5, name="Rank 5 Cultivation Kingdom", localeKey="xiuzhenguo_level_5", requiredRealmIndex=5, requiredCount=1, secondaryRealmIndex=-1, secondaryCount=0, maxAura=1000000, speedBonus=0.12f, autoKing=false },      
+            new LevelConfig { level=6, name="Rank 6 Cultivation Kingdom", localeKey="xiuzhenguo_level_6", requiredRealmIndex=6, requiredCount=1, secondaryRealmIndex=5, secondaryCount=5, maxAura=-1, speedBonus=0.15f, autoKing=true },       
+            new LevelConfig { level=7, name="Rank 7 Cultivation Planet", localeKey="xiuzhenguo_level_7", requiredRealmIndex=9, requiredCount=1, secondaryRealmIndex=7, secondaryCount=5, maxAura=-1, speedBonus=0.20f, autoKing=true },       
+            new LevelConfig { level=8, name="Rank 8 Cultivation Planet", localeKey="xiuzhenguo_level_8", requiredRealmIndex=13, requiredCount=1, secondaryRealmIndex=10, secondaryCount=10, maxAura=-1, speedBonus=0.25f, autoKing=true },    
+            new LevelConfig { level=9, name="Rank 9 Cultivation Planet", localeKey="xiuzhenguo_level_9", requiredRealmIndex=14, requiredCount=1, secondaryRealmIndex=13, secondaryCount=5, maxAura=-1, speedBonus=0.30f, autoKing=true },     
+            new LevelConfig { level=10, name="Peak Cultivation Planet", localeKey="xiuzhenguo_level_10", requiredRealmIndex=15, requiredCount=1, secondaryRealmIndex=14, secondaryCount=5, maxAura=-1, speedBonus=0.40f, autoKing=true }     
         };
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void Init()
         {
             if (_inited) return;
             _inited = true;
             _h = new Harmony("xn.worldbox.xiuzhenguo");
             var mSetText = AccessTools.Method(typeof(NameplateText), "setText", new Type[] { typeof(string), typeof(Vector3), typeof(int) });
-            if (mSetText != null)
-                _h.Patch(mSetText, prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_Nameplate_SetText)));
+            TryPatch(mSetText, "NameplateText.setText(string, Vector3, int)", prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_Nameplate_SetText)));
             var mUpdate = AccessTools.Method(typeof(MapBox), "Update");
-            if (mUpdate != null)
-                _h.Patch(mUpdate, postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_MapBox_Update)));
-            var mCultTick = AccessTools.Method(typeof(xn.world.CultivationPracticeSystem), "Tick_Yearly");
-            if (mCultTick != null)
-            {
-                _h.Patch(mCultTick, prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_CultivationPractice_Tick)));
-                _h.Patch(mCultTick, postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_CultivationPractice_Tick)));
-            }
+            TryPatch(mUpdate, "MapBox.Update", postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_MapBox_Update)));
+            var mCultTick = AccessTools.Method(typeof(xn.world.CultivationPracticeSystem), "GainCultivationAnnual", new Type[] { typeof(Actor) });
+            TryPatch(mCultTick, "CultivationPracticeSystem.GainCultivationAnnual(Actor)", prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_CultivationPractice_Tick)), postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_CultivationPractice_Tick)));
             var mCityInit = AccessTools.Method(typeof(xn.world.CityAuraSystem), "Post_City_Init");
-            if (mCityInit != null)
-                _h.Patch(mCityInit, postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_CityAura_Init)));
-            var mRefreshAura = AccessTools.Method(typeof(xn.world.CityAuraSystem), "RefreshAllCityAura");
-            if (mRefreshAura != null)
-                _h.Patch(mRefreshAura, postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_RefreshAllCityAura)));
+            TryPatch(mCityInit, "CityAuraSystem.Post_City_Init(City)", postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_CityAura_Init)));
+            var mRefreshAura = AccessTools.Method(typeof(xn.world.CityAuraSystem), "RefreshAllCityAura", new Type[] { typeof(MapBox) });
+            TryPatch(mRefreshAura, "CityAuraSystem.RefreshAllCityAura(MapBox)", postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_RefreshAllCityAura)));
             var mFinishCapture = AccessTools.Method(typeof(City), "finishCapture", new Type[] { typeof(Kingdom) });
-            if (mFinishCapture != null)
-                _h.Patch(mFinishCapture, prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_City_FinishCapture)));
+            TryPatch(mFinishCapture, "City.finishCapture(Kingdom)", prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_City_FinishCapture)));
+        }
+        private static bool TryPatch(MethodBase target, string targetName, HarmonyMethod prefix = null, HarmonyMethod postfix = null)
+        {
+            if (target == null)
+            {
+                Debug.LogWarning("[XN] XiuzhenguoSystem patch target not found, skipped: " + targetName);
+                return false;
+            }
+            try
+            {
+                _h.Patch(target, prefix: prefix, postfix: postfix);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[XN] XiuzhenguoSystem patch failed, skipped: " + targetName + " - " + e.Message);
+                return false;
+            }
         }
         public static void Toggle()
         {
@@ -95,8 +112,12 @@ namespace xn.world
         }
         public static LevelConfig GetConfig(int level)
         {
-            if (level < 0 || level >= LEVEL_CONFIGS.Length) return LEVEL_CONFIGS[0];
+            if (level < 0 || level >= LEVEL_CONFIGS.Length) level = 0;
             return LEVEL_CONFIGS[level];
+        }
+        private static string GetConfigName(LevelConfig cfg)
+        {
+            return T(cfg.localeKey, cfg.name);
         }
         public static int CalculateLevel(Kingdom k)
         {
@@ -186,7 +207,7 @@ namespace xn.world
             {
                 int level = GetLevel(kingdom);
                 var cfg = GetConfig(level);
-                pNewText = pNewText + $" · {cfg.name}";
+                pNewText = pNewText + $" · {GetConfigName(cfg)}";
                 pAdditionalWidth += 100;
             }
         }
@@ -240,7 +261,7 @@ namespace xn.world
                     if (k.king != unit)
                     {
                         k.setKing(unit);
-                        BroadcastSystem.Custom($"{unit.getName()} 成为 {k.name} 的国王！");
+                        BroadcastSystem.Custom(T("broadcast_xiuzhenguo_auto_king", "{0} became the king of {1}!", unit.getName(), k.name));
                     }
                     break; 
                 }
@@ -249,12 +270,12 @@ namespace xn.world
         private static string GetRealmName(int realmIndex)
         {
             var names = new string[] {
-                "凝气", "筑基", "结丹", "元婴", "化神", "婴变", "问鼎", "窥涅",
-                "净涅", "碎涅", "空涅", "空灵", "空玄", "天尊", "半步踏天", "踏天"
+                "Qi Condensation", "Foundation Establishment", "Core Formation", "Nascent Soul", "Soul Formation", "Soul Transformation", "Ascendant", "Nirvana Scryer",
+                "Nirvana Cleanser", "Nirvana Shatterer", "Void Nirvana", "Void Spirit", "Void Arcanum", "Grand Empyrean", "Half-Step Heaven Trampling", "Heaven Trampling"
             };
             if (realmIndex >= 0 && realmIndex < names.Length)
-                return names[realmIndex];
-            return "未知";
+                return T("trait_" + REALM_IDS[realmIndex], names[realmIndex]);
+            return "Unknown";
         }
         public static float GetSpeedBonus(Kingdom k)
         {
@@ -292,13 +313,13 @@ namespace xn.world
                 _oldXP = 0;
                 return;
             }
-            a.data.get(KEY_XP, out _oldXP, 0L);
+            xn.access.ActorAccess.GetData(a).get(KEY_XP, out _oldXP, 0L);
         }
         public static void Post_CultivationPractice_Tick(Actor a)
         {
             if (a == null || !a.isAlive()) return;
             if (a.kingdom == null || a.kingdom.isRekt()) return;
-            int successYear; a.data.get(KEY_BREAK_SUCCESS_YEAR, out successYear, 0);
+            int successYear; xn.access.ActorAccess.GetData(a).get(KEY_BREAK_SUCCESS_YEAR, out successYear, 0);
             if (successYear > 0)
             {
                 int curYear = Date.getCurrentYear();
@@ -310,13 +331,13 @@ namespace xn.world
             float bonus = GetSpeedBonus(a.kingdom);
             if (bonus <= 0f) return;
             long newXP;
-            a.data.get(KEY_XP, out newXP, 0L);
+            xn.access.ActorAccess.GetData(a).get(KEY_XP, out newXP, 0L);
             long gainThisYear = newXP - _oldXP;
             if (gainThisYear <= 0) return; 
             long extra = (long)(gainThisYear * bonus);
             if (extra > 0)
             {
-                a.data.set(KEY_XP, newXP + extra);
+                xn.access.ActorAccess.GetData(a).set(KEY_XP, newXP + extra);
             }
         }
         public static void Post_CityAura_Init(City __instance)
@@ -329,18 +350,19 @@ namespace xn.world
             int currentAura;
             __instance.data.get(CityAuraSystem.KeyAura, out currentAura, 0);
             int maxAura = 40000; 
-            if (__instance.kingdom != null && !__instance.kingdom.isRekt())
+            Kingdom kingdom = xn.access.CityAccess.GetKingdom(__instance);
+            if (kingdom != null && !kingdom.isRekt())
             {
-                maxAura = GetMaxAura(__instance.kingdom);
+                maxAura = GetMaxAura(kingdom);
             }
             if (maxAura < int.MaxValue && currentAura > maxAura)
             {
                 __instance.data.set(CityAuraSystem.KeyAura, maxAura);
                 currentAura = maxAura;
             }
-            if (__instance.kingdom != null && !__instance.kingdom.isRekt())
+            if (kingdom != null && !kingdom.isRekt())
             {
-                ApplyKingdomAuraLimit(__instance.kingdom);
+                ApplyKingdomAuraLimit(kingdom);
             }
         }
         private static void ApplyKingdomAuraLimit(Kingdom k)
@@ -376,29 +398,30 @@ namespace xn.world
         public static bool Pre_City_FinishCapture(City __instance, Kingdom pNewKingdom)
         {
             if (__instance == null || pNewKingdom == null) return true;
-            if (__instance.kingdom == null || __instance.kingdom.isRekt()) return true;
+            Kingdom defenderKingdom = xn.access.CityAccess.GetKingdom(__instance);
+            if (defenderKingdom == null || defenderKingdom.isRekt()) return true;
             if (!xn.config.ModConfigHooks.EnableXiuzhenguoSuppress)
             {
                 return true;
             }
-            int defenderLevel = GetLevel(__instance.kingdom);   
+            int defenderLevel = GetLevel(defenderKingdom);   
             int attackerLevel = GetLevel(pNewKingdom);          
             if (attackerLevel < defenderLevel)
             {
                 if (UnityEngine.Random.value < 0.30f)
                 {
-                    BroadcastSystem.Custom($"{pNewKingdom.name}（{GetConfig(attackerLevel).name}）无法占领 {__instance.kingdom.name}（{GetConfig(defenderLevel).name}）的城市：修真国等级不足！");
+                    BroadcastSystem.Custom(T("broadcast_xiuzhenguo_capture_level_low", "{0} ({1}) cannot occupy {2}'s city ({3}): cultivation kingdom rank is too low!", pNewKingdom.name, GetConfigName(GetConfig(attackerLevel)), defenderKingdom.name, GetConfigName(GetConfig(defenderLevel))));
                 }
-                __instance.clearCapture(); 
+                xn.access.CityAccess.ClearCapture(__instance); 
                 return false; 
             }
             else if (attackerLevel == defenderLevel && defenderLevel > 0)
             {
                 if (UnityEngine.Random.value < 0.30f)
                 {
-                    BroadcastSystem.Custom($"{pNewKingdom.name} 与 {__instance.kingdom.name} 同为{GetConfig(defenderLevel).name}，无法占领其城市！");
+                    BroadcastSystem.Custom(T("broadcast_xiuzhenguo_capture_same_level", "{0} and {1} are both {2}; it cannot occupy that city!", pNewKingdom.name, defenderKingdom.name, GetConfigName(GetConfig(defenderLevel))));
                 }
-                __instance.clearCapture();
+                xn.access.CityAccess.ClearCapture(__instance);
                 return false;
             }
             return true;

@@ -29,11 +29,11 @@ namespace xn.expand
             WorldTile targetTile = null;
             if (pTarget != null && !pTarget.isRekt())
             {
-                if (pTarget.isActor())
+                if (xn.access.BaseSimObjectAccess.IsActor(pTarget))
                 {
-                    targetTile = pTarget.a.current_tile;
+                    targetTile = xn.access.BaseSimObjectAccess.GetActor(pTarget).current_tile;
                 }
-                else if (pTarget.isBuilding())
+                else if (xn.access.BaseSimObjectAccess.IsBuilding(pTarget))
                 {
                     targetTile = pTarget.b.current_tile;
                 }
@@ -42,8 +42,8 @@ namespace xn.expand
             {
                 targetTile = __instance.current_tile;
             }
-            __instance.data.set(KEY_OWN_EFFECT_IMMUNE, 1);
-            __instance.data.set(KEY_OWN_EFFECT_TIME, Time.time);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_IMMUNE, 1);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_EFFECT_TIME, Time.time);
             TriggerTatianProjectiles(__instance, pTarget, targetTile);
         }
         private static bool HasTatianRealm(Actor actor)
@@ -76,13 +76,13 @@ namespace xn.expand
             {
                 BaseSimObject enemy = enemies[i];
                 if (enemy == null || enemy.isRekt() || !enemy.isAlive()) continue;
-                if (enemy.isActor() && enemy.a == actor) continue; 
+                if (xn.access.BaseSimObjectAccess.IsActor(enemy) && xn.access.BaseSimObjectAccess.GetActor(enemy) == actor) continue; 
                 string projectileType = GetRandomProjectileType();
                 Vector3 targetPosition = GetEnemyPosition(enemy);
                 float targetZ = 0f;
-                if (enemy.isActor())
+                if (xn.access.BaseSimObjectAccess.IsActor(enemy))
                 {
-                    targetZ = enemy.a.getHeight();
+                    targetZ = xn.access.BaseSimObjectAccess.GetHeight(xn.access.BaseSimObjectAccess.GetActor(enemy));
                 }
                 SpawnProjectile(actor, enemy, projectileType, launchPosition, targetPosition, targetZ);
                 validEnemyCount++;
@@ -162,12 +162,12 @@ namespace xn.expand
         }
         private static Vector3 GetEnemyPosition(BaseSimObject enemy)
         {
-            if (enemy.isActor())
+            if (xn.access.BaseSimObjectAccess.IsActor(enemy))
             {
-                Vector2 pos2D = enemy.a.current_position;
+                Vector2 pos2D = xn.access.BaseSimObjectAccess.GetActor(enemy).current_position;
                 return new Vector3(pos2D.x, pos2D.y, 0f);
             }
-            else if (enemy.isBuilding())
+            else if (xn.access.BaseSimObjectAccess.IsBuilding(enemy))
             {
                 Vector2Int pos = enemy.b.current_tile.pos;
                 return new Vector3(pos.x, pos.y, 0f);
@@ -182,14 +182,14 @@ namespace xn.expand
         {
             Vector2 pos2D = actor.current_position;
             Vector3 position = new Vector3(pos2D.x, pos2D.y, 0f);
-            float size = actor.stats["size"];
+            float size = xn.access.BaseSimObjectAccess.GetStats(actor)["size"];
             position.y += size + 0.5f; 
             return position;
         }
         private static void SpawnProjectile(Actor actor, BaseSimObject target, string projectileType, Vector3 launchPosition, Vector3 targetPosition, float targetZ)
         {
             if (actor == null || World.world == null || World.world.projectiles == null) return;
-            float startZ = actor.getHeight() + 0.5f;
+            float startZ = xn.access.BaseSimObjectAccess.GetHeight(actor) + 0.5f;
             World.world.projectiles.spawn(
                 actor,              
                 target,             

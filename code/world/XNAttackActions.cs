@@ -264,28 +264,28 @@ namespace xn.world
         private static bool CheckCDAndCost(Actor caster, string cdKey, float cdTime, string costKey, int cost)
         {
             float now = Time.time;
-            caster.data.get(cdKey, out float cd, 0f);
+            xn.access.ActorAccess.GetData(caster).get(cdKey, out float cd, 0f);
             if (now < cd) return false;
-            caster.data.get(costKey, out int resource, 0);
+            xn.access.ActorAccess.GetData(caster).get(costKey, out int resource, 0);
             if (resource < cost) return false;
-            caster.data.set(costKey, resource - cost);
-            caster.data.set(cdKey, now + AdjCD(caster, cdTime)); 
+            xn.access.ActorAccess.GetData(caster).set(costKey, resource - cost);
+            xn.access.ActorAccess.GetData(caster).set(cdKey, now + AdjCD(caster, cdTime)); 
             return true;
         }
         private static void DealDamage(Actor caster, Actor target, float multiplier)
         {
             if (target == null || !target.isAlive()) return;
-            int dmg = Mathf.FloorToInt(caster.stats["damage"] * multiplier);
+            int dmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * multiplier);
             if (dmg <= 0) return;
-            if (caster != null) target.attackedBy = caster;
-            target._last_attack_type = AttackType.Other;
+            if (caster != null) xn.access.ActorAccess.SetAttackedBy(target, caster);
+            xn.access.ActorAccess.SetLastAttackType(target, AttackType.Other);
             target.getHit(dmg, pFlash: true, AttackType.Other, caster);
         }
         public static bool Action_Sanmei(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_SANMEI) return false;
             if (!CheckCDAndCost(caster, KEY_SANMEI_CD, CD_SANMEI, KEY_LINGLI, COST_SANMEI)) return false;
@@ -297,7 +297,7 @@ namespace xn.world
             {
                 foreach (var u in Finder.getUnitsFromChunk(tile, 2, 3f))
                 {
-                    if (u == null || !u.isAlive() || u.data.id == target.data.id) continue;
+                    if (u == null || !u.isAlive() || xn.access.ActorAccess.GetData(u).id == xn.access.ActorAccess.GetData(target).id) continue;
                     if (!IsEnemy(caster, u)) continue;
                     u.addStatusEffect("burning", 8f);
                 }
@@ -306,9 +306,9 @@ namespace xn.world
         }
         public static bool Action_Wanjian(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_WANJIAN) return false;
             if (!CheckCDAndCost(caster, KEY_WANJIAN_CD, CD_WANJIAN, KEY_LINGLI, COST_WANJIAN)) return false;
@@ -318,12 +318,12 @@ namespace xn.world
             foreach (var u in Finder.getUnitsFromChunk(tile, 2, 10f))
             {
                 if (u == null || !u.isAlive()) continue;
-                if (u.data.id == caster.data.id) continue;
+                if (xn.access.ActorAccess.GetData(u).id == xn.access.ActorAccess.GetData(caster).id) continue;
                 if (!IsEnemy(caster, u)) continue;
                 list.Add(u);
             }
-            ShentongFX.PlayOnce_Wanjian(tile, caster.actor_scale);
-            int segDmg = Mathf.FloorToInt(caster.stats["damage"] * 1.6f);
+            ShentongFX.PlayOnce_Wanjian(tile, xn.access.ActorAccess.GetActorScale(caster));
+            int segDmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 1.6f);
             for (int seg = 0; seg < 3; seg++)
             {
                 foreach (var u in list)
@@ -337,9 +337,9 @@ namespace xn.world
         }
         public static bool Action_Weiya(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_WEIYA) return false;
             if (!IsLowerInAnyGroup(caster, target)) return false;
@@ -352,9 +352,9 @@ namespace xn.world
         }
         public static bool Action_Xuankong(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_XUANKONG) return false;
             if (!CheckCDAndCost(caster, KEY_XUANKONG_CD, CD_XUANKONG, KEY_LINGLI, COST_XUANKONG)) return false;
@@ -365,24 +365,24 @@ namespace xn.world
         }
         public static bool Action_Zhenkong(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ZHENKONG) return false;
             var tile = caster.current_tile;
             if (tile == null) return false;
-            Vector2 posCaster = caster.cur_transform_position;
-            Vector2 forward = ((Vector2)target.cur_transform_position - posCaster);
+            Vector2 posCaster = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(caster);
+            Vector2 forward = ((Vector2)xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(target) - posCaster);
             if (forward.sqrMagnitude < 0.0001f) return false;
             forward.Normalize();
             var victims = new List<Actor>(16);
             foreach (var u in Finder.getUnitsFromChunk(tile, 2, 5f))
             {
                 if (u == null || !u.isAlive()) continue;
-                if (u.data.id == caster.data.id) continue;
+                if (xn.access.ActorAccess.GetData(u).id == xn.access.ActorAccess.GetData(caster).id) continue;
                 if (!IsEnemy(caster, u)) continue;
-                Vector2 d = (Vector2)u.cur_transform_position - posCaster;
+                Vector2 d = (Vector2)xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(u) - posCaster;
                 if (d.magnitude > 5f) continue;
                 if (Vector2.Dot(d.normalized, forward) <= 0f) continue;
                 victims.Add(u);
@@ -390,13 +390,13 @@ namespace xn.world
             if (victims.Count == 0) return false;
             if (!CheckCDAndCost(caster, KEY_ZHENKONG_CD, CD_ZHENKONG, KEY_LINGLI, COST_ZHENKONG)) return false;
             ShentongFX.PlayOnce_Zhenkongquan(target);
-            int dmg = Mathf.FloorToInt(caster.stats["damage"] * 1.8f);
+            int dmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 1.8f);
             foreach (var v in victims)
             {
                 if (v == null || !v.isAlive()) continue;
                 v.getHit(dmg, pFlash: true, AttackType.Other, caster);
                 v.makeStunned(3);
-                Vector2 vp = v.cur_transform_position;
+                Vector2 vp = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v);
                 Vector2 dir = (vp - posCaster).normalized;
                 Vector2 hit = vp + dir * 0.1f;
                 v.calculateForce(vp.x, vp.y, hit.x, hit.y, 18f, 0f, true);
@@ -405,15 +405,15 @@ namespace xn.world
         }
         public static bool Action_Jiuyin(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_JIUYIN) return false;
             if (!CheckCDAndCost(caster, KEY_JIUYIN_CD, CD_JIUYIN, KEY_LINGLI, COST_JIUYIN)) return false;
             ShentongFX.PlayOnce_Jiuyin(target);
-            int dmg = Mathf.FloorToInt(caster.stats["damage"] * 2.8f);
-            float maxHP = target.stats["health"];
+            int dmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 2.8f);
+            float maxHP = xn.access.BaseSimObjectAccess.GetStats(target)["health"];
             if (maxHP <= 0f) maxHP = target.getMaxHealth();
             float hpNow = target.getHealth();
             if (dmg > 0)
@@ -430,16 +430,16 @@ namespace xn.world
         }
         public static bool Action_Duqi(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_DUQI) return false;
             if (!CheckCDAndCost(caster, KEY_DUQI_CD, CD_DUQI, KEY_LINGLI, COST_DUQI)) return false;
             var tile = target.current_tile;
             if (tile == null) return false;
-            ShentongFX.PlayOnce_Duqi(tile, caster.actor_scale);
-            int extraDmg = Mathf.FloorToInt(caster.stats["damage"] * 0.5f);
+            ShentongFX.PlayOnce_Duqi(tile, xn.access.ActorAccess.GetActorScale(caster));
+            int extraDmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 0.5f);
             if (extraDmg > 0)
             {
                 target.getHit(extraDmg, pFlash: true, AttackType.Other, caster);
@@ -454,24 +454,24 @@ namespace xn.world
         }
         public static bool Action_Jianzhan(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_JIANZHAN) return false;
-            caster.data.get(KEY_YUANLI, out int yuanli, 0);
-            caster.data.get(KEY_LINGLI, out int lingli, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_YUANLI, out int yuanli, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_LINGLI, out int lingli, 0);
             float now = Time.time;
-            caster.data.get(KEY_JIANZHAN_CD, out float cd, 0f);
+            xn.access.ActorAccess.GetData(caster).get(KEY_JIANZHAN_CD, out float cd, 0f);
             if (now < cd) return false;
             bool useYuanli = yuanli >= COST_JIANZHAN_YUANLI;
             bool useLingli = !useYuanli && lingli >= COST_JIANZHAN_LINGLI;
             if (!useYuanli && !useLingli) return false;
-            caster.data.set(KEY_JIANZHAN_CD, now + AdjCD(caster, CD_JIANZHAN));
-            if (useYuanli) caster.data.set(KEY_YUANLI, yuanli - COST_JIANZHAN_YUANLI);
-            else caster.data.set(KEY_LINGLI, lingli - COST_JIANZHAN_LINGLI);
+            xn.access.ActorAccess.GetData(caster).set(KEY_JIANZHAN_CD, now + AdjCD(caster, CD_JIANZHAN));
+            if (useYuanli) xn.access.ActorAccess.GetData(caster).set(KEY_YUANLI, yuanli - COST_JIANZHAN_YUANLI);
+            else xn.access.ActorAccess.GetData(caster).set(KEY_LINGLI, lingli - COST_JIANZHAN_LINGLI);
             ShentongFX.PlayOnce_Jianzhan(target);
-            int baseAtk = Mathf.FloorToInt(caster.stats["damage"]);
+            int baseAtk = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"]);
             if (useYuanli)
             {
                 int dmg = Mathf.FloorToInt(baseAtk * 7.0f);
@@ -487,58 +487,58 @@ namespace xn.world
                 int sub = Mathf.FloorToInt(baseAtk * 0.2f);
                 if (sub > 0)
                 {
-                    caster.stats["damage"] -= sub;
-                    caster.data.set(KEY_JIANZHAN_WEAK_SUB, sub);
-                    caster.data.set(KEY_JIANZHAN_WEAK_ACTIVE, 1);
-                    caster.data.set(KEY_JIANZHAN_WEAK_END, now + 20f);
+                    xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] -= sub;
+                    xn.access.ActorAccess.GetData(caster).set(KEY_JIANZHAN_WEAK_SUB, sub);
+                    xn.access.ActorAccess.GetData(caster).set(KEY_JIANZHAN_WEAK_ACTIVE, 1);
+                    xn.access.ActorAccess.GetData(caster).set(KEY_JIANZHAN_WEAK_END, now + 20f);
                 }
             }
             return true;
         }
         public static bool Action_ArtMissile(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_MISSILE) return false;
             if (!CheckCDAndCost(caster, KEY_ART_MISSILE_CD, CD_ART_MISSILE, KEY_YUANLI, COST_ART_MISSILE)) return false;
             ShentongFX.PlayOnce_XS_Missile(target);
             DealDamage(caster, target, 5f);
-            target.data.set(KEY_NOHEAL_END_TS, Time.time + 20f);
-            target.data.set(KEY_NOHEAL_LAST_HP, target.getHealth());
+            xn.access.ActorAccess.GetData(target).set(KEY_NOHEAL_END_TS, Time.time + 20f);
+            xn.access.ActorAccess.GetData(target).set(KEY_NOHEAL_LAST_HP, target.getHealth());
             return true;
         }
         public static bool Action_ArtSlash(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_SLASH) return false;
             if (!CheckCDAndCost(caster, KEY_ART_SLASH_CD, CD_ART_SLASH, KEY_YUANLI, COST_ART_SLASH)) return false;
             float now = Time.time;
-            caster.data.set(KEY_ART_SLASH_ACTIVE, 1);
-            caster.data.set(KEY_ART_SLASH_END, now + 2f);
-            caster.data.set(KEY_ART_SLASH_NEXT, now + 0.0f); 
-            caster.data.set(KEY_ART_SLASH_LEFT, 10);
-            caster.data.set(KEY_ART_SLASH_TID, (int)target.data.id);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_END, now + 2f);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_NEXT, now + 0.0f); 
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_LEFT, 10);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_TID, (int)xn.access.ActorAccess.GetData(target).id);
             caster.addStatusEffect("invincible", 2f);
             ShentongFX.PlayOnce_XS_Slash(target);
             return true;
         }
         public static bool Action_ArtQuake(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_QUAKE) return false;
             if (!CheckCDAndCost(caster, KEY_ART_QUAKE_CD, CD_ART_QUAKE, KEY_YUANLI, COST_ART_QUAKE)) return false;
             var tile = target.current_tile;
             if (tile == null) return false;
-            ShentongFX.PlayOnce_XS_Quake(tile, caster.actor_scale);
-            int dmg = Mathf.FloorToInt(caster.stats["damage"] * 8.88f);
+            ShentongFX.PlayOnce_XS_Quake(tile, xn.access.ActorAccess.GetActorScale(caster));
+            int dmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 8.88f);
             foreach (var u in Finder.getUnitsFromChunk(tile, 4, 6f))
             {
                 if (u == null || !u.isAlive()) continue;
@@ -550,25 +550,25 @@ namespace xn.world
         }
         public static bool Action_ArtWaves(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_WAVES) return false;
             if (!CheckCDAndCost(caster, KEY_ART_WAVES_CD, CD_ART_WAVES, KEY_YUANLI, COST_ART_WAVES)) return false;
             float now = Time.time;
-            caster.data.set(KEY_ART_WAVES_ACTIVE, 1);
-            caster.data.set(KEY_ART_WAVES_NEXT, now + 0.0f); 
-            caster.data.set(KEY_ART_WAVES_LEFT, 3);
-            caster.data.set(KEY_ART_WAVES_TID, (int)target.data.id);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_WAVES_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_WAVES_NEXT, now + 0.0f); 
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_WAVES_LEFT, 3);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_WAVES_TID, (int)xn.access.ActorAccess.GetData(target).id);
             ShentongFX.PlayOnce_XS_Waves(caster);
             return true;
         }
         public static bool Action_ArtConvert(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_CONVERT) return false;
             if (!CheckCDAndCost(caster, KEY_ART_CONVERT_CD, CD_ART_CONVERT, KEY_YUANLI, COST_ART_CONVERT)) return false;
@@ -585,8 +585,8 @@ namespace xn.world
                     allies.Add(u);
             }
             if (allies.Count == 0) allies.Add(caster); 
-            ShentongFX.PlayOnce_XS_Convert(tile, caster.actor_scale);
-            int burst = Mathf.FloorToInt(caster.stats["damage"] * 4.8f);
+            ShentongFX.PlayOnce_XS_Convert(tile, xn.access.ActorAccess.GetActorScale(caster));
+            int burst = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 4.8f);
             int totalDamage = 0;
             foreach (var u in enemies)
             {
@@ -615,22 +615,22 @@ namespace xn.world
         }
         public static bool Action_ArtPalm(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_PALM) return false;
             if (!CheckCDAndCost(caster, KEY_ART_PALM_CD, CD_ART_PALM, KEY_YUANLI, COST_ART_PALM)) return false;
             var tile = target.current_tile;
             if (tile == null) return false;
-            ShentongFX.PlayOnce_XS_Palm(tile, caster.actor_scale);
+            ShentongFX.PlayOnce_XS_Palm(tile, xn.access.ActorAccess.GetActorScale(caster));
             foreach (var u in Finder.getUnitsFromChunk(tile, 4, 6f))
             {
                 if (u == null || !u.isAlive()) continue;
                 if (!IsEnemy(caster, u)) continue;
                 u.addStatusEffect("freeze", 5f);
             }
-            int baseHP = Mathf.FloorToInt(target.stats["health"]);
+            int baseHP = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(target)["health"]);
             if (baseHP > 0)
             {
                 int dmg = Mathf.FloorToInt(baseHP * 0.9f);
@@ -646,16 +646,16 @@ namespace xn.world
         }
         public static bool Action_ArtBreaker(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_BREAKER) return false;
             if (!CheckCDAndCost(caster, KEY_ART_BREAKER_CD, CD_ART_BREAKER, KEY_YUANLI, COST_ART_BREAKER)) return false;
             ShentongFX.PlayOnce_XS_Breaker(target);
-            int baseAtk = Mathf.FloorToInt(caster.stats["damage"]);
+            int baseAtk = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"]);
             int raw = Mathf.FloorToInt(baseAtk * 10.0f);
-            float armor = target.stats["armor"];
+            float armor = xn.access.BaseSimObjectAccess.GetStats(target)["armor"];
             float effArmor = Mathf.Max(armor * 0.5f, 0f);
             float factor = 1f - (effArmor / 100f);
             if (factor < 0.01f) factor = 0.01f;
@@ -665,38 +665,38 @@ namespace xn.world
         }
         public static bool Action_ArtLink(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null || pTarget?.a == null || !pTarget.a.isAlive()) return false;
-            var caster = pSelf.a;
-            var target = pTarget.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null || xn.access.BaseSimObjectAccess.GetActor(pTarget) == null || !xn.access.BaseSimObjectAccess.GetActor(pTarget).isAlive()) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
+            var target = xn.access.BaseSimObjectAccess.GetActor(pTarget);
             if (!IsEnemy(caster, target)) return false;
             if (UnityEngine.Random.value > CHANCE_ART_LINK) return false;
             if (!CheckCDAndCost(caster, KEY_ART_LINK_CD, CD_ART_LINK, KEY_YUANLI, COST_ART_LINK)) return false;
             ShentongFX.PlayOnce_XS_Link(caster);
             ShentongFX.PlayOnce_XS_Link(target);
-            caster.data.set(KEY_LINK_ON, 1);
-            caster.data.set(KEY_LINK_END, Time.time + 20f);
-            caster.data.set(KEY_LINK_TID, (int)target.data.id);
+            xn.access.ActorAccess.GetData(caster).set(KEY_LINK_ON, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_LINK_END, Time.time + 20f);
+            xn.access.ActorAccess.GetData(caster).set(KEY_LINK_TID, (int)xn.access.ActorAccess.GetData(target).id);
             return true;
         }
         public static bool Action_Baonu(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null) return false;
-            var caster = pSelf.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
             if (!caster.isAlive()) return false;
-            caster.data.get(KEY_BAONU_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_BAONU_ACTIVE, out int active, 0);
             if (active == 1) return false;
             float now = Time.time;
-            caster.data.get(KEY_BAONU_CD, out float cd, 0f);
+            xn.access.ActorAccess.GetData(caster).get(KEY_BAONU_CD, out float cd, 0f);
             if (now < cd) return false;
-            caster.data.get(KEY_LINGLI, out int lingli, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_LINGLI, out int lingli, 0);
             if (lingli < COST_BAONU) return false;
-            caster.data.set(KEY_BAONU_ACTIVE, 1);
-            caster.data.set(KEY_BAONU_END_TS, now + 20f);
-            caster.data.set(KEY_BAONU_CD, now + AdjCD(caster, CD_BAONU));
-            int baseAtk = Mathf.FloorToInt(caster.stats["damage"]);
+            xn.access.ActorAccess.GetData(caster).set(KEY_BAONU_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_BAONU_END_TS, now + 20f);
+            xn.access.ActorAccess.GetData(caster).set(KEY_BAONU_CD, now + AdjCD(caster, CD_BAONU));
+            int baseAtk = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"]);
             int addDmg = Mathf.FloorToInt(baseAtk * 1.5f);
-            caster.data.set(KEY_BAONU_DMG_ADD, addDmg);
-            if (addDmg > 0) caster.stats["damage"] += addDmg;
+            xn.access.ActorAccess.GetData(caster).set(KEY_BAONU_DMG_ADD, addDmg);
+            if (addDmg > 0) xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] += addDmg;
             ShentongFX.StartLoop_Baonu(caster);
             caster.finishStatusEffect("stunned");
             caster.finishStatusEffect("freeze");
@@ -705,29 +705,29 @@ namespace xn.world
         }
         public static bool Action_ArtAscension(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null) return false;
-            var caster = pSelf.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
             if (!caster.isAlive()) return false;
-            caster.data.get(KEY_ASC_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_ASC_ACTIVE, out int active, 0);
             if (active == 1) return false;
             float now = Time.time;
-            caster.data.get(KEY_ART_ASC_CD, out float cd, 0f);
+            xn.access.ActorAccess.GetData(caster).get(KEY_ART_ASC_CD, out float cd, 0f);
             if (now < cd) return false;
             int curHP = caster.getHealth();
             int maxHP = caster.getMaxHealth();
             if (maxHP <= 0) return false;
             float hpRatio = (float)curHP / maxHP;
             if (hpRatio >= 0.2f) return false;
-            caster.data.get(KEY_YUANLI, out int yuanli, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_YUANLI, out int yuanli, 0);
             if (yuanli < 100) return false;
             int curRealmIdx = GetRealmIndex(caster);
             if (curRealmIdx >= 12) return false; 
-            caster.data.get(KEY_LINGLI, out int lingli, 0);
-            caster.data.set(KEY_LINGLI, 0);
-            caster.data.set(KEY_YUANLI, 0);
-            caster.data.set(KEY_ART_ASC_CD, now + AdjCD(caster, CD_ART_ASC));
+            xn.access.ActorAccess.GetData(caster).get(KEY_LINGLI, out int lingli, 0);
+            xn.access.ActorAccess.GetData(caster).set(KEY_LINGLI, 0);
+            xn.access.ActorAccess.GetData(caster).set(KEY_YUANLI, 0);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_ASC_CD, now + AdjCD(caster, CD_ART_ASC));
             string oldRealm = (curRealmIdx >= 0 && curRealmIdx < REALM_IDS.Length) ? REALM_IDS[curRealmIdx] : "";
-            caster.data.set(KEY_ASC_OLD_REALM, oldRealm);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ASC_OLD_REALM, oldRealm);
             string tmpRealm = "";
             if (curRealmIdx >= 0)
             {
@@ -738,17 +738,17 @@ namespace xn.world
                     caster.addTrait(tmpRealm); 
                 }
             }
-            caster.data.set(KEY_ASC_TMP_REALM, tmpRealm);
-            int baseAtk = Mathf.FloorToInt(caster.stats["damage"]);
-            int baseArmor = Mathf.FloorToInt(caster.stats["armor"]);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ASC_TMP_REALM, tmpRealm);
+            int baseAtk = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"]);
+            int baseArmor = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["armor"]);
             int addDmg = Mathf.FloorToInt(baseAtk * 0.3f);
             int addArmor = Mathf.FloorToInt(baseArmor * 0.3f);
-            if (addDmg != 0) caster.stats["damage"] += addDmg;
-            if (addArmor != 0) caster.stats["armor"] += addArmor;
-            caster.data.set(KEY_ASC_ACTIVE, 1);
-            caster.data.set(KEY_ASC_END_TS, now + 15f);
-            caster.data.set(KEY_ASC_ADD_DMG, addDmg);
-            caster.data.set(KEY_ASC_ADD_ARMOR, addArmor);
+            if (addDmg != 0) xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] += addDmg;
+            if (addArmor != 0) xn.access.BaseSimObjectAccess.GetStats(caster)["armor"] += addArmor;
+            xn.access.ActorAccess.GetData(caster).set(KEY_ASC_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ASC_END_TS, now + 15f);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ASC_ADD_DMG, addDmg);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ASC_ADD_ARMOR, addArmor);
             ShentongFX.StartLoop_XS_Ascension(caster);
             var tile = caster.current_tile;
             if (tile != null)
@@ -765,32 +765,32 @@ namespace xn.world
         }
         public static bool Action_ArtShield(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
-            if (pSelf?.a == null) return false;
-            var caster = pSelf.a;
+            if (xn.access.BaseSimObjectAccess.GetActor(pSelf) == null) return false;
+            var caster = xn.access.BaseSimObjectAccess.GetActor(pSelf);
             if (!caster.isAlive()) return false;
             float now = Time.time;
-            caster.data.get(KEY_ART_SHIELD_CD, out float cd, 0f);
-            caster.data.get(KEY_ART_SHIELD_ACTIVE, out int active, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_ART_SHIELD_CD, out float cd, 0f);
+            xn.access.ActorAccess.GetData(caster).get(KEY_ART_SHIELD_ACTIVE, out int active, 0);
             if (active == 1)
             {
-                caster.data.set(KEY_ART_SHIELD_ACTIVE, 0);
-                caster.data.set(KEY_ART_SHIELD_CD, now + AdjCD(caster, CD_ART_SHIELD));
-                caster.data.get(KEY_ART_SHIELD_RESIST_ADD, out int addResist, 0);
-                if (addResist != 0) caster.stats["Resist"] -= addResist;
-                caster.data.set(KEY_ART_SHIELD_RESIST_ADD, 0);
+                xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_ACTIVE, 0);
+                xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_CD, now + AdjCD(caster, CD_ART_SHIELD));
+                xn.access.ActorAccess.GetData(caster).get(KEY_ART_SHIELD_RESIST_ADD, out int addResist, 0);
+                if (addResist != 0) xn.access.BaseSimObjectAccess.GetStats(caster)["Resist"] -= addResist;
+                xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_RESIST_ADD, 0);
                 ShentongFX.StopLoop_XS_Shield(caster);
                 return true;
             }
             if (now < cd) return false;
             if (!HasEnemyNearby(caster, 6f)) return false;
-            caster.data.get(KEY_YUANLI, out int yuanli, 0);
+            xn.access.ActorAccess.GetData(caster).get(KEY_YUANLI, out int yuanli, 0);
             if (yuanli < COST_ART_SHIELD_OPEN_REQ) return false;
-            caster.data.set(KEY_ART_SHIELD_ACTIVE, 1);
-            caster.data.set(KEY_ART_SHIELD_NEXT_DRAIN, now + 1f);
-            caster.data.set(KEY_ART_SHIELD_CD, now + AdjCD(caster, CD_ART_SHIELD));
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_ACTIVE, 1);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_NEXT_DRAIN, now + 1f);
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_CD, now + AdjCD(caster, CD_ART_SHIELD));
             int resistAdd = 999;
-            caster.stats["Resist"] += resistAdd;
-            caster.data.set(KEY_ART_SHIELD_RESIST_ADD, resistAdd);
+            xn.access.BaseSimObjectAccess.GetStats(caster)["Resist"] += resistAdd;
+            xn.access.ActorAccess.GetData(caster).set(KEY_ART_SHIELD_RESIST_ADD, resistAdd);
             ShentongFX.StartLoop_XS_Shield(caster);
             return true;
         }
@@ -809,11 +809,11 @@ namespace xn.world
         private static void EndShieldState(Actor a)
         {
             if (a == null) return;
-            a.data.get(KEY_ART_SHIELD_RESIST_ADD, out int addResist, 0);
-            if (addResist != 0) a.stats["Resist"] -= addResist;
-            a.data.set(KEY_ART_SHIELD_ACTIVE, 0);
-            a.data.set(KEY_ART_SHIELD_NEXT_DRAIN, 0f);
-            a.data.set(KEY_ART_SHIELD_RESIST_ADD, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ART_SHIELD_RESIST_ADD, out int addResist, 0);
+            if (addResist != 0) xn.access.BaseSimObjectAccess.GetStats(a)["Resist"] -= addResist;
+            xn.access.ActorAccess.GetData(a).set(KEY_ART_SHIELD_ACTIVE, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ART_SHIELD_NEXT_DRAIN, 0f);
+            xn.access.ActorAccess.GetData(a).set(KEY_ART_SHIELD_RESIST_ADD, 0);
             ShentongFX.StopLoop_XS_Shield(a);
         }
         private const string KEY_WEIYA_END = "xn.weiya.end";
@@ -860,7 +860,7 @@ namespace xn.world
                     Actor target = null;
                     foreach (var u in units)
                     {
-                        if (u != null && (int)u.data.id == actorId)
+                        if (u != null && (int)xn.access.ActorAccess.GetData(u).id == actorId)
                         {
                             target = u;
                             break;
@@ -871,7 +871,7 @@ namespace xn.world
                         toRemove.Add(actorId);
                         continue;
                     }
-                    target.data.get(KEY_WEIYA_END, out float endTime, 0f);
+                    xn.access.ActorAccess.GetData(target).get(KEY_WEIYA_END, out float endTime, 0f);
                     if (now >= endTime)
                     {
                         ShentongFX.StopLoop_Weiya(target);
@@ -888,13 +888,13 @@ namespace xn.world
                 foreach (var actor in units)
                 {
                     if (actor == null || !actor.isAlive()) continue;
-                    actor.data.get(KEY_LINK_ON, out int linkOn, 0);
+                    xn.access.ActorAccess.GetData(actor).get(KEY_LINK_ON, out int linkOn, 0);
                     if (linkOn != 1) continue;
-                    actor.data.get(KEY_LINK_END, out float linkEnd, 0f);
+                    xn.access.ActorAccess.GetData(actor).get(KEY_LINK_END, out float linkEnd, 0f);
                     if (now >= linkEnd)
                     {
-                        actor.data.set(KEY_LINK_ON, 0);
-                        actor.data.set(KEY_LINK_TID, 0);
+                        xn.access.ActorAccess.GetData(actor).set(KEY_LINK_ON, 0);
+                        xn.access.ActorAccess.GetData(actor).set(KEY_LINK_TID, 0);
                     }
                 }
             }
@@ -903,16 +903,16 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_JIANZHAN_WEAK_ACTIVE, out int on, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_JIANZHAN_WEAK_ACTIVE, out int on, 0);
                     if (on != 1) continue;
-                    a.data.get(KEY_JIANZHAN_WEAK_END, out float endt, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_JIANZHAN_WEAK_END, out float endt, 0f);
                     if (endt > 0f && now >= endt)
                     {
-                        a.data.get(KEY_JIANZHAN_WEAK_SUB, out int sub, 0);
-                        if (sub > 0) a.stats["damage"] += sub;
-                        a.data.set(KEY_JIANZHAN_WEAK_SUB, 0);
-                        a.data.set(KEY_JIANZHAN_WEAK_ACTIVE, 0);
-                        a.data.set(KEY_JIANZHAN_WEAK_END, 0f);
+                        xn.access.ActorAccess.GetData(a).get(KEY_JIANZHAN_WEAK_SUB, out int sub, 0);
+                        if (sub > 0) xn.access.BaseSimObjectAccess.GetStats(a)["damage"] += sub;
+                        xn.access.ActorAccess.GetData(a).set(KEY_JIANZHAN_WEAK_SUB, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_JIANZHAN_WEAK_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_JIANZHAN_WEAK_END, 0f);
                     }
                 }
             }
@@ -921,22 +921,22 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_NOHEAL_END_TS, out float end, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_NOHEAL_END_TS, out float end, 0f);
                     if (end <= 0f) continue;
                     if (now >= end)
                     {
-                        a.data.set(KEY_NOHEAL_END_TS, 0f);
-                        a.data.set(KEY_NOHEAL_LAST_HP, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_NOHEAL_END_TS, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_NOHEAL_LAST_HP, 0);
                         continue;
                     }
-                    a.data.get(KEY_NOHEAL_LAST_HP, out int last, a.getHealth());
+                    xn.access.ActorAccess.GetData(a).get(KEY_NOHEAL_LAST_HP, out int last, a.getHealth());
                     int cur = a.getHealth();
                     if (cur > last)
                     {
                         a.changeHealth(-(cur - last)); 
                         cur = last;
                     }
-                    a.data.set(KEY_NOHEAL_LAST_HP, cur);
+                    xn.access.ActorAccess.GetData(a).set(KEY_NOHEAL_LAST_HP, cur);
                 }
             }
             private static void CheckSlashSchedule(List<Actor> units, float now)
@@ -944,39 +944,39 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_ART_SLASH_ACTIVE, out int on, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SLASH_ACTIVE, out int on, 0);
                     if (on != 1) continue;
-                    a.data.get(KEY_ART_SLASH_END, out float end, 0f);
-                    a.data.get(KEY_ART_SLASH_NEXT, out float next, 0f);
-                    a.data.get(KEY_ART_SLASH_LEFT, out int left, 0);
-                    a.data.get(KEY_ART_SLASH_TID, out int tid, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SLASH_END, out float end, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SLASH_NEXT, out float next, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SLASH_LEFT, out int left, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SLASH_TID, out int tid, 0);
                     if (now >= end || left <= 0)
                     {
-                        a.data.set(KEY_ART_SLASH_ACTIVE, 0);
-                        a.data.set(KEY_ART_SLASH_END, 0f);
-                        a.data.set(KEY_ART_SLASH_LEFT, 0);
-                        a.data.set(KEY_ART_SLASH_TID, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_END, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_LEFT, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_TID, 0);
                         continue;
                     }
                     if (now < next) continue;
                     Actor target = FindActorById(units, tid);
                     if (target == null || !target.isAlive())
                     {
-                        a.data.set(KEY_ART_SLASH_ACTIVE, 0);
-                        a.data.set(KEY_ART_SLASH_END, 0f);
-                        a.data.set(KEY_ART_SLASH_LEFT, 0);
-                        a.data.set(KEY_ART_SLASH_TID, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_END, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_LEFT, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_TID, 0);
                         continue;
                     }
-                    int segDmg = Mathf.FloorToInt(a.stats["damage"] * 0.9f);
+                    int segDmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * 0.9f);
                     if (segDmg > 0)
                     {
                         target.getHit(segDmg, pFlash: true, AttackType.Other, a);
                         a.changeHealth(Mathf.FloorToInt(segDmg * 0.5f)); 
                     }
                     ShentongFX.PlayOnce_XS_Slash(target);
-                    a.data.set(KEY_ART_SLASH_NEXT, now + 0.2f);
-                    a.data.set(KEY_ART_SLASH_LEFT, left - 1);
+                    xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_NEXT, now + 0.2f);
+                    xn.access.ActorAccess.GetData(a).set(KEY_ART_SLASH_LEFT, left - 1);
                 }
             }
             private static void CheckWavesSchedule(List<Actor> units, float now)
@@ -984,17 +984,17 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_ART_WAVES_ACTIVE, out int on, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_WAVES_ACTIVE, out int on, 0);
                     if (on != 1) continue;
-                    a.data.get(KEY_ART_WAVES_NEXT, out float next, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_WAVES_NEXT, out float next, 0f);
                     if (now < next) continue;
-                    a.data.get(KEY_ART_WAVES_LEFT, out int left, 0);
-                    a.data.get(KEY_ART_WAVES_TID, out int tid, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_WAVES_LEFT, out int left, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_WAVES_TID, out int tid, 0);
                     if (left <= 0)
                     {
-                        a.data.set(KEY_ART_WAVES_ACTIVE, 0);
-                        a.data.set(KEY_ART_WAVES_LEFT, 0);
-                        a.data.set(KEY_ART_WAVES_TID, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_LEFT, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_TID, 0);
                         continue;
                     }
                     Actor target = FindActorById(units, tid);
@@ -1003,22 +1003,22 @@ namespace xn.world
                         target = FindClosestEnemy(a, units, 6f);
                         if (target == null)
                         {
-                            a.data.set(KEY_ART_WAVES_ACTIVE, 0);
-                            a.data.set(KEY_ART_WAVES_LEFT, 0);
-                            a.data.set(KEY_ART_WAVES_TID, 0);
+                            xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_ACTIVE, 0);
+                            xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_LEFT, 0);
+                            xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_TID, 0);
                             continue;
                         }
-                        a.data.set(KEY_ART_WAVES_TID, (int)target.data.id);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_TID, (int)xn.access.ActorAccess.GetData(target).id);
                     }
-                    Vector2 posCaster = a.cur_transform_position;
-                    Vector2 forward = ((Vector2)target.cur_transform_position - posCaster);
+                    Vector2 posCaster = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(a);
+                    Vector2 forward = ((Vector2)xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(target) - posCaster);
                     if (forward.sqrMagnitude < 0.0001f) forward = Vector2.right;
                     forward.Normalize();
                     int waveIdx = 4 - left; 
                     float mul = 2.5f;
                     if (waveIdx == 2) mul *= 1.1f;
                     if (waveIdx == 3) mul *= 1.2f;
-                    int dmg = Mathf.FloorToInt(a.stats["damage"] * mul);
+                    int dmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * mul);
                     var tile = a.current_tile;
                     if (tile != null)
                     {
@@ -1026,19 +1026,19 @@ namespace xn.world
                         {
                             if (v == null || !v.isAlive()) continue;
                             if (!IsEnemy(a, v)) continue;
-                            Vector2 d = (Vector2)v.cur_transform_position - posCaster;
+                            Vector2 d = (Vector2)xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v) - posCaster;
                             if (d.magnitude > 3f) continue;
                             if (Vector2.Dot(d.normalized, forward) <= 0f) continue; 
                             v.getHit(dmg, pFlash: true, AttackType.Other, a);
-                            Vector2 vp = v.cur_transform_position;
+                            Vector2 vp = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v);
                             Vector2 dir = d.normalized;
                             Vector2 hit = vp + dir * 0.08f;
                             v.calculateForce(vp.x, vp.y, hit.x, hit.y, 12f, 0f, true);
                         }
                     }
                     ShentongFX.PlayOnce_XS_Waves(a);
-                    a.data.set(KEY_ART_WAVES_LEFT, left - 1);
-                    a.data.set(KEY_ART_WAVES_NEXT, now + 0.4f);
+                    xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_LEFT, left - 1);
+                    xn.access.ActorAccess.GetData(a).set(KEY_ART_WAVES_NEXT, now + 0.4f);
                 }
             }
             private static Actor FindActorById(List<Actor> units, int id)
@@ -1046,7 +1046,7 @@ namespace xn.world
                 if (id == 0) return null;
                 foreach (var u in units)
                 {
-                    if (u != null && u.isAlive() && (int)u.data.id == id)
+                    if (u != null && u.isAlive() && (int)xn.access.ActorAccess.GetData(u).id == id)
                         return u;
                 }
                 return null;
@@ -1056,12 +1056,12 @@ namespace xn.world
                 if (a == null || !a.isAlive()) return null;
                 Actor best = null;
                 float bestD = radius * radius;
-                Vector2 pa = a.cur_transform_position;
+                Vector2 pa = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(a);
                 foreach (var u in units)
                 {
                     if (u == null || !u.isAlive()) continue;
                     if (!IsEnemy(a, u)) continue;
-                    float d = ((Vector2)u.cur_transform_position - pa).sqrMagnitude;
+                    float d = ((Vector2)xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(u) - pa).sqrMagnitude;
                     if (d < bestD) { bestD = d; best = u; }
                 }
                 return best;
@@ -1071,19 +1071,19 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_BAONU_ACTIVE, out int on, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_BAONU_ACTIVE, out int on, 0);
                     if (on != 1) continue;
                     a.finishStatusEffect("stunned");
                     a.finishStatusEffect("freeze");
                     a.finishStatusEffect("slowness");
-                    a.data.get(KEY_BAONU_END_TS, out float end, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_BAONU_END_TS, out float end, 0f);
                     if (end > 0f && now >= end)
                     {
-                        a.data.get(KEY_BAONU_DMG_ADD, out int addDmg, 0);
-                        if (addDmg > 0) a.stats["damage"] -= addDmg;
-                        a.data.set(KEY_BAONU_ACTIVE, 0);
-                        a.data.set(KEY_BAONU_END_TS, 0f);
-                        a.data.set(KEY_BAONU_DMG_ADD, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_BAONU_DMG_ADD, out int addDmg, 0);
+                        if (addDmg > 0) xn.access.BaseSimObjectAccess.GetStats(a)["damage"] -= addDmg;
+                        xn.access.ActorAccess.GetData(a).set(KEY_BAONU_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_BAONU_END_TS, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_BAONU_DMG_ADD, 0);
                         ShentongFX.StopLoop_Baonu(a);
                     }
                 }
@@ -1093,26 +1093,26 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_ASC_ACTIVE, out int on, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ASC_ACTIVE, out int on, 0);
                     if (on != 1) continue;
                     a.restoreHealthPercent(0.05f);
-                    a.data.get(KEY_ASC_END_TS, out float end, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ASC_END_TS, out float end, 0f);
                     if (end > 0f && now >= end)
                     {
-                        a.data.get(KEY_ASC_ADD_DMG, out int addDmg, 0);
-                        a.data.get(KEY_ASC_ADD_ARMOR, out int addArmor, 0);
-                        if (addDmg != 0) a.stats["damage"] -= addDmg;
-                        if (addArmor != 0) a.stats["armor"] -= addArmor;
-                        a.data.get(KEY_ASC_OLD_REALM, out string oldR, "");
-                        a.data.get(KEY_ASC_TMP_REALM, out string tmpR, "");
+                        xn.access.ActorAccess.GetData(a).get(KEY_ASC_ADD_DMG, out int addDmg, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_ASC_ADD_ARMOR, out int addArmor, 0);
+                        if (addDmg != 0) xn.access.BaseSimObjectAccess.GetStats(a)["damage"] -= addDmg;
+                        if (addArmor != 0) xn.access.BaseSimObjectAccess.GetStats(a)["armor"] -= addArmor;
+                        xn.access.ActorAccess.GetData(a).get(KEY_ASC_OLD_REALM, out string oldR, "");
+                        xn.access.ActorAccess.GetData(a).get(KEY_ASC_TMP_REALM, out string tmpR, "");
                         if (!string.IsNullOrEmpty(tmpR) && a.hasTrait(tmpR)) a.removeTrait(tmpR);
                         if (!string.IsNullOrEmpty(oldR) && !a.hasTrait(oldR)) a.addTrait(oldR);
-                        a.data.set(KEY_ASC_ACTIVE, 0);
-                        a.data.set(KEY_ASC_END_TS, 0f);
-                        a.data.set(KEY_ASC_ADD_DMG, 0);
-                        a.data.set(KEY_ASC_ADD_ARMOR, 0);
-                        a.data.set(KEY_ASC_OLD_REALM, "");
-                        a.data.set(KEY_ASC_TMP_REALM, "");
+                        xn.access.ActorAccess.GetData(a).set(KEY_ASC_ACTIVE, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ASC_END_TS, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ASC_ADD_DMG, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ASC_ADD_ARMOR, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ASC_OLD_REALM, "");
+                        xn.access.ActorAccess.GetData(a).set(KEY_ASC_TMP_REALM, "");
                         ShentongFX.StopLoop_XS_Ascension(a);
                     }
                 }
@@ -1122,19 +1122,19 @@ namespace xn.world
                 foreach (var a in units)
                 {
                     if (a == null || !a.isAlive()) continue;
-                    a.data.get(KEY_ART_SHIELD_ACTIVE, out int on, 0);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SHIELD_ACTIVE, out int on, 0);
                     if (on != 1) continue;
-                    a.data.get(KEY_ART_SHIELD_NEXT_DRAIN, out float nextDrain, 0f);
+                    xn.access.ActorAccess.GetData(a).get(KEY_ART_SHIELD_NEXT_DRAIN, out float nextDrain, 0f);
                     if (now >= nextDrain)
                     {
-                        a.data.get(KEY_YUANLI, out int yuanli, 0);
+                        xn.access.ActorAccess.GetData(a).get(KEY_YUANLI, out int yuanli, 0);
                         if (yuanli < COST_ART_SHIELD_PER_SEC)
                         {
                             EndShieldState(a);
                             continue;
                         }
-                        a.data.set(KEY_YUANLI, yuanli - COST_ART_SHIELD_PER_SEC);
-                        a.data.set(KEY_ART_SHIELD_NEXT_DRAIN, now + 1f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_YUANLI, yuanli - COST_ART_SHIELD_PER_SEC);
+                        xn.access.ActorAccess.GetData(a).set(KEY_ART_SHIELD_NEXT_DRAIN, now + 1f);
                     }
                 }
             }
@@ -1147,16 +1147,16 @@ namespace xn.world
                 if (s_inLinkDamage) return;
                 if (__instance == null || !__instance.isAlive()) return;
                 if (pDamage <= 0) return;
-                __instance.data.get(KEY_LINK_ON, out int linkOn, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_LINK_ON, out int linkOn, 0);
                 if (linkOn != 1) return;
-                __instance.data.get(KEY_LINK_TID, out int linkTid, 0);
+                xn.access.ActorAccess.GetData(__instance).get(KEY_LINK_TID, out int linkTid, 0);
                 if (linkTid == 0) return;
                 var units = MapBox.instance?.units?.getSimpleList();
                 if (units == null) return;
                 Actor linkTarget = null;
                 foreach (var u in units)
                 {
-                    if (u != null && u.isAlive() && (int)u.data.id == linkTid)
+                    if (u != null && u.isAlive() && (int)xn.access.ActorAccess.GetData(u).id == linkTid)
                     {
                         linkTarget = u;
                         break;
@@ -1164,7 +1164,7 @@ namespace xn.world
                 }
                 if (linkTarget == null || !linkTarget.isAlive())
                 {
-                    __instance.data.set(KEY_LINK_ON, 0);
+                    xn.access.ActorAccess.GetData(__instance).set(KEY_LINK_ON, 0);
                     return;
                 }
                 s_inLinkDamage = true;
@@ -1184,9 +1184,9 @@ namespace xn.world
         }
         private static void RegisterWeiyaTarget(Actor target, float duration)
         {
-            int id = (int)target.data.id;
+            int id = (int)xn.access.ActorAccess.GetData(target).id;
             s_weiyaTargets.Add(id);
-            target.data.set(KEY_WEIYA_END, Time.time + duration);
+            xn.access.ActorAccess.GetData(target).set(KEY_WEIYA_END, Time.time + duration);
         }
     }
 }

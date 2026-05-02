@@ -94,11 +94,21 @@ namespace xn.ui
             }
             return _powerButton;
         }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
+        private static string ActorName(Actor actor)
+        {
+            return actor?.getName() ?? T("value_unknown", "Unknown");
+        }
         private static bool OnClickAction(WorldTile pTile, string pPowerID)
         {
             if (pTile == null) return false;
-            var selectedButton = World.world.selected_buttons?.selectedButton;
-            if (selectedButton == null || selectedButton.godPower == null || selectedButton.godPower.id != _currentPowerId)
+            var selectedButton = xn.access.MapBoxAccess.GetSelectedButton(World.world);
+            GodPower selectedPower = xn.access.PowerButtonAccess.GetGodPower(selectedButton);
+            if (selectedPower == null || selectedPower.id != _currentPowerId)
             {
                 _soulActor = null; 
                 return false;
@@ -117,49 +127,50 @@ namespace xn.ui
             });
             if (target == null)
             {
-                xn.world.BroadcastSystem.Custom("请点击一个有智慧生物的位置");
+                xn.world.BroadcastSystem.Custom(T("brush_select_sapient_unit", "Click a sapient unit"));
                 return false;
             }
             if (_soulActor == null)
             {
                 int beingPossessed;
-                target.data.get(KEY_POS_BEING_POSSESSED, out beingPossessed, 0);
+                xn.access.ActorAccess.GetData(target).get(KEY_POS_BEING_POSSESSED, out beingPossessed, 0);
                 if (beingPossessed != 0)
                 {
-                    xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}正在被夺舍，不能作为灵魂");
+                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_possession_being_possessed_soul", "{0} is being possessed and cannot be used as the soul"), ActorName(target)));
                     return false;
                 }
                 _soulActor = target;
-                xn.world.BroadcastSystem.Custom($"已选择灵魂：{target.getName() ?? "未知"}，请点击目标");
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_possession_soul_selected", "Soul selected: {0}. Click the target"), ActorName(target)));
                 return true;
             }
             if (_soulActor == target)
             {
-                xn.world.BroadcastSystem.Custom("不能选择同一个单位");
+                xn.world.BroadcastSystem.Custom(T("brush_cannot_select_same_unit", "Cannot select the same unit"));
                 return false;
             }
             int taken;
-            target.data.get(KEY_POS_TAKEN, out taken, 0);
+            xn.access.ActorAccess.GetData(target).get(KEY_POS_TAKEN, out taken, 0);
             if (taken != 0)
             {
                 _soulActor = null;
-                xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}已经被夺舍过，不能作为目标");
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_possession_already_taken_target", "{0} has already been possessed and cannot be used as the target"), ActorName(target)));
                 return false;
             }
             int targetBeingPossessed;
-            target.data.get(KEY_POS_BEING_POSSESSED, out targetBeingPossessed, 0);
+            xn.access.ActorAccess.GetData(target).get(KEY_POS_BEING_POSSESSED, out targetBeingPossessed, 0);
             if (targetBeingPossessed != 0)
             {
                 _soulActor = null;
-                xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}正在被夺舍，不能作为目标");
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_possession_being_possessed_target", "{0} is being possessed and cannot be used as the target"), ActorName(target)));
                 return false;
             }
             int soulActive;
-            _soulActor.data.get(KEY_POS_ACTIVE, out soulActive, 0);
+            xn.access.ActorAccess.GetData(_soulActor).get(KEY_POS_ACTIVE, out soulActive, 0);
             if (soulActive != 0)
             {
+                string soulName = ActorName(_soulActor);
                 _soulActor = null;
-                xn.world.BroadcastSystem.Custom($"{_soulActor.getName() ?? "未知"}正在夺舍中，不能重复使用");
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_possession_soul_active", "{0} is already possessing someone and cannot be used again"), soulName));
                 return false;
             }
             ExecutePossession(_soulActor, target);
@@ -168,7 +179,7 @@ namespace xn.ui
         }
         private static void ExecutePossession(Actor soul, Actor target)
         {
-            target.data.set(KEY_POS_BEING_POSSESSED, 1);
+            xn.access.ActorAccess.GetData(target).set(KEY_POS_BEING_POSSESSED, 1);
             FreezeDuringFX(soul, target);
             DuoSheFX.PlayOnce(target);
             ResolvePossession(soul, target);
@@ -181,14 +192,14 @@ namespace xn.ui
         }
         private static void ResolvePossession(Actor soul, Actor target)
         {
-            soul.data.set(KEY_POS_ACTIVE, 0);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_ACTIVE, 0);
             long tid = 0L;
-            soul.data.get(KEY_POS_TARGET, out tid, 0L);
-            soul.data.set(KEY_POS_TARGET, 0L);
-            soul.data.set(KEY_POS_RESOLVE, 0f);
+            xn.access.ActorAccess.GetData(soul).get(KEY_POS_TARGET, out tid, 0L);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_TARGET, 0L);
+            xn.access.ActorAccess.GetData(soul).set(KEY_POS_RESOLVE, 0f);
             if (target != null && target.isAlive())
             {
-                target.data.set(KEY_POS_BEING_POSSESSED, 0);
+                xn.access.ActorAccess.GetData(target).set(KEY_POS_BEING_POSSESSED, 0);
             }
             if (target == null || !target.isAlive())
             {
@@ -205,10 +216,10 @@ namespace xn.ui
                 soul.dieAndDestroy(AttackType.Other);
                 return;
             }
-            int sw; soul.data.get(KEY_WUXIN, out sw, 0);
-            int sl; soul.data.get(KEY_LUCK, out sl, 0);
-            int tw; target.data.get(KEY_WUXIN, out tw, 0);
-            int tl; target.data.get(KEY_LUCK, out tl, 0);
+            int sw; xn.access.ActorAccess.GetData(soul).get(KEY_WUXIN, out sw, 0);
+            int sl; xn.access.ActorAccess.GetData(soul).get(KEY_LUCK, out sl, 0);
+            int tw; xn.access.ActorAccess.GetData(target).get(KEY_WUXIN, out tw, 0);
+            int tl; xn.access.ActorAccess.GetData(target).get(KEY_LUCK, out tl, 0);
             int realmIdx = GetRealmIndex(soul);
             float floor = 0.10f; 
             if (realmIdx >= 3)
@@ -221,11 +232,11 @@ namespace xn.ui
             {
                 SavePreviousLifeSnapshot(soul, target);
                 ApplyPossessionSuccess(soul, target);
-                int rc; soul.data.get(KEY_REINC, out rc, 0);
-                target.data.set(KEY_REINC, rc);
-                target.data.set(KEY_POS_TAKEN, 1);
-                target.data.set(KEY_STOP, 1);
-                target.data.set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + 10);
+                int rc; xn.access.ActorAccess.GetData(soul).get(KEY_REINC, out rc, 0);
+                xn.access.ActorAccess.GetData(target).set(KEY_REINC, rc);
+                xn.access.ActorAccess.GetData(target).set(KEY_POS_TAKEN, 1);
+                xn.access.ActorAccess.GetData(target).set(KEY_STOP, 1);
+                xn.access.ActorAccess.GetData(target).set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + 10);
                 xn.world.BroadcastSystem.PossessionSuccess(soul, target);
                 soul.dieAndDestroy(AttackType.Other);
             }
@@ -243,37 +254,37 @@ namespace xn.ui
             string soulName = soul.getName();
             int realmIdx = GetRealmIndex(soul);
             string realmName = (realmIdx >= 0 && realmIdx < REALM_IDS.Length) ? REALM_IDS[realmIdx] : "";
-            long xp; soul.data.get(KEY_XP, out xp, 0L);
-            int wuxin; soul.data.get(KEY_WUXIN, out wuxin, 0);
-            int luck; soul.data.get(KEY_LUCK, out luck, 0);
+            long xp; xn.access.ActorAccess.GetData(soul).get(KEY_XP, out xp, 0L);
+            int wuxin; xn.access.ActorAccess.GetData(soul).get(KEY_WUXIN, out wuxin, 0);
+            int luck; xn.access.ActorAccess.GetData(soul).get(KEY_LUCK, out luck, 0);
             string kingdomName = soul.hasKingdom() ? soul.kingdom.name : "";
             string speciesId = "";
             if (soul.asset != null && !string.IsNullOrEmpty(soul.asset.id))
             {
                 speciesId = soul.asset.id;
             }
-            else if (soul.data != null && !string.IsNullOrEmpty(soul.data.asset_id))
+            else if (xn.access.ActorAccess.GetData(soul) != null && !string.IsNullOrEmpty(xn.access.ActorAccess.GetData(soul).asset_id))
             {
-                speciesId = soul.data.asset_id;
+                speciesId = xn.access.ActorAccess.GetData(soul).asset_id;
             }
             int year = Date.getCurrentYear();
             string snapshot = $"{soulId}|{soulName}|{realmName}|{xp}|{wuxin}|{luck}|{kingdomName}|{speciesId}|{year}";
-            target.data.set(KEY_POS_PREV_INFO, snapshot);
+            xn.access.ActorAccess.GetData(target).set(KEY_POS_PREV_INFO, snapshot);
         }
         private static void ApplyPossessionSuccess(Actor src, Actor dst)
         {
-            bool dstFavorite = dst.data.favorite;
+            bool dstFavorite = xn.access.ActorAccess.GetData(dst).favorite;
             TransferBloodlineData(src, dst);
             string srcBase = ExtractBaseNameOnly(src.getName());
             dst.setName(srcBase);
-            if (src.hasKingdom()) dst.setKingdom(src.kingdom);
-            long xp; src.data.get(KEY_XP, out xp, 0L);
-            dst.data.set(KEY_XP, xp);
+            if (src.hasKingdom()) xn.access.ActorAccess.SetKingdom(dst, src.kingdom);
+            long xp; xn.access.ActorAccess.GetData(src).get(KEY_XP, out xp, 0L);
+            xn.access.ActorAccess.GetData(dst).set(KEY_XP, xp);
             if (!HasAnyCultivationRealm(dst))
             {
                 var qi = AssetManager.traits.get("realm_01_qi") as ActorTrait;
                 if (qi != null) dst.addTrait(qi);
-                dst.data.set(KEY_XP, 0L);
+                xn.access.ActorAccess.GetData(dst).set(KEY_XP, 0L);
             }
             var removeBuf = new System.Collections.Generic.List<ActorTrait>(16);
             var tsDst = dst.getTraits();
@@ -308,13 +319,13 @@ namespace xn.ui
                     if (newRealmIdx < REALM_THRESHOLDS.Length)
                     {
                         long newXP = REALM_THRESHOLDS[newRealmIdx];
-                        dst.data.set(KEY_XP, newXP);
+                        xn.access.ActorAccess.GetData(dst).set(KEY_XP, newXP);
                     }
                 }
             }
             if (dstFavorite)
             {
-                dst.data.favorite = true;
+                xn.access.ActorAccess.GetData(dst).favorite = true;
             }
         }
         private static int GetRealmIndex(Actor a)
@@ -356,7 +367,7 @@ namespace xn.ui
         private static void TransferBloodlineData(Actor src, Actor dst)
         {
             if (src == null || dst == null) return;
-            src.data.get("xn.bloodline.type", out string bloodlineType, "");
+            xn.access.ActorAccess.GetData(src).get("xn.bloodline.type", out string bloodlineType, "");
             if (string.IsNullOrEmpty(bloodlineType))
             {
                 return;
@@ -369,16 +380,16 @@ namespace xn.ui
             };
             foreach (var key in stringKeys)
             {
-                src.data.get(key, out string value, "");
+                xn.access.ActorAccess.GetData(src).get(key, out string value, "");
                 if (!string.IsNullOrEmpty(value))
                 {
-                    dst.data.set(key, value);
+                    xn.access.ActorAccess.GetData(dst).set(key, value);
                 }
             }
-            src.data.get("xn.bloodline.concentration", out float concentration, 0f);
+            xn.access.ActorAccess.GetData(src).get("xn.bloodline.concentration", out float concentration, 0f);
             if (concentration > 0f)
             {
-                dst.data.set("xn.bloodline.concentration", concentration);
+                xn.access.ActorAccess.GetData(dst).set("xn.bloodline.concentration", concentration);
             }
             string[] intKeys = new string[]
             {
@@ -393,8 +404,8 @@ namespace xn.ui
             };
             foreach (var key in intKeys)
             {
-                src.data.get(key, out int value, 0);
-                dst.data.set(key, value);
+                xn.access.ActorAccess.GetData(src).get(key, out int value, 0);
+                xn.access.ActorAccess.GetData(dst).set(key, value);
             }
             string[] longKeys = new string[]
             {
@@ -402,12 +413,12 @@ namespace xn.ui
             };
             foreach (var key in longKeys)
             {
-                src.data.get(key, out long value, -1L);
-                dst.data.set(key, value);
+                xn.access.ActorAccess.GetData(src).get(key, out long value, -1L);
+                xn.access.ActorAccess.GetData(dst).set(key, value);
             }
             if (src.hasClan())
             {
-                dst.data.set("xn.bloodline.clan_id", src.clan.getID());
+                xn.access.ActorAccess.GetData(dst).set("xn.bloodline.clan_id", src.clan.getID());
                 if (src.clan.isAlive())
                 {
                     dst.setClan(src.clan);
@@ -415,7 +426,7 @@ namespace xn.ui
             }
             else if (dst.hasClan())
             {
-                dst.data.set("xn.bloodline.clan_id", dst.clan.getID());
+                xn.access.ActorAccess.GetData(dst).set("xn.bloodline.clan_id", dst.clan.getID());
             }
         }
         public static void Reset()

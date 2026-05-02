@@ -63,7 +63,7 @@ namespace xn.world
                 if (a != null && a.isAlive())
                 {
                     int active;
-                    a.data.get("xn_ruin_active", out active, 0);
+                    xn.access.ActorAccess.GetData(a).get("xn_ruin_active", out active, 0);
                     if (active == 1) return true;
                 }
             }
@@ -72,15 +72,19 @@ namespace xn.world
         public static void OnRuinPlaced(Building b)
         {
             if (b == null || !b.isAlive()) return;
-            if (b.asset == null || b.asset.id != RUIN_ID) return;
+            if (xn.access.BuildingAccess.GetAsset(b) == null || xn.access.BuildingAccess.GetAsset(b).id != RUIN_ID) return;
             if (_pool_divines == null || _pool_arts == null)
                 BuildTraitPools();
-            _allRuinIds.Add(b.data.id);
+            BuildingData data = xn.access.BuildingAccess.GetData(b);
+            if (data == null) return;
+            _allRuinIds.Add(data.id);
             TryAssignParticipants(b);
         }
         private static void TryAssignParticipants(Building b)
         {
             if (b == null || !b.isAlive()) return;
+            BuildingData data = xn.access.BuildingAccess.GetData(b);
+            if (data == null) return;
             _tmpActors.Clear();
             foreach (Actor a in World.world.units)
             {
@@ -91,7 +95,7 @@ namespace xn.world
             }
             if (_tmpActors.Count == 0)
             {
-                _participants[b.data.id] = new List<long>();
+                _participants[data.id] = new List<long>();
                 return;
             }
             int want = Randy.randomInt(1, 30);
@@ -103,11 +107,11 @@ namespace xn.world
                 int pick = Randy.randomInt(0, n - 1);
                 Actor chosen = _tmpActors[pick];
                 GiveRuinDestroyJob(chosen, b);
-                _tmpIds.Add(chosen.data.id);
+                _tmpIds.Add(xn.access.ActorAccess.GetData(chosen).id);
                 _tmpActors[pick] = _tmpActors[n - 1];
                 n--;
             }
-            _participants[b.data.id] = new List<long>(_tmpIds);
+            _participants[data.id] = new List<long>(_tmpIds);
         }
         private static bool HasAnyCultivationTrait(Actor a)
         {
@@ -132,9 +136,11 @@ namespace xn.world
         private static void Po_Kill(Building __instance)
         {
             Building b = __instance;
-            if (b == null || b.asset == null) return;
-            if (b.asset.id != RUIN_ID) return;
-            long bid = b.data.id;
+            if (b == null || xn.access.BuildingAccess.GetAsset(b) == null) return;
+            if (xn.access.BuildingAccess.GetAsset(b).id != RUIN_ID) return;
+            BuildingData data = xn.access.BuildingAccess.GetData(b);
+            if (data == null) return;
+            long bid = data.id;
             _allRuinIds.Remove(bid);
             if (!_participants.TryGetValue(bid, out var plist) || plist == null || plist.Count == 0)
             {
@@ -157,7 +163,7 @@ namespace xn.world
             foreach (Actor a in Finder.getUnitsFromChunk(b.current_tile, 2, 0f, pRandom: false))
             {
                 if (a == null || !a.isAlive()) continue;
-                long id = a.data.id;
+                long id = xn.access.ActorAccess.GetData(a).id;
                 bool isParticipant = false;
                 for (int i = 0; i < plist.Count; i++)
                 {
@@ -193,15 +199,15 @@ namespace xn.world
             else if (r < 0.70f)
             {
                 int add = Randy.randomInt(1, 1000);
-                int cur; a.data.get(KEY_LINGSHI, out cur, 0);
-                a.data.set(KEY_LINGSHI, cur + add);
+                int cur; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI, out cur, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_LINGSHI, cur + add);
                 what = add + " 枚灵石";
             }
             else if (r < 0.79f)
             {
                 int add = Randy.randomInt(1, 100);
-                int cur; a.data.get(KEY_LINGSHI_SUPREME, out cur, 0);
-                a.data.set(KEY_LINGSHI_SUPREME, cur + add);
+                int cur; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI_SUPREME, out cur, 0);
+                xn.access.ActorAccess.GetData(a).set(KEY_LINGSHI_SUPREME, cur + add);
                 what = add + " 枚极品灵石";
             }
             else if (r < 0.80f)

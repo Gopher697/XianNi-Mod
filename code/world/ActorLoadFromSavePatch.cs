@@ -24,7 +24,7 @@ namespace xn.world
                     return false; 
                 }
                 __instance.setStatsDirty();
-                TraitTools.loadTraits(__instance, __instance.data.saved_traits);
+                TraitTools.loadTraits(__instance, xn.access.ActorAccess.GetData(__instance).saved_traits);
                 if (__instance.traits != null && __instance.traits.Count > 0)
                 {
                     var traitsSnapshot = __instance.traits.ToList();
@@ -35,18 +35,18 @@ namespace xn.world
                 }
                 if (__instance.isSapient() && __instance.is_profession_nothing)
                 {
-                    __instance.data.profession = UnitProfession.Unit;
+                    xn.access.ActorAccess.GetData(__instance).profession = UnitProfession.Unit;
                 }
-                __instance.setProfession(__instance.data.profession, pCancelBeh: false);
-                City city = World.world.cities.get(__instance.data.cityID);
-                Kingdom kingdom = World.world.kingdoms.get(__instance.data.civ_kingdom_id);
+                xn.access.ActorAccess.SetProfession(__instance, xn.access.ActorAccess.GetData(__instance).profession, cancelBeh: false);
+                City city = World.world.cities.get(xn.access.ActorAccess.GetData(__instance).cityID);
+                Kingdom kingdom = World.world.kingdoms.get(xn.access.ActorAccess.GetData(__instance).civ_kingdom_id);
                 if (city != null && !city.isNeutral())
                 {
-                    __instance.setCity(city);
+                    xn.access.ActorAccess.SetCity(__instance, city);
                 }
                 if (kingdom != null)
                 {
-                    __instance.setKingdom(kingdom);
+                    xn.access.ActorAccess.SetKingdom(__instance, kingdom);
                 }
                 if (__instance.hasEquipment())
                 {
@@ -71,9 +71,9 @@ namespace xn.world
                         }
                     }
                 }
-                if (__instance.data.inventory.isEmpty())
+                if (xn.access.ActorAccess.GetData(__instance).inventory.isEmpty())
                 {
-                    __instance.data.inventory.empty();
+                    xn.access.ActorAccess.GetData(__instance).inventory.empty();
                 }
                 foreach (Actor parent in __instance.getParents())
                 {

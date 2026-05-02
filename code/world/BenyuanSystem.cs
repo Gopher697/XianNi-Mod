@@ -71,7 +71,7 @@ namespace xn.world
         {
             if (__instance == null || __result) return; 
             if (IsDragon(__instance)) return; 
-            if (__instance.isFlying())
+            if (xn.access.ActorAccess.IsFlying(__instance))
             {
                 if (__instance.current_tile != null && __instance.current_tile.Type.ocean)
                 {
@@ -83,18 +83,18 @@ namespace xn.world
         {
             if (a == null || !a.isAlive()) return false;
             if (!a.hasTrait(ATTR_METAL)) return false;
-            a.data.set(KEY_ON_METAL, 1);
-            a.data.set(KEY_NEXT_DRAIN_METAL, Time.time + TICK_SEC);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_METAL, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_METAL, Time.time + TICK_SEC);
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
-            s_activeUnits.Add(a.data.id);
+            s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
             BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
             return true;
         }
         public static void CloseMetal(Actor a)
         {
             if (a == null) return;
-            a.data.set(KEY_ON_METAL, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_METAL, 0);
             BenyuanFX.ResetPlayed(a);
             if (!IsDragon(a) && !HasAnyBenyuanTrait(a))
             {
@@ -106,18 +106,18 @@ namespace xn.world
         {
             if (a == null || !a.isAlive()) return false;
             if (!a.hasTrait(ATTR_WOOD)) return false;
-            a.data.set(KEY_ON_WOOD, 1);
-            a.data.set(KEY_NEXT_DRAIN_WOOD, Time.time + TICK_SEC);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_WOOD, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_WOOD, Time.time + TICK_SEC);
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
-            s_activeUnits.Add(a.data.id);
+            s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
             BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
             return true;
         }
         public static void CloseWood(Actor a)
         {
             if (a == null) return;
-            a.data.set(KEY_ON_WOOD, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_WOOD, 0);
             BenyuanFX.ResetPlayed(a);
             if (!IsDragon(a) && !HasAnyBenyuanTrait(a))
             {
@@ -129,18 +129,18 @@ namespace xn.world
         {
             if (a == null || !a.isAlive()) return false;
             if (!a.hasTrait(ATTR_WATER)) return false;
-            a.data.set(KEY_ON_WATER, 1);
-            a.data.set(KEY_NEXT_DRAIN_WATER, Time.time + TICK_SEC);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_WATER, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_WATER, Time.time + TICK_SEC);
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
-            s_activeUnits.Add(a.data.id);
+            s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
             BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
             return true;
         }
         public static void CloseWater(Actor a)
         {
             if (a == null) return;
-            a.data.set(KEY_ON_WATER, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_WATER, 0);
             BenyuanFX.ResetPlayed(a);
             if (!IsDragon(a) && !HasAnyBenyuanTrait(a))
             {
@@ -152,18 +152,18 @@ namespace xn.world
         {
             if (a == null || !a.isAlive()) return false;
             if (!a.hasTrait(ATTR_FIRE)) return false;
-            a.data.set(KEY_ON_FIRE, 1);
-            a.data.set(KEY_NEXT_DRAIN_FIRE, Time.time + TICK_SEC);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_FIRE, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_FIRE, Time.time + TICK_SEC);
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
-            s_activeUnits.Add(a.data.id);
+            s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
             BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
             return true;
         }
         public static void CloseFire(Actor a)
         {
             if (a == null) return;
-            a.data.set(KEY_ON_FIRE, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_FIRE, 0);
             BenyuanFX.ResetPlayed(a);
             if (!IsDragon(a) && !HasAnyBenyuanTrait(a))
             {
@@ -175,18 +175,18 @@ namespace xn.world
         {
             if (a == null || !a.isAlive()) return false;
             if (!a.hasTrait(ATTR_EARTH)) return false;
-            a.data.set(KEY_ON_EARTH, 1);
-            a.data.set(KEY_NEXT_DRAIN_EARTH, Time.time + TICK_SEC);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_EARTH, 1);
+            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_EARTH, Time.time + TICK_SEC);
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
-            s_activeUnits.Add(a.data.id);
+            s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
             BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
             return true;
         }
         public static void CloseEarth(Actor a)
         {
             if (a == null) return;
-            a.data.set(KEY_ON_EARTH, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_ON_EARTH, 0);
             BenyuanFX.ResetPlayed(a);
             if (!IsDragon(a) && !HasAnyBenyuanTrait(a))
             {
@@ -198,25 +198,25 @@ namespace xn.world
         {
             if (a == null) return;
             int onM = 0, onW = 0, onWa = 0, onF = 0, onE = 0, dotStacks = 0;
-            a.data.get(KEY_ON_METAL, out onM, 0);
-            a.data.get(KEY_ON_WOOD, out onW, 0);
-            a.data.get(KEY_ON_WATER, out onWa, 0);
-            a.data.get(KEY_ON_FIRE, out onF, 0);
-            a.data.get(KEY_ON_EARTH, out onE, 0);
-            a.data.get(KEY_FIRE_DOT_STACKS, out dotStacks, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ON_METAL, out onM, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ON_WOOD, out onW, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ON_WATER, out onWa, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ON_FIRE, out onF, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_ON_EARTH, out onE, 0);
+            xn.access.ActorAccess.GetData(a).get(KEY_FIRE_DOT_STACKS, out dotStacks, 0);
             if (onM == 0 && onW == 0 && onWa == 0 && onF == 0 && onE == 0 && dotStacks == 0)
             {
-                s_activeUnits.Remove(a.data.id);
+                s_activeUnits.Remove(xn.access.ActorAccess.GetData(a).id);
             }
         }
         public static void AddFireDot(Actor a, int stacks)
         {
             if (a == null || !a.isAlive()) return;
-            int cur; a.data.get(KEY_FIRE_DOT_STACKS, out cur, 0);
-            a.data.set(KEY_FIRE_DOT_STACKS, cur + stacks);
-            a.data.set(KEY_FIRE_DOT_UNTIL, Time.time + 5f);
-            a.data.set(KEY_FIRE_DOT_NEXTTICK, Time.time + 1f);
-            s_activeUnits.Add(a.data.id);
+            int cur; xn.access.ActorAccess.GetData(a).get(KEY_FIRE_DOT_STACKS, out cur, 0);
+            xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_STACKS, cur + stacks);
+            xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_UNTIL, Time.time + 5f);
+            xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_NEXTTICK, Time.time + 1f);
+            s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
         }
         private static float s_nextAutoOpenCheck = 0f;
         private const float AUTO_OPEN_CHECK_INTERVAL = 0.5f; 
@@ -246,11 +246,11 @@ namespace xn.world
                     continue;
                 }
                 int onM = 0, onW = 0, onWa = 0, onF = 0, onE = 0;
-                a.data.get(KEY_ON_METAL, out onM, 0);
-                a.data.get(KEY_ON_WOOD,  out onW, 0);
-                a.data.get(KEY_ON_WATER, out onWa, 0);
-                a.data.get(KEY_ON_FIRE,  out onF,  0);
-                a.data.get(KEY_ON_EARTH, out onE,  0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_METAL, out onM, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_WOOD,  out onW, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_WATER, out onWa, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_FIRE,  out onF,  0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_EARTH, out onE,  0);
                 if (onM == 1 && !a.hasTrait(ATTR_METAL)) { CloseMetal(a); onM = 0; }
                 if (onW == 1 && !a.hasTrait(ATTR_WOOD))  { CloseWood(a);  onW = 0; }
                 if (onWa == 1 && !a.hasTrait(ATTR_WATER)) { CloseWater(a); onWa = 0; }
@@ -258,98 +258,98 @@ namespace xn.world
                 if (onE == 1 && !a.hasTrait(ATTR_EARTH)) { CloseEarth(a); onE = 0; }
                 if (onM == 1)
                 {
-                    float next; a.data.get(KEY_NEXT_DRAIN_METAL, out next, 0f);
+                    float next; xn.access.ActorAccess.GetData(a).get(KEY_NEXT_DRAIN_METAL, out next, 0f);
                     if (now >= next)
                     {
-                        int nl; a.data.get(KEY_NIELI, out nl, 0);
+                        int nl; xn.access.ActorAccess.GetData(a).get(KEY_NIELI, out nl, 0);
                         if (nl <= 0) { CloseMetal(a); }
                         else {
                             int cost = Mathf.Max(1, Mathf.FloorToInt(nl * COST_PERCENT));
-                            a.data.set(KEY_NIELI, nl - cost);
-                            a.data.set(KEY_NEXT_DRAIN_METAL, now + TICK_SEC);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NIELI, nl - cost);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_METAL, now + TICK_SEC);
                         }
                     }
                 }
                 if (onW == 1)
                 {
-                    float next; a.data.get(KEY_NEXT_DRAIN_WOOD, out next, 0f);
+                    float next; xn.access.ActorAccess.GetData(a).get(KEY_NEXT_DRAIN_WOOD, out next, 0f);
                     if (now >= next)
                     {
-                        int nl; a.data.get(KEY_NIELI, out nl, 0);
+                        int nl; xn.access.ActorAccess.GetData(a).get(KEY_NIELI, out nl, 0);
                         if (nl <= 0) { CloseWood(a); }
                         else {
                             int cost = Mathf.Max(1, Mathf.FloorToInt(nl * COST_PERCENT));
-                            a.data.set(KEY_NIELI, nl - cost);
-                            a.data.set(KEY_NEXT_DRAIN_WOOD, now + TICK_SEC);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NIELI, nl - cost);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_WOOD, now + TICK_SEC);
                         }
                     }
                 }
                 if (onWa == 1)
                 {
-                    float next; a.data.get(KEY_NEXT_DRAIN_WATER, out next, 0f);
+                    float next; xn.access.ActorAccess.GetData(a).get(KEY_NEXT_DRAIN_WATER, out next, 0f);
                     if (now >= next)
                     {
-                        int nl; a.data.get(KEY_NIELI, out nl, 0);
+                        int nl; xn.access.ActorAccess.GetData(a).get(KEY_NIELI, out nl, 0);
                         if (nl <= 0) { CloseWater(a); }
                         else {
                             int cost = Mathf.Max(1, Mathf.FloorToInt(nl * COST_PERCENT));
-                            a.data.set(KEY_NIELI, nl - cost);
-                            a.data.set(KEY_NEXT_DRAIN_WATER, now + TICK_SEC);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NIELI, nl - cost);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_WATER, now + TICK_SEC);
                         }
                     }
                     a.finishStatusEffect("burning");
                 }
                 if (onF == 1)
                 {
-                    float next; a.data.get(KEY_NEXT_DRAIN_FIRE, out next, 0f);
+                    float next; xn.access.ActorAccess.GetData(a).get(KEY_NEXT_DRAIN_FIRE, out next, 0f);
                     if (now >= next)
                     {
-                        int nl; a.data.get(KEY_NIELI, out nl, 0);
+                        int nl; xn.access.ActorAccess.GetData(a).get(KEY_NIELI, out nl, 0);
                         if (nl <= 0) { CloseFire(a); }
                         else {
                             int cost = Mathf.Max(1, Mathf.FloorToInt(nl * COST_PERCENT));
-                            a.data.set(KEY_NIELI, nl - cost);
-                            a.data.set(KEY_NEXT_DRAIN_FIRE, now + TICK_SEC);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NIELI, nl - cost);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_FIRE, now + TICK_SEC);
                         }
                     }
                     a.finishStatusEffect("burning");
                 }
                 if (onE == 1)
                 {
-                    float next; a.data.get(KEY_NEXT_DRAIN_EARTH, out next, 0f);
+                    float next; xn.access.ActorAccess.GetData(a).get(KEY_NEXT_DRAIN_EARTH, out next, 0f);
                     if (now >= next)
                     {
-                        int nl; a.data.get(KEY_NIELI, out nl, 0);
+                        int nl; xn.access.ActorAccess.GetData(a).get(KEY_NIELI, out nl, 0);
                         if (nl <= 0) { CloseEarth(a); }
                         else {
                             int cost = Mathf.Max(1, Mathf.FloorToInt(nl * COST_PERCENT));
-                            a.data.set(KEY_NIELI, nl - cost);
-                            a.data.set(KEY_NEXT_DRAIN_EARTH, now + TICK_SEC);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NIELI, nl - cost);
+                            xn.access.ActorAccess.GetData(a).set(KEY_NEXT_DRAIN_EARTH, now + TICK_SEC);
                         }
                     }
                     a.finishStatusEffect("slowness");
                     a.finishStatusEffect("frozen");
                 }
-                int stacks; a.data.get(KEY_FIRE_DOT_STACKS, out stacks, 0);
+                int stacks; xn.access.ActorAccess.GetData(a).get(KEY_FIRE_DOT_STACKS, out stacks, 0);
                 if (stacks > 0)
                 {
-                    float until; a.data.get(KEY_FIRE_DOT_UNTIL, out until, 0f);
+                    float until; xn.access.ActorAccess.GetData(a).get(KEY_FIRE_DOT_UNTIL, out until, 0f);
                     if (now >= until)
                     {
-                        a.data.set(KEY_FIRE_DOT_STACKS, 0);
-                        a.data.set(KEY_FIRE_DOT_UNTIL, 0f);
-                        a.data.set(KEY_FIRE_DOT_NEXTTICK, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_STACKS, 0);
+                        xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_UNTIL, 0f);
+                        xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_NEXTTICK, 0f);
                     }
                     else
                     {
-                        float nextTick; a.data.get(KEY_FIRE_DOT_NEXTTICK, out nextTick, 0f);
+                        float nextTick; xn.access.ActorAccess.GetData(a).get(KEY_FIRE_DOT_NEXTTICK, out nextTick, 0f);
                         if (now >= nextTick)
                         {
-                            int maxhp = a.stats["health_max"] > 0 ? (int)a.stats["health_max"] : a.getMaxHealth();
+                            int maxhp = xn.access.BaseSimObjectAccess.GetStats(a)["health_max"] > 0 ? (int)xn.access.BaseSimObjectAccess.GetStats(a)["health_max"] : a.getMaxHealth();
                             int dmg = Mathf.Max(1, Mathf.FloorToInt(maxhp * 0.03f * stacks));
                             a.changeHealth(-dmg);
                             if (!a.hasHealth()) a.batch.c_check_deaths.Add(a);
-                            a.data.set(KEY_FIRE_DOT_NEXTTICK, now + 1f);
+                            xn.access.ActorAccess.GetData(a).set(KEY_FIRE_DOT_NEXTTICK, now + 1f);
                         }
                     }
                 }
@@ -358,9 +358,9 @@ namespace xn.world
                     bool hasTrait = HasAnyBenyuanTrait(a);
                     if (hasTrait)
                     {
-                        if (!a._flying) a.setFlying(true);
+                        if (!xn.access.ActorAccess.IsFlyingRaw(a)) a.setFlying(true);
                     }
-                    else if (a._flying && onM == 0 && onW == 0 && onWa == 0 && onF == 0 && onE == 0)
+                    else if (xn.access.ActorAccess.IsFlyingRaw(a) && onM == 0 && onW == 0 && onWa == 0 && onF == 0 && onE == 0)
                     {
                         a.setFlying(false);
                     }
@@ -391,15 +391,15 @@ namespace xn.world
                     toRemove.Add(id);
                     continue;
                 }
-                if (!a.has_attack_target) continue; 
-                int curNieli = 0; a.data.get(KEY_NIELI, out curNieli, 0);
+                if (!xn.access.ActorAccess.HasAttackTarget(a)) continue; 
+                int curNieli = 0; xn.access.ActorAccess.GetData(a).get(KEY_NIELI, out curNieli, 0);
                 if (curNieli < 20) continue;
                 int onM = 0, onW = 0, onWa = 0, onF = 0, onE = 0;
-                a.data.get(KEY_ON_METAL, out onM, 0);
-                a.data.get(KEY_ON_WOOD,  out onW, 0);
-                a.data.get(KEY_ON_WATER, out onWa, 0);
-                a.data.get(KEY_ON_FIRE,  out onF,  0);
-                a.data.get(KEY_ON_EARTH, out onE,  0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_METAL, out onM, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_WOOD,  out onW, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_WATER, out onWa, 0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_FIRE,  out onF,  0);
+                xn.access.ActorAccess.GetData(a).get(KEY_ON_EARTH, out onE,  0);
                 if (a.hasTrait(ATTR_METAL) && onM == 0) OpenMetal(a);
                 if (a.hasTrait(ATTR_WOOD) && onW == 0) OpenWood(a);
                 if (a.hasTrait(ATTR_WATER) && onWa == 0) OpenWater(a);
@@ -422,7 +422,7 @@ namespace xn.world
                     unit.hasTrait(ATTR_WATER) || unit.hasTrait(ATTR_FIRE) ||
                     unit.hasTrait(ATTR_EARTH))
                 {
-                    s_benyuanActors.Add(unit.data.id);
+                    s_benyuanActors.Add(xn.access.ActorAccess.GetData(unit).id);
                 }
             }
         }
@@ -432,7 +432,7 @@ namespace xn.world
             if (pTraitID == ATTR_METAL || pTraitID == ATTR_WOOD || pTraitID == ATTR_WATER ||
                 pTraitID == ATTR_FIRE || pTraitID == ATTR_EARTH)
             {
-                s_benyuanActors.Add(__instance.data.id);
+                s_benyuanActors.Add(xn.access.ActorAccess.GetData(__instance).id);
             }
         }
         private static void Post_Actor_addTrait_Trait(Actor __instance, ActorTrait pTrait)
@@ -442,14 +442,14 @@ namespace xn.world
             if (traitId == ATTR_METAL || traitId == ATTR_WOOD || traitId == ATTR_WATER ||
                 traitId == ATTR_FIRE || traitId == ATTR_EARTH)
             {
-                s_benyuanActors.Add(__instance.data.id);
+                s_benyuanActors.Add(xn.access.ActorAccess.GetData(__instance).id);
             }
         }
         private const string KEY_NOHEAL_END = "xn.benyuan.noheal_end";
         private static bool Pre_restoreHealth(Actor __instance, ref int pVal)
         {
             if (__instance == null || pVal <= 0) return true;
-            float end; __instance.data.get(KEY_NOHEAL_END, out end, 0f);
+            float end; xn.access.ActorAccess.GetData(__instance).get(KEY_NOHEAL_END, out end, 0f);
             if (end > 0f && Time.time < end) return false; 
             return true;
         }
@@ -468,7 +468,7 @@ namespace xn.world
                 __result = BehResult.Stop;
                 return false;
             }
-            if (!pActor.has_attack_target)
+            if (!xn.access.ActorAccess.HasAttackTarget(pActor))
             {
                 __result = BehResult.Stop;
                 return false;
@@ -484,27 +484,27 @@ namespace xn.world
                 __result = BehResult.Stop;
                 return false;
             }
-            if (!pActor.canAttackTarget(pActor.attack_target))
+            if (!pActor.canAttackTarget(xn.access.ActorAccess.GetAttackTarget(pActor)))
             {
-                pActor.ignoreTarget(pActor.attack_target);
+                pActor.ignoreTarget(xn.access.ActorAccess.GetAttackTarget(pActor));
                 pActor.clearAttackTarget();
                 __result = BehResult.Stop;
                 return false;
             }
-            if (!pActor.isInAttackRange(pActor.attack_target))
+            if (!pActor.isInAttackRange(xn.access.ActorAccess.GetAttackTarget(pActor)))
             {
-                Actor target = pActor.attack_target as Actor;
+                Actor target = xn.access.ActorAccess.GetAttackTarget(pActor) as Actor;
                 if (target == null)
                 {
                     pActor.clearAttackTarget();
                     __result = BehResult.Stop;
                     return false;
                 }
-                bool attackerFlying = pActor.isFlying();
-                bool targetFlying = target.isFlying();
+                bool attackerFlying = xn.access.ActorAccess.IsFlying(pActor);
+                bool targetFlying = xn.access.ActorAccess.IsFlying(target);
                 if (pActor.isWaterCreature())
                 {
-                    bool targetNotInWater = !target.isInLiquid() && (pActor.asset == null || !pActor.asset.force_land_creature);
+                    bool targetNotInWater = !xn.access.BaseSimObjectAccess.IsInLiquid(target) && (pActor.asset == null || !pActor.asset.force_land_creature);
                     bool targetFlyingCantReach = targetFlying && !attackerFlying;
                     if (targetNotInWater || targetFlyingCantReach)
                     {
@@ -516,7 +516,7 @@ namespace xn.world
                 }
                 else
                 {
-                    bool targetInWaterCantReach = target.isInLiquid() && !pActor.isWaterCreature();
+                    bool targetInWaterCantReach = xn.access.BaseSimObjectAccess.IsInLiquid(target) && !pActor.isWaterCreature();
                     bool targetFlyingCantReach = targetFlying && !attackerFlying;
                     if (targetInWaterCantReach || targetFlyingCantReach)
                     {
@@ -527,7 +527,7 @@ namespace xn.world
                     }
                 }
             }
-            if (pActor.chunk == null || pActor.attack_target == null || pActor.attack_target.chunk == null)
+            if (pActor.chunk == null || xn.access.ActorAccess.GetAttackTarget(pActor) == null || xn.access.ActorAccess.GetAttackTarget(pActor).chunk == null)
             {
                 pActor.clearAttackTarget();
                 __result = BehResult.Stop;
@@ -535,8 +535,8 @@ namespace xn.world
             }
             int x = pActor.chunk.x;
             int y = pActor.chunk.y;
-            int x2 = pActor.attack_target.chunk.x;
-            int y2 = pActor.attack_target.chunk.y;
+            int x2 = xn.access.ActorAccess.GetAttackTarget(pActor).chunk.x;
+            int y2 = xn.access.ActorAccess.GetAttackTarget(pActor).chunk.y;
             float num = 1f;
             if (Toolbox.Dist(x, y, x2, y2) >= (float)SimGlobals.m.unit_chunk_sight_range + num)
             {
@@ -544,7 +544,7 @@ namespace xn.world
                 __result = BehResult.Stop;
                 return false;
             }
-            pActor.beh_actor_target = pActor.attack_target;
+            xn.access.ActorAccess.SetBehActorTarget(pActor, xn.access.ActorAccess.GetAttackTarget(pActor));
             __result = BehResult.Continue;
             return false; 
         }
@@ -555,14 +555,15 @@ namespace xn.world
                 __result = AttackDataResult.Continue;
                 return false;
             }
-            float projectileZ = __instance._current_position_3d.z;
-            float targetHeight = pObject.getHeight();
+            Vector3 projectilePosition = xn.access.ProjectileAccess.GetCurrentPosition3D(__instance);
+            float projectileZ = projectilePosition.z;
+            float targetHeight = xn.access.BaseSimObjectAccess.GetHeight(pObject);
             float heightThreshold = 3f;
-            if (pData.initiator != null && pData.initiator.isActor() && pObject.isActor())
+            if (pData.initiator != null && xn.access.BaseSimObjectAccess.IsActor(pData.initiator) && xn.access.BaseSimObjectAccess.IsActor(pObject))
             {
-                Actor attacker = pData.initiator.a;
+                Actor attacker = xn.access.BaseSimObjectAccess.GetActor(pData.initiator);
                 Actor target = pObject as Actor;
-                if (attacker != null && target != null && attacker.isFlying() && target.isFlying())
+                if (attacker != null && target != null && xn.access.ActorAccess.IsFlying(attacker) && xn.access.ActorAccess.IsFlying(target))
                 {
                     heightThreshold = 10f; 
                 }
@@ -573,9 +574,9 @@ namespace xn.world
                 return false;
             }
             Vector3 targetPos = pObject.current_position;
-            Vector3 projPos = __instance._current_position_3d;
+            Vector3 projPos = projectilePosition;
             float dist = Toolbox.Dist(projPos.x, projPos.y + projPos.z, targetPos.x, targetPos.y + targetHeight);
-            float hitRadius = __instance.asset.size + pObject.stats["size"];
+            float hitRadius = __instance.asset.size + xn.access.BaseSimObjectAccess.GetStats(pObject)["size"];
             if (dist > hitRadius)
             {
                 __result = AttackDataResult.Continue;
@@ -590,14 +591,14 @@ namespace xn.world
             if (!pDoChecks) return true;
             if (!__instance.hasMeleeAttack()) return true;
             if (pTarget == null || pTarget.position_height <= 0f) return true;
-            if (__instance.isFlying())
+            if (xn.access.ActorAccess.IsFlying(__instance))
             {
                 if (__instance.isInWaterAndCantAttack())
                 {
                     __result = false;
                     return false;
                 }
-                if (!__instance.isAttackPossible())
+                if (!xn.access.ActorAccess.IsAttackPossible(__instance))
                 {
                     __result = false;
                     return false;

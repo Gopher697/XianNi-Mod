@@ -8,7 +8,7 @@ namespace xn.world
         public static void PlayOnce(Actor a)
         {
             if (a == null || !a.isAlive()) return;
-            long id = a.data.id;
+            long id = xn.access.ActorAccess.GetData(a).id;
             if (s_played.Contains(id)) return;
             fx.XNStatusFX.PlayBenyuanOpen(a);
             s_played.Add(id);
@@ -16,7 +16,7 @@ namespace xn.world
         public static void ResetPlayed(Actor a)
         {
             if (a == null) return;
-            s_played.Remove(a.data.id);
+            s_played.Remove(xn.access.ActorAccess.GetData(a).id);
         }
         public static void ClearAll() => s_played.Clear();
     }

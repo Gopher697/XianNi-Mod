@@ -71,6 +71,11 @@ namespace xn.ui
             }
             return _powerButton;
         }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
         private static bool OnLeftClickAction(WorldTile pTile, GodPower pPower)
         {
             return ModifyAura(pTile, !_isDecreaseMode);
@@ -78,8 +83,8 @@ namespace xn.ui
         public static void ToggleMode()
         {
             _isDecreaseMode = !_isDecreaseMode;
-            string modeText = _isDecreaseMode ? "减少模式" : "增加模式";
-            xn.world.BroadcastSystem.Custom($"灵气笔刷切换为: {modeText}");
+            string modeText = _isDecreaseMode ? T("brush_aura_mode_decrease", "Decrease Mode") : T("brush_aura_mode_increase", "Increase Mode");
+            xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_mode_switched", "Aura brush switched to: {0}"), modeText));
         }
         private static bool ModifyAura(WorldTile pTile, bool isAdd)
         {
@@ -93,12 +98,12 @@ namespace xn.ui
             if (maxAura <= 0) maxAura = 10000;
             int currentAura;
             city.data.get(KEY_CITY_AURA, out currentAura, 0);
-            string cityName = city.data.name ?? "未知城市";
+            string cityName = city.data.name ?? T("brush_aura_unknown_city", "Unknown City");
             if (isAdd)
             {
                 if (currentAura >= maxAura)
                 {
-                    xn.world.BroadcastSystem.Custom($"城市 {cityName} 灵气已达上限 {maxAura}");
+                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_at_max", "City {0} Aura has reached the limit {1}"), cityName, maxAura));
                     return false;
                 }
                 int remaining = maxAura - currentAura;
@@ -106,29 +111,29 @@ namespace xn.ui
                 int newAura = currentAura + addAmount;
                 if (newAura > maxAura) newAura = maxAura;
                 city.data.set(KEY_CITY_AURA, newAura);
-                xn.world.BroadcastSystem.Custom($"城市 {cityName} 灵气 +{addAmount} (当前: {newAura}/{maxAura})");
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_added", "City {0} Aura +{1} (Current: {2}/{3})"), cityName, addAmount, newAura, maxAura));
             }
             else
             {
                 if (currentAura <= 0)
                 {
-                    xn.world.BroadcastSystem.Custom($"城市 {cityName} 灵气已为0，无法减少");
+                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_zero", "City {0} Aura is already 0 and cannot be reduced"), cityName));
                     return false;
                 }
                 int reduceAmount = Random.Range(1, currentAura + 1);
                 int newAura = currentAura - reduceAmount;
                 if (newAura < 0) newAura = 0;
                 city.data.set(KEY_CITY_AURA, newAura);
-                xn.world.BroadcastSystem.Custom($"城市 {cityName} 灵气 -{reduceAmount} (当前: {newAura}/{maxAura})");
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_reduced", "City {0} Aura -{1} (Current: {2}/{3})"), cityName, reduceAmount, newAura, maxAura));
             }
             return true;
         }
         public static bool IsOurPowerSelected()
         {
-            if (World.world == null || World.world.selected_buttons == null) return false;
-            var selectedButton = World.world.selected_buttons.selectedButton;
-            if (selectedButton == null || selectedButton.godPower == null) return false;
-            return selectedButton.godPower.id == _currentPowerId;
+            var selectedButton = xn.access.MapBoxAccess.GetSelectedButton(World.world);
+            GodPower selectedPower = xn.access.PowerButtonAccess.GetGodPower(selectedButton);
+            if (selectedPower == null) return false;
+            return selectedPower.id == _currentPowerId;
         }
     }
     public class AuraAddBrushInputListener : MonoBehaviour

@@ -7,7 +7,7 @@ namespace xn.stats
     {
         static void Postfix(ActorEquipment __instance)
         {
-            var dict = __instance._dictionary;
+            var dict = xn.access.ActorEquipmentAccess.GetDictionary(__instance);
             if (dict == null) return;
             EquipmentType treasureType = (EquipmentType)xn.assets.XNTreasureDefs.EQUIP_TYPE_TREASURE_INT;
             if (!dict.ContainsKey(treasureType))
@@ -26,7 +26,7 @@ namespace xn.stats
             if (asset == null) return;
             EquipmentType treasureType = (EquipmentType)xn.assets.XNTreasureDefs.EQUIP_TYPE_TREASURE_INT;
             if (asset.equipment_type != treasureType) return;
-            var dict = __instance._dictionary;
+            var dict = xn.access.ActorEquipmentAccess.GetDictionary(__instance);
             if (dict == null) return;
             if (!dict.ContainsKey(treasureType))
             {
@@ -41,7 +41,7 @@ namespace xn.stats
         {
             if (pList == null || pList.Count == 0) return;
             if (World.world == null || World.world.items == null) return;
-            var dict = __instance._dictionary;
+            var dict = xn.access.ActorEquipmentAccess.GetDictionary(__instance);
             if (dict == null) return;
             EquipmentType treasureType = (EquipmentType)xn.assets.XNTreasureDefs.EQUIP_TYPE_TREASURE_INT;
             bool hasTreasure = false;
@@ -69,7 +69,7 @@ namespace xn.stats
     {
         static void Postfix(ActorEquipment __instance, List<long> pList, Actor pActor)
         {
-            var dict = __instance._dictionary;
+            var dict = xn.access.ActorEquipmentAccess.GetDictionary(__instance);
             if (dict == null) return;
             EquipmentType treasureType = (EquipmentType)xn.assets.XNTreasureDefs.EQUIP_TYPE_TREASURE_INT;
             if (!dict.ContainsKey(treasureType))
@@ -85,11 +85,11 @@ namespace xn.stats
         {
             EquipmentType treasureType = (EquipmentType)xn.assets.XNTreasureDefs.EQUIP_TYPE_TREASURE_INT;
             if (pType != treasureType) return true;
-            var dict = __instance._dictionary;
+            var dict = xn.access.ActorEquipmentAccess.GetDictionary(__instance);
             if (dict == null)
             {
-                __instance.initDictionary();
-                dict = __instance._dictionary;
+                xn.access.ActorEquipmentAccess.InitDictionary(__instance);
+                dict = xn.access.ActorEquipmentAccess.GetDictionary(__instance);
                 if (dict == null) return true;
             }
             if (!dict.ContainsKey(treasureType))

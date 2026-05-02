@@ -11,6 +11,13 @@ namespace xn.world
     {
         private static float _lastCleanupTime;
         private const float CLEANUP_INTERVAL = 300f; 
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
+
         public static void Init(Harmony h)
         {
             if (h != null)
@@ -35,63 +42,63 @@ namespace xn.world
         public static void HeavenStart(Actor a)
         {
             if (a == null) return;
-            PostActor(a, a.getName() + " 正在经历天道的考验");
+            PostActor(a, T("broadcast_heaven_start", "{0} is undergoing the trial of Heaven", a.getName()));
         }
         public static void HeavenSuccess(Actor a)
         {
             if (a == null) return;
-            PostActor(a, a.getName() + " 在天道的考验中成功");
+            PostActor(a, T("broadcast_heaven_success", "{0} succeeded in the trial of Heaven", a.getName()));
         }
         public static void HeavenSuccessRealm(Actor a, string realmId)
         {
             if (a == null) return;
             string realm = getTraitDisplayName(realmId);
-            PostActor(a, a.getName() + " 在天道考验中成功，晋升 " + realm);
+            PostActor(a, T("broadcast_heaven_success_realm", "{0} succeeded in the trial of Heaven and advanced to {1}", a.getName(), realm));
         }
         public static void HeavenFail(Actor a)
         {
             if (a == null) return;
-            PostActor(a, a.getName() + " 这个逼在天道的考验中失败哈哈哈");
+            PostActor(a, T("broadcast_heaven_fail", "{0} challenged the trial of Heaven and got humbled", a.getName()));
         }
         public static void RealmUp(Actor a, string realmId)
         {
             if (a == null) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
             string realm = getTraitDisplayName(realmId);
-            PostActor(a, a.getName() + " 突破了 " + realm);
+            PostActor(a, T("broadcast_realm_up", "{0} broke through to {1}", a.getName(), realm));
         }
         public static void RealmFailDemote(Actor a, string realmId)
         {
             if (a == null) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
             string realm = getTraitDisplayName(realmId);
-            PostActor(a, a.getName() + " 突破失败跌落至 " + realm + " 了哈哈哈");
+            PostActor(a, T("broadcast_realm_fail_demote", "{0} botched their breakthrough and fell back to {1}", a.getName(), realm));
         }
         public static void AncientUp(Actor a, int star)
         {
             if (a == null) return;
             if (star < 3) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
-            PostActor(a, a.getName() + " 的古神之躯突破到 " + star + " 星");
+            PostActor(a, T("broadcast_ancient_up", "{0}'s Ancient God body broke through to {1}-Star", a.getName(), star));
         }
         public static void BeastUp(Actor a, int stage)
         {
             if (a == null) return;
             if (stage < 3) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
-            PostActor(a, a.getName() + " 的妖兽道行突破到 " + stage + " 阶");
+            PostActor(a, T("broadcast_beast_up", "{0}'s Beast cultivation broke through to Tier {1}", a.getName(), stage));
         }
         public static void IntentGain(Actor a, string intentId)
         {
             if (a == null) return;
             string n = getTraitDisplayName(intentId);
             if (string.IsNullOrEmpty(n)) n = intentId;
-            PostActor(a, a.getName() + " 领悟了 " + n + " 意境");
+            PostActor(a, T("broadcast_intent_gain", "{0} comprehended {1} Intent", a.getName(), n));
         }
         public static void IntentComprehendFail(Actor a)
         {
             if (a == null) return;
-            PostActor(a, a.getName() + " 尝试领悟意境失败了");
+            PostActor(a, T("broadcast_intent_fail", "{0} tried to comprehend Intent and came up empty", a.getName()));
         }
         public static void RuinExploreReward(Actor a, string what)
         {
@@ -117,47 +124,47 @@ namespace xn.world
                         disp = tname;
                 }
             }
-            PostActor(a, name + " 探索遗迹获得了 " + disp);
+            PostActor(a, T("broadcast_ruin_explore", "{0} explored the ruins and obtained {1}", name, disp));
         }
         public static void PossessionSuccess(Actor src, Actor dst)
         {
             if (src == null || dst == null) return;
-            PostActor(dst, src.getName() + " 夺舍成功");
+            PostActor(dst, T("broadcast_possession_success", "{0} successfully possessed the body", src.getName()));
         }
         public static void PossessionFail(Actor src, Actor dst)
         {
             if (src == null || dst == null) return;
-            PostActor(src, src.getName() + " 夺舍 " + dst.getName() + " 失败，元婴死亡");
+            PostActor(src, T("broadcast_possession_fail", "{0} failed to possess {1}; their Nascent Soul perished for it", src.getName(), dst.getName()));
         }
         public static void MentorshipTake(Actor master, Actor appr)
         {
             if (master == null || appr == null) return;
-            PostActor(master, master.getName() + " 收了 [" + appr.getName() + "] 为徒");
+            PostActor(master, T("broadcast_mentorship_take", "{0} took [{1}] as a disciple", master.getName(), appr.getName()));
         }
         public static void MentorshipTrans(Actor master, Actor appr, long gain)
         {
             if (master == null || appr == null) return;
-            PostActor(master, master.getName() + " 传功于 " + appr.getName() + "（+" + gain + " 修为）。");
+            PostActor(master, T("broadcast_mentorship_trans", "{0} transferred cultivation to {1} (+{2} cultivation)", master.getName(), appr.getName(), gain));
         }
         public static void MentorshipVow(Actor master)
         {
             if (master == null) return;
-            PostActor(master, master.getName() + "：你竟敢伤我徒儿！等待我的复仇怒火吧！");
+            PostActor(master, T("broadcast_mentorship_vow", "{0}: You dare harm my disciple! Await my vengeful wrath!", master.getName()));
         }
         public static void MentorshipConsume(Actor master)
         {
             if (master == null) return;
-            PostActor(master, master.getName() + " 炼化了其徒弟，寿命与修为皆有所增。");
+            PostActor(master, T("broadcast_mentorship_consume", "{0} refined their disciple, gaining lifespan and cultivation", master.getName()));
         }
         public static void Custom(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
             post(text);
         }
-        public static void TianyunPrepare() { post("天运子讲道，世界众人准备迎接天运"); }
-        public static void TianyunRuinBuilt() { post("天运子在世界上建造了遗迹，已经有人准备去探索了"); }
-        public static void TianyunRewardSummary(int n) { post(n + "人被天运子赏赐了"); }
-        public static void TianyunBacklashSummary(int n) { post(n + "人被天运子反噬了"); }
+        public static void TianyunPrepare() { post(T("broadcast_tianyun_prepare", "Tian Yunzi is preaching, the world prepares to receive Heavenly Fate")); }
+        public static void TianyunRuinBuilt() { post(T("broadcast_tianyun_ruin_built", "Tian Yunzi built ruins in the world, people are preparing to explore")); }
+        public static void TianyunRewardSummary(int n) { post(T("broadcast_tianyun_reward_summary", "{0} people were rewarded by Tian Yunzi", n)); }
+        public static void TianyunBacklashSummary(int n) { post(T("broadcast_tianyun_backlash_summary", "{0} people were bitten by Tian Yunzi's backlash", n)); }
         public static void PostActor(Actor who, string text)
         {
             if (string.IsNullOrEmpty(text) || who == null) return;
@@ -209,12 +216,12 @@ namespace xn.world
             return -1;
         }
         private static readonly Dictionary<string,string> _realmNameMap = new Dictionary<string,string>(24) {
-            { "realm_01_qi", "凝气" }, { "realm_02_foundation", "筑基" }, { "realm_03_core", "结丹" },
-            { "realm_04_nascent", "元婴" }, { "realm_05_deity", "化神" }, { "realm_06_infantchg", "婴变" },
-            { "realm_07_wending", "问鼎" }, { "realm_08_kuinie", "魁涅" }, { "realm_09_jingnie", "境涅" },
-            { "realm_10_suinie", "髓涅" }, { "realm_11_kongnie", "空涅" }, { "realm_12_kongling", "空灵" },
-            { "realm_13_kongxuan", "空玄" }, { "realm_14_gtianzun", "大天尊" }, { "realm_15_half_tatian", "半踏天" },
-            { "realm_16_tatian", "踏天" }
+            { "realm_01_qi", "Qi Condensation" }, { "realm_02_foundation", "Foundation Establishment" }, { "realm_03_core", "Core Formation" },
+            { "realm_04_nascent", "Nascent Soul" }, { "realm_05_deity", "Soul Formation" }, { "realm_06_infantchg", "Soul Transformation" },
+            { "realm_07_wending", "Ascendant" }, { "realm_08_kuinie", "Nirvana Scryer" }, { "realm_09_jingnie", "Nirvana Cleanser" },
+            { "realm_10_suinie", "Nirvana Shatterer" }, { "realm_11_kongnie", "Nirvana Void" }, { "realm_12_kongling", "Spirit Void" },
+            { "realm_13_kongxuan", "Arcane Void" }, { "realm_14_gtianzun", "Grand Empyrean" }, { "realm_15_half_tatian", "Half-Step Heaven Trampling" },
+            { "realm_16_tatian", "Heaven Trampling" }
         };
         private static string getTraitDisplayName(string id)
         {
@@ -222,10 +229,10 @@ namespace xn.world
             if (!string.IsNullOrEmpty(name) && name != ("trait_" + id)) return name;
             string n;
             if (_realmNameMap != null && _realmNameMap.TryGetValue(id, out n)) return n;
-            if (id.Contains("infant")) return "婴变";
-            if (id.Contains("wending")) return "问鼎";
-            if (id.Contains("half") && id.Contains("tatian")) return "半踏天";
-            if (id.Contains("tatian")) return "踏天";
+            if (id.Contains("infant")) return "Soul Transformation";
+            if (id.Contains("wending")) return "Ascendant";
+            if (id.Contains("half") && id.Contains("tatian")) return "Half-Step Heaven Trampling";
+            if (id.Contains("tatian")) return "Heaven Trampling";
             return id;
         }
     }

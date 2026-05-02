@@ -58,57 +58,67 @@ namespace xn.ui
         }
         private static void ShowPreviousLifeTooltip(Tooltip tooltip, string type, TooltipData data)
         {
-            if (!string.IsNullOrEmpty(data._tip_name))
+            string tipName = xn.access.TooltipDataAccess.GetTipName(data);
+            string tipDescription = xn.access.TooltipDataAccess.GetTipDescription(data);
+            if (!string.IsNullOrEmpty(tipName))
             {
-                tooltip.name.text = data._tip_name;
+                tooltip.name.text = tipName;
             }
-            if (!string.IsNullOrEmpty(data._tip_description))
+            if (!string.IsNullOrEmpty(tipDescription))
             {
-                tooltip.setDescription(data._tip_description);
+                xn.access.TooltipAccess.SetDescription(tooltip, tipDescription);
             }
         }
         private static void ShowReincarnationTooltip(Tooltip tooltip, string type, TooltipData data)
         {
-            if (!string.IsNullOrEmpty(data._tip_name))
+            string tipName = xn.access.TooltipDataAccess.GetTipName(data);
+            string tipDescription = xn.access.TooltipDataAccess.GetTipDescription(data);
+            if (!string.IsNullOrEmpty(tipName))
             {
-                tooltip.name.text = data._tip_name;
+                tooltip.name.text = tipName;
             }
-            if (!string.IsNullOrEmpty(data._tip_description))
+            if (!string.IsNullOrEmpty(tipDescription))
             {
-                tooltip.setDescription(data._tip_description);
+                xn.access.TooltipAccess.SetDescription(tooltip, tipDescription);
             }
         }
         private static void ShowTianjiuBridgeTooltip(Tooltip tooltip, string type, TooltipData data)
         {
-            if (!string.IsNullOrEmpty(data._tip_name))
+            string tipName = xn.access.TooltipDataAccess.GetTipName(data);
+            string tipDescription = xn.access.TooltipDataAccess.GetTipDescription(data);
+            if (!string.IsNullOrEmpty(tipName))
             {
-                tooltip.name.text = data._tip_name;
+                tooltip.name.text = tipName;
             }
-            if (!string.IsNullOrEmpty(data._tip_description))
+            if (!string.IsNullOrEmpty(tipDescription))
             {
-                tooltip.setDescription(data._tip_description);
+                xn.access.TooltipAccess.SetDescription(tooltip, tipDescription);
             }
         }
         private static void ShowBloodlineFamilyTooltip(Tooltip tooltip, string type, TooltipData data)
         {
-            if (!string.IsNullOrEmpty(data._tip_name))
+            string tipName = xn.access.TooltipDataAccess.GetTipName(data);
+            string tipDescription = xn.access.TooltipDataAccess.GetTipDescription(data);
+            if (!string.IsNullOrEmpty(tipName))
             {
-                tooltip.name.text = data._tip_name;
+                tooltip.name.text = tipName;
             }
-            if (!string.IsNullOrEmpty(data._tip_description))
+            if (!string.IsNullOrEmpty(tipDescription))
             {
-                tooltip.setDescription(data._tip_description);
+                xn.access.TooltipAccess.SetDescription(tooltip, tipDescription);
             }
         }
         private static void ShowCultivationDistributionTooltip(Tooltip tooltip, string type, TooltipData data)
         {
-            if (!string.IsNullOrEmpty(data._tip_name))
+            string tipName = xn.access.TooltipDataAccess.GetTipName(data);
+            string tipDescription = xn.access.TooltipDataAccess.GetTipDescription(data);
+            if (!string.IsNullOrEmpty(tipName))
             {
-                tooltip.name.text = data._tip_name;
+                tooltip.name.text = tipName;
             }
-            if (!string.IsNullOrEmpty(data._tip_description))
+            if (!string.IsNullOrEmpty(tipDescription))
             {
-                tooltip.setDescription(data._tip_description);
+                xn.access.TooltipAccess.SetDescription(tooltip, tipDescription);
             }
         }
     }

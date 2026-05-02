@@ -49,7 +49,7 @@ namespace xn.ui
         private static void Postfix(UnitWindow __instance)
         {
             var cont = __instance.GetComponentInChildren<StatsRowsContainer>(true);
-            var a = __instance.actor;
+            var a = xn.access.UnitWindowAccess.GetActor(__instance);
             if (cont == null || a == null || !a.isAlive()) return;
             AddRow(cont, "row_possession_taken", GetPossessionText(a), "row_possession_taken_info");
             AddPreviousLifeRow(cont, a);
@@ -62,7 +62,7 @@ namespace xn.ui
         }
         private static void AddRow(StatsRowsContainer cont, string id, string value, string tooltipId)
         {
-            var row = cont.getStatRow(id);
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(cont, id);
             if (row == null) return;
             if (row.icon != null)
                 row.icon.gameObject.SetActive(false); 
@@ -73,33 +73,54 @@ namespace xn.ui
                 row.value.text = value;
             row.setMetaForTooltip(MetaType.None, -1L, tooltipId);
         }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
+        private static string F(string key, string fallback, params object[] args)
+        {
+            return string.Format(T(key, fallback), args);
+        }
+        private static string Unknown()
+        {
+            return T("value_unknown", "Unknown");
+        }
+        private static string None()
+        {
+            return T("value_none", "None");
+        }
+        private static string YearText(string year)
+        {
+            return F("unit_extra_year_value", "{0}", year);
+        }
         private static void AddTianjiuBridgeRow(StatsRowsContainer cont, Actor a)
         {
             if (!a.hasTrait("realm_14_gtianzun") && !a.hasTrait("realm_15_half_tatian") && !a.hasTrait("realm_16_tatian"))
             {
                 return;
             }
-            var row = cont.getStatRow("row_tianjiu_bridge");
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(cont, "row_tianjiu_bridge");
             if (row == null) return;
-            long bridgeL; a.data.get(KEY_TRIAL_BRIDGE, out bridgeL, 0L);
+            long bridgeL; xn.access.ActorAccess.GetData(a).get(KEY_TRIAL_BRIDGE, out bridgeL, 0L);
             int bridge = (int)bridgeL;
             string displayText;
             string tooltipText;
             if (a.hasTrait("realm_16_tatian"))
             {
-                displayText = "已完成（9/9）";
-                tooltipText = "已通过桥数：9/9\n已通过全部9桥，晋升为踏天";
+                displayText = T("unit_extra_bridge_completed_value", "Completed (9/9)");
+                tooltipText = T("unit_extra_bridge_tooltip_completed", "Passed bridges: 9/9\nPassed all 9 bridges and advanced to Heaven Trampling");
             }
             else if (a.hasTrait("realm_15_half_tatian"))
             {
                 displayText = $"{bridge}/9";
                 if (bridge < 9)
                 {
-                    tooltipText = $"已通过桥数：{bridge}/9\n已通过第5桥，晋升为半步踏天\n通过第9桥可晋升为踏天";
+                    tooltipText = F("unit_extra_bridge_tooltip_half_progress", "Passed bridges: {0}/9\nPassed the 5th bridge and advanced to Half-Step Heaven Trampling\nPassing the 9th bridge advances to Heaven Trampling", bridge);
                 }
                 else
                 {
-                    tooltipText = $"已通过桥数：{bridge}/9\n已通过全部9桥，晋升为踏天";
+                    tooltipText = F("unit_extra_bridge_tooltip_completed_progress", "Passed bridges: {0}/9\nPassed all 9 bridges and advanced to Heaven Trampling", bridge);
                 }
             }
             else
@@ -107,27 +128,24 @@ namespace xn.ui
                 displayText = $"{bridge}/9";
                 if (bridge < 5)
                 {
-                    tooltipText = $"已通过桥数：{bridge}/9\n通过第5桥可晋升为半步踏天";
+                    tooltipText = F("unit_extra_bridge_tooltip_pre_half", "Passed bridges: {0}/9\nPassing the 5th bridge advances to Half-Step Heaven Trampling", bridge);
                 }
                 else
                 {
-                    tooltipText = $"已通过桥数：{bridge}/9\n已通过第5桥，晋升为半步踏天\n通过第9桥可晋升为踏天";
+                    tooltipText = F("unit_extra_bridge_tooltip_half_progress", "Passed bridges: {0}/9\nPassed the 5th bridge and advanced to Half-Step Heaven Trampling\nPassing the 9th bridge advances to Heaven Trampling", bridge);
                 }
             }
             if (row.icon != null)
                 row.icon.gameObject.SetActive(false);
             var name = LocalizedTextManager.getText("row_tianjiu_bridge");
-            if (string.IsNullOrEmpty(name)) name = "踏天九桥";
+            if (string.IsNullOrEmpty(name)) name = T("row_tianjiu_bridge", "9 Bridges Progress");
             if (row.name_text != null)
                 row.name_text.text = name;
             if (row.value != null)
                 row.value.text = displayText;
             TooltipDataGetter tooltipData = () =>
             {
-                var data = new TooltipData();
-                data._tip_name = "踏天九桥进度";
-                data._tip_description = tooltipText;
-                return data;
+                return xn.access.TooltipDataAccess.Create(T("unit_extra_bridge_tip_name", "9 Bridges Progress"), tooltipText);
             };
             row.setMetaForTooltip(MetaType.None, -1L, "row_tianjiu_bridge_info", tooltipData);
         }
@@ -135,7 +153,7 @@ namespace xn.ui
         {
             if (!xn.bloodline.BloodlineSystem.HasBloodline(a))
                 return;
-            var row = cont.getStatRow("row_bloodline_family");
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(cont, "row_bloodline_family");
             if (row == null) return;
             bool isFounder = xn.bloodline.BloodlineSystem.IsFounder(a);
             string bloodlineType = xn.bloodline.BloodlineSystem.GetBloodlineType(a);
@@ -147,17 +165,17 @@ namespace xn.ui
             if (row.icon != null)
                 row.icon.gameObject.SetActive(false);
             var name = LocalizedTextManager.getText("row_bloodline_family");
-            if (string.IsNullOrEmpty(name)) name = "血脉家族";
+            if (string.IsNullOrEmpty(name)) name = T("row_bloodline_family", "Bloodline Family");
             if (row.name_text != null)
                 row.name_text.text = name;
             if (row.value != null)
                 row.value.text = displayValue;
             int familyCreatedYear = GetFamilyCreatedYear(a, isFounder);
-            string generationText = isFounder ? "始祖" : $"第{generation}代";
-            string detailText = $"血脉类型：{typeName}\n血脉浓度：{concentration:F1}%\n血脉辈分：{generationText}\n血脉职位：{position}";
+            string generationText = isFounder ? T("bloodline_founder", "Founder") : F("bloodline_generation_value", "Generation {0}", generation);
+            string detailText = F("unit_extra_bloodline_detail_format", "Bloodline Type: {0}\nConcentration: {1:F1}%\nGeneration: {2}\nPosition: {3}", typeName, concentration, generationText, position);
             if (familyCreatedYear > 0)
             {
-                detailText += $"\n家族创建年份：{familyCreatedYear}年";
+                detailText += "\n" + F("unit_extra_bloodline_family_created_year", "Family founded in year: {0}", familyCreatedYear);
             }
             string talentStatus = GetBloodlineTalentStatus(a, bloodlineType, concentration);
             if (!string.IsNullOrEmpty(talentStatus))
@@ -166,122 +184,137 @@ namespace xn.ui
             }
             TooltipDataGetter tooltipData = () =>
             {
-                var data = new TooltipData();
-                data._tip_name = "血脉家族";
-                data._tip_description = detailText;
-                return data;
+                return xn.access.TooltipDataAccess.Create(T("row_bloodline_family", "Bloodline Family"), detailText);
             };
             row.setMetaForTooltip(MetaType.None, -1L, "row_bloodline_family_info", tooltipData);
         }
         private static string GetBloodlineTalentStatus(Actor a, string bloodlineType, float concentration)
         {
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("血脉天赋：");
+            sb.AppendLine(T("unit_extra_bloodline_talents_header", "Bloodline Talents:"));
             if (bloodlineType == xn.bloodline.BloodlineTypes.TAIGU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [太古威严] 已领悟" : "  [太古威严] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [血脉压制] 已领悟" : "  [血脉压制] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [神震] 已领悟" : "  [神震] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_taigu_majesty", "Immemorial Majesty", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_bloodline_suppression", "Bloodline Suppression", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_divine_shock", "Divine Shock", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.CAOMU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [自然亲和] 已领悟" : "  [自然亲和] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [寄生孢子] 已领悟" : "  [寄生孢子] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [树界降临] 已领悟" : "  [树界降临] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_nature_affinity", "Nature Affinity", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_parasitic_spores", "Parasitic Spores", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_tree_realm_descent", "Tree Realm Descent", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.MEIHUO)
             {
-                sb.AppendLine(concentration >= 20f ? "  [幻形] 已领悟" : "  [幻形] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [乱心] 已领悟" : "  [乱心] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [心奴] 已领悟" : "  [心奴] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_phantom_form", "Phantom Form", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_mind_disorder", "Mind Disorder", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_heart_thrall", "Heart Thrall", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.HOUYI)
             {
-                sb.AppendLine(concentration >= 20f ? "  [鹰眼] 已领悟" : "  [鹰眼] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [穿云] 已领悟" : "  [穿云] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [落日] 已领悟" : "  [落日] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_eagle_eye", "Eagle Eye", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_pierce_clouds", "Pierce Clouds", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_falling_sun", "Falling Sun", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.HUANGQUAN)
             {
-                sb.AppendLine(concentration >= 20f ? "  [阴体] 已领悟" : "  [阴体] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [拘魂] 已领悟" : "  [拘魂] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [冥河渡] 已领悟" : "  [冥河渡] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_yin_body", "Yin Body", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_soul_binding", "Soul Binding", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_underworld_crossing", "Underworld Crossing", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.ZUZHOU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [厄运] 已领悟" : "  [厄运] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [虚弱力场] 已领悟" : "  [虚弱力场] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [灭魂咒] 已领悟" : "  [灭魂咒] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_misfortune", "Misfortune", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_weakening_field", "Weakening Field", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_soul_extinguishing_curse", "Soul-Extinguishing Curse", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.JIHAN)
             {
-                sb.AppendLine(concentration >= 20f ? "  [寒躯] 已领悟" : "  [寒躯] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [冰封] 已领悟" : "  [冰封] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [碎冰] 已领悟" : "  [碎冰] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_frost_body", "Frost Body", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_ice_seal", "Ice Seal", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_shattered_ice", "Shattered Ice", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.JUMO)
             {
-                sb.AppendLine(concentration >= 20f ? "  [巨体] 已领悟" : "  [巨体] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [活血] 已领悟" : "  [活血] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [传送之术] 已领悟" : "  [传送之术] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_giant_body", "Giant Body", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_blood_vitalization", "Blood Vitalization", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_teleportation_art", "Teleportation Art", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.KUANGZHANSHI)
             {
-                sb.AppendLine(concentration >= 20f ? "  [怒意] 已领悟" : "  [怒意] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [血怒] 已领悟" : "  [血怒] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [不屈] 已领悟" : "  [不屈] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_wrath", "Wrath", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_blood_rage", "Blood Rage", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_unyielding", "Unyielding", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.NIEPAN)
             {
-                sb.AppendLine(concentration >= 20f ? "  [灵火] 已领悟" : "  [灵火] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [余烬] 已领悟" : "  [余烬] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [真火爆裂] 已领悟" : "  [真火爆裂] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_spirit_fire", "Spirit Fire", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_embers", "Embers", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_true_fire_burst", "True Fire Burst", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.JINFA)
             {
-                sb.AppendLine(concentration >= 20f ? "  [绝缘] 已领悟" : "  [绝缘] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [破法] 已领悟" : "  [破法] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [禁魔领域] 已领悟" : "  [禁魔领域] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_insulation", "Insulation", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_spell_breaking", "Spell Breaking", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_anti_magic_domain", "Anti-Magic Domain", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.GUTI)
             {
-                sb.AppendLine(concentration >= 20f ? "  [神皮] 已领悟" : "  [神皮] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [神力] 已领悟" : "  [神力] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [不灭体] 已领悟" : "  [不灭体] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_divine_skin", "Divine Skin", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_divine_strength", "Divine Strength", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_undying_body", "Undying Body", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.SUIYUE)
             {
-                sb.AppendLine(concentration >= 20f ? "  [长生] 已领悟" : "  [长生] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [枯荣] 已领悟" : "  [枯荣] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [永生] 已领悟" : "  [永生] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_longevity", "Longevity", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_wither_and_flourish", "Wither and Flourish", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_immortality", "Immortality", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.LEIFA)
             {
-                sb.AppendLine(concentration >= 20f ? "  [雷体] 已领悟" : "  [雷体] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [引雷] 已领悟" : "  [引雷] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [雷池] 已领悟" : "  [雷池] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_thunder_body", "Thunder Body", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_call_thunder", "Call Thunder", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_thunder_pool", "Thunder Pool", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.XUANWU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [龟息] 已领悟" : "  [龟息] 未领悟 (需20%)");
-                sb.AppendLine(concentration >= 50f ? "  [反震] 已领悟" : "  [反震] 未领悟 (需50%)");
-                sb.Append(concentration >= 80f ? "  [绝对防御] 已领悟" : "  [绝对防御] 未领悟 (需80%)");
+                AppendTalentLine(sb, concentration, 20f, "bloodline_talent_turtle_breath", "Turtle Breath", true);
+                AppendTalentLine(sb, concentration, 50f, "bloodline_talent_countershock", "Countershock", true);
+                AppendTalentLine(sb, concentration, 80f, "bloodline_talent_absolute_defense", "Absolute Defense", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.ENAN)
             {
-                sb.AppendLine("  [万毒疆域] 已激活");
-                sb.Append("  [天煞孤星] 代价生效中");
+                AppendActiveTalentLine(sb, "bloodline_talent_myriad_poison_domain", "Myriad Poison Domain", true);
+                AppendCostTalentLine(sb, "bloodline_talent_heavenly_fiend_lone_star_cost", "Heavenly Fiend Lone Star Cost", false);
             }
             else if (bloodlineType == xn.bloodline.BloodlineTypes.TIANSHA)
             {
-                sb.AppendLine("  [献祭光环] 已激活");
-                sb.Append("  [克死队友] 代价生效中");
+                AppendActiveTalentLine(sb, "bloodline_talent_sacrificial_aura", "Sacrificial Aura", true);
+                AppendCostTalentLine(sb, "bloodline_talent_doomed_allies_cost", "Doomed Allies Cost", false);
             }
             else
             {
-                sb.Append("  (效果开发中...)");
+                sb.Append(T("unit_extra_effects_in_development", "  (Effects in development...)"));
             }
             return sb.ToString();
+        }
+        private static void AppendTalentLine(System.Text.StringBuilder sb, float concentration, float required, string talentKey, string talentFallback, bool appendLine)
+        {
+            string talent = T(talentKey, talentFallback);
+            string text = concentration >= required
+                ? F("unit_extra_talent_understood", "  [{0}] Understood", talent)
+                : F("unit_extra_talent_not_understood", "  [{0}] Not understood (Requires {1}%)", talent, required.ToString("0"));
+            if (appendLine) sb.AppendLine(text); else sb.Append(text);
+        }
+        private static void AppendActiveTalentLine(System.Text.StringBuilder sb, string talentKey, string talentFallback, bool appendLine)
+        {
+            string text = F("unit_extra_talent_active", "  [{0}] Active", T(talentKey, talentFallback));
+            if (appendLine) sb.AppendLine(text); else sb.Append(text);
+        }
+        private static void AppendCostTalentLine(System.Text.StringBuilder sb, string talentKey, string talentFallback, bool appendLine)
+        {
+            string text = F("unit_extra_talent_cost_active", "  [{0}] Cost active", T(talentKey, talentFallback));
+            if (appendLine) sb.AppendLine(text); else sb.Append(text);
         }
         private static string GetBloodlinePosition(Actor actor, bool isFounder)
         {
@@ -292,7 +325,7 @@ namespace xn.ui
             if (actor == null) return 0;
             if (isFounder)
             {
-                actor.data.get(xn.bloodline.BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, out int year, 0);
+                xn.access.ActorAccess.GetData(actor).get(xn.bloodline.BloodlineDataKeys.KEY_FAMILY_CREATED_YEAR, out int year, 0);
                 return year;
             }
             long founderId = xn.bloodline.BloodlineSystem.GetFounderId(actor);
@@ -304,7 +337,7 @@ namespace xn.ui
         }
         private static void AddSlaveRow(StatsRowsContainer cont, Actor a)
         {
-            var row = cont.getStatRow("row_slave_master"); 
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(cont, "row_slave_master"); 
             if (row == null) return;
             MetaType metaType;
             long metaId;
@@ -327,7 +360,7 @@ namespace xn.ui
             const string KEY_SLAVE_ID = "xn_slave_id";        
             metaType = MetaType.None;
             metaId = -1;
-            long masterId; a.data.get(KEY_MASTER_ID, out masterId, 0L);
+            long masterId; xn.access.ActorAccess.GetData(a).get(KEY_MASTER_ID, out masterId, 0L);
             if (masterId > 0)
             {
                 var m = World.world?.units?.get(masterId);
@@ -335,11 +368,11 @@ namespace xn.ui
                 {
                     metaType = MetaType.Unit;
                     metaId = m.getID();
-                    return "主人：" + (m.getName() ?? "未知");
+                    return F("unit_extra_master_value", "Master: {0}", m.getName() ?? Unknown());
                 }
-                return "主人：未知";
+                return F("unit_extra_master_value", "Master: {0}", Unknown());
             }
-            long slaveId; a.data.get(KEY_SLAVE_ID, out slaveId, 0L);
+            long slaveId; xn.access.ActorAccess.GetData(a).get(KEY_SLAVE_ID, out slaveId, 0L);
             if (slaveId > 0)
             {
                 var s = World.world?.units?.get(slaveId);
@@ -347,33 +380,33 @@ namespace xn.ui
                 {
                     metaType = MetaType.Unit;
                     metaId = s.getID();
-                    return "奴仆：" + (s.getName() ?? "未知");
+                    return F("unit_extra_slave_value", "Slave: {0}", s.getName() ?? Unknown());
                 }
-                return "奴仆：未知";
+                return F("unit_extra_slave_value", "Slave: {0}", Unknown());
             }
-            return LocalizedTextManager.getText("value_none") ?? "无";
+            return None();
         }
         private static string GetPossessionText(Actor a)
         {
-            int v; a.data.get(KEY_POSSESSION, out v, 0);
-            var yes = LocalizedTextManager.getText("value_yes"); if (string.IsNullOrEmpty(yes)) yes = "是";
-            var no  = LocalizedTextManager.getText("value_no");  if (string.IsNullOrEmpty(no))  no  = "否";
+            int v; xn.access.ActorAccess.GetData(a).get(KEY_POSSESSION, out v, 0);
+            var yes = T("value_yes", "Yes");
+            var no  = T("value_no", "No");
             return v != 0 ? yes : no;
         }
-        private static int GetTianyunCount(Actor a) { int c; a.data.get(KEY_TY_COUNT, out c, 0); return c; }
-        private static int GetReincCount(Actor a)   { int c; a.data.get(KEY_REINC, out c, 0);   return c; }
+        private static int GetTianyunCount(Actor a) { int c; xn.access.ActorAccess.GetData(a).get(KEY_TY_COUNT, out c, 0); return c; }
+        private static int GetReincCount(Actor a)   { int c; xn.access.ActorAccess.GetData(a).get(KEY_REINC, out c, 0);   return c; }
         private static void AddReincarnationRow(StatsRowsContainer cont, Actor a)
         {
-            var row = cont.getStatRow("row_reinc_count");
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(cont, "row_reinc_count");
             if (row == null) return;
             int reincCount = GetReincCount(a);
             string displayValue = reincCount.ToString();
-            string snapshot; a.data.get(KEY_REINC_PREV_INFO, out snapshot, "");
+            string snapshot; xn.access.ActorAccess.GetData(a).get(KEY_REINC_PREV_INFO, out snapshot, "");
             bool hasPrevInfo = !string.IsNullOrEmpty(snapshot);
             if (row.icon != null)
                 row.icon.gameObject.SetActive(false);
             var name = LocalizedTextManager.getText("row_reinc_count");
-            if (string.IsNullOrEmpty(name)) name = "轮回次数";
+            if (string.IsNullOrEmpty(name)) name = T("row_reinc_count", "Reincarnations");
             if (row.name_text != null)
                 row.name_text.text = name;
             if (row.value != null)
@@ -396,21 +429,18 @@ namespace xn.ui
                         }
                         parts = newParts;
                     }
-                    string prevName = (parts.Length > 1 && !string.IsNullOrEmpty(parts[1])) ? parts[1] : "未知";
-                    string realmName = (parts.Length > 2 && !string.IsNullOrEmpty(parts[2])) ? GetRealmDisplayName(parts[2]) : "无";
+                    string prevName = (parts.Length > 1 && !string.IsNullOrEmpty(parts[1])) ? parts[1] : Unknown();
+                    string realmName = (parts.Length > 2 && !string.IsNullOrEmpty(parts[2])) ? GetRealmDisplayName(parts[2]) : None();
                     string xpStr = (parts.Length > 3 && long.TryParse(parts[3], out long xpVal)) ? FormatNumber(xpVal) : "0";
                     string wuxinStr = (parts.Length > 4 && !string.IsNullOrEmpty(parts[4])) ? parts[4] : "0";
                     string luckStr = (parts.Length > 5 && !string.IsNullOrEmpty(parts[5])) ? parts[5] : "0";
-                    string kingdomStr = (parts.Length > 6 && !string.IsNullOrEmpty(parts[6])) ? parts[6] : "无";
-                    string speciesStr = (parts.Length > 7 && !string.IsNullOrEmpty(parts[7])) ? parts[7] : "未知";
-                    string yearStr = (parts.Length > 8 && !string.IsNullOrEmpty(parts[8]) && parts[8] != "0") ? parts[8] : "未知";
-                    string detailText = $"姓名：{prevName}\n境界：{realmName}\n修为：{xpStr}\n悟性：{wuxinStr}\n气运：{luckStr}\n国家：{kingdomStr}\n物种：{speciesStr}\n死亡年份：{yearStr}年";
+                    string kingdomStr = (parts.Length > 6 && !string.IsNullOrEmpty(parts[6])) ? parts[6] : None();
+                    string speciesStr = (parts.Length > 7 && !string.IsNullOrEmpty(parts[7])) ? parts[7] : Unknown();
+                    string yearStr = YearText((parts.Length > 8 && !string.IsNullOrEmpty(parts[8]) && parts[8] != "0") ? parts[8] : Unknown());
+                    string detailText = BuildLifeTooltip(prevName, realmName, xpStr, wuxinStr, luckStr, kingdomStr, speciesStr, yearStr);
                     TooltipDataGetter tooltipData = () =>
                     {
-                        var data = new TooltipData();
-                        data._tip_name = "前世信息";
-                        data._tip_description = detailText;
-                        return data;
+                        return xn.access.TooltipDataAccess.Create(T("unit_extra_past_life_title", "Past Life Info"), detailText);
                     };
                     row.setMetaForTooltip(MetaType.None, -1L, "row_reinc_count_info", tooltipData);
                     row.on_click_value = new UnityEngine.Events.UnityAction(() => ShowReincarnationDetails(prevName, realmName, xpStr, wuxinStr, luckStr, kingdomStr, speciesStr, yearStr));
@@ -427,15 +457,7 @@ namespace xn.ui
         }
         private static void ShowReincarnationDetails(string name, string realm, string xp, string wuxin, string luck, string kingdom, string species, string year)
         {
-            string details = $"前世信息\n\n";
-            details += $"姓名：{name}\n";
-            details += $"境界：{realm}\n";
-            details += $"修为：{xp}\n";
-            details += $"悟性：{wuxin}\n";
-            details += $"气运：{luck}\n";
-            details += $"国家：{kingdom}\n";
-            details += $"物种：{species}\n";
-            details += $"死亡年份：{year}年";
+            string details = BuildLifeDetail(T("unit_extra_past_life_title", "Past Life Info"), name, realm, xp, wuxin, luck, kingdom, species, year);
             try
             {
                 var infoWindowType = System.Type.GetType("NeoModLoader.ui.InformationWindow, NeoModLoader");
@@ -454,11 +476,11 @@ namespace xn.ui
         }
         private static void AddPreviousLifeRow(StatsRowsContainer cont, Actor a)
         {
-            int taken; a.data.get(KEY_POSSESSION, out taken, 0);
+            int taken; xn.access.ActorAccess.GetData(a).get(KEY_POSSESSION, out taken, 0);
             if (taken == 0) return; 
-            var row = cont.getStatRow("row_previous_life");
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(cont, "row_previous_life");
             if (row == null) return;
-            string snapshot; a.data.get(KEY_POS_PREV_INFO, out snapshot, "");
+            string snapshot; xn.access.ActorAccess.GetData(a).get(KEY_POS_PREV_INFO, out snapshot, "");
             if (string.IsNullOrEmpty(snapshot))
             {
                 row.gameObject.SetActive(false);
@@ -483,29 +505,26 @@ namespace xn.ui
                 }
                 parts = newParts;
             }
-            string prevName = (parts.Length > 1 && !string.IsNullOrEmpty(parts[1])) ? parts[1] : "未知";
-            string realmName = (parts.Length > 2 && !string.IsNullOrEmpty(parts[2])) ? GetRealmDisplayName(parts[2]) : "无";
+            string prevName = (parts.Length > 1 && !string.IsNullOrEmpty(parts[1])) ? parts[1] : Unknown();
+            string realmName = (parts.Length > 2 && !string.IsNullOrEmpty(parts[2])) ? GetRealmDisplayName(parts[2]) : None();
             string xpStr = (parts.Length > 3 && long.TryParse(parts[3], out long xpVal)) ? FormatNumber(xpVal) : "0";
             string wuxinStr = (parts.Length > 4 && !string.IsNullOrEmpty(parts[4])) ? parts[4] : "0";
             string luckStr = (parts.Length > 5 && !string.IsNullOrEmpty(parts[5])) ? parts[5] : "0";
-            string kingdomStr = (parts.Length > 6 && !string.IsNullOrEmpty(parts[6])) ? parts[6] : "无";
-            string speciesStr = (parts.Length > 7 && !string.IsNullOrEmpty(parts[7])) ? parts[7] : "未知";
-            string yearStr = (parts.Length > 8 && !string.IsNullOrEmpty(parts[8]) && parts[8] != "0") ? parts[8] : "未知";
+            string kingdomStr = (parts.Length > 6 && !string.IsNullOrEmpty(parts[6])) ? parts[6] : None();
+            string speciesStr = (parts.Length > 7 && !string.IsNullOrEmpty(parts[7])) ? parts[7] : Unknown();
+            string yearStr = YearText((parts.Length > 8 && !string.IsNullOrEmpty(parts[8]) && parts[8] != "0") ? parts[8] : Unknown());
             if (row.icon != null)
                 row.icon.gameObject.SetActive(false);
             var name = LocalizedTextManager.getText("row_previous_life");
-            if (string.IsNullOrEmpty(name)) name = "前身";
+            if (string.IsNullOrEmpty(name)) name = T("row_previous_life", "Past Life Info");
             if (row.name_text != null)
                 row.name_text.text = name;
             if (row.value != null)
                 row.value.text = prevName; 
-            string detailText = $"姓名：{prevName}\n境界：{realmName}\n修为：{xpStr}\n悟性：{wuxinStr}\n气运：{luckStr}\n国家：{kingdomStr}\n物种：{speciesStr}\n死亡年份：{yearStr}年";
+            string detailText = BuildLifeTooltip(prevName, realmName, xpStr, wuxinStr, luckStr, kingdomStr, speciesStr, yearStr);
             TooltipDataGetter tooltipData = () =>
             {
-                var data = new TooltipData();
-                data._tip_name = "前身信息";
-                data._tip_description = detailText;
-                return data;
+                return xn.access.TooltipDataAccess.Create(T("unit_extra_previous_body_title", "Previous Body Info"), detailText);
             };
             row.setMetaForTooltip(MetaType.None, -1L, "row_previous_life_info", tooltipData);
             row.on_click_value = new UnityEngine.Events.UnityAction(() => ShowPreviousLifeDetails(prevName, realmName, xpStr, wuxinStr, luckStr, kingdomStr, speciesStr, yearStr));
@@ -513,15 +532,7 @@ namespace xn.ui
         }
         private static void ShowPreviousLifeDetails(string name, string realm, string xp, string wuxin, string luck, string kingdom, string species, string year)
         {
-            string details = $"前身信息\n\n";
-            details += $"姓名：{name}\n";
-            details += $"境界：{realm}\n";
-            details += $"修为：{xp}\n";
-            details += $"悟性：{wuxin}\n";
-            details += $"气运：{luck}\n";
-            details += $"国家：{kingdom}\n";
-            details += $"物种：{species}\n";
-            details += $"死亡年份：{year}年";
+            string details = BuildLifeDetail(T("unit_extra_previous_body_title", "Previous Body Info"), name, realm, xp, wuxin, luck, kingdom, species, year);
             try
             {
                 var infoWindowType = System.Type.GetType("NeoModLoader.ui.InformationWindow, NeoModLoader");
@@ -540,7 +551,7 @@ namespace xn.ui
         }
         private static string GetRealmDisplayName(string realmId)
         {
-            if (string.IsNullOrEmpty(realmId)) return "无";
+            if (string.IsNullOrEmpty(realmId)) return None();
             var trait = AssetManager.traits?.get(realmId) as ActorTrait;
             if (trait != null)
             {
@@ -557,6 +568,14 @@ namespace xn.ui
             if (num >= 1000) return (num / 1000.0).ToString("F2") + "K";
             return num.ToString();
         }
+        private static string BuildLifeTooltip(string name, string realm, string xp, string wuxin, string luck, string kingdom, string species, string year)
+        {
+            return F("unit_extra_life_tooltip_format", "Name: {0}\nRealm: {1}\nCultivation: {2}\nComprehension: {3}\nLuck/Fate: {4}\nKingdom: {5}\nSpecies: {6}\nDeath Year: {7}", name, realm, xp, wuxin, luck, kingdom, species, year);
+        }
+        private static string BuildLifeDetail(string title, string name, string realm, string xp, string wuxin, string luck, string kingdom, string species, string year)
+        {
+            return F("unit_extra_life_detail_format", "{0}\n\nName: {1}\nRealm: {2}\nCultivation: {3}\nComprehension: {4}\nLuck/Fate: {5}\nKingdom: {6}\nSpecies: {7}\nDeath Year: {8}", title, name, realm, xp, wuxin, luck, kingdom, species, year);
+        }
         private static string GetNextBreakRequirement(Actor a)
         {
             bool isAncient = HasAnyTraitInSet(a, ANC_STAR_IDS);
@@ -565,26 +584,26 @@ namespace xn.ui
             {
                 int cur = GetCurrentIndex(a, ANC_STAR_IDS);
                 int next = cur + 1;
-                if (next < 0 || next >= ANC_THRESHOLDS.Length) return "已至巅峰";
-                int power; a.data.get(KEY_ANC_POWER, out power, 0);
+                if (next < 0 || next >= ANC_THRESHOLDS.Length) return T("unit_extra_break_peak", "Peak");
+                int power; xn.access.ActorAccess.GetData(a).get(KEY_ANC_POWER, out power, 0);
                 long need = Math.Max(0, (long)ANC_THRESHOLDS[next] - power);
-                return need == 0 ? "可突破" : need.ToString();
+                return need == 0 ? T("unit_extra_break_ready", "Ready") : need.ToString();
             }
             if (isBeast)
             {
                 int cur = GetCurrentIndex(a, BEAST_STAGE_IDS);
                 int next = cur + 1;
-                if (next < 0 || next >= ANC_THRESHOLDS.Length) return "已至巅峰";
-                int power; a.data.get(KEY_BEAST_PWR, out power, 0);
+                if (next < 0 || next >= ANC_THRESHOLDS.Length) return T("unit_extra_break_peak", "Peak");
+                int power; xn.access.ActorAccess.GetData(a).get(KEY_BEAST_PWR, out power, 0);
                 long need = Math.Max(0, (long)ANC_THRESHOLDS[next] - power);
-                return need == 0 ? "可突破" : need.ToString();
+                return need == 0 ? T("unit_extra_break_ready", "Ready") : need.ToString();
             }
             int r = GetCurrentIndex(a, REALM_IDS);
             int rn = r + 1;
-            if (rn < 0 || rn >= REALM_THRESHOLDS.Length) return "已至巅峰";
-            long xp; a.data.get(KEY_XP, out xp, 0L);
+            if (rn < 0 || rn >= REALM_THRESHOLDS.Length) return T("unit_extra_break_peak", "Peak");
+            long xp; xn.access.ActorAccess.GetData(a).get(KEY_XP, out xp, 0L);
             long needRealm = Math.Max(0, REALM_THRESHOLDS[rn] - xp);
-            return needRealm == 0 ? "可突破" : needRealm.ToString();
+            return needRealm == 0 ? T("unit_extra_break_ready", "Ready") : needRealm.ToString();
         }
         private static bool HasAnyTraitInSet(Actor a, string[] ids)
         {
@@ -622,11 +641,7 @@ namespace xn.ui
                 TooltipDataGetter safeData = null;
                 if (pData == null)
                 {
-                    safeData = () => new TooltipData
-                    {
-                        _tip_name = pTooltipId,
-                        _tip_description = ""
-                    };
+                    safeData = () => xn.access.TooltipDataAccess.Create(pTooltipId, "");
                 }
                 else
                 {
@@ -638,13 +653,13 @@ namespace xn.ui
                             if (originalData != null)
                             {
                                 var result = originalData();
-                                return result ?? new TooltipData { _tip_name = pTooltipId, _tip_description = "" };
+                                return result ?? xn.access.TooltipDataAccess.Create(pTooltipId, "");
                             }
-                            return new TooltipData { _tip_name = pTooltipId, _tip_description = "" };
+                            return xn.access.TooltipDataAccess.Create(pTooltipId, "");
                         }
                         catch
                         {
-                            return new TooltipData { _tip_name = pTooltipId, _tip_description = "" };
+                            return xn.access.TooltipDataAccess.Create(pTooltipId, "");
                         }
                     };
                 }

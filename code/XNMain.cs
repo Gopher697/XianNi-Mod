@@ -113,7 +113,7 @@ namespace xn
     {
         public static void ShowStatsRowsPostfix(UnitWindow __instance)
         {
-            var actor = __instance != null ? __instance.actor : null;
+            var actor = __instance != null ? xn.access.UnitWindowAccess.GetActor(__instance) : null;
             if (actor == null) return;
             ui.UnitWindowStatsIcon.Initialize(__instance);
             ui.UnitWindowStatsIcon.OnEnable(__instance, actor);

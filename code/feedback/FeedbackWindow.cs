@@ -20,6 +20,12 @@ namespace xn.feedback
         private const string FEEDBACK_KEY = "XN_HasFeedback";
         private const string FEEDBACK_VERSION_KEY = "XN_FeedbackVersion";
         private static string CurrentVersion => xn.version.OnlineVersionChecker.CurrentVersion;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void Init()
         {
             if (_inited) return;
@@ -98,7 +104,7 @@ namespace xn.feedback
             bg.color = new Color(0.12f, 0.13f, 0.18f, 0.98f);
             float y = panelHeight / 2 - 15f;
             CreateText("Title", panel.transform, new Vector2(0, y), new Vector2(140, 22),
-                "支持作者", 13, TextAnchor.MiddleCenter, new Color(0.95f, 0.85f, 0.55f));
+                T("feedback_support_author", "Support the Author"), 13, TextAnchor.MiddleCenter, new Color(0.95f, 0.85f, 0.55f));
             y -= 25f;
             CreateGradientDivider(panel.transform, y, 130);
             y -= 15f;
@@ -113,16 +119,16 @@ namespace xn.feedback
             {
                 qrImg.color = new Color(0.2f, 0.22f, 0.28f);
                 CreateText("QRPlaceholder", qrObj.transform, Vector2.zero, new Vector2(100, 40),
-                    "赞赏码", 11, TextAnchor.MiddleCenter, new Color(0.5f, 0.5f, 0.55f));
+                    T("feedback_sponsor_code", "Sponsor Code"), 11, TextAnchor.MiddleCenter, new Color(0.5f, 0.5f, 0.55f));
             }
             y -= 125f;
             CreateText("WechatLabel", panel.transform, new Vector2(0, y), new Vector2(140, 18),
-                "微信扫码赞赏", 10, TextAnchor.MiddleCenter, new Color(0.65f, 0.65f, 0.72f));
+                T("feedback_wechat_sponsor", "Scan with WeChat to sponsor"), 10, TextAnchor.MiddleCenter, new Color(0.65f, 0.65f, 0.72f));
             y -= 25f;
             CreateGradientDivider(panel.transform, y, 130);
             y -= 15f;
             CreateText("Thanks", panel.transform, new Vector2(0, y - 30f), new Vector2(130, 70),
-                "您的支持\n是我持续更新\n的最大动力", 10, TextAnchor.UpperCenter, new Color(0.55f, 0.55f, 0.62f));
+                T("feedback_support_thanks", "Your support\nkeeps updates\nmoving forward"), 10, TextAnchor.UpperCenter, new Color(0.55f, 0.55f, 0.62f));
         }
         private static void CreateCenterPanel(Transform parent)
         {
@@ -138,7 +144,7 @@ namespace xn.feedback
             bg.color = new Color(0.12f, 0.13f, 0.18f, 0.98f);
             float y = panelHeight / 2 - 15f;
             CreateText("CenterTitle_Text", panel.transform, new Vector2(0, y), new Vector2(380, 24),
-                "关于仙逆模组", 16, TextAnchor.MiddleCenter, new Color(0.98f, 0.95f, 0.88f));
+                T("feedback_about_title", "About Xian Ni Mod"), 16, TextAnchor.MiddleCenter, new Color(0.98f, 0.95f, 0.88f));
             var commentSprite = GetSprite("ui/icon/comment", "ui/icons/iconAbout");
             if (commentSprite != null)
             {
@@ -153,12 +159,12 @@ namespace xn.feedback
             }
             y -= 25f;
             CreateText("Version", panel.transform, new Vector2(0, y), new Vector2(380, 16),
-                $"当前版本: v{CurrentVersion}", 10, TextAnchor.MiddleCenter, new Color(0.55f, 0.55f, 0.62f));
+                T("feedback_current_version", "Current Version: v{0}", CurrentVersion), 10, TextAnchor.MiddleCenter, new Color(0.55f, 0.55f, 0.62f));
             y -= 20f;
             CreateGradientDivider(panel.transform, y, 360);
             y -= 15f;
             CreateText("RatingLabel", panel.transform, new Vector2(0, y), new Vector2(380, 18),
-                "请为模组打分", 12, TextAnchor.MiddleCenter, new Color(0.88f, 0.88f, 0.9f));
+                T("feedback_rating_label", "Please rate the mod"), 12, TextAnchor.MiddleCenter, new Color(0.88f, 0.88f, 0.9f));
             y -= 30f;
             CreateStarRating(panel.transform, new Vector2(0, y));
             y -= 28f;
@@ -176,9 +182,9 @@ namespace xn.feedback
             CreateGradientDivider(panel.transform, y, 360);
             y -= 12f;
             CreateText("ContentLabel", panel.transform, new Vector2(-130, y), new Vector2(100, 16),
-                "为作者留言", 11, TextAnchor.MiddleLeft, new Color(0.82f, 0.82f, 0.85f));
+                T("feedback_message_label", "Leave a message"), 11, TextAnchor.MiddleLeft, new Color(0.82f, 0.82f, 0.85f));
             CreateText("Optional", panel.transform, new Vector2(20, y), new Vector2(80, 16),
-                "反馈建议", 9, TextAnchor.MiddleLeft, new Color(0.45f, 0.45f, 0.52f));
+                T("feedback_suggestion_label", "Feedback"), 9, TextAnchor.MiddleLeft, new Color(0.45f, 0.45f, 0.52f));
             y -= 35f;
             CreateInputField(panel.transform, new Vector2(0, y));
             y -= 45f;
@@ -191,12 +197,14 @@ namespace xn.feedback
             _statusText.fontSize = 9;
             _statusText.alignment = TextAnchor.MiddleCenter;
             _statusText.color = new Color(0.5f, 0.5f, 0.58f);
-            _statusText.text = HasFeedback() ? "您已评价过，再次提交将更新" : "您的反馈是我们前进的动力";
+            _statusText.text = HasFeedback()
+                ? T("feedback_status_already_rated", "You have already rated this. Submitting again will update it.")
+                : T("feedback_status_default", "Your feedback helps us keep improving");
             y -= 22f;
             CreateButtons(panel.transform, y);
             y -= 38f;
             CreateText("Warning", panel.transform, new Vector2(0, y), new Vector2(380, 14),
-                "注意：每天只允许提交1次，最多请求5次(自动拉黑)，请勿频繁请求", 9, TextAnchor.MiddleCenter, new Color(0.9f, 0.4f, 0.4f));
+                T("feedback_rate_limit_warning", "Note: one submission per day. Please do not submit repeatedly."), 9, TextAnchor.MiddleCenter, new Color(0.9f, 0.4f, 0.4f));
             CreateCloseX(panel.transform, panelWidth, panelHeight);
         }
         private static void CreateRightPanel(Transform parent)
@@ -285,9 +293,17 @@ namespace xn.feedback
         }
         private static void UpdateRatingText()
         {
-            string[] texts = { "非常差", "较差", "一般", "很好", "非常棒！" };
+            string[] texts =
+            {
+                T("feedback_rating_1", "Very Poor"),
+                T("feedback_rating_2", "Poor"),
+                T("feedback_rating_3", "Average"),
+                T("feedback_rating_4", "Good"),
+                T("feedback_rating_5", "Excellent!")
+            };
             string[] colors = { "#E85555", "#F09050", "#E8C050", "#88C855", "#50D880" };
-            _ratingText.text = $"<color={colors[_selectedRating - 1]}>{_selectedRating}星 - {texts[_selectedRating - 1]}</color>";
+            string rating = T("feedback_rating_format", "{0} Star - {1}", _selectedRating, texts[_selectedRating - 1]);
+            _ratingText.text = $"<color={colors[_selectedRating - 1]}>{rating}</color>";
         }
         private static void CreateInputField(Transform parent, Vector2 pos)
         {
@@ -326,7 +342,7 @@ namespace xn.feedback
             placeholder.fontSize = 11;
             placeholder.color = new Color(0.4f, 0.4f, 0.45f);
             placeholder.alignment = TextAnchor.UpperLeft;
-            placeholder.text = "请输入您想对作者说的话...";
+            placeholder.text = T("feedback_input_placeholder", "Enter what you want to say to the author...");
             placeholder.fontStyle = FontStyle.Italic;
             _contentInput = inputObj.AddComponent<InputField>();
             _contentInput.textComponent = text;
@@ -358,7 +374,7 @@ namespace xn.feedback
             submitTextRect.anchorMax = Vector2.one;
             submitTextRect.sizeDelta = Vector2.zero;
             var submitTxt = submitText.AddComponent<Text>();
-            submitTxt.text = "提交评价";
+            submitTxt.text = T("feedback_submit_button", "Submit Review");
             submitTxt.font = LocalizedTextManager.current_font;
             submitTxt.fontSize = 13;
             submitTxt.alignment = TextAnchor.MiddleCenter;
@@ -385,7 +401,7 @@ namespace xn.feedback
             cancelTextRect.anchorMax = Vector2.one;
             cancelTextRect.sizeDelta = Vector2.zero;
             var cancelTxt = cancelText.AddComponent<Text>();
-            cancelTxt.text = "关闭";
+            cancelTxt.text = T("feedback_close_button", "Close");
             cancelTxt.font = LocalizedTextManager.current_font;
             cancelTxt.fontSize = 13;
             cancelTxt.alignment = TextAnchor.MiddleCenter;
@@ -394,7 +410,7 @@ namespace xn.feedback
         private static void OnSubmit()
         {
             string content = _contentInput != null ? _contentInput.text : "";
-            _statusText.text = "正在提交...";
+            _statusText.text = T("feedback_submitting", "Submitting...");
             _statusText.color = new Color(0.9f, 0.85f, 0.3f);
             _submitButton.interactable = false;
             if (MapBox.instance != null)

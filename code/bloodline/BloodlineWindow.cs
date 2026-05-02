@@ -298,7 +298,7 @@ namespace xn.bloodline
                     break;
             }
             icon.gameObject.SetActive(true);
-            icon.sprite = actor._last_colored_sprite ?? actor.asset.getSpriteIcon();
+            icon.sprite = xn.access.ActorAccess.GetLastColoredSprite(actor) ?? actor.asset.getSpriteIcon();
             string nameColor = roleTitle == "始祖" ? "#FF8C00" : "#FFD700";
             title.text = $"<color={nameColor}>[{roleTitle}]</color>{actor.getName()}";
             string bloodlineType = BloodlineTypes.GetLocaleName(BloodlineSystem.GetBloodlineType(actor));

@@ -8,24 +8,43 @@ namespace xn.ui
 {
     public static class SkinToneBrushToolDisplayPatch
     {
-        private static readonly string[] ColorNames = new string[]
+        private static readonly string[] ColorNameKeys = new string[]
         {
-            "黑",      
-            "白",      
-            "灰",      
-            "红",      
-            "橙",      
-            "黄",      
-            "绿",      
-            "青",      
-            "蓝",      
-            "紫",      
-            "粉",      
-            "棕",      
-            "棕褐",    
-            "金",      
-            "银",      
-            "藏青"     
+            "skin_tone_color_black",
+            "skin_tone_color_white",
+            "skin_tone_color_grey",
+            "skin_tone_color_red",
+            "skin_tone_color_orange",
+            "skin_tone_color_yellow",
+            "skin_tone_color_green",
+            "skin_tone_color_cyan",
+            "skin_tone_color_blue",
+            "skin_tone_color_purple",
+            "skin_tone_color_pink",
+            "skin_tone_color_brown",
+            "skin_tone_color_tan",
+            "skin_tone_color_gold",
+            "skin_tone_color_silver",
+            "skin_tone_color_navy"
+        };
+        private static readonly string[] ColorNameFallbacks = new string[]
+        {
+            "Black",
+            "White",
+            "Grey",
+            "Red",
+            "Orange",
+            "Yellow",
+            "Green",
+            "Cyan",
+            "Blue",
+            "Purple",
+            "Pink",
+            "Brown",
+            "Tan",
+            "Gold",
+            "Silver",
+            "Navy"
         };
         private static System.Type ModConfigListItemType;
         private static System.Reflection.FieldInfo SliderAreaField;
@@ -84,11 +103,16 @@ namespace xn.ui
         }
         public static string GetColorName(int index)
         {
-            if (index >= 0 && index < ColorNames.Length)
+            if (index >= 0 && index < ColorNameKeys.Length)
             {
-                return ColorNames[index];
+                return T(ColorNameKeys[index], ColorNameFallbacks[index]);
             }
             return index.ToString();
+        }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
         }
         private static void UpdateColorDisplay(Text valueText, int intVal)
         {

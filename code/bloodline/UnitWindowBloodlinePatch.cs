@@ -10,7 +10,7 @@ namespace xn.bloodline
         [HarmonyPrefix]
         private static void Prefix(UnitWindow __instance)
         {
-            if (!(__instance.actor?.isAlive() ?? false)) return;
+            if (!(xn.access.UnitWindowAccess.GetActor(__instance)?.isAlive() ?? false)) return;
             if (!s_initialized)
             {
                 s_initialized = true;
@@ -33,8 +33,8 @@ namespace xn.bloodline
             var saved_transform_parents = old_component.transform_parents;
             var saved_transform_siblings = old_component.transform_siblings;
             var saved_transform_children = old_component.transform_children;
-            var saved_prefab_unfolder = old_component._prefab_unfolder;
-            var saved_sex_icon = old_component._sex_icon;
+            var saved_prefab_unfolder = xn.access.UnitWindowAccess.GetPrefabUnfolder(old_component);
+            var saved_sex_icon = xn.access.UnitWindowAccess.GetSexIcon(old_component);
             Object.DestroyImmediate(old_component);
             var content_bloodline = content_bloodline_obj.AddComponent<UnitBloodlineElement>();
             content_bloodline.prefab_avatar = saved_prefab_avatar;
@@ -114,9 +114,10 @@ namespace xn.bloodline
             bloodline_entry.transform.SetSiblingIndex(indexToInsert);
             bloodline_entry.container = window.tabs;
             bloodline_entry.tab_elements.RemoveAll(t => t.name.ToLower().StartsWith("content_"));
-            if (!window.tabs._tabs.Contains(bloodline_entry))
+            var tabs = xn.access.UnitWindowAccess.GetTabs(window.tabs);
+            if (tabs != null && !tabs.Contains(bloodline_entry))
             {
-                window.tabs._tabs.Add(bloodline_entry);
+                tabs.Add(bloodline_entry);
             }
             window.tabs.addTabContent(bloodline_entry, content_bloodline_obj.transform);
             window.tabs.refillTabsWithContent();

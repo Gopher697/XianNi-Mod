@@ -35,7 +35,7 @@ namespace xn.world
         }
         public static void ClearBroadcastLogs()
         {
-            var q = WorldBoxConsole.Console._texts;
+            var q = xn.access.WorldBoxConsoleAccess.GetTexts();
             if (q == null) return;
             var kept = new Queue<string>(q.Count);
             while (q.Count > 0)
@@ -43,8 +43,8 @@ namespace xn.world
                 var s = q.Dequeue();
                 if (ShouldKeep(s)) kept.Enqueue(s);
             }
-            WorldBoxConsole.Console._texts = kept;
-            WorldBoxConsole.Console._line_num = 0;
+            xn.access.WorldBoxConsoleAccess.SetTexts(kept);
+            xn.access.WorldBoxConsoleAccess.SetLineNum(0);
         }
         private static bool ShouldKeep(string s)
         {

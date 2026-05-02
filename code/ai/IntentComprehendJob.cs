@@ -79,18 +79,18 @@ namespace cultivation.ai
             private static bool Prefix(Actor __instance, ref string __result)
             {
                 if (__instance == null || !__instance.isAlive()) return true;
-                if (__instance.kingdom == null || __instance.city == null || __instance.is_inside_boat) return true;
+                if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance)) return true;
                 if (HasAnyIntent(__instance)) return true;
                 if (GetRealmIndex(__instance) < 4) return true;
-                int cd; __instance.data.get(KEY_LV_CD_UNTIL, out cd, 0);
+                int cd; xn.access.ActorAccess.GetData(__instance).get(KEY_LV_CD_UNTIL, out cd, 0);
                 if (Date.getCurrentYear() < cd) return true;
-                int active; __instance.data.get(KEY_LV_ACTIVE, out active, 0);
+                int active; xn.access.ActorAccess.GetData(__instance).get(KEY_LV_ACTIVE, out active, 0);
                 if (active == 1) return true;
                 RegisterJob();
                 __result = "job_xn_intent_comprehend";
-                __instance.data.set(KEY_LV_ACTIVE, 1);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_LV_ACTIVE, 1);
                 float dur = UnityEngine.Random.Range(30f, 60f);
-                __instance.data.set(KEY_LV_END_T, Time.time + dur);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_LV_END_T, Time.time + dur);
                 return false;
             }
         }
@@ -109,13 +109,13 @@ namespace cultivation.ai
                 {
                     var a = list[i];
                     if (a == null || !a.isAlive()) continue;
-                    int active; a.data.get(KEY_LV_ACTIVE, out active, 0);
+                    int active; xn.access.ActorAccess.GetData(a).get(KEY_LV_ACTIVE, out active, 0);
                     if (active != 1) continue;
-                    if (!a.is_inside_building || a.inside_building == null) continue;
-                    float endt; a.data.get(KEY_LV_END_T, out endt, 0f);
+                    if (!xn.access.ActorAccess.IsInsideBuilding(a) || xn.access.ActorAccess.GetInsideBuilding(a) == null) continue;
+                    float endt; xn.access.ActorAccess.GetData(a).get(KEY_LV_END_T, out endt, 0f);
                     if (endt <= 0f || now < endt) continue;
-                    a.data.set(KEY_LV_ACTIVE, 0);
-                    a.data.set(KEY_LV_END_T, 0f);
+                    xn.access.ActorAccess.GetData(a).set(KEY_LV_ACTIVE, 0);
+                    xn.access.ActorAccess.GetData(a).set(KEY_LV_END_T, 0f);
                     bool ok = (UnityEngine.Random.value < 0.30f);
                     if (ok)
                     {
@@ -129,7 +129,7 @@ namespace cultivation.ai
                         int loss = Mathf.FloorToInt(a.getMaxHealth() * 0.30f);
                         if (loss > 0) a.changeHealth(-loss);
                         if (!a.hasHealth()) a.batch.c_check_deaths.Add(a);
-                        a.data.set(KEY_LV_CD_UNTIL, year + 50);
+                        xn.access.ActorAccess.GetData(a).set(KEY_LV_CD_UNTIL, year + 50);
                         BroadcastSystem.IntentComprehendFail(a);
                     }
                 }

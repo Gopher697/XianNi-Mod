@@ -14,6 +14,12 @@ namespace xn.tournament
         private static Dictionary<string, float> _deathTriggers = new Dictionary<string, float>(); 
         public static bool IsRunning => _current != null && _current.State != TournamentState.None && _current.State != TournamentState.Finished;
         public static bool IsFinalRound => _current != null && _current.ParticipantIds != null && _current.ParticipantIds.Count == 2;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void Init()
         {
             if (_inited) return;
@@ -47,20 +53,20 @@ namespace xn.tournament
         {
             if (IsRunning)
             {
-                xn.world.BroadcastSystem.Custom("比武大会正在进行中，无法开始新的比赛");
+                xn.world.BroadcastSystem.Custom(T("broadcast_tournament_already_running", "Tournament is already underway; a new match cannot begin"));
                 return false;
             }
             int participantCount = Random.Range(10, 21);
             var topActors = GetTopPowerActors(participantCount);
             if (topActors == null || topActors.Count < 2)
             {
-                xn.world.BroadcastSystem.Custom("参赛人数不足，无法举办比武大会");
+                xn.world.BroadcastSystem.Custom(T("broadcast_tournament_not_enough_participants", "Not enough participants to hold the tournament"));
                 return false;
             }
             var arenaTile = TournamentArena.FindOceanTileForArena();
             if (arenaTile == null)
             {
-                xn.world.BroadcastSystem.Custom("找不到合适的海域建造擂台");
+                xn.world.BroadcastSystem.Custom(T("broadcast_tournament_no_arena_tile", "No suitable ocean site was found for the arena"));
                 return false;
             }
             _editionCounter++;
@@ -83,7 +89,7 @@ namespace xn.tournament
                 _current.ParticipantInfos[id] = GetParticipantDisplayInfo(a); 
                 _actorCache[id] = a; 
             }
-            xn.world.BroadcastSystem.Custom($"第{_editionCounter}届比武大会即将开始！共{_current.ParticipantIds.Count}人参赛");
+            xn.world.BroadcastSystem.Custom(T("broadcast_tournament_starting", "Tournament #{0} is about to begin! {1} fighters have entered", _editionCounter, _current.ParticipantIds.Count));
             TournamentArena.BuildArena(arenaTile);
             return true;
         }
@@ -129,7 +135,7 @@ namespace xn.tournament
                     var f2 = GetActorById(nextMatch.Fighter2Id);
                     if (f1 != null && f2 != null)
                     {
-                        xn.world.BroadcastSystem.Custom($"下一场：{f1.getName()} VS {f2.getName()}");
+                        xn.world.BroadcastSystem.Custom(T("broadcast_tournament_next_match", "Next match: {0} VS {1}", f1.getName(), f2.getName()));
                     }
                 }
             }
@@ -220,7 +226,7 @@ namespace xn.tournament
                 var byeActor = GetActorById(_current.ByeParticipantId);
                 if (byeActor != null)
                 {
-                    xn.world.BroadcastSystem.PostActor(byeActor, $"第{_current.Edition}届比武大会第{_current.CurrentRound}轮：{byeActor.getName()} 轮空");
+                    xn.world.BroadcastSystem.PostActor(byeActor, T("broadcast_tournament_bye", "Tournament #{0} Round {1}: {2} gets a bye", _current.Edition, _current.CurrentRound, byeActor.getName()));
                 }
             }
             for (int i = 0; i < participants.Count; i += 2)
@@ -235,7 +241,7 @@ namespace xn.tournament
                 _current.CurrentMatches.Add(match);
             }
             _current.State = TournamentState.Fighting;
-            xn.world.BroadcastSystem.Custom($"第{_current.Edition}届比武大会第{_current.CurrentRound}轮开始！共{_current.CurrentMatches.Count}组对决");
+            xn.world.BroadcastSystem.Custom(T("broadcast_tournament_round_start", "Tournament #{0} Round {1} begins! {2} duels are set", _current.Edition, _current.CurrentRound, _current.CurrentMatches.Count));
             if (_current.CurrentMatches.Count > 0)
             {
                 var firstMatch = _current.CurrentMatches[0];
@@ -243,7 +249,7 @@ namespace xn.tournament
                 var f2 = GetActorById(firstMatch.Fighter2Id);
                 if (f1 != null && f2 != null)
                 {
-                    xn.world.BroadcastSystem.Custom($"第一场：{f1.getName()} VS {f2.getName()}");
+                    xn.world.BroadcastSystem.Custom(T("broadcast_tournament_first_match", "Opening match: {0} VS {1}", f1.getName(), f2.getName()));
                 }
             }
         }
@@ -271,12 +277,12 @@ namespace xn.tournament
                 {
                     championInfo = GetParticipantDisplayInfo(champion);
                     string championName = championInfo.GetFullDisplayName();
-                    xn.world.BroadcastSystem.PostActor(champion, $"第{_current.Edition}届比武大会冠军：{championName}！");
+                    xn.world.BroadcastSystem.PostActor(champion, T("broadcast_tournament_champion", "Tournament #{0} Champion: {1}!", _current.Edition, championName));
                 }
             }
             else
             {
-                xn.world.BroadcastSystem.Custom($"第{_current.Edition}届比武大会结束，无人获胜");
+                xn.world.BroadcastSystem.Custom(T("broadcast_tournament_no_winner", "Tournament #{0} ended with no victor", _current.Edition));
             }
             SaveTournamentHistory(championInfo);
             foreach (var kvp in _current.OriginalPositions)
@@ -296,7 +302,7 @@ namespace xn.tournament
                 EndYear = _current.EndYear,
                 ChampionId = _current.ChampionId,
                 ChampionInfo = championInfo,
-                ChampionName = championInfo?.GetFullDisplayName() ?? "无", 
+                ChampionName = championInfo?.GetFullDisplayName() ?? T("value_none", "None"), 
                 TotalRounds = _current.CurrentRound,
                 Timestamp = World.world.getCurWorldTime()
             };
@@ -333,12 +339,12 @@ namespace xn.tournament
             if (f1 != null && f1.isAlive())
             {
                 f1.cancelAllBeh();
-                f1.spawnOn(arenaTiles[0]);
+                xn.access.ActorAccess.SpawnOn(f1, arenaTiles[0]);
             }
             if (f2 != null && f2.isAlive())
             {
                 f2.cancelAllBeh();
-                f2.spawnOn(arenaTiles[arenaTiles.Count / 2]); 
+                xn.access.ActorAccess.SpawnOn(f2, arenaTiles[arenaTiles.Count / 2]); 
             }
         }
         private static void TeleportBackToOriginal(string actorId)
@@ -353,7 +359,7 @@ namespace xn.tournament
                 {
                     actor.cancelAllBeh();
                     actor.clearAttackTarget();
-                    actor.spawnOn(tile);
+                    xn.access.ActorAccess.SpawnOn(actor, tile);
                 }
             }
         }
@@ -402,19 +408,19 @@ namespace xn.tournament
         private static bool IsTianyunzi(Actor a)
         {
             if (a == null) return false;
-            int flag; a.data.get("xn_is_tianyunzi", out flag, 0);
+            int flag; xn.access.ActorAccess.GetData(a).get("xn_is_tianyunzi", out flag, 0);
             return flag == 1;
         }
         private static bool IsInSpecialTask(Actor a)
         {
             if (a == null) return false;
-            int trialActive; a.data.get("xn.trial.active", out trialActive, 0);
+            int trialActive; xn.access.ActorAccess.GetData(a).get("xn.trial.active", out trialActive, 0);
             if (trialActive == 1) return true;
-            int breakStop; a.data.get("xn.cultivation.stop", out breakStop, 0);
+            int breakStop; xn.access.ActorAccess.GetData(a).get("xn.cultivation.stop", out breakStop, 0);
             if (breakStop == 1) return true;
-            int condenseReady; a.data.get("xn.root.condense_ready", out condenseReady, 0);
+            int condenseReady; xn.access.ActorAccess.GetData(a).get("xn.root.condense_ready", out condenseReady, 0);
             if (condenseReady == 1) return true;
-            var ai = a.ai;
+            var ai = xn.access.ActorAccess.GetAI(a);
             if (ai == null) return false;
             var task = ai.task;
             if (task == null) return false;
@@ -524,12 +530,12 @@ namespace xn.tournament
         }
         private static ParticipantDisplayInfo GetParticipantDisplayInfo(Actor actor)
         {
-            if (actor == null) return new ParticipantDisplayInfo("未知", "", "");
+            if (actor == null) return new ParticipantDisplayInfo(T("value_unknown", "Unknown"), "", "");
             string baseName = TitleSystem.GetBaseName(actor);
             string title = TitleSystem.GetTitle(actor);
             string suffix = TitleSystem.GetSuffix(actor);
             if (string.IsNullOrEmpty(baseName))
-                baseName = actor.getName() ?? "未知";
+                baseName = actor.getName() ?? T("value_unknown", "Unknown");
             return new ParticipantDisplayInfo(baseName, title, suffix);
         }
     }

@@ -35,7 +35,7 @@ namespace xn.ui
             if (list == null) return;
             foreach (var u in list)
             {
-                if (u == null || !u.isAlive() || !u.is_visible)
+                if (u == null || !u.isAlive() || !xn.access.ActorAccess.IsVisible(u))
                 {
                     CleanupOne(u);
                     continue;
@@ -54,7 +54,7 @@ namespace xn.ui
         {
             if (a != null)
             {
-                a.data.get("xn.title.current", out string storedTitle, "");
+                xn.access.ActorAccess.GetData(a).get("xn.title.current", out string storedTitle, "");
                 if (!string.IsNullOrEmpty(storedTitle))
                 {
                     return storedTitle;
@@ -64,7 +64,7 @@ namespace xn.ui
         }
         private void CreateOrUpdateText(Actor a, string text, Color col)
         {
-            a.data.get("xn_title_obj_id", out string id, "");
+            xn.access.ActorAccess.GetData(a).get("xn_title_obj_id", out string id, "");
             GameObject go = null;
             if (!string.IsNullOrEmpty(id))
             {
@@ -80,7 +80,7 @@ namespace xn.ui
             }
             if (go == null)
             {
-                go = new GameObject("XN_TitleText_" + a.data.id);
+                go = new GameObject("XN_TitleText_" + xn.access.ActorAccess.GetData(a).id);
                 go.transform.SetParent(transform);
                 var t = go.AddComponent<Text>();
                 t.font = LocalizedTextManager.current_font;
@@ -88,7 +88,7 @@ namespace xn.ui
                 t.resizeTextForBestFit = false;
                 t.fontSize = 12;
                 t.supportRichText = true; 
-                a.data.set("xn_title_obj_id", go.name);
+                xn.access.ActorAccess.GetData(a).set("xn_title_obj_id", go.name);
             }
             var txt = go.GetComponent<Text>();
             int realmIdx = GetRealmIndex(a);
@@ -102,7 +102,7 @@ namespace xn.ui
                 txt.text = text;
                 txt.color = col;
             }
-            var posWorld = a.cur_transform_position + new Vector3(0, 2.0f, 0);
+            var posWorld = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(a) + new Vector3(0, 2.0f, 0);
             var screen = World.world.camera.WorldToViewportPoint(posWorld);
             var lp = new Vector2(
                 screen.x * _canvasRect.sizeDelta.x - _canvasRect.sizeDelta.x * 0.5f,
@@ -113,7 +113,7 @@ namespace xn.ui
         private void CleanupOne(Actor a)
         {
             if (a == null) return;
-            a.data.get("xn_title_obj_id", out string id, "");
+            xn.access.ActorAccess.GetData(a).get("xn_title_obj_id", out string id, "");
             if (string.IsNullOrEmpty(id)) return;
             for (int i = 0; i < transform.childCount; i++)
             {
@@ -124,7 +124,7 @@ namespace xn.ui
                     break;
                 }
             }
-            a.data.removeString("xn_title_obj_id");
+            xn.access.ActorAccess.GetData(a).removeString("xn_title_obj_id");
         }
         private void CleanupAll()
         {
@@ -143,7 +143,7 @@ namespace xn.ui
                 {
                     if (a != null)
                     {
-                        a.data.removeString("xn_title_obj_id");
+                        xn.access.ActorAccess.GetData(a).removeString("xn_title_obj_id");
                     }
                 }
             }
@@ -224,7 +224,7 @@ namespace xn.ui
                 Color.blue,                         
                 new Color(0.5f, 0.0f, 0.5f, 1.0f)  
             };
-            long actorId = a != null ? a.data.id : 0;
+            long actorId = a != null ? xn.access.ActorAccess.GetData(a).id : 0;
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             for (int i = 0; i < text.Length; i++)
             {

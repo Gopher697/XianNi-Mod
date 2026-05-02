@@ -28,21 +28,21 @@ namespace cultivation.ai
             if (__instance == null) return true;
             if (pDestroy) return true;
             int isMainChar;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             if (isMainChar != 1) return true; 
             int removed;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, out removed, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_REMOVED, out removed, 0);
             if (removed == 1) return true; 
             if (xn.tournament.TournamentManager.IsRunning && xn.tournament.TournamentManager.IsParticipant(__instance))
             {
                 return true; 
             }
             int lives;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, out lives, 3);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, out lives, 3);
             if (lives > 0)
             {
                 lives--;
-                __instance.data.set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, lives);
+                xn.access.ActorAccess.GetData(__instance).set(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHAR_LIVES, lives);
                 RecordNearDeathEvent(__instance, pType);
                 int maxHealth = __instance.getMaxHealth();
                 __instance.changeHealth(maxHealth);
@@ -57,9 +57,9 @@ namespace cultivation.ai
         private static void RecordNearDeathEvent(Actor actor, AttackType deathType)
         {
             if (actor == null) return;
-            if (!actor.attackedBy.isRekt() && actor.attackedBy.isActor())
+            if (!xn.access.ActorAccess.GetAttackedBy(actor).isRekt() && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(actor)))
             {
-                WorldLog.logFavMurder(actor, actor.attackedBy.a);
+                WorldLog.logFavMurder(actor, xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(actor)));
             }
             else
             {
@@ -72,7 +72,7 @@ namespace cultivation.ai
             WorldTile randomTile = World.world.islands_calculator.getRandomIslandGround()?.regions.GetRandom()?.tiles.GetRandom();
             if (randomTile == null || randomTile.Type.block || !randomTile.Type.ground)
             {
-                var allTiles = World.world.tiles_list;
+                var allTiles = xn.access.MapBoxAccess.GetTilesList(World.world);
                 if (allTiles != null && allTiles.Length > 0)
                 {
                     int attempts = 0;
@@ -87,7 +87,7 @@ namespace cultivation.ai
             {
                 ActionLibrary.teleportEffect(actor, randomTile);
                 actor.cancelAllBeh();
-                actor.spawnOn(randomTile);
+                xn.access.ActorAccess.SpawnOn(actor, randomTile);
             }
         }
         private static void Postfix_Actor_tryToAttack(Actor __instance, BaseSimObject pTarget, bool pDoChecks, Action pKillAction, Vector3 pAttackPosition, Kingdom pForceKingdom, WorldTile pTileTarget, float pBonusAreOfEffect, bool __result)
@@ -95,16 +95,16 @@ namespace cultivation.ai
             if (__instance == null || !__instance.isAlive()) return;
             if (!__result) return; 
             int isMainChar;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             if (isMainChar != 1) return; 
             WorldTile targetTile = null;
             if (pTarget != null && !pTarget.isRekt())
             {
-                if (pTarget.isActor())
+                if (xn.access.BaseSimObjectAccess.IsActor(pTarget))
                 {
-                    targetTile = pTarget.a.current_tile;
+                    targetTile = xn.access.BaseSimObjectAccess.GetActor(pTarget).current_tile;
                 }
-                else if (pTarget.isBuilding())
+                else if (xn.access.BaseSimObjectAccess.IsBuilding(pTarget))
                 {
                     targetTile = pTarget.b.current_tile;
                 }
@@ -115,8 +115,8 @@ namespace cultivation.ai
             }
             if (targetTile != null)
             {
-                __instance.data.set(KEY_OWN_LIGHTNING_IMMUNE, 1);
-                __instance.data.set(KEY_OWN_LIGHTNING_TIME, Time.time);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_IMMUNE, 1);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_TIME, Time.time);
                 MapBox.spawnLightningSmall(targetTile, 0.25f, __instance);
             }
         }
@@ -124,40 +124,40 @@ namespace cultivation.ai
         {
             if (__instance == null) return true;
             int isMainChar;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             if (isMainChar != 1) return true; 
             if (pAttackType == AttackType.Fire)
             {
                 return false; 
             }
             int ownLightningImmune;
-            __instance.data.get(KEY_OWN_LIGHTNING_IMMUNE, out ownLightningImmune, 0);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_OWN_LIGHTNING_IMMUNE, out ownLightningImmune, 0);
             if (ownLightningImmune != 1) return true; 
             float lightningTime;
-            __instance.data.get(KEY_OWN_LIGHTNING_TIME, out lightningTime, 0f);
+            xn.access.ActorAccess.GetData(__instance).get(KEY_OWN_LIGHTNING_TIME, out lightningTime, 0f);
             float timeSinceLightning = Time.time - lightningTime;
             if (timeSinceLightning > IMMUNE_DURATION)
             {
-                __instance.data.set(KEY_OWN_LIGHTNING_IMMUNE, 0);
-                __instance.data.set(KEY_OWN_LIGHTNING_TIME, 0f);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_IMMUNE, 0);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_TIME, 0f);
                 return true;
             }
             bool isLightningDamage = (pAttackType == AttackType.Other);
-            if (isLightningDamage && pAttacker != null && pAttacker.isActor() && pAttacker.a == __instance)
+            if (isLightningDamage && pAttacker != null && xn.access.BaseSimObjectAccess.IsActor(pAttacker) && xn.access.BaseSimObjectAccess.GetActor(pAttacker) == __instance)
             {
-                __instance.data.set(KEY_OWN_LIGHTNING_IMMUNE, 0);
-                __instance.data.set(KEY_OWN_LIGHTNING_TIME, 0f);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_IMMUNE, 0);
+                xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_TIME, 0f);
                 return false; 
             }
-            __instance.data.set(KEY_OWN_LIGHTNING_IMMUNE, 0);
-            __instance.data.set(KEY_OWN_LIGHTNING_TIME, 0f);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_IMMUNE, 0);
+            xn.access.ActorAccess.GetData(__instance).set(KEY_OWN_LIGHTNING_TIME, 0f);
             return true;
         }
         private static bool Prefix_Actor_addStatusEffect(Actor __instance, StatusAsset pStatusAsset, float pOverrideTimer, bool pColorEffect)
         {
             if (__instance == null || pStatusAsset == null) return true;
             int isMainChar;
-            __instance.data.get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+            xn.access.ActorAccess.GetData(__instance).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
             if (isMainChar != 1) return true; 
             if (pStatusAsset.id == "burning")
             {

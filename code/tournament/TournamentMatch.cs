@@ -32,8 +32,8 @@ namespace xn.tournament
             }
             f1.cancelAllBeh();
             f2.cancelAllBeh();
-            f1.data.health = f1.getMaxHealth();
-            f2.data.health = f2.getMaxHealth();
+            xn.access.ActorAccess.GetData(f1).health = f1.getMaxHealth();
+            xn.access.ActorAccess.GetData(f2).health = f2.getMaxHealth();
             f1.addStatusEffect("tantrum", TANTRUM_DURATION);
             f2.addStatusEffect("tantrum", TANTRUM_DURATION);
             f1.startFightingWith(f2);
@@ -76,8 +76,8 @@ namespace xn.tournament
             float elapsed = UnityEngine.Time.time - match.StartTime;
             if (elapsed >= MATCH_TIMEOUT)
             {
-                int f1Hp = f1.data.health;
-                int f2Hp = f2.data.health;
+                int f1Hp = xn.access.ActorAccess.GetData(f1).health;
+                int f2Hp = xn.access.ActorAccess.GetData(f2).health;
                 bool f1Wins;
                 string reason;
                 if (f1Hp > f2Hp)
@@ -143,8 +143,8 @@ namespace xn.tournament
                 BroadcastWinner(winner);
                 return;
             }
-            float hp1 = (float)f1.data.health / f1.getMaxHealth();
-            float hp2 = (float)f2.data.health / f2.getMaxHealth();
+            float hp1 = (float)xn.access.ActorAccess.GetData(f1).health / f1.getMaxHealth();
+            float hp2 = (float)xn.access.ActorAccess.GetData(f2).health / f2.getMaxHealth();
             if (hp1 <= DEFEAT_HP_THRESHOLD)
             {
                 match.WinnerId = match.Fighter2Id;
@@ -177,7 +177,7 @@ namespace xn.tournament
                 actor.cancelAllBeh();
                 actor.clearAttackTarget();
                 actor.finishStatusEffect("tantrum");
-                actor.data.health = actor.getMaxHealth();
+                xn.access.ActorAccess.GetData(actor).health = actor.getMaxHealth();
             }
         }
         private static void BroadcastWinner(Actor winner)
@@ -191,11 +191,11 @@ namespace xn.tournament
         {
             if (attacker == null || target == null) return;
             if (!attacker.isAlive() || !target.isAlive()) return;
-            if (!attacker.hasStatus("tantrum"))
+            if (!xn.access.BaseSimObjectAccess.HasStatus(attacker, "tantrum"))
             {
                 attacker.addStatusEffect("tantrum", TANTRUM_DURATION);
             }
-            if (!attacker.has_attack_target)
+            if (!xn.access.ActorAccess.HasAttackTarget(attacker))
             {
                 attacker.startFightingWith(target);
             }
@@ -211,7 +211,7 @@ namespace xn.tournament
                 if (centerTile != null)
                 {
                     actor.cancelAllBeh();
-                    actor.spawnOn(centerTile);
+                    xn.access.ActorAccess.SpawnOn(actor, centerTile);
                 }
             }
         }

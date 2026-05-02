@@ -12,17 +12,23 @@ namespace xn.world
         private const string KEY_SUFFIX = "xn.title.suffix";          
         private static readonly Dictionary<string, string[]> _titleCache = new Dictionary<string, string[]>();
         private static string _titleFolderPath;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         public static void ClearTitleData(Actor actor)
         {
             if (actor == null) return;
-            actor.data.set(KEY_BASE_NAME, "");
-            actor.data.set(KEY_TITLE, "");
-            actor.data.set(KEY_SUFFIX, "");
+            xn.access.ActorAccess.GetData(actor).set(KEY_BASE_NAME, "");
+            xn.access.ActorAccess.GetData(actor).set(KEY_TITLE, "");
+            xn.access.ActorAccess.GetData(actor).set(KEY_SUFFIX, "");
         }
         public static string GetBaseName(Actor actor)
         {
             if (actor == null) return "";
-            actor.data.get(KEY_BASE_NAME, out string baseName, "");
+            xn.access.ActorAccess.GetData(actor).get(KEY_BASE_NAME, out string baseName, "");
             if (!string.IsNullOrEmpty(baseName)) return baseName;
             string name = actor.getName() ?? "";
             ExtractTitleAndBaseName(actor, name, out _, out string parsed);
@@ -31,13 +37,13 @@ namespace xn.world
         public static string GetTitle(Actor actor)
         {
             if (actor == null) return "";
-            actor.data.get(KEY_TITLE, out string title, "");
+            xn.access.ActorAccess.GetData(actor).get(KEY_TITLE, out string title, "");
             return title ?? "";
         }
         public static string GetSuffix(Actor actor)
         {
             if (actor == null) return "";
-            actor.data.get(KEY_SUFFIX, out string suffix, "");
+            xn.access.ActorAccess.GetData(actor).get(KEY_SUFFIX, out string suffix, "");
             return suffix ?? "";
         }
         public static void Init()
@@ -46,7 +52,7 @@ namespace xn.world
             _inited = true;
             InitTitleFolderPath();
             AttachAllHooks();
-            Debug.Log("[XN] TitleSystem: 称号逻辑已挂接到 realm_/ancient_/beast_ 特质");
+            Debug.Log("[XN] TitleSystem: title hooks attached to realm_/ancient_/beast_ traits");
         }
         private static void InitTitleFolderPath()
         {
@@ -61,12 +67,12 @@ namespace xn.world
                 if (Directory.Exists(path))
                 {
                     _titleFolderPath = path;
-                    Debug.Log("[XN] TitleSystem: 称号文件夹路径: " + _titleFolderPath);
+                    Debug.Log("[XN] TitleSystem: title folder path: " + _titleFolderPath);
                     return;
                 }
             }
             _titleFolderPath = possiblePaths[0];
-            Debug.LogWarning("[XN] TitleSystem: 未找到称号文件夹，使用默认路径: " + _titleFolderPath);
+            Debug.LogWarning("[XN] TitleSystem: title folder not found, using default path: " + _titleFolderPath);
         }
         private static string GetSubFolder(string fileKey)
         {
@@ -109,7 +115,7 @@ namespace xn.world
             }
             catch (Exception ex)
             {
-                Debug.LogError("[XN] TitleSystem: 读取称号文件失败 " + filePath + ": " + ex.Message);
+                Debug.LogError("[XN] TitleSystem: failed to read title file " + filePath + ": " + ex.Message);
                 _titleCache[fileKey] = null;
                 return null;
             }
@@ -168,7 +174,7 @@ namespace xn.world
             }
             catch (Exception ex)
             {
-                Debug.LogError("[XN] TitleSystem RealmHook 异常: " + ex);
+                Debug.LogError("[XN] TitleSystem RealmHook exception: " + ex);
             }
             return false;
         }
@@ -187,7 +193,7 @@ namespace xn.world
             }
             catch (Exception ex)
             {
-                Debug.LogError("[XN] TitleSystem AncientHook 异常: " + ex);
+                Debug.LogError("[XN] TitleSystem AncientHook exception: " + ex);
             }
             return false;
         }
@@ -206,58 +212,58 @@ namespace xn.world
             }
             catch (Exception ex)
             {
-                Debug.LogError("[XN] TitleSystem BeastHook 异常: " + ex);
+                Debug.LogError("[XN] TitleSystem BeastHook exception: " + ex);
             }
             return false;
         }
         private static readonly Dictionary<string, string> _realmSuffixMap =
             new Dictionary<string, string>
         {
-            { "realm_01", "凝气" },
-            { "realm_02", "筑基" },
-            { "realm_03", "结丹" },
-            { "realm_04", "元婴" },
-            { "realm_05", "化神" },
-            { "realm_06", "婴变" },
-            { "realm_07", "问鼎" },
-            { "realm_08", "窥涅" },
-            { "realm_09", "净涅" },
-            { "realm_10", "碎涅" },
-            { "realm_11", "空涅" },
-            { "realm_12", "空灵" },
-            { "realm_13", "空玄" },
-            { "realm_14", "天尊" },
-            { "realm_15", "半踏天" },
-            { "realm_16", "踏天" }
+            { "realm_01", "Qi Condensation" },
+            { "realm_02", "Foundation Establishment" },
+            { "realm_03", "Core Formation" },
+            { "realm_04", "Nascent Soul" },
+            { "realm_05", "Soul Formation" },
+            { "realm_06", "Soul Transformation" },
+            { "realm_07", "Ascendant" },
+            { "realm_08", "Nirvana Scryer" },
+            { "realm_09", "Nirvana Cleanser" },
+            { "realm_10", "Nirvana Shatterer" },
+            { "realm_11", "Void Nirvana" },
+            { "realm_12", "Void Spirit" },
+            { "realm_13", "Void Arcanum" },
+            { "realm_14", "Grand Empyrean" },
+            { "realm_15", "Half-Step Heaven Trampling" },
+            { "realm_16", "Heaven Trampling" }
         };
         private static readonly Dictionary<string, string> _beastSuffixMap =
             new Dictionary<string, string>
         {
-            { "beast_01_stage", "一阶妖兽" },
-            { "beast_02_stage", "二阶妖兽" },
-            { "beast_03_stage", "三阶妖兽" },
-            { "beast_04_stage", "四阶妖兽" },
-            { "beast_05_stage", "五阶妖兽" },
-            { "beast_06_stage", "六阶妖兽" },
-            { "beast_07_stage", "七阶妖兽" },
-            { "beast_08_stage", "八阶妖兽" },
-            { "beast_09_stage", "九阶妖兽" },
-            { "beast_10_stage", "十阶妖兽" }
+            { "beast_01_stage", "1st Tier Beast" },
+            { "beast_02_stage", "2nd Tier Beast" },
+            { "beast_03_stage", "3rd Tier Beast" },
+            { "beast_04_stage", "4th Tier Beast" },
+            { "beast_05_stage", "5th Tier Beast" },
+            { "beast_06_stage", "6th Tier Beast" },
+            { "beast_07_stage", "7th Tier Beast" },
+            { "beast_08_stage", "8th Tier Beast" },
+            { "beast_09_stage", "9th Tier Beast" },
+            { "beast_10_stage", "10th Tier Beast" }
         };
         private static string GetAncientSuffix(int starLevel)
         {
             switch (starLevel)
             {
-                case 1: return "一星古神";
-                case 2: return "二星古神";
-                case 3: return "三星古神";
-                case 4: return "四星古神";
-                case 5: return "五星古神";
-                case 6: return "六星古神";
-                case 7: return "七星古神";
-                case 8: return "八星古神";
-                case 9: return "九星古神";
-                case 10: return "十星古神";
+                case 1: return T("title_suffix_ancient_01", "1 Star Ancient God");
+                case 2: return T("title_suffix_ancient_02", "2 Star Ancient God");
+                case 3: return T("title_suffix_ancient_03", "3 Star Ancient God");
+                case 4: return T("title_suffix_ancient_04", "4 Star Ancient God");
+                case 5: return T("title_suffix_ancient_05", "5 Star Ancient God");
+                case 6: return T("title_suffix_ancient_06", "6 Star Ancient God");
+                case 7: return T("title_suffix_ancient_07", "7 Star Ancient God");
+                case 8: return T("title_suffix_ancient_08", "8 Star Ancient God");
+                case 9: return T("title_suffix_ancient_09", "9 Star Ancient God");
+                case 10: return T("title_suffix_ancient_10", "10 Star Ancient God");
             }
             return null;
         }
@@ -279,6 +285,7 @@ namespace xn.world
                 return;
             if (!_realmSuffixMap.TryGetValue(key, out string suffix))
                 return;
+            suffix = T("title_suffix_" + key, suffix);
             string currentName = actor.getName();
             if (string.IsNullOrEmpty(currentName))
                 return;
@@ -324,7 +331,7 @@ namespace xn.world
             if (string.IsNullOrEmpty(baseName))
                 baseName = currentName.Trim();
             string title = null;
-            actor.data.get(KEY_TITLE, out string storedTitle, "");
+            xn.access.ActorAccess.GetData(actor).get(KEY_TITLE, out string storedTitle, "");
             if (!string.IsNullOrEmpty(storedTitle))
             {
                 title = storedTitle;
@@ -367,8 +374,8 @@ namespace xn.world
                 return;
             if (string.IsNullOrEmpty(baseName))
                 baseName = currentName.Trim();
-            actor.data.set(KEY_BASE_NAME, baseName);
-            actor.data.set(KEY_TITLE, picked);
+            xn.access.ActorAccess.GetData(actor).set(KEY_BASE_NAME, baseName);
+            xn.access.ActorAccess.GetData(actor).set(KEY_TITLE, picked);
         }
         private static int GetBeastStage(string traitId)
         {
@@ -388,6 +395,7 @@ namespace xn.world
                 return;
             if (!_beastSuffixMap.TryGetValue(traitId, out string suffix))
                 return;
+            suffix = T("title_suffix_" + traitId, suffix);
             string currentName = actor.getName();
             if (string.IsNullOrEmpty(currentName))
                 return;
@@ -426,9 +434,9 @@ namespace xn.world
             string storedBase = null;
             string storedTitle = null;
             string storedSuffix = null;
-            actor.data.get(KEY_BASE_NAME, out storedBase, null);
-            actor.data.get(KEY_TITLE, out storedTitle, null);
-            actor.data.get(KEY_SUFFIX, out storedSuffix, null);
+            xn.access.ActorAccess.GetData(actor).get(KEY_BASE_NAME, out storedBase, null);
+            xn.access.ActorAccess.GetData(actor).get(KEY_TITLE, out storedTitle, null);
+            xn.access.ActorAccess.GetData(actor).get(KEY_SUFFIX, out storedSuffix, null);
             if (!string.IsNullOrEmpty(storedBase))
             {
                 string expectedName = BuildExpectedName(storedTitle, storedBase, storedSuffix);
@@ -468,7 +476,7 @@ namespace xn.world
                 baseName = name.Trim();
             if (!string.IsNullOrEmpty(baseName))
             {
-                actor.data.set(KEY_BASE_NAME, baseName);
+                xn.access.ActorAccess.GetData(actor).set(KEY_BASE_NAME, baseName);
             }
         }
         private static string BuildExpectedName(string title, string baseName, string suffix)
@@ -481,9 +489,9 @@ namespace xn.world
         {
             if (actor == null || string.IsNullOrEmpty(baseName))
                 return;
-            actor.data.set(KEY_BASE_NAME, baseName);
-            actor.data.set(KEY_TITLE, title ?? "");
-            actor.data.set(KEY_SUFFIX, suffix ?? "");
+            xn.access.ActorAccess.GetData(actor).set(KEY_BASE_NAME, baseName);
+            xn.access.ActorAccess.GetData(actor).set(KEY_TITLE, title ?? "");
+            xn.access.ActorAccess.GetData(actor).set(KEY_SUFFIX, suffix ?? "");
             string titlePart = string.IsNullOrEmpty(title) ? "" : "[" + title + "]";
             string suffixPart = string.IsNullOrEmpty(suffix) ? "" : "-" + suffix;
             string finalName = titlePart + baseName + suffixPart;

@@ -15,6 +15,16 @@ namespace xn.ui
             "realm_09_jingnie","realm_10_suinie","realm_11_kongnie","realm_12_kongling",
             "realm_13_kongxuan","realm_14_gtianzun","realm_15_half_tatian","realm_16_tatian"
         };
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
+        private static string ActorName(Actor actor)
+        {
+            return actor?.getName() ?? T("value_unknown", "Unknown");
+        }
         public static void Init()
         {
             CreateMasterApprenticeBrushPower();
@@ -68,8 +78,9 @@ namespace xn.ui
         private static bool OnClickAction(WorldTile pTile, string pPowerID)
         {
             if (pTile == null) return false;
-            var selectedButton = World.world.selected_buttons?.selectedButton;
-            if (selectedButton == null || selectedButton.godPower == null || selectedButton.godPower.id != _currentPowerId)
+            var selectedButton = xn.access.MapBoxAccess.GetSelectedButton(World.world);
+            GodPower selectedPower = xn.access.PowerButtonAccess.GetGodPower(selectedButton);
+            if (selectedPower == null || selectedPower.id != _currentPowerId)
             {
                 _firstActor = null; 
                 return false;
@@ -88,41 +99,42 @@ namespace xn.ui
             });
             if (target == null)
             {
-                xn.world.BroadcastSystem.Custom("请点击一个有智慧生物的位置");
+                xn.world.BroadcastSystem.Custom(T("brush_select_sapient_unit", "Click a sapient unit"));
                 return false;
             }
             if (_firstActor == null)
             {
                 long masterId;
-                target.data.get(KEY_MASTER_ID, out masterId, 0L);
+                xn.access.ActorAccess.GetData(target).get(KEY_MASTER_ID, out masterId, 0L);
                 if (masterId > 0)
                 {
-                    xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}已经有师傅，不能设置");
+                    xn.world.BroadcastSystem.Custom(T("brush_mentorship_already_has_master", "{0} already has a master and cannot be set", ActorName(target)));
                     return false;
                 }
                 _firstActor = target;
-                xn.world.BroadcastSystem.Custom($"已选择第一个：{target.getName() ?? "未知"}，请点击第二个");
+                xn.world.BroadcastSystem.Custom(T("brush_mentorship_first_selected", "First selected: {0}. Click the second unit", ActorName(target)));
                 return true;
             }
             if (_firstActor == target)
             {
-                xn.world.BroadcastSystem.Custom("不能选择同一个单位");
+                xn.world.BroadcastSystem.Custom(T("brush_cannot_select_same_unit", "Cannot select the same unit"));
                 return false;
             }
             long targetMasterId;
-            target.data.get(KEY_MASTER_ID, out targetMasterId, 0L);
+            xn.access.ActorAccess.GetData(target).get(KEY_MASTER_ID, out targetMasterId, 0L);
             if (targetMasterId > 0)
             {
                 _firstActor = null; 
-                xn.world.BroadcastSystem.Custom($"{target.getName() ?? "未知"}已经有师傅，不能设置");
+                xn.world.BroadcastSystem.Custom(T("brush_mentorship_already_has_master", "{0} already has a master and cannot be set", ActorName(target)));
                 return false;
             }
             long firstMasterId;
-            _firstActor.data.get(KEY_MASTER_ID, out firstMasterId, 0L);
+            xn.access.ActorAccess.GetData(_firstActor).get(KEY_MASTER_ID, out firstMasterId, 0L);
             if (firstMasterId > 0)
             {
+                string firstName = ActorName(_firstActor);
                 _firstActor = null; 
-                xn.world.BroadcastSystem.Custom($"{_firstActor.getName() ?? "未知"}已经有师傅，不能设置为师傅");
+                xn.world.BroadcastSystem.Custom(T("brush_mentorship_master_already_has_master", "{0} already has a master and cannot become a master", firstName));
                 return false;
             }
             int firstRealm = GetRealmIndex(_firstActor);
@@ -142,7 +154,7 @@ namespace xn.ui
             else
             {
                 _firstActor = null;
-                xn.world.BroadcastSystem.Custom("两个单位境界相同，无法设置师徒关系");
+                xn.world.BroadcastSystem.Custom(T("brush_mentorship_same_realm", "Both units are in the same realm, so mentorship cannot be set"));
                 return false;
             }
             int maxDisciples = GetMaxDisciples(master);
@@ -150,13 +162,13 @@ namespace xn.ui
             if (currentDisciples >= maxDisciples)
             {
                 _firstActor = null;
-                xn.world.BroadcastSystem.Custom($"{master.getName() ?? "未知"}已达到收徒上限（{maxDisciples}名），无法再收徒");
+                xn.world.BroadcastSystem.Custom(T("brush_mentorship_disciple_limit", "{0} has reached the disciple limit ({1}) and cannot take another disciple", ActorName(master), maxDisciples));
                 return false;
             }
             AddDisciple(master, disciple);
-            string masterName = master.getName() ?? "未知";
-            string discipleName = disciple.getName() ?? "未知";
-            xn.world.BroadcastSystem.Custom($"{masterName}收{discipleName}为徒");
+            string masterName = ActorName(master);
+            string discipleName = ActorName(disciple);
+            xn.world.BroadcastSystem.Custom(T("brush_mentorship_success", "{0} accepted {1} as a disciple", masterName, discipleName));
             xn.voice.AIVoiceBroadcast.OnMentorshipSuccess(disciple, master);
             _firstActor = null;
             return true;
@@ -182,7 +194,7 @@ namespace xn.ui
         private static int GetDisciplesCount(Actor master)
         {
             string idsStr;
-            master.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+            xn.access.ActorAccess.GetData(master).get(KEY_DISCIPLES_IDS, out idsStr, "");
             if (string.IsNullOrEmpty(idsStr)) return 0;
             string[] parts = idsStr.Split(',');
             int count = 0;
@@ -200,7 +212,7 @@ namespace xn.ui
         {
             List<long> list = new List<long>();
             string idsStr;
-            master.data.get(KEY_DISCIPLES_IDS, out idsStr, "");
+            xn.access.ActorAccess.GetData(master).get(KEY_DISCIPLES_IDS, out idsStr, "");
             if (string.IsNullOrEmpty(idsStr)) return list;
             string[] parts = idsStr.Split(',');
             foreach (var part in parts)
@@ -216,12 +228,12 @@ namespace xn.ui
         private static void AddDisciple(Actor master, Actor disciple)
         {
             List<long> list = GetDisciplesList(master);
-            if (!list.Contains(disciple.data.id))
+            if (!list.Contains(xn.access.ActorAccess.GetData(disciple).id))
             {
-                list.Add(disciple.data.id);
-                master.data.set(KEY_DISCIPLES_IDS, string.Join(",", list));
+                list.Add(xn.access.ActorAccess.GetData(disciple).id);
+                xn.access.ActorAccess.GetData(master).set(KEY_DISCIPLES_IDS, string.Join(",", list));
             }
-            disciple.data.set(KEY_MASTER_ID, master.data.id);
+            xn.access.ActorAccess.GetData(disciple).set(KEY_MASTER_ID, xn.access.ActorAccess.GetData(master).id);
         }
         public static void Reset()
         {

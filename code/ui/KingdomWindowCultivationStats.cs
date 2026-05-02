@@ -7,6 +7,12 @@ namespace xn.ui
 {
     internal static class KingdomWindowCultivationStats
     {
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
         private static readonly string[] REALM_IDS = {
             "realm_01_qi", "realm_02_foundation", "realm_03_core", "realm_04_nascent",
             "realm_05_deity", "realm_06_infantchg", "realm_07_wending", "realm_08_kuinie",
@@ -14,22 +20,24 @@ namespace xn.ui
             "realm_13_kongxuan", "realm_14_gtianzun", "realm_15_half_tatian", "realm_16_tatian"
         };
         private static readonly string[] REALM_NAMES = {
-            "凝气", "筑基", "结丹", "元婴", "化神", "婴变", "问鼎", "窥涅",
-            "净涅", "碎涅", "空涅", "空灵", "空玄", "天尊", "半步踏天", "踏天"
+            "Qi Condensation", "Foundation Establishment", "Core Formation", "Nascent Soul", "Soul Formation", "Soul Transformation", "Ascendant", "Nirvana Scryer",
+            "Nirvana Cleanser", "Nirvana Shatterer", "Void Nirvana", "Void Spirit", "Void Arcanum", "Grand Empyrean", "Half-Step Heaven Trampling", "Heaven Trampling"
         };
         private static readonly string[] ANCIENT_IDS = {
             "ancient_01_star", "ancient_02_star", "ancient_03_star", "ancient_04_star", "ancient_05_star",
             "ancient_06_star", "ancient_07_star", "ancient_08_star", "ancient_09_star", "ancient_10_star"
         };
         private static readonly string[] ANCIENT_NAMES = {
-            "一星", "二星", "三星", "四星", "五星", "六星", "七星", "八星", "九星", "十星"
+            "1 Star Ancient God", "2 Star Ancient God", "3 Star Ancient God", "4 Star Ancient God", "5 Star Ancient God",
+            "6 Star Ancient God", "7 Star Ancient God", "8 Star Ancient God", "9 Star Ancient God", "10 Star Ancient God"
         };
         private static readonly string[] BEAST_IDS = {
             "beast_01_stage", "beast_02_stage", "beast_03_stage", "beast_04_stage", "beast_05_stage",
             "beast_06_stage", "beast_07_stage", "beast_08_stage", "beast_09_stage", "beast_10_stage"
         };
         private static readonly string[] BEAST_NAMES = {
-            "一阶", "二阶", "三阶", "四阶", "五阶", "六阶", "七阶", "八阶", "九阶", "十阶"
+            "1st Tier Beast", "2nd Tier Beast", "3rd Tier Beast", "4th Tier Beast", "5th Tier Beast",
+            "6th Tier Beast", "7th Tier Beast", "8th Tier Beast", "9th Tier Beast", "10th Tier Beast"
         };
         public static void Post_showStatsRows(KingdomWindow __instance)
         {
@@ -79,43 +87,40 @@ namespace xn.ui
             }
             ShowLevelRow(container, kingdom);
             ShowAuraRow(container, kingdom);
-            ShowCultivatorRow(container, "xn_kingdom_cultivators", "修士", totalCultivators, realmCounts, REALM_NAMES);
-            ShowCultivatorRow(container, "xn_kingdom_ancients", "古神", totalAncients, ancientCounts, ANCIENT_NAMES);
-            ShowCultivatorRow(container, "xn_kingdom_beasts", "妖兽", totalBeasts, beastCounts, BEAST_NAMES);
+            ShowCultivatorRow(container, "xn_kingdom_cultivators", "Cultivators", totalCultivators, realmCounts, REALM_IDS, REALM_NAMES);
+            ShowCultivatorRow(container, "xn_kingdom_ancients", "Ancient Gods", totalAncients, ancientCounts, ANCIENT_IDS, ANCIENT_NAMES);
+            ShowCultivatorRow(container, "xn_kingdom_beasts", "Beasts", totalBeasts, beastCounts, BEAST_IDS, BEAST_NAMES);
         }
         private static void ShowLevelRow(StatsRowsContainer container, Kingdom kingdom)
         {
-            var row = container.getStatRow("xn_kingdom_cultivation_level");
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(container, "xn_kingdom_cultivation_level");
             if (row == null) return;
             int level = XiuzhenguoSystem.GetLevel(kingdom);
             var cfg = XiuzhenguoSystem.GetConfig(level);
-            string title = LocalizedTextManager.getText("row_xn_kingdom_cultivation_level");
-            if (string.IsNullOrEmpty(title) || title == "row_xn_kingdom_cultivation_level") title = "修真国等级";
+            string title = T("row_xn_kingdom_cultivation_level", "Cultivation Level");
             row.name_text.text = title;
-            row.value.text = cfg.name;
+            row.value.text = T(cfg.localeKey, cfg.name);
             row.icon.gameObject.SetActive(false);
             row.setMetaForTooltip(MetaType.None, -1L, "row_xn_kingdom_cultivation_level_info");
             row.gameObject.SetActive(true);
         }
         private static void ShowAuraRow(StatsRowsContainer container, Kingdom kingdom)
         {
-            var row = container.getStatRow("xn_kingdom_aura_sum");
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(container, "xn_kingdom_aura_sum");
             if (row == null) return;
             int auraSum = CityAuraSystem.SumAuraFromKingdom(kingdom);
-            string title = LocalizedTextManager.getText("row_xn_kingdom_aura_sum");
-            if (string.IsNullOrEmpty(title) || title == "row_xn_kingdom_aura_sum") title = "国家灵气强度总和";
+            string title = T("row_xn_kingdom_aura_sum", "Total Kingdom Aura");
             row.name_text.text = title;
             row.value.text = auraSum.ToString();
             row.icon.gameObject.SetActive(false);
             row.setMetaForTooltip(MetaType.None, -1L, "row_xn_kingdom_aura_sum_info");
             row.gameObject.SetActive(true);
         }
-        private static void ShowCultivatorRow(StatsRowsContainer container, string rowId, string typeName, int total, int[] counts, string[] names)
+        private static void ShowCultivatorRow(StatsRowsContainer container, string rowId, string typeName, int total, int[] counts, string[] ids, string[] names)
         {
-            var row = container.getStatRow(rowId);
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(container, rowId);
             if (row == null) return;
-            string title = LocalizedTextManager.getText("row_" + rowId);
-            if (string.IsNullOrEmpty(title) || title == "row_" + rowId) title = typeName;
+            string title = T("row_" + rowId, typeName);
             row.name_text.text = title;
             row.value.text = total.ToString();
             row.icon.gameObject.SetActive(false);
@@ -127,16 +132,15 @@ namespace xn.ui
                 {
                     if (counts[i] > 0)
                     {
-                        sb.AppendLine($"{names[i]}：{counts[i]}人");
+                        string name = T("trait_" + ids[i], names[i]);
+                        sb.AppendLine(T("kingdom_stats_count_line", "{0}: {1}", name, counts[i]));
                         hasAny = true;
                     }
                 }
-                if (!hasAny) sb.AppendLine("暂无");
-                return new TooltipData
-                {
-                    _tip_name = $"{typeName}境界分布",
-                    _tip_description = sb.ToString().TrimEnd()
-                };
+                if (!hasAny) sb.AppendLine(T("kingdom_stats_empty", "None"));
+                return xn.access.TooltipDataAccess.Create(
+                    T("kingdom_stats_distribution_title", "{0} Distribution", title),
+                    sb.ToString().TrimEnd());
             };
             row.setMetaForTooltip(MetaType.None, -1L, "row_" + rowId + "_info", tooltipData);
             row.gameObject.SetActive(true);

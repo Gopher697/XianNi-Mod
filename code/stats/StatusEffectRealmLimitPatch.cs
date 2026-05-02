@@ -35,16 +35,16 @@ namespace cultivation
         private static bool ShouldBlockPercentDamage(BaseSimObject target, out Actor attacker)
         {
             attacker = null;
-            if (!target.isActor())
+            if (!xn.access.BaseSimObjectAccess.IsActor(target))
             {
                 return false;
             }
-            Actor targetActor = target.a;
-            if (targetActor.attackedBy != null && targetActor.attackedBy.isActor())
+            Actor targetActor = xn.access.BaseSimObjectAccess.GetActor(target);
+            if (xn.access.ActorAccess.GetAttackedBy(targetActor) != null && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(targetActor)))
             {
-                attacker = targetActor.attackedBy.a;
+                attacker = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(targetActor));
             }
-            else if (targetActor.has_attack_target && targetActor.attack_target != null && targetActor.attack_target.isActor())
+            else if (xn.access.ActorAccess.HasAttackTarget(targetActor) && xn.access.ActorAccess.GetAttackTarget(targetActor) != null && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackTarget(targetActor)))
             {
                 return false;
             }
@@ -66,33 +66,33 @@ namespace cultivation
         private static bool ShouldBlockFireDamage(BaseSimObject target, out Actor attacker)
         {
             attacker = null;
-            if (!target.isActor())
+            if (!xn.access.BaseSimObjectAccess.IsActor(target))
             {
                 return false;
             }
-            Actor targetActor = target.a;
+            Actor targetActor = xn.access.BaseSimObjectAccess.GetActor(target);
             return targetActor.isImmuneToFire();
         }
         private static bool ShouldBlockControlEffect(BaseSimObject target, BaseSimObject caster)
         {
-            if (!target.isActor())
+            if (!xn.access.BaseSimObjectAccess.IsActor(target))
             {
                 return false;
             }
-            Actor targetActor = target.a;
+            Actor targetActor = xn.access.BaseSimObjectAccess.GetActor(target);
             int targetRealm = GetUnifiedRealmIndex(targetActor);
             if (targetRealm < 0)
             {
                 return false;
             }
             Actor casterActor = null;
-            if (caster != null && caster.isActor())
+            if (caster != null && xn.access.BaseSimObjectAccess.IsActor(caster))
             {
-                casterActor = caster.a;
+                casterActor = xn.access.BaseSimObjectAccess.GetActor(caster);
             }
-            else if (targetActor.attackedBy != null && targetActor.attackedBy.isActor())
+            else if (xn.access.ActorAccess.GetAttackedBy(targetActor) != null && xn.access.BaseSimObjectAccess.IsActor(xn.access.ActorAccess.GetAttackedBy(targetActor)))
             {
-                casterActor = targetActor.attackedBy.a;
+                casterActor = xn.access.BaseSimObjectAccess.GetActor(xn.access.ActorAccess.GetAttackedBy(targetActor));
             }
             if (casterActor == null)
             {
@@ -202,9 +202,9 @@ namespace cultivation
         {
             if (ShouldBlockFireDamage(pTarget, out Actor attacker))
             {
-                if (pTarget.isActor() && pTarget.a.asset.has_skin && Randy.randomBool())
+                if (xn.access.BaseSimObjectAccess.IsActor(pTarget) && xn.access.BaseSimObjectAccess.GetActor(pTarget).asset.has_skin && Randy.randomBool())
                 {
-                    pTarget.a.addInjuryTrait("skin_burns");
+                    xn.access.BaseSimObjectAccess.GetActor(pTarget).addInjuryTrait("skin_burns");
                 }
                 __result = true;
                 return false; 
@@ -224,8 +224,8 @@ namespace cultivation
         {
             if (ShouldBlockPercentDamage(pTarget, out Actor attacker))
             {
-                pTarget.a.spawnParticle(Toolbox.color_infected);
-                pTarget.a.startShake(0.4f, 0.2f, pHorizontal: true, pVertical: false);
+                xn.access.BaseSimObjectAccess.GetActor(pTarget).spawnParticle(Toolbox.color_infected);
+                xn.access.BaseSimObjectAccess.GetActor(pTarget).startShake(0.4f, 0.2f, pHorizontal: true, pVertical: false);
                 __result = true;
                 return false; 
             }

@@ -43,7 +43,7 @@ namespace xn.expand
         }
         private static void RegisterEvents()
         {
-            MapBox.on_world_loaded += OnWorldLoaded;
+            xn.access.MapBoxAccess.AddWorldLoadedHandler(OnWorldLoaded);
             var h = new Harmony("xn.expand.audiomanager");
             h.PatchAll(typeof(Patch_ConfigSwitch));
             h.PatchAll(typeof(Patch_MapBoxUpdate));
