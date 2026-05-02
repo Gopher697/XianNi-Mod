@@ -67,12 +67,17 @@ namespace xn.bloodline
         };
         public static string GetLocaleName(string bloodlineType)
         {
-            if (string.IsNullOrEmpty(bloodlineType)) return "无血脉";
+            if (string.IsNullOrEmpty(bloodlineType)) return T("bloodline_type_none", "无血脉");
             if (DISPLAY_NAMES.TryGetValue(bloodlineType, out string name))
             {
-                return name;
+                return T("bloodline_type_" + bloodlineType, name);
             }
             return bloodlineType;
+        }
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
         }
         public static bool IsMutation(string bloodlineType)
         {
