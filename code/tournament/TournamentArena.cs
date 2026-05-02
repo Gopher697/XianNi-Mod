@@ -7,6 +7,12 @@ namespace xn.tournament
         private const int ARENA_RADIUS = 7;
         private static HashSet<WorldTile> _arenaTiles = new HashSet<WorldTile>();
         private static bool _allowTerrainChange = false; 
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         internal static bool IsTerrainChangeAllowed()
         {
             return _allowTerrainChange;
@@ -71,7 +77,7 @@ namespace xn.tournament
                 }
             }
             _allowTerrainChange = false; 
-            xn.world.BroadcastSystem.PostAtTile(center, "比武大会擂台建造完成！");
+            xn.world.BroadcastSystem.PostAtTile(center, T("broadcast_tournament_arena_built", "Tournament arena constructed!"));
         }
         public static bool IsArenaReady(WorldTile center)
         {

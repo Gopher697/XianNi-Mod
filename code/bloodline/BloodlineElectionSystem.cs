@@ -7,6 +7,12 @@ namespace xn.bloodline
     {
         private static bool _inited;
         private static int _lastCheckYear = -1;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         public static void Init()
         {
             if (_inited) return;
@@ -90,7 +96,7 @@ namespace xn.bloodline
                 string positionName = GetPositionName(position);
                 if (i == 0)
                 {
-                    electionResults = $"{candidate.getName()} 当选为{positionName}";
+                    electionResults = T("broadcast_bloodline_election_winner", "{0} was elected {1}", candidate.getName(), positionName);
                 }
             }
             xn.access.ActorAccess.GetData(founder).set(BloodlineDataKeys.KEY_LAST_ELECTION_YEAR, currentYear);
@@ -98,7 +104,7 @@ namespace xn.bloodline
             string typeName = BloodlineTypes.GetLocaleName(bloodlineType);
             if (!string.IsNullOrEmpty(electionResults))
             {
-                xn.world.BroadcastSystem.Custom($"{typeName}家族完成换届选举，{electionResults}");
+                xn.world.BroadcastSystem.Custom(T("broadcast_bloodline_election_complete", "{0} family completed succession; {1}", typeName, electionResults));
             }
         }
         private static int GetElectionScore(Actor actor)
@@ -118,16 +124,16 @@ namespace xn.bloodline
         {
             switch (position)
             {
-                case 1: return "族长";
-                case 2: return "大长老";
-                case 3: return "二长老";
-                case 4: return "三长老";
-                case 5: return "四长老";
-                case 6: return "五长老";
-                case 7: return "六长老";
-                case 8: return "七长老";
-                case 9: return "八长老";
-                default: return "弟子";
+                case 1: return T("bloodline_position_chief", "Chief");
+                case 2: return T("bloodline_position_elder_1", "First Elder");
+                case 3: return T("bloodline_position_elder_2", "Second Elder");
+                case 4: return T("bloodline_position_elder_3", "Third Elder");
+                case 5: return T("bloodline_position_elder_4", "Fourth Elder");
+                case 6: return T("bloodline_position_elder_5", "Fifth Elder");
+                case 7: return T("bloodline_position_elder_6", "Sixth Elder");
+                case 8: return T("bloodline_position_elder_7", "Seventh Elder");
+                case 9: return T("bloodline_position_elder_8", "Eighth Elder");
+                default: return T("bloodline_position_disciple", "Disciple");
             }
         }
         public static int GetPosition(Actor actor)
@@ -139,8 +145,8 @@ namespace xn.bloodline
         }
         public static string GetPositionNameForActor(Actor actor)
         {
-            if (actor == null) return "无";
-            if (BloodlineSystem.IsFounder(actor)) return "始祖";
+            if (actor == null) return T("common_none", "None");
+            if (BloodlineSystem.IsFounder(actor)) return T("bloodline_role_progenitor", "Progenitor");
             if (BloodlineSystem.IsAtavism(actor))
             {
                 int generation = BloodlineSystem.GetGeneration(actor);
@@ -149,30 +155,30 @@ namespace xn.bloodline
             float conc = BloodlineSystem.GetConcentration(actor);
             if (conc <= 20f)
             {
-                return "外门弟子";
+                return T("bloodline_position_outer_disciple", "Outer Disciple");
             }
             int position = GetPosition(actor);
             if (position > 0)
             {
                 return GetPositionName(position);
             }
-            return "内门弟子";
+            return T("bloodline_position_inner_disciple", "Inner Disciple");
         }
         private static string GetAtavismTitle(int generation)
         {
             switch (generation)
             {
-                case 1: return "始祖"; 
-                case 2: return "二代始祖";
-                case 3: return "三代始祖";
-                case 4: return "四代始祖";
-                case 5: return "五代始祖";
-                case 6: return "六代始祖";
-                case 7: return "七代始祖";
-                case 8: return "八代始祖";
-                case 9: return "九代始祖";
-                case 10: return "十代始祖";
-                default: return $"第{generation}代始祖";
+                case 1: return T("bloodline_atavism_title_1", "Progenitor");
+                case 2: return T("bloodline_atavism_title_2", "Second-generation Progenitor");
+                case 3: return T("bloodline_atavism_title_3", "Third-generation Progenitor");
+                case 4: return T("bloodline_atavism_title_4", "Fourth-generation Progenitor");
+                case 5: return T("bloodline_atavism_title_5", "Fifth-generation Progenitor");
+                case 6: return T("bloodline_atavism_title_6", "Sixth-generation Progenitor");
+                case 7: return T("bloodline_atavism_title_7", "Seventh-generation Progenitor");
+                case 8: return T("bloodline_atavism_title_8", "Eighth-generation Progenitor");
+                case 9: return T("bloodline_atavism_title_9", "Ninth-generation Progenitor");
+                case 10: return T("bloodline_atavism_title_10", "Tenth-generation Progenitor");
+                default: return T("bloodline_atavism_title_n", "Generation {0} Progenitor", generation);
             }
         }
     }

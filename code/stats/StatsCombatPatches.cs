@@ -30,6 +30,12 @@ namespace cultivation
         private static Actor s_currentDelegateAttacker = null;
         private static bool s_debugDamage = false;   
         private const string LOGTAG = "[XN-DMG]";
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         private static void D(string msg)
         {
             if (!s_debugDamage) return;
@@ -449,7 +455,8 @@ namespace cultivation
                         if (Randy.randomChance(0.00001f))
                         {
                             if (attacker != null) xn.access.ActorAccess.GetData(attacker).kills++;
-                            xn.world.BroadcastSystem.PostActor(attacker, $"{attacker?.getName() ?? "踏天强者"}使用天劫之力绞杀孽畜");
+                            string attackerName = attacker?.getName() ?? T("broadcast_heavenly_tribulation_unknown_tatian", "Heaven Trampling cultivator");
+                            xn.world.BroadcastSystem.PostActor(attacker, T("broadcast_heavenly_tribulation_purge_beast", "{0} used heavenly tribulation power to purge the beast", attackerName));
                             World.world.units.destroyObject(__instance);
                             D($"Tatian instant kill: NoRealm target erased from world (0.1% chance)");
                             return false; 

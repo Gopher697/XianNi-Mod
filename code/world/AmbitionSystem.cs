@@ -12,6 +12,12 @@ namespace xn.world
         private static int s_nextDemonThreshold = 1000; 
         private const int DEMON_MAX_THRESHOLD = 9000; 
         private static bool s_dragonSpawned = false;  
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         public static int GetValue() { return s_value; }
         public static void Add(int delta)
         {
@@ -60,7 +66,7 @@ namespace xn.world
                 CopyRealmTraits(src, demon);
             }
             GiveRandomDivine(demon, 1);
-            BroadcastSystem.PostActor(demon, "天运子分身降临");
+            BroadcastSystem.PostActor(demon, T("broadcast_tianyunzi_avatar_descends", "Tian Yunzi's avatar has descended"));
             return true;
         }
         private static bool TrySpawnDragonAvatar()
@@ -83,7 +89,7 @@ namespace xn.world
             GiveRandomImmortalArts(dragon, 5);
             GiveRandomIntentExcludingExtreme(dragon, 1);
             GiveRandomAttrFive(dragon, 1);
-            BroadcastSystem.PostActor(dragon, "天运子降临受死吧人类");
+            BroadcastSystem.PostActor(dragon, T("broadcast_tianyunzi_descends", "Tian Yunzi has descended. Humans, meet your death."));
             return true;
         }
         static readonly string[] DIVINE = new string[] {

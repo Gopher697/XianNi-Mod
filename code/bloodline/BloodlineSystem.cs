@@ -11,6 +11,12 @@ namespace xn.bloodline
     {
         private static bool _inited;
         private static Harmony _h;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         private static readonly string[] REALM_IDS = {
             "realm_01_qi",          
             "realm_02_foundation",  
@@ -309,7 +315,7 @@ namespace xn.bloodline
             else if (cultivationType == 3) initialPurifyRealm = GetAncientStar(a);
             xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, initialPurifyRealm);
             string typeName = BloodlineTypes.GetLocaleName(bloodlineType);
-            XNHistoryRegistry.LogBroadcastForActor(a, $"{a.getName()} 证道成功，觉醒了 {typeName}，浓度 {concentration:F1}%！");
+            XNHistoryRegistry.LogBroadcastForActor(a, T("broadcast_bloodline_awakened", "{0} attained the Dao and awakened {1} at {2:F1}% concentration!", a.getName(), typeName, concentration));
             TryGenerateChildAfterAwaken(a);
             return true;
         }
@@ -323,7 +329,7 @@ namespace xn.bloodline
                 baby.addTrait("miracle_born");
                 xn.access.ActorAccess.GetData(baby).set(BloodlineDataKeys.KEY_AWAKENED, 0);
                 XNHistoryRegistry.LogBroadcastForActor(baby,
-                    $"{founder.getName()} 证道后天赐麟儿，{baby.getName()} 诞生，继承了血脉！");
+                    T("broadcast_bloodline_child_born", "After {0} attained the Dao, heaven granted a child: {1} was born and inherited the bloodline!", founder.getName(), baby.getName()));
             }
         }
         public static void OnFounderBreakthrough(Actor founder, float oldConcentration, float newConcentration)
@@ -428,7 +434,7 @@ namespace xn.bloodline
             {
                 resultConc = UnityEngine.Random.Range(90f, 100f);
                 isAtavism = true;
-                XNHistoryRegistry.LogBroadcastForActor(baby, $"奇迹！{baby.getName()} 发生返祖现象，血脉浓度重置为 {resultConc:F1}%！");
+                XNHistoryRegistry.LogBroadcastForActor(baby, T("broadcast_bloodline_atavism", "Miracle! {0} underwent bloodline atavism; concentration reset to {1:F1}%!", baby.getName(), resultConc));
             }
             if (resultConc < 3f && !isAtavism)
             {
@@ -580,7 +586,7 @@ namespace xn.bloodline
                         xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_LAST_PURIFY_REALM, currentRealm);
                         OnFounderBreakthrough(a, oldConc, newConc);
                         string typeName = BloodlineTypes.GetLocaleName(GetBloodlineType(a));
-                        XNHistoryRegistry.LogBroadcastForActor(a, $"{a.getName()} 境界突破，{typeName}浓度提升至 {newConc:F1}%！后代血脉得到提纯。");
+                        XNHistoryRegistry.LogBroadcastForActor(a, T("broadcast_bloodline_purified", "{0} broke through; {1} concentration rose to {2:F1}% and descendants' bloodline was purified.", a.getName(), typeName, newConc));
                     }
                 }
             }

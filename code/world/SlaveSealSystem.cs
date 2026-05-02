@@ -26,6 +26,12 @@ namespace xn.world
         const float  RUSH_RECHECK_SEC    = 3f;     
         static double s_nextTick = 0;
         static double s_nextRushReset = 0;
+        static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         internal static void TrySeal(Actor caster, Actor target)
         {
             if (xn.world.SpaceRiftSystem.IsSpaceActiveFor(caster) || xn.world.SpaceRiftSystem.IsSpaceActiveFor(target)) return;
@@ -57,9 +63,9 @@ namespace xn.world
             xn.access.ActorAccess.GetData(caster).set(KEY_SLAVE_ID, xn.access.ActorAccess.GetData(target).id);
             target.cancelAllBeh();
             caster.cancelAllBeh();
-            string tName = target.getName() ?? "未知";
-            string cName = caster.getName() ?? "未知";
-            xn.world.BroadcastSystem.Custom($"{tName}被{cName}种下了奴印");
+            string tName = target.getName() ?? T("common_unknown", "Unknown");
+            string cName = caster.getName() ?? T("common_unknown", "Unknown");
+            xn.world.BroadcastSystem.Custom(T("broadcast_slave_seal_applied", "{0} was marked with {1}'s slave seal", tName, cName));
             long xp; xn.access.ActorAccess.GetData(target).get(KEY_XP, out xp, 0L);
             xn.access.ActorAccess.GetData(target).set(KEY_LAST_XP, xp);
             xn.access.ActorAccess.GetData(target).set(KEY_SAVE_ONCE, xn.access.ActorAccess.GetData(caster).id); 
@@ -92,7 +98,7 @@ namespace xn.world
                             if (ey > 0 && Date.getCurrentYear() >= ey)
                             {
                                 ClearRelation(slave, master);
-                                xn.world.BroadcastSystem.Custom($"{slave.getName() ?? "未知"}的奴印到期解除了");
+                                xn.world.BroadcastSystem.Custom(T("broadcast_slave_seal_expired", "{0}'s slave seal expired", slave.getName() ?? T("common_unknown", "Unknown")));
                                 continue;
                             }
                             BaseSimObject slaveAttackTarget = xn.access.ActorAccess.GetAttackTarget(slave);

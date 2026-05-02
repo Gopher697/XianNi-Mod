@@ -23,6 +23,12 @@ namespace cultivation
         private const float EFFECT_Y_OFFSET = -2f;   
         private const int DAMAGE_FRAME = 28;          
         private static bool s_registered;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         private class BlackHoleData
         {
             public Actor caster;
@@ -83,7 +89,7 @@ namespace cultivation
             if (targetActor == null) return false;
             WorldTile centerTile = targetActor.current_tile;
             if (centerTile == null) return false;
-            BroadcastSystem.PostActor(suppressor, suppressor.getName() + " 发动了天劫之力绞杀余孽");
+            BroadcastSystem.PostActor(suppressor, T("broadcast_heavenly_tribulation_purge", "{0} unleashed heavenly tribulation power to purge the remnants", suppressor.getName()));
             StartBlackHole(suppressor, targetActor, suppressedTargets, nieli);
             return true;
         }

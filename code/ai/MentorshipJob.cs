@@ -41,6 +41,12 @@ namespace xn.world
         static readonly HashSet<long> s_mentorshipUnits = new HashSet<long>();
         static float s_nextCacheRefresh = 0f;
         const float CACHE_REFRESH_INTERVAL = 10f; 
+        static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         static readonly string[] ROOT_IDS = {
             "root_01_mortal", "root_02_low", "root_03_mid", 
             "root_04_high", "root_05_supreme", "root_06_tiandi"
@@ -425,7 +431,7 @@ namespace xn.world
                 long discXp;
                 xn.access.ActorAccess.GetData(disc).get(KEY_XP, out discXp, 0L);
                 xn.access.ActorAccess.GetData(disc).set(KEY_XP, discXp + (long)(masterXp * REBELLION_XP_GAIN));
-                BroadcastSystem.Custom(disc.getName() + " 弑师证道，获得 " + master.getName() + " 一半修为");
+                BroadcastSystem.Custom(T("broadcast_mentorship_rebellion", "{0} slew their master and gained half of {1}'s cultivation", disc.getName(), master.getName()));
                 RemoveDisciple(master, discId);
                 xn.access.ActorAccess.GetData(disc).set(KEY_MASTER_ID, 0L);
                 master.die(pDestroy: false, AttackType.Other, pCountDeath: true, pLogFavorite: true);
@@ -552,9 +558,9 @@ namespace xn.world
                         xn.access.ActorAccess.GetData(inheritor).get("xn.stat.jipinshiling", out inheritorJiPin, 0);
                         xn.access.ActorAccess.GetData(inheritor).set("xn.stat.shiling", inheritorShiLing + shiLing);
                         xn.access.ActorAccess.GetData(inheritor).set("xn.stat.jipinshiling", inheritorJiPin + jiPinShiLing);
-                        BroadcastSystem.Custom(inheritor.getName() + " 继承了 " + __instance.getName() + " 的所有灵石");
+                        BroadcastSystem.Custom(T("broadcast_mentorship_stones_inherited", "{0} inherited all spirit stones from {1}", inheritor.getName(), __instance.getName()));
                     }
-                    BroadcastSystem.Custom(__instance.getName() + " 陨落，其徒弟发誓将来复仇");
+                    BroadcastSystem.Custom(T("broadcast_mentorship_revenge_oath", "{0} fell; their disciples swore future revenge", __instance.getName()));
                 }
             }
         }

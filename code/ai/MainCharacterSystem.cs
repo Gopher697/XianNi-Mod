@@ -8,6 +8,12 @@ namespace cultivation.ai
         private const string KEY_OWN_LIGHTNING_IMMUNE = "xn.main_char.own_lightning_immune";
         private const string KEY_OWN_LIGHTNING_TIME = "xn.main_char.own_lightning_time";
         private const float IMMUNE_DURATION = 2f;
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         public static void Init(Harmony h)
         {
             h.Patch(AccessTools.Method(typeof(Actor), "die",
@@ -47,8 +53,8 @@ namespace cultivation.ai
                 int maxHealth = __instance.getMaxHealth();
                 __instance.changeHealth(maxHealth);
                 TeleportToRandomLocation(__instance);
-                string name = __instance.getName() ?? "未知";
-                string message = $"{name}的主角光环触发保命，剩余保命次数：{lives}";
+                string name = __instance.getName() ?? T("common_unknown", "Unknown");
+                string message = T("broadcast_main_character_life_saved", "{0}'s protagonist halo saved them. Remaining saves: {1}", name, lives);
                 xn.world.BroadcastSystem.PostActor(__instance, message);
                 return false;
             }

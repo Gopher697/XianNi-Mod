@@ -19,6 +19,12 @@ namespace xn.world
         private static int   s_tick;
         private static int   s_startYear; 
         private static readonly List<RecordTile> s_changed = new List<RecordTile>(512);
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         private static readonly string[] REALM_IDS = {
             "realm_01_qi","realm_02_foundation","realm_03_core","realm_04_nascent",
             "realm_05_deity","realm_06_infantchg","realm_07_wending","realm_08_kuinie",
@@ -112,7 +118,7 @@ namespace xn.world
                 WorldTile center;
                 if (!TryPickOceanAndBuildIsland(out center))
                 {
-                    BroadcastSystem.PostActor(attacker, attacker.getName() + " 尝试开辟空间失败：未找到足够大的海域");
+                    BroadcastSystem.PostActor(attacker, T("broadcast_space_rift_no_ocean", "{0} failed to open a space rift: no large enough ocean was found", attacker.getName()));
                     xn.access.ActorAccess.GetData(attacker).set(KEY_CD_UNTIL_YEAR, Date.getCurrentYear() + 1);
                     return;
                 }
@@ -135,7 +141,7 @@ namespace xn.world
                 xn.access.ActorAccess.GetData(attacker).set(KEY_CD_UNTIL_YEAR, Date.getCurrentYear() + COOLDOWN_YEARS);
                 xn.world.TerritoryFX.StartFor(attacker);
                 xn.world.TerritoryFX.StartFor(target);
-                BroadcastSystem.PostAtTile(center, attacker.getName() + " 对 " + target.getName() + " 开辟了空间（" + s_center.x + "," + s_center.y + "）");
+                BroadcastSystem.PostAtTile(center, T("broadcast_space_rift_opened", "{0} opened a space rift against {1} ({2},{3})", attacker.getName(), target.getName(), s_center.x, s_center.y));
             }
         }
         [HarmonyPatch(typeof(MapBox), "updateSimulation")]
@@ -157,7 +163,7 @@ namespace xn.world
                     EndAndRestore(a1, a2);
                     if (a1 != null && a1.isAlive() && a2 != null && a2.isAlive())
                     {
-                        BroadcastSystem.PostActor(a1, a1.getName() + " 与 " + a2.getName() + " 的空间开辟已持续3年，自动结束");
+                        BroadcastSystem.PostActor(a1, T("broadcast_space_rift_auto_end", "{0} and {1}'s space rift lasted 3 years and ended automatically", a1.getName(), a2.getName()));
                     }
                     return;
                 }

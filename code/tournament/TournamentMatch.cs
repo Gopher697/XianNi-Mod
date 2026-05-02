@@ -5,6 +5,12 @@ namespace xn.tournament
         private const float DEFEAT_HP_THRESHOLD = 0.1f; 
         private const float TANTRUM_DURATION = 300f;    
         private const float MATCH_TIMEOUT = 60f;        
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         public static void StartMatch(MatchData match)
         {
             if (match == null) return;
@@ -28,7 +34,7 @@ namespace xn.tournament
             match.IsDeathMatch = UnityEngine.Random.Range(0f, 1f) < 0.2f;
             if (match.IsDeathMatch)
             {
-                xn.world.BroadcastSystem.Custom($"生死对决！{f1.getName()} VS {f2.getName()} - 不死不休！");
+                xn.world.BroadcastSystem.Custom(T("broadcast_tournament_deathmatch", "Death duel! {0} VS {1} - no retreat!", f1.getName(), f2.getName()));
             }
             f1.cancelAllBeh();
             f2.cancelAllBeh();
@@ -52,7 +58,7 @@ namespace xn.tournament
                 match.WinnerId = null;
                 match.LoserId = null;
                 match.IsFinished = true;
-                xn.world.BroadcastSystem.Custom("比武双方同归于尽！");
+                xn.world.BroadcastSystem.Custom(T("broadcast_tournament_double_ko", "Both tournament fighters fell together!"));
                 return;
             }
             if (!f1Alive)
@@ -83,17 +89,17 @@ namespace xn.tournament
                 if (f1Hp > f2Hp)
                 {
                     f1Wins = true;
-                    reason = "血量优势";
+                    reason = T("tournament_reason_hp_advantage", "health advantage");
                 }
                 else if (f2Hp > f1Hp)
                 {
                     f1Wins = false;
-                    reason = "血量优势";
+                    reason = T("tournament_reason_hp_advantage", "health advantage");
                 }
                 else
                 {
                     f1Wins = UnityEngine.Random.Range(0, 2) == 0;
-                    reason = "随机判定";
+                    reason = T("tournament_reason_random", "random judgment");
                 }
                 if (f1Wins)
                 {
@@ -109,7 +115,7 @@ namespace xn.tournament
                 StopFightAndHeal(f1);
                 StopFightAndHeal(f2);
                 var winner = f1Wins ? f1 : f2;
-                xn.world.BroadcastSystem.PostActor(winner, $"比赛超时！{winner.getName()} 以{reason}获胜！");
+                xn.world.BroadcastSystem.PostActor(winner, T("broadcast_tournament_timeout_win", "Match timeout! {0} won by {1}!", winner.getName(), reason));
                 return;
             }
             if (match.IsDeathMatch)
@@ -139,7 +145,7 @@ namespace xn.tournament
                 StopFightAndHeal(f2);
                 var loser = deathLoser == match.Fighter1Id ? f1 : f2;
                 var winner = deathLoser == match.Fighter1Id ? f2 : f1;
-                xn.world.BroadcastSystem.PostActor(loser, $"{loser.getName()} 濒死落败！");
+                xn.world.BroadcastSystem.PostActor(loser, T("broadcast_tournament_near_death_defeat", "{0} was defeated near death!", loser.getName()));
                 BroadcastWinner(winner);
                 return;
             }
@@ -184,7 +190,7 @@ namespace xn.tournament
         {
             if (winner != null)
             {
-                xn.world.BroadcastSystem.PostActor(winner, $"{winner.getName()} 获胜！");
+                xn.world.BroadcastSystem.PostActor(winner, T("broadcast_tournament_winner", "{0} won!", winner.getName()));
             }
         }
         private static void EnsureFighting(Actor attacker, Actor target)

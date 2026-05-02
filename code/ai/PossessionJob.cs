@@ -24,6 +24,12 @@ namespace cultivation.ai
         private const string KEY_LUCK  = "xn.stat.qiyun";
         private const string KEY_STOP  = "xn.cultivation.stop";
         private const string KEY_SEAL_UNTIL_YEAR = "xn.seal_until_year";
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
         private static readonly string[] REALM_IDS = new[]
         {
             "realm_01_qi","realm_02_foundation","realm_03_core","realm_04_nascent",
@@ -371,8 +377,8 @@ namespace cultivation.ai
             {
                 dst.switchFavorite();
             }
-            string name = dst.getName() ?? "未知";
-            BroadcastSystem.Custom($"主角{name}夺舍成功，继续拥有主角光环");
+            string name = dst.getName() ?? T("common_unknown", "Unknown");
+            BroadcastSystem.Custom(T("broadcast_possession_main_character_success", "Protagonist {0} possessed a new body and kept the protagonist halo", name));
         }
         private static Actor PickTarget(Actor soul)
         {
