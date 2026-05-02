@@ -9,6 +9,11 @@ namespace xn.feedback
         private static readonly Color COL_PANEL = new(0.12f, 0.13f, 0.18f, 0.98f);
         private static readonly Color COL_DIVIDER = new(0.45f, 0.52f, 0.68f, 0.35f);
         private static readonly Color COL_SUBTLE = new(0.55f, 0.55f, 0.62f);
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
         public static void Create(Transform parent, Vector2 position, float width, float height)
         {
             var panel = MakeGO("SponsorPanel", parent);
@@ -32,7 +37,7 @@ namespace xn.feedback
                 iconImg.preserveAspect = true;
             }
             MakeText("Title", panel.transform, new Vector2(0, y),
-                new Vector2(width - 20, 22), "赞助榜", 13,
+                new Vector2(width - 20, 22), T("sponsor_title", "Sponsors"), 13,
                 TextAnchor.MiddleCenter, new Color(0.95f, 0.82f, 0.45f));
             y -= 25f;
             var div = MakeGO("Divider", panel.transform);
@@ -84,7 +89,7 @@ namespace xn.feedback
             loadingText.fontSize = 10;
             loadingText.alignment = TextAnchor.MiddleCenter;
             loadingText.color = COL_SUBTLE;
-            loadingText.text = "加载中...";
+            loadingText.text = T("sponsor_loading", "Loading...");
             var listContent = content.transform;
             if (SponsorLoader.IsLoaded)
                 PopulateList(listContent, loadingText, SponsorLoader.GetCachedSponsors());
@@ -105,7 +110,7 @@ namespace xn.feedback
                 t.fontSize = 10;
                 t.alignment = TextAnchor.MiddleCenter;
                 t.color = COL_SUBTLE;
-                t.text = "暂无赞助者\n期待您的支持！";
+                t.text = T("sponsor_empty", "No sponsors yet\nThank you for your support!");
                 return;
             }
             for (int i = 0; i < sponsors.Count; i++)

@@ -11,11 +11,16 @@ namespace xn.bloodline
         private static Transform _content;
         private static ObjectPoolGenericMono<BloodlineFamilyElement> _pool;
         public const string WINDOW_ID = "xn_bloodline_list";
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
         public static void Init()
         {
             if (_inited) return;
             _inited = true;
-            _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, "血脉传承");
+            _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, "bloodline_window_title");
             var bg = _window.transform.Find("Background");
             var scrollView = bg?.Find("Scroll View");
             var viewport = scrollView?.Find("Viewport");
@@ -94,20 +99,20 @@ namespace xn.bloodline
                     {
                         rank++;
                         var element = _pool.getNext();
-                        element.Setup(family.Founder, rank, "始祖");
+                        element.Setup(family.Founder, rank, T("bloodline_role_progenitor", "Progenitor"), true);
                     }
                     if (family.Chief != null && family.Chief.isAlive() && family.Chief != family.Founder)
                     {
                         rank++;
                         var element = _pool.getNext();
-                        element.Setup(family.Chief, rank, "族长");
+                        element.Setup(family.Chief, rank, T("bloodline_role_chief", "Chief"), false);
                     }
                 }
             }
             if (rank == 0)
             {
                 var element = _pool.getNext();
-                element.SetupEmpty("暂无血脉家族");
+                element.SetupEmpty(T("bloodline_family_empty", "No bloodline families"));
             }
         }
         private static List<BloodlineFamily> GetBloodlineFamilies()
@@ -164,6 +169,11 @@ namespace xn.bloodline
         public Text title;
         public Text power;
         private Actor _actor;
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
         public static void CreatePrefab()
         {
             if (Prefab != null) return;
@@ -269,7 +279,7 @@ namespace xn.bloodline
             obj.SetActive(false);
             Prefab = element;
         }
-        public void Setup(Actor actor, int rankNum, string roleTitle)
+        public void Setup(Actor actor, int rankNum, string roleTitle, bool isProgenitor)
         {
             gameObject.SetActive(true);
             _actor = actor;
@@ -281,7 +291,7 @@ namespace xn.bloodline
             }
             if (actor == null || !actor.isAlive())
             {
-                SetupEmpty("(已故)");
+                SetupEmpty(T("bloodline_member_dead", "Deceased"));
                 return;
             }
             rank.text = rankNum.ToString();
@@ -299,7 +309,7 @@ namespace xn.bloodline
             }
             icon.gameObject.SetActive(true);
             icon.sprite = xn.access.ActorAccess.GetLastColoredSprite(actor) ?? actor.asset.getSpriteIcon();
-            string nameColor = roleTitle == "始祖" ? "#FF8C00" : "#FFD700";
+            string nameColor = isProgenitor ? "#FF8C00" : "#FFD700";
             title.text = $"<color={nameColor}>[{roleTitle}]</color>{actor.getName()}";
             string bloodlineType = BloodlineTypes.GetLocaleName(BloodlineSystem.GetBloodlineType(actor));
             float concentration = BloodlineSystem.GetConcentration(actor);

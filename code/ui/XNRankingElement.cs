@@ -19,6 +19,11 @@ namespace xn.ui
         public Image iconRealm;
         public Image iconPower;
         private Actor _actor;
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
         public static void CreatePrefab()
         {
             if (Prefab != null) return;
@@ -333,12 +338,12 @@ namespace xn.ui
                 }
             }
             iconRealm.gameObject.SetActive(false);
-            textRealm.text = "<color=#888888>无境界</color>";
+            textRealm.text = $"<color=#888888>{T("ranking_no_realm", "No realm")}</color>";
         }
         private void ShowEmpty()
         {
             textRank.text = "";
-            textName.text = "<color=#888888>(空)</color>";
+            textName.text = $"<color=#888888>{T("ranking_empty_slot", "(empty)")}</color>";
             textRealm.text = "";
             textPower.text = "-";
             textLevel.text = "-";
@@ -351,11 +356,11 @@ namespace xn.ui
         {
             string text;
             if (power >= 1_000_000_000_000)
-                text = $"{power / 1_000_000_000_000f:F1}兆";
+                text = $"{power / 1_000_000_000_000f:F1}{T("ranking_power_unit_trillion", "T")}";
             else if (power >= 100_000_000)
-                text = $"{power / 100_000_000f:F1}亿";
+                text = $"{power / 100_000_000f:F1}{T("ranking_power_unit_hundred_million", " Yi")}";
             else if (power >= 10_000)
-                text = $"{power / 10_000f:F1}万";
+                text = $"{power / 10_000f:F1}{T("ranking_power_unit_ten_thousand", " Wan")}";
             else
                 text = power.ToString();
             string color;

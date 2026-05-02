@@ -922,7 +922,23 @@
   "broadcast_bridge_dao_insight": "{0} 感悟道心，原来这就是修仙，桥段保留",
   "broadcast_bridge_fail": "{0} 经历踏天{1}桥失败咯",
   "broadcast_tribulation_death": "{0} 突破中被天劫杀死了",
-  "btn_xn_questions_desc": "查看常见问题与解答。"
-
+  "btn_xn_questions_desc": "查看常见问题与解答。",
+  "bloodline_window_title": "血脉传承",
+  "bloodline_role_progenitor": "始祖",
+  "bloodline_role_chief": "族长",
+  "bloodline_family_empty": "暂无血脉家族",
+  "bloodline_member_dead": "已故",
+  "xn_power_ranking_title": "战力排行榜",
+  "version_update_title": "仙逆模组发现新版本!",
+  "version_update_info": "当前版本: {0}    最新版本: {1}",
+  "version_download_button": "前往下载最新版",
+  "common_close": "关闭",
+  "sponsor_title": "赞助榜",
+  "sponsor_loading": "加载中...",
+  "sponsor_empty": "暂无赞助者\n期待您的支持！",
+  "ranking_no_realm": "无境界",
+  "ranking_empty_slot": "(空)",
+  "ranking_power_unit_trillion": "兆",
+  "ranking_power_unit_hundred_million": "亿",
+  "ranking_power_unit_ten_thousand": "万"
 }
-

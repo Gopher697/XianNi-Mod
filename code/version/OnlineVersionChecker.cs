@@ -16,6 +16,11 @@ namespace xn.version
         private static bool _hasChecked;
         private static GameObject _popupWindow;
         private static string _downloadUrl;
+        private static string T(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
+        }
         public static void CheckOnLoad()
         {
             if (_hasChecked) return;
@@ -116,10 +121,10 @@ namespace xn.version
             panelImage.color = new Color(0.1f, 0.1f, 0.15f, 1f);
             float currentY = panelHeight / 2 - 35f;
             CreateText("Title", panelObj.transform, new Vector2(0, currentY), new Vector2(420, 35),
-                "仙逆模组发现新版本!", 24, TextAnchor.MiddleCenter, new Color(1f, 0.8f, 0.2f));
+                T("version_update_title", "New Xianni Mod Version Available!"), 24, TextAnchor.MiddleCenter, new Color(1f, 0.8f, 0.2f));
             currentY -= 50f;
             CreateText("Info", panelObj.transform, new Vector2(0, currentY), new Vector2(420, 45),
-                $"当前版本: {CURRENT_VERSION}    最新版本: {data.version}", 16, TextAnchor.MiddleCenter, Color.white);
+                string.Format(T("version_update_info", "Current: {0}  Latest: {1}"), CURRENT_VERSION, data.version), 16, TextAnchor.MiddleCenter, Color.white);
             currentY -= 45f;
             if (hasChangelog)
             {
@@ -180,7 +185,7 @@ namespace xn.version
                 urlTxtRect.anchorMax = Vector2.one;
                 urlTxtRect.sizeDelta = Vector2.zero;
                 var txt = urlTxt.AddComponent<Text>();
-                txt.text = "前往下载最新版";
+                txt.text = T("version_download_button", "Download Latest Version");
                 txt.font = LocalizedTextManager.current_font;
                 txt.fontSize = 16;
                 txt.alignment = TextAnchor.MiddleCenter;
@@ -201,7 +206,7 @@ namespace xn.version
             closeTxtRect.anchorMax = Vector2.one;
             closeTxtRect.sizeDelta = Vector2.zero;
             var closeTxtComp = closeTxt.AddComponent<Text>();
-            closeTxtComp.text = "关闭";
+            closeTxtComp.text = T("common_close", "Close");
             closeTxtComp.font = LocalizedTextManager.current_font;
             closeTxtComp.fontSize = 15;
             closeTxtComp.alignment = TextAnchor.MiddleCenter;

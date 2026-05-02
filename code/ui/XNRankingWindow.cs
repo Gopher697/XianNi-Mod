@@ -18,7 +18,7 @@ namespace xn.ui
         {
             if (_inited) return;
             _inited = true;
-            _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, "战力排行榜");
+            _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, "xn_power_ranking_title");
             var bg = _window.transform.Find("Background");
             var scrollView = bg?.Find("Scroll View");
             var viewport = scrollView?.Find("Viewport");
