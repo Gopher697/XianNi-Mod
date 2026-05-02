@@ -1592,131 +1592,156 @@ namespace xn.bloodline
         }
         #endregion
         #region 血脉天赋解锁状态查询
+        private static string T(string key, string fallback, params object[] args)
+        {
+            string text = LocalizedTextManager.getText(key);
+            if (string.IsNullOrEmpty(text) || text == key) text = fallback;
+            return args != null && args.Length > 0 ? string.Format(text, args) : text;
+        }
+        private static string TalentName(string key, string fallback)
+        {
+            return T("bloodline_talent_name_" + key, fallback);
+        }
+        private static string TalentStatusLine(float concentration, int required, string key, string fallback)
+        {
+            string name = TalentName(key, fallback);
+            return concentration >= required
+                ? T("bloodline_talent_status_learned", "  [{0}] Learned", name)
+                : T("bloodline_talent_status_not_learned", "  [{0}] Not learned (requires {1}% concentration)", name, required);
+        }
+        private static string TalentActiveLine(string key, string fallback)
+        {
+            return T("bloodline_talent_status_active", "  [{0}] Active", TalentName(key, fallback));
+        }
+        private static string TalentCostLine(string key, string fallback)
+        {
+            return T("bloodline_talent_status_cost", "  [{0}] Cost active", TalentName(key, fallback));
+        }
         public static string GetBloodlineTalentStatus(Actor a)
         {
             if (a == null || !BloodlineSystem.HasBloodline(a)) return "";
             float concentration = BloodlineSystem.GetConcentration(a);
             string bloodlineType = BloodlineSystem.GetBloodlineType(a);
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("血脉天赋：");
+            sb.AppendLine(T("bloodline_talent_status_header", "Bloodline Talents:"));
             if (bloodlineType == BloodlineTypes.TAIGU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [太古威严] 已领悟" : "  [太古威严] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [血脉压制] 已领悟" : "  [血脉压制] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [神震] 已领悟" : "  [神震] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "taigu_20", "Primordial Majesty"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "taigu_50", "Bloodline Suppression"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "taigu_80", "Divine Tremor"));
             }
             else if (bloodlineType == BloodlineTypes.CAOMU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [自然亲和] 已领悟" : "  [自然亲和] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [寄生孢子] 已领悟" : "  [寄生孢子] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [树界降临] 已领悟" : "  [树界降临] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "caomu_20", "Natural Affinity"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "caomu_50", "Parasitic Spores"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "caomu_80", "Tree Realm Descent"));
             }
             else if (bloodlineType == BloodlineTypes.MEIHUO)
             {
-                sb.AppendLine(concentration >= 20f ? "  [幻形] 已领悟" : "  [幻形] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [乱心] 已领悟" : "  [乱心] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [心奴] 已领悟" : "  [心奴] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "meihuo_20", "Illusory Form"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "meihuo_50", "Mind Disturbance"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "meihuo_80", "Mind Slave"));
             }
             else if (bloodlineType == BloodlineTypes.HOUYI)
             {
-                sb.AppendLine(concentration >= 20f ? "  [鹰眼] 已领悟" : "  [鹰眼] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [穿云] 已领悟" : "  [穿云] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [落日] 已领悟" : "  [落日] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "houyi_20", "Hawk Eye"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "houyi_50", "Cloud Piercer"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "houyi_80", "Falling Sun"));
             }
             else if (bloodlineType == BloodlineTypes.HUANGQUAN)
             {
-                sb.AppendLine(concentration >= 20f ? "  [阴体] 已领悟" : "  [阴体] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [拘魂] 已领悟" : "  [拘魂] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [冥河渡] 已领悟" : "  [冥河渡] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "huangquan_20", "Yin Body"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "huangquan_50", "Soul Binding"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "huangquan_80", "Nether River Crossing"));
             }
             else if (bloodlineType == BloodlineTypes.ZUZHOU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [厄运] 已领悟" : "  [厄运] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [虚弱力场] 已领悟" : "  [虚弱力场] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [灭魂咒] 已领悟" : "  [灭魂咒] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "zuzhou_20", "Misfortune"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "zuzhou_50", "Weakening Field"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "zuzhou_80", "Soul-Destroying Curse"));
             }
             else if (bloodlineType == BloodlineTypes.JIHAN)
             {
-                sb.AppendLine(concentration >= 20f ? "  [寒躯] 已领悟" : "  [寒躯] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [冰封] 已领悟" : "  [冰封] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [碎冰] 已领悟" : "  [碎冰] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "jihan_20", "Cold Body"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "jihan_50", "Ice Seal"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "jihan_80", "Ice Shatter"));
             }
             else if (bloodlineType == BloodlineTypes.JUMO)
             {
-                sb.AppendLine(concentration >= 20f ? "  [巨体] 已领悟" : "  [巨体] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [活血] 已领悟" : "  [活血] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [传送之术] 已领悟" : "  [传送之术] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "jumo_20", "Giant Body"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "jumo_50", "Blood Vitality"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "jumo_80", "Teleportation Art"));
             }
             else if (bloodlineType == BloodlineTypes.KUANGZHANSHI)
             {
-                sb.AppendLine(concentration >= 20f ? "  [怒意] 已领悟" : "  [怒意] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [血怒] 已领悟" : "  [血怒] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [不屈] 已领悟" : "  [不屈] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "kuangzhanshi_20", "Rage"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "kuangzhanshi_50", "Blood Fury"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "kuangzhanshi_80", "Unyielding"));
             }
             else if (bloodlineType == BloodlineTypes.NIEPAN)
             {
-                sb.AppendLine(concentration >= 20f ? "  [灵火] 已领悟" : "  [灵火] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [余烬] 已领悟" : "  [余烬] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [真火爆裂] 已领悟" : "  [真火爆裂] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "niepan_20", "Spirit Flame"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "niepan_50", "Embers"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "niepan_80", "True Fire Burst"));
             }
             else if (bloodlineType == BloodlineTypes.JINFA)
             {
-                sb.AppendLine(concentration >= 20f ? "  [绝缘] 已领悟" : "  [绝缘] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [破法] 已领悟" : "  [破法] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [禁魔领域] 已领悟" : "  [禁魔领域] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "jinfa_20", "Insulation"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "jinfa_50", "Spellbreaker"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "jinfa_80", "Anti-Magic Domain"));
             }
             else if (bloodlineType == BloodlineTypes.GUTI)
             {
-                sb.AppendLine(concentration >= 20f ? "  [神皮] 已领悟" : "  [神皮] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [神力] 已领悟" : "  [神力] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [不灭体] 已领悟" : "  [不灭体] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "guti_20", "Divine Skin"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "guti_50", "Divine Strength"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "guti_80", "Undying Body"));
             }
             else if (bloodlineType == BloodlineTypes.SUIYUE)
             {
-                sb.AppendLine(concentration >= 20f ? "  [长生] 已领悟" : "  [长生] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [枯荣] 已领悟" : "  [枯荣] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [永生] 已领悟" : "  [永生] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "suiyue_20", "Longevity"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "suiyue_50", "Wither and Flourish"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "suiyue_80", "Immortality"));
             }
             else if (bloodlineType == BloodlineTypes.LEIFA)
             {
-                sb.AppendLine(concentration >= 20f ? "  [雷体] 已领悟" : "  [雷体] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [引雷] 已领悟" : "  [引雷] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [雷池] 已领悟" : "  [雷池] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "leifa_20", "Thunder Body"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "leifa_50", "Lightning Call"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "leifa_80", "Thunder Pool"));
             }
             else if (bloodlineType == BloodlineTypes.XUANWU)
             {
-                sb.AppendLine(concentration >= 20f ? "  [龟息] 已领悟" : "  [龟息] 未领悟 (需20%浓度)");
-                sb.AppendLine(concentration >= 50f ? "  [反震] 已领悟" : "  [反震] 未领悟 (需50%浓度)");
-                sb.AppendLine(concentration >= 80f ? "  [绝对防御] 已领悟" : "  [绝对防御] 未领悟 (需80%浓度)");
+                sb.AppendLine(TalentStatusLine(concentration, 20, "xuanwu_20", "Turtle Breath"));
+                sb.AppendLine(TalentStatusLine(concentration, 50, "xuanwu_50", "Backlash"));
+                sb.AppendLine(TalentStatusLine(concentration, 80, "xuanwu_80", "Absolute Defense"));
             }
             else if (bloodlineType == BloodlineTypes.ENAN)
             {
-                sb.AppendLine("  [万毒疆域] 已激活");
-                sb.AppendLine("  [天煞孤星] 代价生效中");
+                sb.AppendLine(TalentActiveLine("enan_active", "Ten Thousand Poisons Domain"));
+                sb.AppendLine(TalentCostLine("enan_cost", "Solitary Ominous Star"));
             }
             else if (bloodlineType == BloodlineTypes.TIANSHA)
             {
-                sb.AppendLine("  [献祭光环] 已激活");
-                sb.AppendLine("  [克死队友] 代价生效中");
+                sb.AppendLine(TalentActiveLine("tiansha_active", "Sacrifice Aura"));
+                sb.AppendLine(TalentCostLine("tiansha_cost", "Doomed Companions"));
             }
             else if (bloodlineType == BloodlineTypes.SHIBIAN)
             {
-                sb.AppendLine("  [黄泉尸毒] 已激活");
-                sb.AppendLine("  [生机断绝] 代价生效中");
+                sb.AppendLine(TalentActiveLine("shibian_active", "Yellow Springs Corpse Poison"));
+                sb.AppendLine(TalentCostLine("shibian_cost", "Severed Vitality"));
             }
             else if (bloodlineType == BloodlineTypes.ZAOSHUAI)
             {
-                sb.AppendLine("  [天道宠儿] 已激活");
-                sb.AppendLine("  [昙花一现] 代价生效中");
+                sb.AppendLine(TalentActiveLine("zaoshuai_active", "Heaven's Favored Child"));
+                sb.AppendLine(TalentCostLine("zaoshuai_cost", "Fleeting Bloom"));
             }
             else if (bloodlineType == BloodlineTypes.JIBIAN)
             {
-                sb.AppendLine("  [血肉增殖] 已激活");
-                sb.AppendLine("  [智力崩坏] 代价生效中");
+                sb.AppendLine(TalentActiveLine("jibian_active", "Flesh Proliferation"));
+                sb.AppendLine(TalentCostLine("jibian_cost", "Shattered Mind"));
             }
             else
             {
-                sb.AppendLine("  (效果开发中...)");
+                sb.AppendLine(T("bloodline_talent_status_developing", "  (Effects in development...)"));
             }
             return sb.ToString();
         }
@@ -1724,138 +1749,83 @@ namespace xn.bloodline
         {
             if (bloodlineType == BloodlineTypes.TAIGU)
             {
-                return "太古血脉天赋：\n" +
-                       "20% [太古威严]：基础攻击力与防御力提升10%\n" +
-                       "50% [血脉压制]：周围10格内非太古血脉敌人护甲降低25%\n" +
-                       "80% [神震]：攻击低境界敌人时30%概率眩晕2秒";
+                return T("bloodline_talent_desc_taigu", "Primordial Bloodline Talents:\n20% [Primordial Majesty]: Base attack and defense +10%\n50% [Bloodline Suppression]: Non-Primordial enemies within 10 tiles lose 25 armor\n80% [Divine Tremor]: 30% chance to stun lower-realm enemies for 2 seconds when attacking");
             }
             else if (bloodlineType == BloodlineTypes.CAOMU)
             {
-                return "草木血脉天赋：\n" +
-                       "20% [自然亲和]：在草地或森林上生命恢复速度提升50%\n" +
-                       "50% [寄生孢子]：攻击附带寄生种子，持续5秒吸血\n" +
-                       "80% [树界降临]：生命低于30%时召唤树人，冷却180秒";
+                return T("bloodline_talent_desc_caomu", "Woodland Bloodline Talents:\n20% [Natural Affinity]: Health regeneration +50% on grass or forest tiles\n50% [Parasitic Spores]: Attacks apply parasitic seeds that drain life for 5 seconds\n80% [Tree Realm Descent]: Summons a treant below 30% health, 180-second cooldown");
             }
             else if (bloodlineType == BloodlineTypes.MEIHUO)
             {
-                return "魅惑血脉天赋：\n" +
-                       "20% [幻形]：闪避率提升15%\n" +
-                       "50% [乱心]：受击时20%概率使攻击者停顿3秒\n" +
-                       "80% [心奴]：击杀非首领敌人时30%概率复活为死士(最多3名)";
+                return T("bloodline_talent_desc_meihuo", "Charm Bloodline Talents:\n20% [Illusory Form]: Dodge +15%\n50% [Mind Disturbance]: 20% chance when hit to halt the attacker for 3 seconds\n80% [Mind Slave]: 30% chance to revive killed non-leader enemies as deathsworn servants (max 3)");
             }
             else if (bloodlineType == BloodlineTypes.HOUYI)
             {
-                return "后羿血脉天赋：\n" +
-                       "20% [鹰眼]：攻击距离+2格，命中率+20%\n" +
-                       "50% [穿云]：远程攻击无视50%护甲\n" +
-                       "80% [落日]：攻击时20%概率召唤箭雨打击目标，无冷却";
+                return T("bloodline_talent_desc_houyi", "Hou Yi Bloodline Talents:\n20% [Hawk Eye]: Attack range +2 tiles, accuracy +20%\n50% [Cloud Piercer]: Ranged attacks ignore 50% armor\n80% [Falling Sun]: 20% chance on attack to summon an arrow rain on the target, no cooldown");
             }
             else if (bloodlineType == BloodlineTypes.HUANGQUAN)
             {
-                return "黄泉血脉天赋：\n" +
-                       "20% [阴体]：夜晚时全属性提升15%\n" +
-                       "50% [拘魂]：击杀敌人后召唤骷髅助战30秒\n" +
-                       "80% [冥河渡]：死亡时以灵魂形态继续战斗10秒，期间无敌";
+                return T("bloodline_talent_desc_huangquan", "Yellow Springs Bloodline Talents:\n20% [Yin Body]: All stats +15% at night\n50% [Soul Binding]: Summons a skeleton for 30 seconds after killing an enemy\n80% [Nether River Crossing]: Continues fighting as an invincible soul for 10 seconds after death");
             }
             else if (bloodlineType == BloodlineTypes.ZUZHOU)
             {
-                return "诅咒血脉天赋：\n" +
-                       "20% [厄运]：受击时反弹5%伤害给攻击者\n" +
-                       "50% [虚弱力场]：周围10格敌人攻击力和移速降低20%\n" +
-                       "80% [灭魂咒]：击杀的敌人无法轮回和夺舍";
+                return T("bloodline_talent_desc_zuzhou", "Curse Bloodline Talents:\n20% [Misfortune]: Reflects 5% damage to attackers when hit\n50% [Weakening Field]: Enemies within 10 tiles lose 20% attack and movement speed\n80% [Soul-Destroying Curse]: Killed enemies cannot reincarnate or possess a new body");
             }
             else if (bloodlineType == BloodlineTypes.JIHAN)
             {
-                return "极寒血脉天赋：\n" +
-                       "20% [寒躯]：受到的火焰伤害降低50%\n" +
-                       "50% [冰封]：攻击有20%概率施加冻结状态，持续5秒\n" +
-                       "80% [碎冰]：攻击处于冻结状态的敌人时，伤害翻倍";
+                return T("bloodline_talent_desc_jihan", "Extreme Cold Bloodline Talents:\n20% [Cold Body]: Fire damage taken -50%\n50% [Ice Seal]: Attacks have a 20% chance to freeze for 5 seconds\n80% [Ice Shatter]: Damage doubles against frozen enemies");
             }
             else if (bloodlineType == BloodlineTypes.JUMO)
             {
-                return "巨魔血脉天赋：\n" +
-                       "20% [巨体]：生命上限提升20%，体型+20%\n" +
-                       "50% [活血]：战斗时护甲提升20%\n" +
-                       "80% [传送之术]：生命值低于15%时将至多5名敌人传送至地图随机位置，冷却500秒";
+                return T("bloodline_talent_desc_jumo", "Troll Bloodline Talents:\n20% [Giant Body]: Max health +20%, size +20%\n50% [Blood Vitality]: Armor +20% while in combat\n80% [Teleportation Art]: Below 15% health, teleports up to 5 enemies to random map positions, 500-second cooldown");
             }
             else if (bloodlineType == BloodlineTypes.KUANGZHANSHI)
             {
-                return "狂战士血脉天赋：\n" +
-                       "20% [怒意]：完全免疫恐惧状态，不会逃跑\n" +
-                       "50% [血怒]：生命值每降低5%，攻击速度提升1%\n" +
-                       "80% [不屈]：濒死时强制锁血1点，获得5秒无敌状态，冷却300秒";
+                return T("bloodline_talent_desc_kuangzhanshi", "Berserker Bloodline Talents:\n20% [Rage]: Fully immune to fear and will not flee\n50% [Blood Fury]: Attack speed +1% for every 5% missing health\n80% [Unyielding]: At near death, locks health at 1 and gains 5 seconds of invincibility, 300-second cooldown");
             }
             else if (bloodlineType == BloodlineTypes.NIEPAN)
             {
-                return "涅槃血脉天赋：\n" +
-                       "20% [灵火]：普通攻击附带燃烧效果\n" +
-                       "50% [余烬]：死亡后变为一颗蛋，若10秒内蛋未被摧毁，则以50%生命值复活\n" +
-                       "80% [真火爆裂]：涅槃重生瞬间，对周围8格造成火焰伤害并附带燃烧";
+                return T("bloodline_talent_desc_niepan", "Nirvana Bloodline Talents:\n20% [Spirit Flame]: Normal attacks apply burning\n50% [Embers]: After death, becomes an egg; if not destroyed within 10 seconds, revives with 50% health\n80% [True Fire Burst]: On Nirvana revival, deals fire damage within 8 tiles and applies burning");
             }
             else if (bloodlineType == BloodlineTypes.JINFA)
             {
-                return "禁法血脉天赋：\n" +
-                       "20% [绝缘]：投掷物和陨石造成伤害降低50%\n" +
-                       "50% [破法]：范围10格内的法师无法施法且移动速度降低90%\n" +
-                       "80% [禁魔领域]：周围10格内，所有敌方投射物飞行速度降低90%";
+                return T("bloodline_talent_desc_jinfa", "Forbidden Magic Bloodline Talents:\n20% [Insulation]: Projectile and meteor damage taken -50%\n50% [Spellbreaker]: Mages within 10 tiles cannot cast and lose 90% movement speed\n80% [Anti-Magic Domain]: Enemy projectiles within 10 tiles lose 90% flight speed");
             }
             else if (bloodlineType == BloodlineTypes.GUTI)
             {
-                return "古体血脉天赋：\n" +
-                       "20% [神皮]：护甲提升40%，免疫击退效果，移速-60%\n" +
-                       "50% [神力]：法力变为生命护盾，受伤时先消耗法力\n" +
-                       "80% [不灭体]：单次伤害未超过生命上限5%时，强制判定为1伤害";
+                return T("bloodline_talent_desc_guti", "Ancient Body Bloodline Talents:\n20% [Divine Skin]: Armor +40%, immune to knockback, movement speed -60%\n50% [Divine Strength]: Mana becomes a health shield and is consumed before health when damaged\n80% [Undying Body]: Any single hit below 5% max health is forced to 1 damage");
             }
             else if (bloodlineType == BloodlineTypes.SUIYUE)
             {
-                return "岁月血脉天赋：\n" +
-                       "20% [长生]：寿命上限+20%\n" +
-                       "50% [枯荣]：每次攻击5%概率强制减少敌人10年寿命\n" +
-                       "80% [永生]：年龄超过1000岁时锁定年龄不再增加";
+                return T("bloodline_talent_desc_suiyue", "Time Bloodline Talents:\n20% [Longevity]: Lifespan +20%\n50% [Wither and Flourish]: 5% chance on each attack to forcibly reduce enemy lifespan by 10 years\n80% [Immortality]: After age 1000, age is locked and no longer increases");
             }
             else if (bloodlineType == BloodlineTypes.LEIFA)
             {
-                return "雷罚血脉天赋：\n" +
-                       "20% [雷体]：免疫雷电伤害，移动速度提升10%\n" +
-                       "50% [引雷]：受击时30%概率召唤闪电劈向攻击者\n" +
-                       "80% [雷池]：生命值低于15%时，周围持续落下高频雷暴，无差别攻击";
+                return T("bloodline_talent_desc_leifa", "Thunder Punishment Bloodline Talents:\n20% [Thunder Body]: Immune to lightning damage, movement speed +10%\n50% [Lightning Call]: 30% chance when hit to summon lightning against the attacker\n80% [Thunder Pool]: Below 15% health, high-frequency lightning storms strike nearby units indiscriminately");
             }
             else if (bloodlineType == BloodlineTypes.XUANWU)
             {
-                return "玄武血脉天赋：\n" +
-                       "20% [龟息]：静止不动时，生命恢复速度提升300%\n" +
-                       "50% [反震]：受到的近战伤害50%直接反弹给攻击者\n" +
-                       "80% [绝对防御]：濒死时获得10秒无敌，期间无法移动，冷却300秒";
+                return T("bloodline_talent_desc_xuanwu", "Xuanwu Bloodline Talents:\n20% [Turtle Breath]: While standing still, health regeneration +300%\n50% [Backlash]: Reflects 50% melee damage directly to the attacker\n80% [Absolute Defense]: At near death, gains 10 seconds of invincibility but cannot move, 300-second cooldown");
             }
             else if (bloodlineType == BloodlineTypes.ENAN)
             {
-                return "厄难毒体（变异血脉）：\n" +
-                       "[万毒疆域]：战斗时周围15格内敌方生物持续中毒\n" +
-                       "[天煞孤星]（代价）：外交值固定为最低，生命值永远锁定1%无法恢复满";
+                return T("bloodline_talent_desc_enan", "Calamity Poison Body (Mutated Bloodline):\n[Ten Thousand Poisons Domain]: During combat, enemy creatures within 15 tiles are continuously poisoned\n[Solitary Ominous Star] (Cost): Diplomacy is fixed at the minimum; health is permanently locked at 1% and cannot fully recover");
             }
             else if (bloodlineType == BloodlineTypes.TIANSHA)
             {
-                return "天煞血脉（变异血脉）：\n" +
-                       "[献祭光环]：视野范围内每有一个友军死亡，自身攻击力提升10%，可无限叠加直至战斗结束\n" +
-                       "[克死队友]（代价）：周围友军防御力降低40%，自身气运值降低50%";
+                return T("bloodline_talent_desc_tiansha", "Heavenly Omen Bloodline (Mutated Bloodline):\n[Sacrifice Aura]: Each allied death within sight increases attack by 10%, stacking without limit until combat ends\n[Doomed Companions] (Cost): Nearby allies lose 40% defense; own luck is reduced by 50%");
             }
             else if (bloodlineType == BloodlineTypes.SHIBIAN)
             {
-                return "尸变血脉（变异血脉）：\n" +
-                       "[黄泉尸毒]：周围5格内的敌人会自动染上尸毒，每秒扣除生命值1%，且死后100%转化为骷髅兵(至多20个)\n" +
-                       "[生机断绝]（代价）：自然生命恢复速度为0，奇迹纪元和希望纪元全属性减半";
+                return T("bloodline_talent_desc_shibian", "Corpse Transformation Bloodline (Mutated Bloodline):\n[Yellow Springs Corpse Poison]: Enemies within 5 tiles automatically contract corpse poison, losing 1% health per second; on death, 100% chance to become skeleton soldiers (max 20)\n[Severed Vitality] (Cost): Natural health regeneration is 0; all stats are halved during the Age of Miracles and Age of Hope");
             }
             else if (bloodlineType == BloodlineTypes.ZAOSHUAI)
             {
-                return "早衰血脉（变异血脉）：\n" +
-                       "[天道宠儿]：修炼速度提升500%，悟性为100点气运为100点\n" +
-                       "[昙花一现]（代价）：最大寿命强制锁定为100，若100岁直接死亡";
+                return T("bloodline_talent_desc_zaoshuai", "Premature Decay Bloodline (Mutated Bloodline):\n[Heaven's Favored Child]: Cultivation speed +500%, comprehension set to 100, luck set to 100\n[Fleeting Bloom] (Cost): Maximum lifespan is forcibly locked at 100; death occurs directly at age 100");
             }
             else if (bloodlineType == BloodlineTypes.JIBIAN)
             {
-                return "畸变血脉（变异血脉）：\n" +
-                       "[血肉增殖]：受到伤害时分裂出随机野生生物助战(至多10只)，击杀敌人后50%瞬间回满生命\n" +
-                       "[智力崩坏]（代价）：智力强制锁定为1，无法成为领主或国王，战斗中有概率陷入混乱攻击友军";
+                return T("bloodline_talent_desc_jibian", "Aberration Bloodline (Mutated Bloodline):\n[Flesh Proliferation]: When damaged, splits off random wild creatures to fight (max 10); after killing an enemy, 50% chance to instantly restore full health\n[Shattered Mind] (Cost): Intelligence is forced to 1, cannot become a lord or king, and may fall into confusion during combat and attack allies");
             }
             return "";
         }
