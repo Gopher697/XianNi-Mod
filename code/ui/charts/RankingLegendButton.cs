@@ -111,7 +111,7 @@ namespace xn.ui.charts
             }
             if (!RankingLegendGenerator.CanGenerate())
             {
-                ShowLegendText(T("ranking_legend_default_key_limit", "The default key can generate only once. Configure a custom API key."));
+                ShowLegendText(T("ranking_legend_default_key_limit", "The default key can only generate once. Please configure a custom API key."));
                 return;
             }
             GenerateLegend();
@@ -120,7 +120,7 @@ namespace xn.ui.charts
         {
             if (!RankingLegendGenerator.CanRegenerate())
             {
-                ShowLegendText(T("ranking_legend_regenerate_requires_custom_key", "Regeneration requires a custom API key."));
+                ShowLegendText(T("ranking_legend_regenerate_requires_custom_key", "Regenerating requires a custom API key."));
                 return;
             }
             string previousContent = RankingLegendStorage.Load();
@@ -153,10 +153,10 @@ namespace xn.ui.charts
             }
             if (top3[0] == null)
             {
-                ShowLegendText(T("ranking_legend_no_rankable_units", "No rankable units found"));
+                ShowLegendText(T("ranking_legend_no_rankable_units", "No eligible units found to rank."));
                 return;
             }
-            ShowLegendText(T("ranking_legend_generating_story", "Generating legend story..."));
+            ShowLegendText(T("ranking_legend_generating_story", "Generating legend..."));
             RankingLegendGenerator.GenerateLegend(top3, scores, (result) =>
             {
                 ShowLegendText(result);
