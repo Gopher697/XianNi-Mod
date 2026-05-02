@@ -9,10 +9,9 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $sourceDll = Join-Path $repoRoot 'build_staging\XianniMod.dll'
-$sourceLocales = @(
-    Join-Path $repoRoot 'Locales\en.json'
-    Join-Path $repoRoot 'Locales\cz.json'
-)
+$sourceLocalesDir = Join-Path $repoRoot 'Locales'
+$sourceLocales = Get-ChildItem -LiteralPath $sourceLocalesDir -Filter '*.json' -File |
+    Sort-Object Name
 
 if (-not (Test-Path -LiteralPath $sourceDll -PathType Leaf)) {
     throw "Missing build output: $sourceDll. Run 'dotnet build .\XianniMod.csproj -c Release' first."
@@ -22,10 +21,8 @@ if (-not (Test-Path -LiteralPath $ModDir -PathType Container)) {
     throw "Target mod directory does not exist: $ModDir"
 }
 
-foreach ($locale in $sourceLocales) {
-    if (-not (Test-Path -LiteralPath $locale -PathType Leaf)) {
-        throw "Missing locale file: $locale"
-    }
+if ($sourceLocales.Count -eq 0) {
+    throw "No locale JSON files found in: $sourceLocalesDir"
 }
 
 $targetLocales = Join-Path $ModDir 'Locales'
@@ -38,8 +35,8 @@ $copyPlan = @(
 
 foreach ($locale in $sourceLocales) {
     $copyPlan += [pscustomobject]@{
-        Source = $locale
-        Target = Join-Path $targetLocales (Split-Path -Leaf $locale)
+        Source = $locale.FullName
+        Target = Join-Path $targetLocales $locale.Name
     }
 }
 

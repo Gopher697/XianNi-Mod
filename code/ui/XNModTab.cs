@@ -36,7 +36,7 @@ namespace xn.ui
             if (_inited) return; _inited = true;
             var tabIcon = SpriteTextureLoader.getSprite("ui/icon/icontab")
                         ?? SpriteTextureLoader.getSprite("ui/icons/iconTab");
-            _tab = TabManager.CreateTab("xn_tab_root", T("xn_tab_root", "Cultivation"), T("xn_tab_root_desc", "Xian Ni mod entry"), tabIcon);
+            _tab = TabManager.CreateTab("xn_tab_root", "xn_tab_root", "xn_tab_root_desc", tabIcon);
             _tab.SetLayout(new List<string> { "tools" });
             var btnIcon = SpriteTextureLoader.getSprite("ui/icon/lingqi")
                       ?? SpriteTextureLoader.getSprite("ui/icons/iconBook");
