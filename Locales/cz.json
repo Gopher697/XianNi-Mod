@@ -369,6 +369,7 @@
   "tournament_summary_user_prompt": "请根据以下比武大会数据，创作一段比赛总结：\n\n{0}",
   "tournament_history_window_title": "对战历史",
   "Match History": "对战历史",
+  "Battle History": "对战历史",
   "ranking_legend_tip": "战力传奇",
   "ranking_legend_desc": "左键：生成/查看；右键：重新生成（需自定义API密匙）",
   "ranking_legend_generating_wait": "正在生成中，请稍候...",

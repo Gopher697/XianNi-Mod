@@ -21,7 +21,7 @@ namespace xn.tournament
             _inited = true;
             try
             {
-                _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, T("tournament_history_window_title", "Match History"));
+                _window = WindowCreator.CreateEmptyWindow(WINDOW_ID, T("tournament_history_window_title", "Battle History"));
                 var winRT = _window.transform as RectTransform;
                 if (winRT != null)
                 {
@@ -83,7 +83,7 @@ namespace xn.tournament
             var histories = TournamentHistoryStorage.GetAllHistories();
             if (histories.Count == 0)
             {
-                _contentText.text = T("tournament_history_empty", "No tournament history records yet");
+                _contentText.text = T("tournament_history_empty", "No Grand Martial Arts Tournament history available");
                 return;
             }
             var sb = new System.Text.StringBuilder();
@@ -91,9 +91,9 @@ namespace xn.tournament
             {
                 var history = histories[i];
                 sb.AppendLine("━━━━━━━━━━━━━━━━━━━━");
-                sb.AppendLine(T("tournament_history_header_format", "<b><size=16>Tournament #{0} ({1}-{2})</size></b>", history.Edition, history.Year, history.EndYear));
-                sb.AppendLine(T("tournament_history_participants_format", "Participants: {0}", history.ParticipantNames.Count));
-                sb.AppendLine(T("tournament_history_rounds_format", "Total Rounds: {0}", history.TotalRounds));
+                sb.AppendLine(T("tournament_history_header_format", "<b><size=16>Grand Martial Arts Tournament {0} ({1}–{2})</size></b>", history.Edition, history.Year, history.EndYear));
+                sb.AppendLine(T("tournament_history_participants_format", "Number of participants: {0}", history.ParticipantNames.Count));
+                sb.AppendLine(T("tournament_history_rounds_format", "Total rounds: {0}", history.TotalRounds));
                 sb.AppendLine(T("tournament_history_champion_format", "Champion: <color=#FFD700><b>{0}</b></color>", history.ChampionName));
                 if (!string.IsNullOrEmpty(history.RunnerUpName))
                 {
