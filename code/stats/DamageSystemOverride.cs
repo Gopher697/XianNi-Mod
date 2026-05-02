@@ -26,7 +26,7 @@ namespace cultivation
                 typeof(BaseSimObject), typeof(bool), typeof(bool), typeof(bool)
             }),
             (typeof(BaseSimObject), "changeHealth", new Type[] { typeof(int) }),
-            (typeof(Actor), "addForce", new Type[] { typeof(float), typeof(float), typeof(float) }),
+            (typeof(Actor), "addForce", new Type[] { typeof(float), typeof(float), typeof(float), typeof(bool), typeof(bool) }),
             (typeof(ActorTool), "applyForceToUnit", new Type[] {
                 typeof(AttackData), typeof(BaseSimObject), typeof(float), typeof(bool)
             }),

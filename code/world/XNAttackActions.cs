@@ -360,7 +360,7 @@ namespace xn.world
             if (!CheckCDAndCost(caster, KEY_XUANKONG_CD, CD_XUANKONG, KEY_LINGLI, COST_XUANKONG)) return false;
             ShentongFX.PlayOnce_Xuankongpo(target);
             DealDamage(caster, target, 1.5f);
-            target.addForce(0, 0, 8f); 
+            target.addForce(0, 0, 8f, false, false); 
             return true;
         }
         public static bool Action_Zhenkong(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)

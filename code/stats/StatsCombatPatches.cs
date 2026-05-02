@@ -1019,7 +1019,7 @@ namespace cultivation
                 }
             }
         }
-        [HarmonyPatch(typeof(Actor), "addForce")]
+        [HarmonyPatch(typeof(Actor), "addForce", new Type[] { typeof(float), typeof(float), typeof(float), typeof(bool), typeof(bool) })]
         private static class AddForceRealmCheckPatch
         {
             [HarmonyPrefix]
