@@ -366,6 +366,7 @@
   "btn_xn_place_dashou": "神の用心棒を設置",
   "btn_xn_place_dashou_desc": "強力な護衛を一人配置することを推奨。",
   "actor_dashou": "神の用心棒",
+  "上帝的打手_description": "神の用心棒を召喚または制御する。",
   "xn_config_dashou_behavior": "用心棒の挙動（0=中立、1=攻撃的、2=停止）",
   "xn_config_dashou_behavior Description": "用心棒ユニットの行動パターンを設定。",
   "btn_xn_control_dashou": "用心棒を制御",

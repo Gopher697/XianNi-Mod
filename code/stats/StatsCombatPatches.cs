@@ -923,7 +923,7 @@ namespace cultivation
                     force *= Mathf.Max(0f, 1f - kbReduce / 100f);
                 Vector2 pos = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(target);
                 Vector2 hit = pos + new Vector2(0.1f, 0f);                
-                target.calculateForce(pos.x, pos.y, hit.x, hit.y, force, 0f, pCheckCancelJobOnLand);
+                xn.access.ActorAccess.CalculateForce(target, pos.x, pos.y, hit.x, hit.y, force, 0f, pCheckCancelJobOnLand);
                 return false; 
             }
         }

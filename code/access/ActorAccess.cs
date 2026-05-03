@@ -27,6 +27,7 @@ namespace xn.access
         private static readonly MethodInfo IsUsingPathMethod = AccessTools.Method(typeof(Actor), "isUsingPath");
         private static readonly MethodInfo IsAttackPossibleMethod = AccessTools.Method(typeof(Actor), "isAttackPossible");
         private static readonly MethodInfo IsInAttackRangeMethod = AccessTools.Method(typeof(Actor), "isInAttackRange", new[] { typeof(BaseSimObject) });
+        private static readonly MethodInfo CalculateForceMethod = AccessTools.Method(typeof(Actor), "calculateForce", new[] { typeof(float), typeof(float), typeof(float), typeof(float), typeof(float), typeof(float), typeof(bool) });
         private static readonly MethodInfo SetCityMethod = AccessTools.Method(typeof(Actor), "setCity", new[] { typeof(City) });
         private static readonly MethodInfo SetKingdomMethod = AccessTools.Method(typeof(Actor), "setKingdom", new[] { typeof(Kingdom) });
         private static readonly MethodInfo SetCurrentTilePositionMethod = AccessTools.Method(typeof(Actor), "setCurrentTilePosition", new[] { typeof(WorldTile) });
@@ -50,6 +51,7 @@ namespace xn.access
         private static bool _warnedIsUsingPath;
         private static bool _warnedIsAttackPossible;
         private static bool _warnedIsInAttackRange;
+        private static bool _warnedCalculateForce;
         private static bool _warnedSetCity;
         private static bool _warnedSetKingdom;
         private static bool _warnedSetCurrentTilePosition;
@@ -351,6 +353,17 @@ namespace xn.access
                 return false;
             }
             return IsInAttackRangeMethod.Invoke(actor, new object[] { target }) is bool value && value;
+        }
+
+        public static void CalculateForce(Actor actor, float startX, float startY, float targetX, float targetY, float forceAmountDirection, float forceHeight, bool checkCancelJobOnLand)
+        {
+            if (actor == null) return;
+            if (CalculateForceMethod == null)
+            {
+                WarnOnce(ref _warnedCalculateForce, "[XN] Actor.calculateForce method not found; force was not applied.");
+                return;
+            }
+            CalculateForceMethod.Invoke(actor, new object[] { startX, startY, targetX, targetY, forceAmountDirection, forceHeight, checkCancelJobOnLand });
         }
 
         public static void SetCity(Actor actor, City city)

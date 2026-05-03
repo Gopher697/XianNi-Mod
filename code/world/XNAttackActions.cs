@@ -399,7 +399,7 @@ namespace xn.world
                 Vector2 vp = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v);
                 Vector2 dir = (vp - posCaster).normalized;
                 Vector2 hit = vp + dir * 0.1f;
-                v.calculateForce(vp.x, vp.y, hit.x, hit.y, 18f, 0f, true);
+                xn.access.ActorAccess.CalculateForce(v, vp.x, vp.y, hit.x, hit.y, 18f, 0f, true);
             }
             return true;
         }
@@ -1033,7 +1033,7 @@ namespace xn.world
                             Vector2 vp = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v);
                             Vector2 dir = d.normalized;
                             Vector2 hit = vp + dir * 0.08f;
-                            v.calculateForce(vp.x, vp.y, hit.x, hit.y, 12f, 0f, true);
+                            xn.access.ActorAccess.CalculateForce(v, vp.x, vp.y, hit.x, hit.y, 12f, 0f, true);
                         }
                     }
                     ShentongFX.PlayOnce_XS_Waves(a);

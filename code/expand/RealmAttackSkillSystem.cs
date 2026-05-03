@@ -486,7 +486,7 @@ namespace xn.expand
                         }
                     }
                 }
-                target.calculateForce(target.current_tile.x, target.current_tile.y, tile.x, tile.y, 2.5f, 0f, true);
+                xn.access.ActorAccess.CalculateForce(target, target.current_tile.x, target.current_tile.y, tile.x, tile.y, 2.5f, 0f, true);
             }
             MapAction.applyTileDamage(tile, radius, AssetManager.terraform.get("lightning_normal"));
         }

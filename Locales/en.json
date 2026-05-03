@@ -554,6 +554,7 @@
   "btn_xn_place_dashou": "Place God's Thug",
   "btn_xn_place_dashou_desc": "Recommended to place one.",
   "actor_dashou": "God's Thug",
+  "上帝的打手_description": "Summons or controls God's Thugs.",
   "xn_config_dashou_behavior": "Thug Behavior (0=Neutral 1=Aggro 2=Stop)",
   "xn_config_dashou_behavior Description": "0=Neutral, 1=Active Attack, 2=Stop Move/Attack",
   "btn_xn_control_dashou": "Control Thugs",

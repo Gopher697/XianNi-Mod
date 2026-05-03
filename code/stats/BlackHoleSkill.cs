@@ -230,7 +230,7 @@ namespace cultivation
                     float progress = (float)data.currentFrame / TOTAL_FRAMES;
                     float pullStrength = Mathf.Lerp(0.5f, 3f, progress);
                     dir.Normalize();
-                    target.calculateForce(
+                    xn.access.ActorAccess.CalculateForce(target,
                         target.current_tile.x, target.current_tile.y,
                         target.current_tile.x - (int)(dir.x * pullStrength),
                         target.current_tile.y - (int)(dir.y * pullStrength),
