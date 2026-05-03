@@ -542,7 +542,7 @@ namespace cultivation
                     bool attackerInCombat = xn.access.ActorAccess.HasAttackTarget(attacker);
                     if (!attackerInCombat)
                     {
-                        var task = xn.access.ActorAccess.GetAI(attacker)?.task as BehaviourTaskActor;
+                        var task = xn.access.AiSystemAccess.GetTask(xn.access.ActorAccess.GetAI(attacker));
                         if (task != null)
                         {
                             attackerInCombat = task.in_combat || task.id == "fighting";

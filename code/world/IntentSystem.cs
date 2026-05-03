@@ -282,7 +282,7 @@ namespace cultivation
         {
             if (a == null || !a.isAlive()) return false;
             if (xn.access.ActorAccess.HasAttackTarget(a)) return true;
-            var task = xn.access.ActorAccess.GetAI(a)?.task as BehaviourTaskActor;
+            var task = xn.access.AiSystemAccess.GetTask(xn.access.ActorAccess.GetAI(a));
             if (task != null)
             {
                 if (task.in_combat) return true;

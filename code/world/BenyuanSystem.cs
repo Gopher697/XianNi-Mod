@@ -484,7 +484,7 @@ namespace xn.world
                 __result = BehResult.Stop;
                 return false;
             }
-            if (!pActor.canAttackTarget(xn.access.ActorAccess.GetAttackTarget(pActor)))
+            if (!xn.access.BaseSimObjectAccess.CanAttackTarget(pActor, xn.access.ActorAccess.GetAttackTarget(pActor)))
             {
                 pActor.ignoreTarget(xn.access.ActorAccess.GetAttackTarget(pActor));
                 pActor.clearAttackTarget();

@@ -15,6 +15,7 @@ namespace xn.access
         private static readonly MethodInfo GetHeightMethod = AccessTools.Method(typeof(BaseSimObject), "getHeight");
         private static readonly MethodInfo HasStatusMethod = AccessTools.Method(typeof(BaseSimObject), "hasStatus", new[] { typeof(string) });
         private static readonly MethodInfo IsInLiquidMethod = AccessTools.Method(typeof(BaseSimObject), "isInLiquid");
+        private static readonly MethodInfo CanAttackTargetMethod = AccessTools.Method(typeof(BaseSimObject), "canAttackTarget", new[] { typeof(BaseSimObject), typeof(bool), typeof(bool) });
         private static bool _warnedActor;
         private static bool _warnedBuilding;
         private static bool _warnedStats;
@@ -24,6 +25,7 @@ namespace xn.access
         private static bool _warnedGetHeight;
         private static bool _warnedHasStatus;
         private static bool _warnedIsInLiquid;
+        private static bool _warnedCanAttackTarget;
 
         public static Actor GetActor(BaseSimObject obj)
         {
@@ -122,6 +124,17 @@ namespace xn.access
                 return false;
             }
             return IsInLiquidMethod.Invoke(obj, null) is bool value && value;
+        }
+
+        public static bool CanAttackTarget(BaseSimObject source, BaseSimObject target, bool pCheckForFactions = true, bool pAttackBuildings = true)
+        {
+            if (source == null || target == null) return false;
+            if (CanAttackTargetMethod == null)
+            {
+                WarnOnce(ref _warnedCanAttackTarget, "[XN] BaseSimObject.canAttackTarget method not found; treating attack target as invalid.");
+                return false;
+            }
+            return CanAttackTargetMethod.Invoke(source, new object[] { target, pCheckForFactions, pAttackBuildings }) is bool value && value;
         }
 
         private static void WarnOnce(ref bool warned, string message)

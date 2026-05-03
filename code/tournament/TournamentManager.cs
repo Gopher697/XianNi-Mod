@@ -422,7 +422,7 @@ namespace xn.tournament
             if (condenseReady == 1) return true;
             var ai = xn.access.ActorAccess.GetAI(a);
             if (ai == null) return false;
-            var task = ai.task;
+            var task = xn.access.AiSystemAccess.GetTask(ai);
             if (task == null) return false;
             string taskId = task.id;
             if (string.IsNullOrEmpty(taskId)) return false;

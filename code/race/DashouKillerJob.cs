@@ -68,7 +68,7 @@ namespace xn.race
                     continue;
                 if (!pActor.isSameIslandAs(other))
                     continue;
-                if (!pActor.canAttackTarget(other))
+                if (!xn.access.BaseSimObjectAccess.CanAttackTarget(pActor, other))
                     continue;
                 float dist = Toolbox.SquaredDistTile(other.current_tile, pActor.current_tile);
                 if (dist < minDist)
