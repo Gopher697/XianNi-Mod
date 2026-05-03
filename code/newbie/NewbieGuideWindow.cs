@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using xn.access;
 namespace xn.newbie
 {
     public static class NewbieGuideSystem
@@ -8,19 +9,22 @@ namespace xn.newbie
         private static bool _isOurTutorial;
         public static void Start()
         {
-            var tutorial = World.world?.tutorial;
+            var tutorial = MapBoxAccess.GetTutorial(World.world);
             if (tutorial == null) return;
-            if (tutorial.isActive()) return;
+            if (TutorialAccess.IsActive(tutorial)) return;
             var tab = xn.ui.XNModTab.Tab;
-            if (tutorial.pages == null)
+            var pages = TutorialAccess.GetPages(tutorial);
+            if (pages == null)
             {
-                tutorial.create();
+                TutorialAccess.Create(tutorial);
+                pages = TutorialAccess.GetPages(tutorial);
+                if (pages == null) return;
             }
-            _originalPages = new List<TutorialPage>(tutorial.pages);
-            tutorial.pages.Clear();
+            _originalPages = new List<TutorialPage>(pages);
+            pages.Clear();
             foreach (var step in NewbieGuideData.GetGuideSteps())
             {
-                tutorial.pages.Add(new TutorialPage
+                pages.Add(new TutorialPage
                 {
                     text = step.Content,
                     wait = 0.3f,
@@ -38,10 +42,12 @@ namespace xn.newbie
         {
             if (!_isOurTutorial) return;
             _isOurTutorial = false;
-            var tutorial = World.world?.tutorial;
+            var tutorial = MapBoxAccess.GetTutorial(World.world);
             if (tutorial == null || _originalPages == null) return;
-            tutorial.pages.Clear();
-            tutorial.pages.AddRange(_originalPages);
+            var pages = TutorialAccess.GetPages(tutorial);
+            if (pages == null) return;
+            pages.Clear();
+            pages.AddRange(_originalPages);
             _originalPages = null;
         }
         public static bool IsOurTutorial => _isOurTutorial;
