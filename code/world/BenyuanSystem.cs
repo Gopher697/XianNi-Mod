@@ -491,7 +491,7 @@ namespace xn.world
                 __result = BehResult.Stop;
                 return false;
             }
-            if (!pActor.isInAttackRange(xn.access.ActorAccess.GetAttackTarget(pActor)))
+            if (!xn.access.ActorAccess.IsInAttackRange(pActor, xn.access.ActorAccess.GetAttackTarget(pActor)))
             {
                 Actor target = xn.access.ActorAccess.GetAttackTarget(pActor) as Actor;
                 if (target == null)
@@ -603,7 +603,7 @@ namespace xn.world
                     __result = false;
                     return false;
                 }
-                if (!__instance.isInAttackRange(pTarget))
+                if (!xn.access.ActorAccess.IsInAttackRange(__instance, pTarget))
                 {
                     __result = false;
                     return false;

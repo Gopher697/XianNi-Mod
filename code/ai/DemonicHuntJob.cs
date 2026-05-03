@@ -86,7 +86,7 @@ namespace cultivation.ai
                     return BehResult.Stop;
                 }
                 pActor.setAttackTarget(target);
-                if (pActor.isInAttackRange(target))
+                if (xn.access.ActorAccess.IsInAttackRange(pActor, target))
                 {
                     pActor.tryToAttack(target);
                 }

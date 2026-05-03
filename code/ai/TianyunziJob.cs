@@ -48,7 +48,7 @@ namespace cultivation.ai
                 if (currentTarget != null && currentTarget.isAlive())
                 {
                     pActor.setAttackTarget(currentTarget);
-                    if (pActor.isInAttackRange(currentTarget))
+                    if (xn.access.ActorAccess.IsInAttackRange(pActor, currentTarget))
                     {
                         pActor.tryToAttack(currentTarget);
                     }
@@ -67,7 +67,7 @@ namespace cultivation.ai
                 {
                     xn.access.ActorAccess.SetBehActorTarget(pActor, newTarget);
                     pActor.setAttackTarget(newTarget);
-                    if (pActor.isInAttackRange(newTarget))
+                    if (xn.access.ActorAccess.IsInAttackRange(pActor, newTarget))
                     {
                         pActor.tryToAttack(newTarget);
                     }
