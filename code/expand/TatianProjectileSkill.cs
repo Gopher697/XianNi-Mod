@@ -35,7 +35,8 @@ namespace xn.expand
                 }
                 else if (xn.access.BaseSimObjectAccess.IsBuilding(pTarget))
                 {
-                    targetTile = pTarget.b.current_tile;
+                    Building targetBuilding = xn.access.BaseSimObjectAccess.GetBuilding(pTarget);
+                    if (targetBuilding != null) targetTile = targetBuilding.current_tile;
                 }
             }
             if (targetTile == null)
@@ -169,14 +170,15 @@ namespace xn.expand
             }
             else if (xn.access.BaseSimObjectAccess.IsBuilding(enemy))
             {
-                Vector2Int pos = enemy.b.current_tile.pos;
-                return new Vector3(pos.x, pos.y, 0f);
+                Building targetBuilding = xn.access.BaseSimObjectAccess.GetBuilding(enemy);
+                if (targetBuilding != null && targetBuilding.current_tile != null)
+                {
+                    Vector2Int pos = targetBuilding.current_tile.pos;
+                    return new Vector3(pos.x, pos.y, 0f);
+                }
             }
-            else
-            {
-                Vector2 pos2D = enemy.current_position;
-                return new Vector3(pos2D.x, pos2D.y, 0f);
-            }
+            Vector2 fallbackPos2D = enemy.current_position;
+            return new Vector3(fallbackPos2D.x, fallbackPos2D.y, 0f);
         }
         private static Vector3 CalculateLaunchPosition(Actor actor)
         {

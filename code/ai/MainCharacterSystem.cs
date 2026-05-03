@@ -112,7 +112,8 @@ namespace cultivation.ai
                 }
                 else if (xn.access.BaseSimObjectAccess.IsBuilding(pTarget))
                 {
-                    targetTile = pTarget.b.current_tile;
+                    Building targetBuilding = xn.access.BaseSimObjectAccess.GetBuilding(pTarget);
+                    if (targetBuilding != null) targetTile = targetBuilding.current_tile;
                 }
             }
             if (targetTile == null)
