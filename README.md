@@ -7,6 +7,7 @@ This repository contains a C# WorldBox mod for the Xianni cultivation overhaul. 
 - `code/` contains the C# mod source.
 - `Locales/` contains runtime locale JSON files loaded by the mod.
 - `GameResources/`, `Title/`, `mod.json`, `default_config.json`, and `icon.png` are runtime package assets.
+- `docs/translation/` contains historical translation archaeology notes and artifacts.
 - `tools/deploy-local.ps1` copies the built DLL and locale files into a local mod folder.
 - `build_staging/` contains local build output and intermediates.
 - `reports/` contains local smoke-test logs, screenshots, and session closeouts.
@@ -75,11 +76,10 @@ For a full clean install, ensure the target mod folder also has the runtime pack
 
 Current UI smoke automation assumes fullscreen WorldBox at `2560x1440` with Windows display scaling at `100%`.
 
-Ignored `reports/` artifacts are used for smoke screenshots, logs, and session closeouts. Translation-memory and smoke reports are local workflow artifacts, not release package output.
+Ignored `reports/` artifacts are used for smoke screenshots, logs, and session closeouts. Generated translation-memory reports and smoke reports are local workflow artifacts, not release package output.
 
 ## Known Follow-Ups
 
 - Consider replacing the default `WorldBoxDir` fallback with documented per-developer setup only.
-- Decide whether root translation patch/report artifacts should remain tracked.
 - Add fixture/setup notes for populated bloodline family/member/talent validation.
 - Treasure display is manually validated, but a repeatable automated treasure grant route is still open.
