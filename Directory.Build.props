@@ -1,6 +1,13 @@
 <Project>
+  <Import Project="Directory.Build.props.user" Condition="Exists('Directory.Build.props.user')" />
+
   <PropertyGroup>
     <BaseIntermediateOutputPath>build_staging\obj\</BaseIntermediateOutputPath>
     <MSBuildProjectExtensionsPath>build_staging\obj\</MSBuildProjectExtensionsPath>
+    <WorldBoxDir Condition="'$(WorldBoxDir)' == ''">D:\SteamLibrary\steamapps\common\worldbox</WorldBoxDir>
+    <WorldBoxDataDir>$(WorldBoxDir)\worldbox_Data</WorldBoxDataDir>
+    <WorldBoxManagedDir>$(WorldBoxDataDir)\Managed</WorldBoxManagedDir>
+    <WorldBoxStreamingModsDir>$(WorldBoxDataDir)\StreamingAssets\mods</WorldBoxStreamingModsDir>
+    <WorldBoxNmlDir>$(WorldBoxStreamingModsDir)\NML</WorldBoxNmlDir>
   </PropertyGroup>
 </Project>

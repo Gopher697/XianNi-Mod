@@ -19,13 +19,29 @@ This repository contains a C# WorldBox mod for the Xianni cultivation overhaul. 
 - WorldBox installed locally.
 - NeoModLoader/NML installed so the required publicized WorldBox, NeoModLoader, Harmony, and Unity assemblies are available.
 
-Current limitation: `XianniMod.csproj` uses hardcoded reference paths under:
+By default, the build looks for WorldBox under:
 
 ```text
 D:\SteamLibrary\steamapps\common\worldbox
 ```
 
-If WorldBox is installed elsewhere, update the reference paths in `XianniMod.csproj` before building. A future cleanup should replace these hardcoded paths with a configurable `WorldBoxDir`.
+If WorldBox is installed elsewhere, pass `WorldBoxDir` on the command line:
+
+```powershell
+dotnet build .\XianniMod.csproj -c Release /p:WorldBoxDir="C:\Path\To\worldbox"
+```
+
+For a persistent local override, create an untracked `Directory.Build.props.user` file:
+
+```xml
+<Project>
+  <PropertyGroup>
+    <WorldBoxDir>C:\Path\To\worldbox</WorldBoxDir>
+  </PropertyGroup>
+</Project>
+```
+
+Do not commit `Directory.Build.props.user`; it is ignored by Git.
 
 ## Build
 
@@ -63,7 +79,7 @@ Ignored `reports/` artifacts are used for smoke screenshots, logs, and session c
 
 ## Known Follow-Ups
 
-- Replace hardcoded WorldBox reference paths with a configurable `WorldBoxDir`.
+- Consider replacing the default `WorldBoxDir` fallback with documented per-developer setup only.
 - Decide whether root translation patch/report artifacts should remain tracked.
 - Add fixture/setup notes for populated bloodline family/member/talent validation.
 - Treasure display is manually validated, but a repeatable automated treasure grant route is still open.
