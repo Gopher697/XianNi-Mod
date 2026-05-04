@@ -76,6 +76,12 @@ namespace xn.bloodline
             }
             if (indexToInsert < 0)
                 indexToInsert = tabsContainer.childCount;
+            var tabButtonsContainer = xn.access.UnitWindowAccess.GetTabButtonsContainer(window);
+            if (tabButtonsContainer == null)
+            {
+                Debug.LogWarning("[BloodlinePatch] Unit window tab container not found.");
+                return;
+            }
             var bloodline_entry = Object.Instantiate(window.transform.Find("Background/Tabs/Genealogy").GetComponent<WindowMetaTab>(), tabsContainer);
             bloodline_entry.name = "BloodlineTab";
             bloodline_entry.tab_action = new WindowMetaTabEvent();
@@ -112,15 +118,15 @@ namespace xn.bloodline
                 tipButton.textOnClickDescription = "tab_bloodline_description";
             }
             bloodline_entry.transform.SetSiblingIndex(indexToInsert);
-            bloodline_entry.container = window.tabs;
+            xn.access.UnitWindowAccess.SetContainer(bloodline_entry, tabButtonsContainer);
             bloodline_entry.tab_elements.RemoveAll(t => t.name.ToLower().StartsWith("content_"));
-            var tabs = xn.access.UnitWindowAccess.GetTabs(window.tabs);
+            var tabs = xn.access.UnitWindowAccess.GetTabs(tabButtonsContainer);
             if (tabs != null && !tabs.Contains(bloodline_entry))
             {
                 tabs.Add(bloodline_entry);
             }
-            window.tabs.addTabContent(bloodline_entry, content_bloodline_obj.transform);
-            window.tabs.refillTabsWithContent();
+            xn.access.UnitWindowAccess.AddTabContent(tabButtonsContainer, bloodline_entry, content_bloodline_obj.transform);
+            xn.access.UnitWindowAccess.RefillTabsWithContent(tabButtonsContainer);
             Debug.Log("[BloodlinePatch] Bloodline tab created successfully!");
         }
         private static void SetLocalizedTextForTransform(Transform parent, string key)

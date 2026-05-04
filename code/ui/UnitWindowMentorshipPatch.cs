@@ -70,6 +70,12 @@ namespace xn.ui
                 }
                 if (indexToInsert < 0)
                     indexToInsert = tabsContainer.childCount;
+                var tabButtonsContainer = xn.access.UnitWindowAccess.GetTabButtonsContainer(__instance);
+                if (tabButtonsContainer == null)
+                {
+                    Debug.LogWarning("[MentorshipPatch] Unit window tab container not found.");
+                    return;
+                }
                 var mentorship_entry = Object.Instantiate(__instance.transform.Find("Background/Tabs/Genealogy").GetComponent<WindowMetaTab>(), tabsContainer);
                 mentorship_entry.name = "MentorshipTab";
                 mentorship_entry.tab_action = new WindowMetaTabEvent();
@@ -116,15 +122,15 @@ namespace xn.ui
                         break;
                     }
                 }
-                mentorship_entry.container = __instance.tabs;
+                xn.access.UnitWindowAccess.SetContainer(mentorship_entry, tabButtonsContainer);
                 mentorship_entry.tab_elements.RemoveAll(t => t.name.ToLower().StartsWith("content_"));
-                var tabs = xn.access.UnitWindowAccess.GetTabs(__instance.tabs);
+                var tabs = xn.access.UnitWindowAccess.GetTabs(tabButtonsContainer);
                 if (tabs != null && !tabs.Contains(mentorship_entry))
                 {
                     tabs.Add(mentorship_entry);
                 }
-                __instance.tabs.addTabContent(mentorship_entry, content_mentorship_obj.transform);
-                __instance.tabs.refillTabsWithContent();
+                xn.access.UnitWindowAccess.AddTabContent(tabButtonsContainer, mentorship_entry, content_mentorship_obj.transform);
+                xn.access.UnitWindowAccess.RefillTabsWithContent(tabButtonsContainer);
             }
         }
         private static void SetLocalizedTextForTransform(Transform parent, string key)

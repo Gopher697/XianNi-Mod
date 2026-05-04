@@ -40,8 +40,8 @@ namespace xn.tournament
             f2.cancelAllBeh();
             xn.access.ActorAccess.GetData(f1).health = f1.getMaxHealth();
             xn.access.ActorAccess.GetData(f2).health = f2.getMaxHealth();
-            f1.addStatusEffect("tantrum", TANTRUM_DURATION);
-            f2.addStatusEffect("tantrum", TANTRUM_DURATION);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(f1, "tantrum", TANTRUM_DURATION);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(f2, "tantrum", TANTRUM_DURATION);
             f1.startFightingWith(f2);
             f2.startFightingWith(f1);
             match.StartTime = UnityEngine.Time.time;
@@ -199,7 +199,7 @@ namespace xn.tournament
             if (!attacker.isAlive() || !target.isAlive()) return;
             if (!xn.access.BaseSimObjectAccess.HasStatus(attacker, "tantrum"))
             {
-                attacker.addStatusEffect("tantrum", TANTRUM_DURATION);
+                xn.access.BaseSimObjectAccess.AddStatusEffect(attacker, "tantrum", TANTRUM_DURATION);
             }
             if (!xn.access.ActorAccess.HasAttackTarget(attacker))
             {
