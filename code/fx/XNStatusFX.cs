@@ -92,7 +92,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_tiandao");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_tiandao");
         }
         public static void StopTiandao(Actor a)
         {
@@ -103,7 +103,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_yijing_loop");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_yijing_loop");
         }
         public static void StopYijingLoop(Actor a)
         {
@@ -114,7 +114,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_condense_root");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_condense_root");
         }
         public static void StopCondenseRoot(Actor a)
         {
@@ -125,7 +125,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_territory");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_territory");
         }
         public static void StopTerritory(Actor a)
         {
@@ -136,7 +136,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_weiya");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_weiya");
         }
         public static void StopWeiya(Actor a)
         {
@@ -147,7 +147,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_baonu");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_baonu");
         }
         public static void StopBaonu(Actor a)
         {
@@ -158,7 +158,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_xs_ascension");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_xs_ascension");
         }
         public static void StopXsAscension(Actor a)
         {
@@ -169,7 +169,7 @@ namespace xn.fx
         {
             if (a == null || !a.isAlive()) return;
             if (!xn.config.ModConfigHooks.EnableAnimation) return;
-            a.addStatusEffect("xn_xs_shield");
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "xn_xs_shield");
         }
         public static void StopXsShield(Actor a)
         {

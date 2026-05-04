@@ -14,6 +14,7 @@ namespace xn.access
         private static readonly MethodInfo IsBuildingMethod = AccessTools.Method(typeof(BaseSimObject), "isBuilding");
         private static readonly MethodInfo GetHeightMethod = AccessTools.Method(typeof(BaseSimObject), "getHeight");
         private static readonly MethodInfo HasStatusMethod = AccessTools.Method(typeof(BaseSimObject), "hasStatus", new[] { typeof(string) });
+        private static readonly MethodInfo AddStatusEffectMethod = AccessTools.Method(typeof(BaseSimObject), "addStatusEffect", new[] { typeof(string), typeof(float), typeof(bool) });
         private static readonly MethodInfo IsInLiquidMethod = AccessTools.Method(typeof(BaseSimObject), "isInLiquid");
         private static readonly MethodInfo CanAttackTargetMethod = AccessTools.Method(typeof(BaseSimObject), "canAttackTarget", new[] { typeof(BaseSimObject), typeof(bool), typeof(bool) });
         private static bool _warnedActor;
@@ -24,6 +25,7 @@ namespace xn.access
         private static bool _warnedIsBuilding;
         private static bool _warnedGetHeight;
         private static bool _warnedHasStatus;
+        private static bool _warnedAddStatusEffect;
         private static bool _warnedIsInLiquid;
         private static bool _warnedCanAttackTarget;
 
@@ -113,6 +115,17 @@ namespace xn.access
                 return false;
             }
             return HasStatusMethod.Invoke(obj, new object[] { id }) is bool value && value;
+        }
+
+        public static bool AddStatusEffect(BaseSimObject obj, string effectId, float duration = 0f, bool pColorEffect = false)
+        {
+            if (obj == null || string.IsNullOrEmpty(effectId)) return false;
+            if (AddStatusEffectMethod == null)
+            {
+                WarnOnce(ref _warnedAddStatusEffect, "[XN] BaseSimObject.addStatusEffect method not found; status effect was not applied.");
+                return false;
+            }
+            return AddStatusEffectMethod.Invoke(obj, new object[] { effectId, duration, pColorEffect }) is bool value && value;
         }
 
         public static bool IsInLiquid(BaseSimObject obj)
