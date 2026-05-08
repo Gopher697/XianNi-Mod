@@ -83,7 +83,7 @@ namespace xn.world
             if (city != null)
             {
                 int aura; city.data.get(KeyAura, out aura, 0);
-                pNewText = pNewText + " · 灵气 " + aura;
+                pNewText = pNewText + " · Aura " + aura;
                 pAdditionalWidth += 80;
                 return;
             }
@@ -93,7 +93,7 @@ namespace xn.world
                 int sum = SumAuraFromKingdom(kingdom);
                 if (sum > 0)
                 {
-                    pNewText = pNewText + " · 总灵气 " + sum;
+                    pNewText = pNewText + " · Total Aura " + sum;
                     pAdditionalWidth += 100;
                 }
                 return;

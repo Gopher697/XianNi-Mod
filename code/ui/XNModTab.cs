@@ -299,7 +299,7 @@ namespace xn.ui
         {
             xn.voice.AIVoiceBroadcast.OnButtonClicked(T("btn_xn_search_units", "Unit Search"));
             string kw = xn.config.ModConfigHooks.UnitSearchKeyword;
-            if (string.IsNullOrEmpty(kw)) kw = "康康";
+            if (string.IsNullOrEmpty(kw)) kw = "";
             xn.ui.XNSearchRanking.Open(kw);
         }
         private static void OnOpenModSettings()

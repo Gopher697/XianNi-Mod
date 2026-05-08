@@ -23,10 +23,10 @@ namespace xn.ui
                     if (mc == 1)
                     {
                         string actorName = pActor.getName();
-                        string text = $"主角{actorName}已选中";
-                        if (xn.config.ModConfigHooks.EnableDeepSeekTextGen)
+                        string text = $"Protagonist {actorName} selected";
+                        if (xn.config.ModConfigHooks.EnableAITextGen)
                         {
-                            _ = PlayWithDeepSeekOptimization(text);
+                            _ = PlayWithAIOptimization(text);
                         }
                         else
                         {
@@ -41,16 +41,16 @@ namespace xn.ui
                 xn.access.SelectedUnitAccess.SetUnitMain(pActor);
                 return false; 
             }
-            private static async System.Threading.Tasks.Task PlayWithDeepSeekOptimization(string rawText)
+            private static async System.Threading.Tasks.Task PlayWithAIOptimization(string rawText)
             {
                 try
                 {
-                    string optimizedText = await xn.voice.DeepSeekTextGenerator.GenerateNaturalText(rawText, "主角");
+                    string optimizedText = await xn.voice.AITextGenerator.GenerateNaturalText(rawText, "protagonist");
                     xn.voice.AIVoiceManager.Play(optimizedText);
                 }
                 catch (System.Exception e)
                 {
-                    UnityEngine.Debug.LogWarning($"[XN-Voice] DeepSeek优化失败，使用原文: {e.Message}");
+                    UnityEngine.Debug.LogWarning($"[XN-Voice] AI optimization failed, using raw text: {e.Message}");
                     xn.voice.AIVoiceManager.Play(rawText);
                 }
             }

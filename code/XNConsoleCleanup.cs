@@ -6,27 +6,27 @@ namespace xn.world
     {
         private const string CONSOLE_MARK = "\u2063XN";
         private static readonly string[] KNOWN_PHRASES = new string[] {
-            "正在经历天道的考验",
-            "在天道考验中成功",
-            "突破了 ",
-            "突破失败跌落至 ",
-            "的古神之躯突破到 ",
-            "的妖兽道行突破到 ",
-            "领悟了 ",
-            "尝试领悟意境失败了",
-            "探索遗迹获得了 ",
-            "夺舍成功",
-            "夺舍 ",
-            "收了 [",
-            "传功于 ",
-            "等待我的复仇怒火吧",
-            "炼化了其徒弟",
-            "天运子讲道",
-            "建造了遗迹",
-            "人被天运子赏赐了",
-            "人被天运子反噬了",
-            "天运赏赐",
-            "天运反噬"
+            "is undergoing the trial of Heaven",
+            "succeeded in the trial of Heaven",
+            "broke through to ",
+            "botched their breakthrough",
+            "'s Ancient God body broke through",
+            "'s Beast cultivation broke through",
+            "comprehended ",
+            "tried to comprehend Intent",
+            "explored the ruins and obtained",
+            "successfully possessed the body",
+            "failed to possess ",
+            "took [",
+            "transferred cultivation to",
+            "Await my vengeful wrath",
+            "refined their disciple",
+            "Tian Yunzi is preaching",
+            "built ruins in the world",
+            "people were rewarded by Tian Yunzi",
+            "people were bitten by Tian Yunzi",
+            "Tian Yunzi reward",
+            "Tian Yunzi backlash"
         };
         public static string Mark(string text)
         {

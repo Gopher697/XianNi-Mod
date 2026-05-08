@@ -32,7 +32,7 @@ namespace xn.voice
                         text = text.Substring(0, 200);
                     }
                     string encodedText = Uri.EscapeDataString(text);
-                    string url = $"{GOOGLE_TTS_URL}?ie=UTF-8&q={encodedText}&tl=zh-CN&client=tw-ob";
+                    string url = $"{GOOGLE_TTS_URL}?ie=UTF-8&q={encodedText}&tl=en&client=tw-ob";
                     client.DefaultRequestHeaders.Clear();
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
                     client.DefaultRequestHeaders.Add("Referer", "https://translate.google.com/");
@@ -50,7 +50,7 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] TTS生成异常: {e.Message}");
+                Debug.LogError($"[XN-Voice] TTS generation error: {e.Message}");
             }
             return false;
         }

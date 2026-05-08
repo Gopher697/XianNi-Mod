@@ -69,7 +69,7 @@ namespace xn.ui.charts
                 string filePath = GetFilePath();
                 if (string.IsNullOrEmpty(filePath)) return false;
                 string saveId = GetCurrentSaveId();
-                string fullContent = $"存档ID: {saveId}\n生成时间: {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}\n世界年份: {worldYear}\n\n---战力排行榜传奇---\n\n{content}";
+                string fullContent = $"Save ID: {saveId}\nGenerated: {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}\nWorld Year: {worldYear}\n\n--- Power Ranking Legends ---\n\n{content}";
                 File.WriteAllText(filePath, fullContent, System.Text.Encoding.UTF8);
                 return true;
             }
@@ -81,7 +81,7 @@ namespace xn.ui.charts
             {
                 string content = Load();
                 if (string.IsNullOrEmpty(content)) return 0;
-                const string prefix = "世界年份: ";
+                const string prefix = "World Year: ";
                 int idx = content.IndexOf(prefix);
                 if (idx < 0) return 0;
                 int start = idx + prefix.Length;

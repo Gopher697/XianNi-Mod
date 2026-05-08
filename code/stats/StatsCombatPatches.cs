@@ -228,7 +228,7 @@ namespace cultivation
                 float originalDamage = pDamage;
                 {
                     int invuln; xn.access.ActorAccess.GetData(__instance).get(KEY_REBIRTH_INVULN_UNTIL, out invuln, 0);
-                    if (invuln > 0 && NowTs() < invuln) { D("Invuln(护命无敌) SKIP"); return false; }
+                    if (invuln > 0 && NowTs() < invuln) { D("Invuln(life-guard) SKIP"); return false; }
                 }
                 if (attacker != null && __instance.isAlive())
                 {

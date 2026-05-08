@@ -163,7 +163,7 @@ namespace xn.tournament
         }
         private static async Task<string> GenerateSummaryFromAPI(string tournamentData, string apiKey)
         {
-            var (endpoint, model) = xn.voice.DeepSeekTextGenerator.GetProviderConfig();
+            var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
             string systemPrompt = T("tournament_summary_system_prompt", "You are a professional xianxia novelist. Based on the tournament data provided, write a short match summary.\nRequirements:\n1. Keep it between 50 and 200 words\n2. Describe how exciting the matches were and how the champion performed\n3. If runner-up and third-place information is available, mention their performances too\n4. Use vivid, flavorful language that fits a cultivation story\n5. Make the summary complete and emphasize the champion's strength");
             string userPrompt = T("tournament_summary_user_prompt", "Based on the following tournament data, write a match summary:\n\n{0}", tournamentData);
             var request = new ChatRequest
@@ -185,7 +185,7 @@ namespace xn.tournament
                 }
                 else
                 {
-                    client.DefaultRequestHeaders.Add("X-Mod-Secret", xn.config.ModConfigHooks.ProxySecret);
+                    // No API key configured — request will be sent without Authorization header
                 }
                 var content = new StringContent(
                     JsonConvert.SerializeObject(request),
@@ -200,7 +200,7 @@ namespace xn.tournament
                     if (chatResponse?.choices != null && chatResponse.choices.Length > 0)
                     {
                         string messageContent = chatResponse.choices[0].message.content ?? T("ai_generation_failed", "Generation failed");
-                        return xn.voice.DeepSeekTextGenerator.FilterThinkingProcess(messageContent);
+                        return xn.voice.AITextGenerator.FilterThinkingProcess(messageContent);
                     }
                 }
                 else

@@ -46,7 +46,7 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] 初始化异常: {e.Message}");
+                Debug.LogError($"[XN-Voice] Init error: {e.Message}");
             }
         }
         public static void Play(string text, bool ignoreSwitch = false)
@@ -83,7 +83,7 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] 处理队列异常: {e.Message}");
+                Debug.LogError($"[XN-Voice] Queue processing error: {e.Message}");
             }
             finally
             {
@@ -118,7 +118,7 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] 生成并播放异常: {e.Message}");
+                Debug.LogError($"[XN-Voice] Generate-and-play error: {e.Message}");
             }
         }
         private static void PlayAudioFile(string fullPath, bool ignoreSwitch)
@@ -140,7 +140,7 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] 播放音频异常: {e.Message}");
+                Debug.LogError($"[XN-Voice] Audio playback error: {e.Message}");
             }
         }
     }

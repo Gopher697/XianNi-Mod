@@ -16,7 +16,7 @@ namespace xn.voice
             if (slave == null || master == null) return;
             string slaveName = slave.getName();
             string masterName = master.getName();
-            string text = $"{slaveName}被{masterName}种下奴印";
+            string text = $"{masterName} placed a Slave Seal on {slaveName}";
             PlayWithOptimization(text, "slave");
         }
         public static void OnMentorshipSuccess(Actor disciple, Actor master)
@@ -24,12 +24,12 @@ namespace xn.voice
             if (disciple == null || master == null) return;
             string discipleName = disciple.getName();
             string masterName = master.getName();
-            string text = $"{discipleName}拜{masterName}为师";
+            string text = $"{discipleName} has taken {masterName} as master";
             PlayWithOptimization(text, "mentorship");
         }
         public static void OnRankingClicked()
         {
-            string text = "战力排行榜";
+            string text = "Power Ranking";
             PlayWithOptimization(text, "ranking");
         }
         public static void OnButtonClicked(string buttonName)
@@ -47,13 +47,13 @@ namespace xn.voice
             {
                 _lastRandomBroadcastYear = currentYear;
                 string story;
-                if (xn.config.ModConfigHooks.EnableDeepSeekTextGen)
+                if (xn.config.ModConfigHooks.EnableAITextGen)
                 {
-                    story = await DeepSeekTextGenerator.GenerateCultivationStory();
+                    story = await AITextGenerator.GenerateCultivationStory();
                 }
                 else
                 {
-                    story = "修仙界风云变幻，天道无常，世事难料";
+                    story = "The cultivation world churns — Heaven's will is fickle, fate unpredictable.";
                 }
                 AIVoiceManager.Play(story);
             }
@@ -67,15 +67,15 @@ namespace xn.voice
             try
             {
                 string finalText = rawText;
-                if (xn.config.ModConfigHooks.EnableDeepSeekTextGen)
+                if (xn.config.ModConfigHooks.EnableAITextGen)
                 {
-                    finalText = await DeepSeekTextGenerator.GenerateNaturalText(rawText, context);
+                    finalText = await AITextGenerator.GenerateNaturalText(rawText, context);
                 }
                 AIVoiceManager.Play(finalText);
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"[XN-Voice] 播报失败: {e.Message}");
+                Debug.LogWarning($"[XN-Voice] Broadcast failed: {e.Message}");
                 AIVoiceManager.Play(rawText);
             }
         }

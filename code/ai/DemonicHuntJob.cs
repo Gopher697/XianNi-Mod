@@ -229,22 +229,22 @@ namespace cultivation.ai
                 {
                     if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
                     {
-                        text = hunterName + "榨干了男修" + targetName + "的元阳导致他精尽人亡";
+                        text = hunterName + " drained " + targetName + "'s Yang essence to death";
                     }
                     else
                     {
-                        text = hunterName + "发现男修" + targetName + "偷喝自己的洗澡水于是将其抓住并榨取了元阳";
+                        text = hunterName + " caught " + targetName + " spying and drained his Yang essence";
                     }
                 }
                 else
                 {
                     if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
                     {
-                        text = hunterName + "夺取了女修" + targetName + "的元阴并强暴了她";
+                        text = hunterName + " seized " + targetName + "'s Yin essence by force";
                     }
                     else
                     {
-                        text = hunterName + "强行让女修" + targetName + "生子其不愿意杀死并将元阴夺走了";
+                        text = hunterName + " forced " + targetName + " to bear offspring and stripped her Yin essence";
                     }
                 }
                 BroadcastSystem.PostActor(attacker, text);
@@ -322,11 +322,11 @@ namespace cultivation.ai
                     string broadcastText;
                     if (a.isSexFemale())
                     {
-                        broadcastText = hunterName + "按耐不住欲望开始榨取男修" + targetName;
+                        broadcastText = hunterName + " gives in to desire and begins draining " + targetName;
                     }
                     else
                     {
-                        broadcastText = hunterName + "想吃好的了开始玩弄女修" + targetName;
+                        broadcastText = hunterName + " grows hungry for power and begins preying on " + targetName;
                     }
                     BroadcastSystem.PostActor(a, broadcastText);
                 }
@@ -425,11 +425,11 @@ namespace cultivation.ai
                     string failText;
                     if (a.isSexFemale())
                     {
-                        failText = a.getName() + "榨取男修元阳失败，被天运子处决";
+                        failText = a.getName() + " failed to drain Yang essence and was executed by Tian Yunzi";
                     }
                     else
                     {
-                        failText = a.getName() + "夺取女修元阴失败，被天运子处决";
+                        failText = a.getName() + " failed to seize Yin essence and was executed by Tian Yunzi";
                     }
                     BroadcastSystem.PostActor(a, failText);
                     OnHuntFailed(a);

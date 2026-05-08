@@ -119,7 +119,7 @@ namespace xn.race
             power.show_unit_stats_overview = template.show_unit_stats_overview;
             power.set_used_camera_drag_on_long_move = template.set_used_camera_drag_on_long_move;
             power.actor_asset_id = ACTOR_ID;
-            power.name = "上帝的打手";
+            power.name = "God's Enforcers";
             power.path_icon = "ui/icon/dashou"; 
             power.click_action = PowerLibraryAccess.SpawnUnit;
             lib.add(power);

@@ -44,30 +44,30 @@ namespace xn.bloodline
         };
         public static readonly Dictionary<string, string> DISPLAY_NAMES = new Dictionary<string, string>
         {
-            { TAIGU, "太古血脉" },
-            { CAOMU, "草木血脉" },
-            { MEIHUO, "魅惑血脉" },
-            { HOUYI, "后羿血脉" },
-            { HUANGQUAN, "黄泉血脉" },
-            { ZUZHOU, "诅咒血脉" },
-            { JIHAN, "极寒血脉" },
-            { JUMO, "巨魔血脉" },
-            { KUANGZHANSHI, "狂战士血脉" },
-            { NIEPAN, "涅槃血脉" },
-            { JINFA, "禁法血脉" },
-            { GUTI, "古体血脉" },
-            { SUIYUE, "岁月血脉" },
-            { LEIFA, "雷罚血脉" },
-            { XUANWU, "玄武血脉" },
-            { ENAN, "厄难毒体" },
-            { TIANSHA, "天煞血脉" },
-            { SHIBIAN, "尸变血脉" },
-            { ZAOSHUAI, "早衰血脉" },
-            { JIBIAN, "畸变血脉" }
+            { TAIGU, "Primordial Bloodline" },
+            { CAOMU, "Verdantwood Bloodline" },
+            { MEIHUO, "Allure Bloodline" },
+            { HOUYI, "Houyi Bloodline" },
+            { HUANGQUAN, "Yellow Springs Bloodline" },
+            { ZUZHOU, "Curse Bloodline" },
+            { JIHAN, "Frostblood Bloodline" },
+            { JUMO, "Giant-Demon Bloodline" },
+            { KUANGZHANSHI, "Berserker Bloodline" },
+            { NIEPAN, "Nirvana Bloodline" },
+            { JINFA, "Spellbane Bloodline" },
+            { GUTI, "Ancient Body Bloodline" },
+            { SUIYUE, "Ageless Bloodline" },
+            { LEIFA, "Thunder Punishment Bloodline" },
+            { XUANWU, "Black Tortoise Bloodline" },
+            { ENAN, "Calamity Venombody (Mutated)" },
+            { TIANSHA, "Heavenbane Bloodline (Mutated)" },
+            { SHIBIAN, "Corpseblight Bloodline (Mutated)" },
+            { ZAOSHUAI, "Fleeting Bloom Bloodline (Mutated)" },
+            { JIBIAN, "Aberrant Flesh Bloodline (Mutated)" }
         };
         public static string GetLocaleName(string bloodlineType)
         {
-            if (string.IsNullOrEmpty(bloodlineType)) return T("bloodline_type_none", "无血脉");
+            if (string.IsNullOrEmpty(bloodlineType)) return T("bloodline_type_none", "No Bloodline");
             if (DISPLAY_NAMES.TryGetValue(bloodlineType, out string name))
             {
                 return T("bloodline_type_" + bloodlineType, name);

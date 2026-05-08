@@ -202,7 +202,7 @@ namespace xn.ui.charts
         }
         private static async Task<string> GenerateLegendFromAPI(string actorData, string apiKey, string previousContent = null, int currentYear = 0, int previousYear = 0)
         {
-            var (endpoint, model) = xn.voice.DeepSeekTextGenerator.GetProviderConfig();
+            var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
             string systemPrompt = T("ranking_legend_system_prompt", "You are a cultivation (Renegade Immortal) novelist. Based on the top three Power Ranking data, evaluate these three mighty figures.\nRequirements:\n1. Keep it between 100 and 800 words\n2. Narrate in third person and evaluate each of the three separately\n3. Use grand, sweeping language that fits a cultivation novel\n4. Comment based on their realm, power score, traits, bloodline, and other data\n5. Highlight each person's defining qualities and legendary aspects");
             string userPrompt;
             if (!string.IsNullOrEmpty(previousContent))
@@ -238,7 +238,7 @@ namespace xn.ui.charts
                 }
                 else
                 {
-                    client.DefaultRequestHeaders.Add("X-Mod-Secret", xn.config.ModConfigHooks.ProxySecret);
+                    // No API key configured — request will be sent without Authorization header
                 }
                 var content = new StringContent(
                     JsonConvert.SerializeObject(request),
@@ -251,7 +251,7 @@ namespace xn.ui.charts
                     string responseText = await response.Content.ReadAsStringAsync();
                     var chatResponse = JsonConvert.DeserializeObject<ChatResponse>(responseText);
                     if (chatResponse?.choices != null && chatResponse.choices.Length > 0)
-                        return xn.voice.DeepSeekTextGenerator.FilterThinkingProcess(chatResponse.choices[0].message.content);
+                        return xn.voice.AITextGenerator.FilterThinkingProcess(chatResponse.choices[0].message.content);
                 }
                 else
                 {

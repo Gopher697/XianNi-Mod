@@ -100,7 +100,7 @@ namespace xn
             var row = _mGetRow?.Invoke(container, new object[] { "xn_city_aura" }) as KeyValueField;
             if (row == null) return;
             string title = LocalizedTextManager.getText("row_xn_city_aura");
-            if (string.IsNullOrEmpty(title) || title == "row_xn_city_aura") title = "灵气";
+            if (string.IsNullOrEmpty(title) || title == "row_xn_city_aura") title = "Aura";
             row.name_text.text = title;
             row.value.text = aura.ToString();
             var sp = SpriteTextureLoader.getSprite("ui/icon/lingqi")

@@ -79,7 +79,7 @@ namespace xn.expand
                 if (string.IsNullOrEmpty(filePath)) return false;
                 string saveId = GetCurrentSaveId();
                 long timeId = (long)createdTime;
-                string content = $"存档ID: {saveId}\n角色ID: {actorId}\n创建时间: {timeId}\n角色名: {actorName}\n生成时间: {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}\n\n---修仙史---\n\n{history}";
+                string content = $"Save ID: {saveId}\nActor ID: {actorId}\nCreated: {timeId}\nActor: {actorName}\nGenerated: {System.DateTime.Now:yyyy-MM-dd HH:mm:ss}\n\n--- Cultivation Chronicle ---\n\n{history}";
                 File.WriteAllText(filePath, content, System.Text.Encoding.UTF8);
                 return true;
             }

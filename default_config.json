@@ -39,7 +39,7 @@
     {
       "Id": "xn_config_unit_search_keyword",
       "Type": "TEXT",
-      "TextVal": "康康",
+      "TextVal": "",
       "Callback": "xn.config.ModConfigHooks:OnUnitSearchKeywordChanged"
     },
     {
@@ -167,10 +167,10 @@
       "Callback": "xn.config.ModConfigHooks:OnAIVoiceSwitchChanged"
     },
     {
-      "Id": "xn_config_enable_deepseek_textgen",
+      "Id": "xn_config_enable_ai_textgen",
       "Type": "SWITCH",
       "BoolVal": false,
-      "Callback": "xn.config.ModConfigHooks:OnDeepSeekTextGenSwitchChanged"
+      "Callback": "xn.config.ModConfigHooks:OnAITextGenSwitchChanged"
     },
     {
       "Id": "xn_config_custom_ai_api_key",

@@ -43,7 +43,7 @@ namespace xn.expand
                         string title = LocalizedTextManager.getText("top_power");
                         if (string.IsNullOrEmpty(title) || title == "top_power")
                         {
-                            title = "战力最强";
+                            title = "Mightiest";
                         }
                         text.text = title;
                         var localizedText = text.GetComponent<LocalizedText>();

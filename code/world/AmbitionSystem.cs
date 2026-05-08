@@ -58,7 +58,7 @@ namespace xn.world
             Actor demon = World.world.units.createNewUnit("demon", tile, pMiracleSpawn: false, 0f, null, null, pSpawnWithItems: false, pAdultAge: true);
             if (demon == null) return false;
             xn.access.ActorAccess.GetData(demon).age_overgrowth = 18;
-            demon.setName("天运子分身");
+            demon.setName("Tian Yunzi Clone");
             xn.access.ActorAccess.GetData(demon).set(KEY_AMB_DEMON, 1);
             Actor src = PickRandomFromTop15ByPower();
             if (src != null)
@@ -76,7 +76,7 @@ namespace xn.world
             if (tile == null) return false;
             Actor dragon = World.world.units.createNewUnit("dragon", tile, pMiracleSpawn: false, 0f, null, null, pSpawnWithItems: false);
             if (dragon == null) return false;
-            dragon.setName("天运子");
+            dragon.setName("Tian Yunzi");
             xn.access.BaseSimObjectAccess.GetStats(dragon)["speed"] = 60f;
             dragon.precalcMovementSpeed(true);
             xn.access.ActorAccess.GetData(dragon).set(KEY_AMB_DRAGON, 1);

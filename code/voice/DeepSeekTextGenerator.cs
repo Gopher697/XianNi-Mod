@@ -1,3 +1,6 @@
+// This file is kept with its original name for git history continuity.
+// The public class is now AITextGenerator; references to DeepSeekTextGenerator
+// are provided as a backward-compat alias at the bottom of this file.
 using System;
 using System.Net.Http;
 using System.Text;
@@ -6,52 +9,65 @@ using Newtonsoft.Json;
 using UnityEngine;
 namespace xn.voice
 {
-    public static class DeepSeekTextGenerator
+    /// <summary>
+    /// Generic AI text generator. Works with any OpenAI-compatible chat completions
+    /// endpoint (OpenAI, Azure OpenAI, Ollama, LM Studio, Anthropic-compatible
+    /// proxies, SiliconFlow, DeepSeek, etc.).
+    ///
+    /// Configure in-game under Mod Settings → AI Features:
+    ///   API Key  – your provider's API key (required for hosted services)
+    ///   API URL  – base URL ending in /v1  OR full chat completions URL
+    ///              leave empty to use the default: https://api.openai.com/v1/chat/completions
+    ///   AI Model – model identifier (e.g. gpt-4o-mini, llama3.1, deepseek-chat)
+    ///              leave empty to use the default: gpt-4o-mini
+    /// </summary>
+    public static class AITextGenerator
     {
-        private const string DefaultModel = "deepseek-ai/DeepSeek-V3";
-        private static bool IsUsingCustomConfig()
-        {
-            return !string.IsNullOrEmpty(xn.config.ModConfigHooks.CustomAIApiKey)
-                || !string.IsNullOrEmpty(xn.config.ModConfigHooks.CustomAIUrl);
-        }
+        // ── defaults ──────────────────────────────────────────────────────────
+        private const string DefaultEndpoint = "https://api.openai.com/v1/chat/completions";
+        private const string DefaultModel    = "gpt-4o-mini";
+
+        // Maximum word count for short broadcast lines
+        private const int MaxBroadcastWords = 20;
+
+        // ── provider config ───────────────────────────────────────────────────
         public static (string endpoint, string model) GetProviderConfig()
         {
-            if (IsUsingCustomConfig())
+            string customUrl = xn.config.ModConfigHooks.CustomAIUrl?.Trim() ?? "";
+            string model     = xn.config.ModConfigHooks.CustomAIModel?.Trim() ?? "";
+            if (string.IsNullOrEmpty(model)) model = DefaultModel;
+
+            string endpoint;
+            if (string.IsNullOrEmpty(customUrl))
             {
-                string customUrl = xn.config.ModConfigHooks.CustomAIUrl;
-                string endpoint;
-                if (string.IsNullOrEmpty(customUrl))
-                {
-                    endpoint = "https://api.siliconflow.cn/v1/chat/completions";
-                }
-                else
-                {
-                    customUrl = customUrl.TrimEnd('/');
-                    endpoint = customUrl.EndsWith("/chat/completions")
-                        ? customUrl
-                        : customUrl + "/chat/completions";
-                }
-                string model = string.IsNullOrEmpty(xn.config.ModConfigHooks.CustomAIModel)
-                    ? DefaultModel
-                    : xn.config.ModConfigHooks.CustomAIModel;
-                return (endpoint, model);
+                endpoint = DefaultEndpoint;
             }
-            return (xn.config.ModConfigHooks.DefaultProxyUrl, DefaultModel);
+            else
+            {
+                customUrl = customUrl.TrimEnd('/');
+                // Accept base URL (ends with /v1) or full completions URL
+                if (customUrl.EndsWith("/chat/completions", StringComparison.OrdinalIgnoreCase))
+                    endpoint = customUrl;
+                else if (customUrl.EndsWith("/v1", StringComparison.OrdinalIgnoreCase))
+                    endpoint = customUrl + "/chat/completions";
+                else
+                    endpoint = customUrl + "/v1/chat/completions";
+            }
+            return (endpoint, model);
         }
+
         private static string GetAPIKey()
         {
-            if (IsUsingCustomConfig())
-            {
-                return xn.config.ModConfigHooks.CustomAIApiKey ?? "";
-            }
-            return "";
+            return xn.config.ModConfigHooks.CustomAIApiKey?.Trim() ?? "";
         }
+
+        // ── JSON DTOs ─────────────────────────────────────────────────────────
         private class ChatRequest
         {
             public ChatMessage[] messages;
-            public string model = "deepseek-chat";
+            public string model = DefaultModel;
             public float temperature = 0.7f;
-            public int max_tokens = 100;
+            public int max_tokens = 120;
         }
         private class ChatMessage
         {
@@ -66,152 +82,120 @@ namespace xn.voice
         {
             public ChatMessage message;
         }
+
+        // ── public API ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Rewrite a raw game-event string into a concise English broadcast line.
+        /// Falls back to the raw text if AI is disabled or the call fails.
+        /// </summary>
         public static async Task<string> GenerateNaturalText(string rawText, string context = "general")
         {
-            if (!xn.config.ModConfigHooks.EnableDeepSeekTextGen)
-            {
+            if (!xn.config.ModConfigHooks.EnableAITextGen)
                 return rawText;
-            }
+
             try
             {
                 var (endpoint, model) = GetProviderConfig();
                 string apiKey = GetAPIKey();
                 string systemPrompt = GetSystemPrompt(context);
-                string userPrompt = $"游戏事件：{rawText}\n\n要求：生成一句简洁的语音播报（严格限制在20个汉字以内，不要超过）";
+                string userPrompt = $"Game event: {rawText}\n\nRequirement: Rewrite as a single concise English voice broadcast line, strictly under {MaxBroadcastWords} words.";
+
                 var request = new ChatRequest
                 {
                     messages = new[]
                     {
                         new ChatMessage { role = "system", content = systemPrompt },
-                        new ChatMessage { role = "user", content = userPrompt }
+                        new ChatMessage { role = "user",   content = userPrompt }
                     },
-                    model = model,
+                    model       = model,
                     temperature = 0.9f,
-                    max_tokens = IsUsingCustomConfig() ? 8192 : 50
+                    max_tokens  = 80
                 };
-                using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) })
+
+                using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) })
                 {
                     if (!string.IsNullOrEmpty(apiKey))
-                    {
                         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-                    }
-                    else
-                    {
-                        client.DefaultRequestHeaders.Add("X-Mod-Secret", xn.config.ModConfigHooks.ProxySecret);
-                    }
-                    var content = new StringContent(
-                        JsonConvert.SerializeObject(request),
-                        Encoding.UTF8,
-                        "application/json"
-                    );
-                    var response = await client.PostAsync(endpoint, content);
+
+                    var httpContent = new StringContent(
+                        JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+                    var response = await client.PostAsync(endpoint, httpContent);
                     if (response.IsSuccessStatusCode)
                     {
                         string responseText = await response.Content.ReadAsStringAsync();
                         var chatResponse = JsonConvert.DeserializeObject<ChatResponse>(responseText);
                         if (chatResponse?.choices != null && chatResponse.choices.Length > 0)
                         {
-                            string generatedText = FilterThinkingProcess(chatResponse.choices[0].message.content);
-                            generatedText = generatedText
-                                .Trim('"', '\'', '"', '"', '。', '！', '？', '，')
-                                .Trim();
-                            int charCount = 0;
-                            StringBuilder sb = new StringBuilder();
-                            foreach (char c in generatedText)
-                            {
-                                if (char.IsLetterOrDigit(c) || c >= 0x4E00 && c <= 0x9FA5)
-                                {
-                                    charCount++;
-                                    if (charCount > 20) break;
-                                }
-                                sb.Append(c);
-                            }
-                            generatedText = sb.ToString().Trim();
-                            if (generatedText.Length > 20)
-                            {
-                                generatedText = generatedText.Substring(0, 20);
-                            }
-                            return generatedText;
+                            string generated = FilterThinkingProcess(chatResponse.choices[0].message.content);
+                            generated = generated.Trim('"', '\'', '.', ',').Trim();
+                            generated = TruncateToWordLimit(generated, MaxBroadcastWords);
+                            return generated;
                         }
                     }
                     else
                     {
                         string errorBody = await response.Content.ReadAsStringAsync();
-                        Debug.LogWarning($"[XN-Voice] AI API调用失败: {response.StatusCode} (Model: {model})");
-                        Debug.LogWarning($"[XN-Voice] 错误详情: {errorBody}");
+                        Debug.LogWarning($"[XN-Voice] AI API call failed: {response.StatusCode} (Model: {model})");
+                        Debug.LogWarning($"[XN-Voice] Error details: {errorBody}");
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[XN-Voice] AI生成文本失败: {e.Message}");
+                Debug.LogWarning($"[XN-Voice] AI text generation failed: {e.Message}");
                 if (e.InnerException != null)
-                {
-                    Debug.LogWarning($"[XN-Voice] 内部异常: {e.InnerException.Message}");
-                }
+                    Debug.LogWarning($"[XN-Voice] Inner exception: {e.InnerException.Message}");
             }
             return rawText;
         }
-        private static string GetSystemPrompt(string context)
-        {
-            return "你是仙逆修仙模组玩法播报员，将游戏事件转为简洁自然的播报，严格20字以内";
-        }
-        public static string FilterThinkingProcess(string response)
-        {
-            if (string.IsNullOrEmpty(response))
-                return response;
-            int thinkEndIndex = response.IndexOf("</think>");
-            if (thinkEndIndex >= 0)
-            {
-                return response.Substring(thinkEndIndex + 8).Trim();
-            }
-            return response;
-        }
+
+        /// <summary>
+        /// Generate a short cultivation story for ambient voice broadcasts.
+        /// </summary>
         public static async Task<string> GenerateCultivationStory()
         {
-            if (!xn.config.ModConfigHooks.EnableDeepSeekTextGen)
-            {
-                return "修仙界风云变幻，天道无常，世事难料。";
-            }
+            if (!xn.config.ModConfigHooks.EnableAITextGen)
+                return "The cultivation world churns — Heaven's will is fickle, fate unpredictable.";
+
             try
             {
                 var (endpoint, model) = GetProviderConfig();
                 string apiKey = GetAPIKey();
-                string systemPrompt = @"你是一个专业的修仙小说作者。请创作一个完整的修仙小故事，要求：
-1. 故事要完整，有开头、发展、高潮、结尾
-2. 包含修仙元素：境界突破、法宝、神通、历练等
-3. 主角要有名字，经历要生动有趣
-4. 字数控制在150-250字之间
-5. 语言流畅，适合语音播报
-6. 每次创作不同的主角和故事情节";
-                string userPrompt = "请创作一个修仙小故事";
+
+                string systemPrompt =
+                    "You are a narrator for a xianxia cultivation world simulation game. " +
+                    "Write vivid, immersive short stories set in a world of immortal cultivators. " +
+                    "Stories should feel authentic to the genre: breakthroughs, tribulations, rivalries, fate.";
+
+                string userPrompt =
+                    "Write a complete short cultivation story (100-200 words). " +
+                    "Give the protagonist a name. Include a cultivation element such as a realm " +
+                    "breakthrough, a divine treasure, a heavenly tribulation, or a fateful encounter. " +
+                    "Each story should have a unique protagonist and plot. Write in English.";
+
                 var request = new ChatRequest
                 {
                     messages = new[]
                     {
                         new ChatMessage { role = "system", content = systemPrompt },
-                        new ChatMessage { role = "user", content = userPrompt }
+                        new ChatMessage { role = "user",   content = userPrompt }
                     },
-                    model = model,
+                    model       = model,
                     temperature = 1.0f,
-                    max_tokens = IsUsingCustomConfig() ? 8192 : 800
+                    max_tokens  = 400
                 };
-                using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) })
+
+                using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) })
                 {
                     if (!string.IsNullOrEmpty(apiKey))
-                    {
                         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-                    }
-                    else
-                    {
-                        client.DefaultRequestHeaders.Add("X-Mod-Secret", xn.config.ModConfigHooks.ProxySecret);
-                    }
-                    var content = new StringContent(
-                        JsonConvert.SerializeObject(request),
-                        Encoding.UTF8,
-                        "application/json"
-                    );
-                    var response = await client.PostAsync(endpoint, content);
+
+                    var httpContent = new StringContent(
+                        JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+                    var response = await client.PostAsync(endpoint, httpContent);
                     if (response.IsSuccessStatusCode)
                     {
                         string responseText = await response.Content.ReadAsStringAsync();
@@ -219,30 +203,32 @@ namespace xn.voice
                         if (chatResponse?.choices != null && chatResponse.choices.Length > 0)
                         {
                             string story = FilterThinkingProcess(chatResponse.choices[0].message.content);
-                            return story;
+                            return story.Trim();
                         }
                     }
                     else
                     {
-                        Debug.LogWarning($"[XN-Voice] AI生成故事失败: {response.StatusCode}");
+                        Debug.LogWarning($"[XN-Voice] AI story generation failed: {response.StatusCode}");
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[XN-Voice] AI生成故事异常: {e.Message}");
+                Debug.LogWarning($"[XN-Voice] AI story generation error: {e.Message}");
             }
-            return "修仙界风云变幻，天道无常，世事难料。仙路漫漫，求索不止。";
+            return "The cultivation world churns — Heaven's will is fickle, fate unpredictable. The immortal road stretches on without end.";
         }
+
+        /// <summary>Pre-warm the AI cache with common broadcast phrases.</summary>
         public static async Task PreGenerateCommonTexts()
         {
             string[] commonTexts = new[]
             {
-                "主角已选中",
-                "战力排行榜已开启",
-                "突破成功",
-                "战斗开始",
-                "城市事件"
+                "Main character selected",
+                "Power ranking opened",
+                "Breakthrough successful",
+                "Battle begins",
+                "City event"
             };
             foreach (var text in commonTexts)
             {
@@ -250,5 +236,50 @@ namespace xn.voice
                 await Task.Delay(100);
             }
         }
+
+        // ── helpers ───────────────────────────────────────────────────────────
+
+        private static string GetSystemPrompt(string context)
+        {
+            return "You are the voice broadcaster for a xianxia cultivation world simulation game. " +
+                   "Convert game events into concise, vivid English broadcast lines. " +
+                   $"Keep broadcasts under {MaxBroadcastWords} words. Use cultivation-genre tone.";
+        }
+
+        /// <summary>Strip any &lt;think&gt;...&lt;/think&gt; reasoning block from a model response.</summary>
+        public static string FilterThinkingProcess(string response)
+        {
+            if (string.IsNullOrEmpty(response)) return response;
+            int thinkEnd = response.IndexOf("</think>", StringComparison.Ordinal);
+            return thinkEnd >= 0 ? response.Substring(thinkEnd + 8).Trim() : response;
+        }
+
+        private static string TruncateToWordLimit(string text, int maxWords)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            string[] words = text.Split(new char[]{' ', '\t', '\n', '\r'}, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length <= maxWords) return text;
+            return string.Join(" ", words, 0, maxWords);
+        }
+    }
+
+    // ── backward-compat alias ─────────────────────────────────────────────────
+    /// <summary>
+    /// Deprecated alias. Use AITextGenerator directly.
+    /// Kept so that any external code still referencing DeepSeekTextGenerator compiles.
+    /// </summary>
+    [Obsolete("Use AITextGenerator instead.")]
+    public static class DeepSeekTextGenerator
+    {
+        public static Task<string> GenerateNaturalText(string rawText, string context = "general")
+            => AITextGenerator.GenerateNaturalText(rawText, context);
+        public static Task<string> GenerateCultivationStory()
+            => AITextGenerator.GenerateCultivationStory();
+        public static Task PreGenerateCommonTexts()
+            => AITextGenerator.PreGenerateCommonTexts();
+        public static string FilterThinkingProcess(string response)
+            => AITextGenerator.FilterThinkingProcess(response);
+        public static (string endpoint, string model) GetProviderConfig()
+            => AITextGenerator.GetProviderConfig();
     }
 }

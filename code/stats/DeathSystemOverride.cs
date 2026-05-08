@@ -45,7 +45,7 @@ namespace cultivation
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[XN-DeathOverride] 处理 {type.Name}.{methodName} 时出错: {ex.Message}");
+                    Debug.LogError($"[XN-DeathOverride] Error patching {type.Name}.{methodName}: {ex.Message}");
                 }
             }
         }

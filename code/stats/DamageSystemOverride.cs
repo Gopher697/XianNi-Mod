@@ -37,10 +37,10 @@ namespace cultivation
             _initialized = true;
             if (!xn.config.ModConfigHooks.EnableXianniLaw)
             {
-                UnityEngine.Debug.Log("[XN-DamageOverride] 仙逆法则已关闭");
+                UnityEngine.Debug.Log("[XN-DamageOverride] Xian Ni law disabled");
                 return;
             }
-            UnityEngine.Debug.Log("[XN-DamageOverride] 仙逆法则已开启");
+            UnityEngine.Debug.Log("[XN-DamageOverride] Xian Ni law enabled");
             _harmony = new Harmony(HARMONY_ID);
             foreach (var (type, methodName, parameters) in TargetMethods)
             {
@@ -54,7 +54,7 @@ namespace cultivation
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[XN-DamageOverride] 处理 {type.Name}.{methodName} 时出错: {ex.Message}");
+                    Debug.LogError($"[XN-DamageOverride] Error patching {type.Name}.{methodName}: {ex.Message}");
                 }
             }
             try
@@ -63,7 +63,7 @@ namespace cultivation
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[XN-DamageOverride] 重新应用 Patch 失败: {ex}");
+                Debug.LogError($"[XN-DamageOverride] Re-apply patch failed: {ex}");
             }
         }
         private static void ReapplyXianniPatches(Harmony h)

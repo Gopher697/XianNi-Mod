@@ -10,7 +10,7 @@ namespace xn.config
         public static int AutoFavRealmGate = 1;
         public static int TianyunIntervalYears = 15;
         public static bool EnableTitles = true;
-        public static string UnitSearchKeyword = "康康";
+        public static string UnitSearchKeyword = "";
         public static int AmbitionAddValue = 1;
         public static bool EnableTianyunziSpawn = true;
         public static bool EnableAutoGC = false;
@@ -73,7 +73,7 @@ namespace xn.config
         }
         public static void OnUnitSearchKeywordChanged(string val)
         {
-            if (string.IsNullOrEmpty(val)) { UnitSearchKeyword = "康康"; return; }
+            if (string.IsNullOrEmpty(val)) { UnitSearchKeyword = ""; return; }
             UnitSearchKeyword = val.Trim();
         }
         public static void OnAmbitionAddValueChanged(string val)
@@ -188,14 +188,14 @@ namespace xn.config
         {
             EnableAIVoice = v;
         }
-        public static readonly string DefaultProxyUrl = "https://1334698288-6hdnte4hsl.ap-guangzhou.tencentscf.com";
-        internal const string ProxySecret = "xianni2024";
-        public static string DeepSeekAPIKey => string.IsNullOrEmpty(CustomAIApiKey) ? "" : CustomAIApiKey;
-        public static bool EnableDeepSeekTextGen = false;
-        public static void OnDeepSeekTextGenSwitchChanged(bool v)
+        // AI text generation — works with any OpenAI-compatible endpoint
+        public static bool EnableAITextGen = false;
+        public static void OnAITextGenSwitchChanged(bool v)
         {
-            EnableDeepSeekTextGen = v;
+            EnableAITextGen = v;
         }
+        // Backward-compat alias so existing save-configs still function
+        public static void OnDeepSeekTextGenSwitchChanged(bool v) => OnAITextGenSwitchChanged(v);
         public static string CustomAIApiKey = "";
         public static void OnCustomAIApiKeyChanged(string val)
         {
@@ -218,7 +218,7 @@ namespace xn.config
             {
                 try
                 {
-                    var apiKeyItem = config["xn_config_basic"]["xn_config_custom_ai_api_key"];
+                    var apiKeyItem = config["xn_config_ai"]["xn_config_custom_ai_api_key"];
                     if (apiKeyItem != null && !string.IsNullOrEmpty(apiKeyItem.TextVal))
                     {
                         OnCustomAIApiKeyChanged(apiKeyItem.TextVal);
@@ -227,7 +227,7 @@ namespace xn.config
                 catch (System.Collections.Generic.KeyNotFoundException) { }
                 try
                 {
-                    var urlItem = config["xn_config_basic"]["xn_config_custom_ai_url"];
+                    var urlItem = config["xn_config_ai"]["xn_config_custom_ai_url"];
                     if (urlItem != null && !string.IsNullOrEmpty(urlItem.TextVal))
                     {
                         OnCustomAIUrlChanged(urlItem.TextVal);
@@ -236,7 +236,7 @@ namespace xn.config
                 catch (System.Collections.Generic.KeyNotFoundException) { }
                 try
                 {
-                    var modelItem = config["xn_config_basic"]["xn_config_custom_ai_model"];
+                    var modelItem = config["xn_config_ai"]["xn_config_custom_ai_model"];
                     if (modelItem != null && !string.IsNullOrEmpty(modelItem.TextVal))
                     {
                         OnCustomAIModelChanged(modelItem.TextVal);
@@ -246,7 +246,7 @@ namespace xn.config
             }
             catch (System.Exception e)
             {
-                UnityEngine.Debug.LogWarning($"[XN-Config] 初始化配置失败: {e.Message}");
+                UnityEngine.Debug.LogWarning($"[XN-Config] Config initialization failed: {e.Message}");
             }
         }
         public static bool DisableCondense = false;

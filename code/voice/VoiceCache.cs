@@ -49,7 +49,7 @@ namespace xn.voice
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"[XN-Voice] 加载缓存索引失败: {e.Message}");
+                    Debug.LogError($"[XN-Voice] Failed to load cache index: {e.Message}");
                     _cache = new Dictionary<string, string>();
                 }
             }
@@ -63,7 +63,7 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] 保存缓存索引失败: {e.Message}");
+                Debug.LogError($"[XN-Voice] Failed to save cache index: {e.Message}");
             }
         }
         private static string GetCacheKey(string text, string voiceId)
@@ -102,7 +102,7 @@ namespace xn.voice
                 return;
             if (!File.Exists(filePath))
             {
-                Debug.LogWarning($"[XN-Voice] 尝试缓存不存在的文件: {filePath}");
+                Debug.LogWarning($"[XN-Voice] Attempted to cache non-existent file: {filePath}");
                 return;
             }
             string key = GetCacheKey(text, voiceId);
@@ -133,12 +133,12 @@ namespace xn.voice
             }
             catch (Exception e)
             {
-                Debug.LogError($"[XN-Voice] 清理缓存失败: {e.Message}");
+                Debug.LogError($"[XN-Voice] Failed to clear cache: {e.Message}");
             }
         }
         public static string GetCacheStats()
         {
-            if (!_initialized) return "缓存未初始化";
+            if (!_initialized) return "Cache not initialized";
             long totalSize = 0;
             int fileCount = 0;
             foreach (var filePath in _cache.Values)
@@ -151,7 +151,7 @@ namespace xn.voice
                 }
             }
             double sizeMB = totalSize / (1024.0 * 1024.0);
-            return $"缓存文件数: {fileCount}, 总大小: {sizeMB:F2} MB";
+            return $"Cache files: {fileCount}, total size: {sizeMB:F2} MB";
         }
     }
 }

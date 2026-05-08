@@ -88,7 +88,7 @@ namespace xn.world
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
             s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
-            BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
+            BroadcastSystem.PostActor(a, a.getName() + " activates flight");
             return true;
         }
         public static void CloseMetal(Actor a)
@@ -111,7 +111,7 @@ namespace xn.world
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
             s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
-            BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
+            BroadcastSystem.PostActor(a, a.getName() + " activates flight");
             return true;
         }
         public static void CloseWood(Actor a)
@@ -134,7 +134,7 @@ namespace xn.world
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
             s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
-            BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
+            BroadcastSystem.PostActor(a, a.getName() + " activates flight");
             return true;
         }
         public static void CloseWater(Actor a)
@@ -157,7 +157,7 @@ namespace xn.world
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
             s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
-            BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
+            BroadcastSystem.PostActor(a, a.getName() + " activates flight");
             return true;
         }
         public static void CloseFire(Actor a)
@@ -180,7 +180,7 @@ namespace xn.world
             BenyuanFX.PlayOnce(a);
             if (!IsDragon(a)) a.setFlying(true);
             s_activeUnits.Add(xn.access.ActorAccess.GetData(a).id);
-            BroadcastSystem.PostActor(a, a.getName() + " 开启飞行");
+            BroadcastSystem.PostActor(a, a.getName() + " activates flight");
             return true;
         }
         public static void CloseEarth(Actor a)

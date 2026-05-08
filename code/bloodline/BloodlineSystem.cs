@@ -57,7 +57,7 @@ namespace xn.bloodline
             BloodlineWindow.Init();
             BloodlineEffects.Init();
         }
-        #region 血脉数据读写
+        #region Bloodline Data Read/Write
         public static bool HasBloodline(Actor a)
         {
             if (a == null) return false;
@@ -140,7 +140,7 @@ namespace xn.bloodline
             xn.access.ActorAccess.GetData(a).set(BloodlineDataKeys.KEY_CONCENTRATION, Mathf.Clamp(newConcentration, 0f, 100f));
         }
         #endregion
-        #region 境界检测
+        #region Realm Detection
         public static int GetRealmIndex(Actor a)
         {
             if (a == null) return -1;
@@ -207,7 +207,7 @@ namespace xn.bloodline
             return 0; 
         }
         #endregion
-        #region 血脉唯一性检查
+        #region Bloodline Uniqueness Check
         public static bool IsBloodlineOccupied(string bloodlineType)
         {
             if (string.IsNullOrEmpty(bloodlineType)) return false;
@@ -244,7 +244,7 @@ namespace xn.bloodline
             return GetAvailableBloodlines(bloodlinePool).Count > 0;
         }
         #endregion
-        #region 始祖诞生
+        #region Progenitor Birth
         public static bool TryAwakeAsFounder(Actor a)
         {
             if (!xn.config.ModConfigHooks.EnableBloodlineAwaken) return false;
@@ -354,7 +354,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 遗传与衰减
+        #region Inheritance and Decay
         public static void InheritBloodline(Actor baby, Actor parent1, Actor parent2)
         {
             if (baby == null) return;
@@ -444,7 +444,7 @@ namespace xn.bloodline
                 isFounder: false, isAtavism: isAtavism);
         }
         #endregion
-        #region 获取血脉数据列表
+        #region Get Bloodline Data List
         public static List<Actor> GetAllBloodlineActors()
         {
             var result = new List<Actor>();
@@ -512,7 +512,7 @@ namespace xn.bloodline
         {
             if (clan == null) return "";
             var members = GetClanBloodlineMembers(clan);
-            if (members.Count == 0) return "无血脉成员";
+            if (members.Count == 0) return "No bloodline members";
             var typeCount = new Dictionary<string, int>();
             float maxConc = 0f;
             Actor founder = null;
@@ -536,11 +536,11 @@ namespace xn.bloodline
                 }
             }
             string typeName = BloodlineTypes.GetLocaleName(mainType);
-            string founderInfo = founder != null ? $"始祖：{founder.getName()}" : "";
-            return $"{typeName} | 成员：{members.Count} | 最高浓度：{maxConc:F1}% | {founderInfo}";
+            string founderInfo = founder != null ? $"Ancestor: {founder.getName()}" : "";
+            return $"{typeName} | Members: {members.Count} | Peak Conc.: {maxConc:F1}% | {founderInfo}";
         }
         #endregion
-        #region Harmony Patch - 婴儿出生时继承血脉
+        #region Harmony Patch - Bloodline Inheritance on Birth
         [HarmonyPostfix]
         [HarmonyPatch(typeof(BabyMaker), nameof(BabyMaker.makeBaby))]
         private static void Patch_MakeBaby(Actor __result, Actor pParent1, Actor pParent2)
@@ -549,7 +549,7 @@ namespace xn.bloodline
             InheritBloodline(__result, pParent1, pParent2);
         }
         #endregion
-        #region Harmony Patch - 始祖觉醒（境界变化时检测）
+        #region Harmony Patch - Progenitor Awakening (on realm change)
         private static ConcurrentDictionary<long, int> _lastRealmChecked = new ConcurrentDictionary<long, int>();
         private static ConcurrentDictionary<long, int> _lastStarChecked = new ConcurrentDictionary<long, int>();
         private static ConcurrentDictionary<long, int> _lastStageChecked = new ConcurrentDictionary<long, int>();

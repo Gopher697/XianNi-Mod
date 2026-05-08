@@ -191,7 +191,7 @@
   "row_previous_life_info": "奪舎される前の元の身分を表示（クリックで詳細）。",
   "row_slave_master": "主従",
   "row_slave_master_info": "奴印を刻まれている状態。",
-  "row_tianjiu_bridge": "踏天九橋の進捗", 
+  "row_tianjiu_bridge": "踏天九橋の進捗",
   "row_tianjiu_bridge_info": "踏天九橋の現在の進捗を表示。第九橋を越えると踏天へ昇格する。",
 
   "tab_mentorship": "師弟関係",
@@ -268,7 +268,7 @@
   "btn_xn_aura_add_brush": "霊気増減（右クリックでモード切替）",
   "btn_xn_aura_add_brush_desc": "町をクリックしてランダムに霊気を増減させる。",
   "btn_xn_aura_add_brush_description": "町をクリックしてランダムに霊気を増減させる。",
-  
+
   "btn_xn_xiuzhenguo_toggle": "修真国ネームプレート",
   "btn_xn_xiuzhenguo_toggle_desc": "王国のネームプレートに修真国のランクを表示。ランクは所属修士の境界により判定され、修練速度のボーナスや占領制限に影響する。",
   "btn_xn_place_ruins": "遺跡を設置",
@@ -353,12 +353,12 @@
   "xn_config_enable_mc_select_sfx Description": "操作時にサウンドを再生する。",
   "xn_config_enable_ai_voice": "AI音声読み上げ",
   "xn_config_enable_ai_voice Description": "ボタンクリック時にAIが音声を生成して読み上げる。",
-  "xn_config_enable_deepseek_textgen": "AIテキスト生成最適化",
-  "xn_config_enable_deepseek_textgen Description": "AIがアナウンス文を最適化する（音声読み上げとの併用推奨）。",
+  "xn_config_enable_ai_textgen": "AIテキスト生成",
+  "xn_config_enable_ai_textgen Description": "OpenAI互換プロバイダーでAIアナウンステキストを生成する（AI音声読み上げとの併用推奨）。",
   "xn_config_custom_ai_api_key": "APIキー",
   "xn_config_custom_ai_api_key Description": "自分のAPIキーを入力すると、無制限にカスタムモデルを使用可能。",
   "xn_config_custom_ai_url": "URLアドレス",
-  "xn_config_custom_ai_url Description": "APIエンドポイント。空欄ならデフォルトのDeepSeekを使用。",
+  "xn_config_custom_ai_url Description": "API URL。空欄ならデフォルトのOpenAIを使用。/v1ベースURLまたは完全な/v1/chat/completions URLに対応。",
   "xn_config_custom_ai_model": "AIモデル名",
   "xn_config_custom_ai_model Description": "カスタムAPIキー使用時のモデル名設定。",
 

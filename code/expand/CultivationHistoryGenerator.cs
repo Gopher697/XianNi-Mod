@@ -298,7 +298,7 @@ namespace xn.expand
         }
         private static async Task<string> GenerateHistoryFromAPI(string actorData, string apiKey)
         {
-            var (endpoint, model) = xn.voice.DeepSeekTextGenerator.GetProviderConfig();
+            var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
             string systemPrompt = T("cultivation_history_system_prompt", "You are a professional cultivation (Renegade Immortal) novelist. Based on the provided character data, write a short cultivation-history story.\nRequirements:\n1. Keep it between 50 and 550 words\n2. The story should have a beginning, development, turn, and conclusion, including cultivation, breakthroughs, trials, and wandering experience\n3. Use the character's realm, traits, experiences, and other data to weave a plausible plot\n4. Use vivid, flavorful language that fits a cultivation novel\n5. Make the story complete and leave no unresolved suspense\n6. Do not repeat the raw character data; weave it naturally into the story");
             string userPrompt = F("cultivation_history_user_prompt", "Based on the following character data, write a cultivation-history story:\n\n{0}", actorData);
             var request = new ChatRequest
@@ -320,7 +320,7 @@ namespace xn.expand
                 }
                 else
                 {
-                    client.DefaultRequestHeaders.Add("X-Mod-Secret", xn.config.ModConfigHooks.ProxySecret);
+                    // No API key configured — request will be sent without Authorization header
                 }
                 var content = new StringContent(
                     JsonConvert.SerializeObject(request),
@@ -333,7 +333,7 @@ namespace xn.expand
                     string responseText = await response.Content.ReadAsStringAsync();
                     var chatResponse = JsonConvert.DeserializeObject<ChatResponse>(responseText);
                     if (chatResponse?.choices != null && chatResponse.choices.Length > 0)
-                        return xn.voice.DeepSeekTextGenerator.FilterThinkingProcess(chatResponse.choices[0].message.content);
+                        return xn.voice.AITextGenerator.FilterThinkingProcess(chatResponse.choices[0].message.content);
                 }
                 else
                 {

@@ -19,7 +19,7 @@ namespace xn.ui
         public static void Open(string keyword)
         {
             if (active) return;
-            if (string.IsNullOrEmpty(keyword)) keyword = "康康";
+            if (string.IsNullOrEmpty(keyword)) keyword = "";
             BuildAndShow(keyword);
         }
         private static void BuildAndShow(string keyword)

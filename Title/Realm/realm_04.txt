@@ -1,20 +1,20 @@
-元婴老怪
-紫府老祖
-血袍老祖
-千岁老魔
-元婴小儿
-碎丹真君
-元婴上人
-元魂道师
-通灵祖师
-凝元尊者
-离窍散人
-真阳老祖
-元魄真君
-摄魂怪杰
-不灭真灵
-辟府真人
-护婴道士
-婴光修士
-婴心宗师
-婴胎真人
+Nascent Soul Old Monster
+Purple Palace Patriarch
+Blood-Robed Patriarch
+Thousand-Year Old Fiend
+Nascent Soul Junior
+Shattered Core Lord
+Nascent Soul Adept
+Primordial Soul Daoist
+Spirit-Communing Grandmaster
+Essence-Condensing Venerable
+Soul-Departed Wanderer
+True Yang Patriarch
+Primordial Soul Lord
+Soul-Seizing Maverick
+Undying True Spirit
+Spirit Palace Adept
+Infant Soul Protector
+Infant Radiance Cultivator
+Infant Heart Grandmaster
+Infant Embryo Adept

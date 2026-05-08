@@ -10,7 +10,7 @@ namespace xn.expand
                 return;
             _initialized = true;
             harmony.PatchAll(typeof(UnitWindowCultivationHistoryPatch));
-            UnityEngine.Debug.Log("[XN-CultivationHistory] 修仙史生成系统已初始化");
+            UnityEngine.Debug.Log("[XN-CultivationHistory] Cultivation Chronicle system initialized");
         }
     }
 }

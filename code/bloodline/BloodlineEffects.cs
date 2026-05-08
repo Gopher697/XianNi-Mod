@@ -49,7 +49,7 @@ namespace xn.bloodline
             _h.PatchAll(typeof(Patch_MapBox_ApplyAttack_BloodlineEffects));
             _h.PatchAll(typeof(Patch_Actor_GetHit_BloodlineEffects));
         }
-        #region 境界转换
+        #region Realm Conversion
         private static int ConvertAncientStarToRealmIndex(int star)
         {
             if (star <= 0) return -1;
@@ -108,7 +108,7 @@ namespace xn.bloodline
             return targetRealm <= casterRealm;
         }
         #endregion
-        #region 血脉效果应用
+        #region Bloodline Effect Application
         public static void ApplyPassiveEffects(Actor a)
         {
             if (a == null || !a.isAlive()) return;
@@ -339,7 +339,7 @@ namespace xn.bloodline
             return GetCurrentTimeTick() + seconds;
         }
         #endregion
-        #region 太古血脉效果实现
+        #region Primordial Bloodline Effect
         private static void ApplyTaiguPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
@@ -386,7 +386,7 @@ namespace xn.bloodline
         private const string KEY_MINDSLAVE_IDS = "xn.bloodline.mindslave_ids";
         private const string KEY_SUNSET_CD = "xn.bloodline.sunset_cd";
         #endregion
-        #region 草木血脉效果实现
+        #region Verdantwood Bloodline Effect
         private static void ApplyCaomuPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
@@ -449,14 +449,14 @@ namespace xn.bloodline
                     {
                         xn.access.ActorAccess.SetKingdom(treant, victim.kingdom);
                     }
-                    treant.setName("树人", false);
+                    treant.setName("Treant", false);
                     treesConverted++;
                     if (treesConverted >= maxTrees) break;
                 }
             }
         }
         #endregion
-        #region 魅惑血脉效果实现
+        #region Allure Bloodline Effect
         private static void ApplyMeihuoPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
@@ -499,12 +499,12 @@ namespace xn.bloodline
                 {
                     xn.access.ActorAccess.SetKingdom(mindslave, killer.kingdom);
                 }
-                mindslave.setName($"{victim.getName()}(心奴)", false);
+                mindslave.setName($"{victim.getName()} (Mindslave)", false);
                 xn.access.ActorAccess.GetData(killer).set(KEY_MINDSLAVE_COUNT, slaveCount + 1);
             }
         }
         #endregion
-        #region 后羿血脉效果实现
+        #region Houyi Bloodline Effect
         private static void ApplyHouyiPassive(Actor a, float concentration)
         {
             if (concentration < 20f) return;
@@ -549,7 +549,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 黄泉血脉效果实现
+        #region Yellow Springs Bloodline Effect
         private const string KEY_HUANGQUAN_SKELETON_COUNT = "xn.bloodline.hq_skeleton_count";
         private const string KEY_MINGHE_ACTIVE = "xn.bloodline.minghe_active";
         private const string KEY_MINGHE_END_TIME = "xn.bloodline.minghe_end";
@@ -589,7 +589,7 @@ namespace xn.bloodline
                 {
                     xn.access.ActorAccess.SetKingdom(skeleton, killer.kingdom);
                 }
-                skeleton.setName("拘魂骷髅", false);
+                skeleton.setName("Soul-Bound Skeleton", false);
                 xn.access.ActorAccess.GetData(skeleton).set("xn.bloodline.skeleton_expire", GetFutureTimeTick(30));
             }
         }
@@ -630,7 +630,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 诅咒血脉效果实现
+        #region Curse Bloodline Effect
         private const string KEY_SOUL_DESTROYED = "xn.bloodline.soul_destroyed";
         private static void ApplyZuzhouPassive(Actor a, float concentration)
         {
@@ -688,7 +688,7 @@ namespace xn.bloodline
             return destroyed == 1;
         }
         #endregion
-        #region 极寒血脉效果实现
+        #region Frostblood Bloodline Effect
         private const string KEY_FROZEN_END_TIME = "xn.bloodline.frozen_end";
         private static void ApplyJihanPassive(Actor a, float concentration)
         {
@@ -733,7 +733,7 @@ namespace xn.bloodline
             return frozenEndTime > 0 && currentTime < frozenEndTime;
         }
         #endregion
-        #region 巨魔血脉效果实现
+        #region Giant-Demon Bloodline Effect
         private const string KEY_JUMO_TELEPORT_CD = "xn.bloodline.jumo_teleport_cd";
         private static void ApplyJumoPassive(Actor a, float concentration)
         {
@@ -780,7 +780,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 涅槃血脉效果实现
+        #region Nirvana Bloodline Effect
         private const string KEY_NIEPAN_EGG_ACTIVE = "xn.bloodline.niepan_egg_active";
         private const string KEY_NIEPAN_EGG_END_TIME = "xn.bloodline.niepan_egg_end";
         private const string KEY_NIEPAN_EGG_MAX_HEALTH = "xn.bloodline.niepan_egg_maxhp";
@@ -870,7 +870,7 @@ namespace xn.bloodline
             return active == 1;
         }
         #endregion
-        #region 禁法血脉效果实现
+        #region Spellbane Bloodline Effect
         private const string KEY_JINFA_SILENCED = "xn.bloodline.jinfa_silenced";
         public static float ApplyJinfaProjectileDamageReduction(Actor victim, float damage, AttackType attackType, bool isProjectile)
         {
@@ -939,7 +939,7 @@ namespace xn.bloodline
             return 0.1f; 
         }
         #endregion
-        #region 古体血脉效果实现
+        #region Ancient Body Bloodline Effect
         private const string KEY_GUTI_MANA_SHIELD_ACTIVE = "xn.bloodline.guti_mana_shield";
         private static void ApplyGutiPassive(Actor a, float concentration)
         {
@@ -990,7 +990,7 @@ namespace xn.bloodline
             return damage;
         }
         #endregion
-        #region 岁月血脉效果实现
+        #region Ageless Bloodline Effect
         private const string KEY_SUIYUE_AGE_LOCKED = "xn.bloodline.suiyue_age_locked";
         private const string KEY_SUIYUE_LOCKED_AGE = "xn.bloodline.suiyue_locked_age_val";
         private static void ApplySuiyuePassive(Actor a, float concentration)
@@ -1055,7 +1055,7 @@ namespace xn.bloodline
             return locked == 1;
         }
         #endregion
-        #region 狂战士血脉效果实现
+        #region Berserker Bloodline Effect
         private const string KEY_KUANGZHANSHI_BUQU_CD = "xn.bloodline.kuangzhanshi_buqu_cd";
         private const string KEY_KUANGZHANSHI_BUQU_ACTIVE = "xn.bloodline.kuangzhanshi_buqu_active";
         private const string KEY_KUANGZHANSHI_BUQU_END = "xn.bloodline.kuangzhanshi_buqu_end";
@@ -1120,7 +1120,7 @@ namespace xn.bloodline
             return active == 1;
         }
         #endregion
-        #region 雷罚血脉效果实现
+        #region Thunder Punishment Bloodline Effect
         private const string KEY_LEIFA_LEICHI_ACTIVE = "xn.bloodline.leifa_leichi_active";
         private const string KEY_LEIFA_LEICHI_TICK = "xn.bloodline.leifa_leichi_tick";
         private static void ApplyLeifaPassive(Actor a, float concentration)
@@ -1189,7 +1189,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 玄武血脉效果实现
+        #region Black Tortoise Bloodline Effect
         private const string KEY_XUANWU_DEFENSE_ACTIVE = "xn.bloodline.xuanwu_defense_active";
         private const string KEY_XUANWU_DEFENSE_END = "xn.bloodline.xuanwu_defense_end";
         private const string KEY_XUANWU_DEFENSE_CD = "xn.bloodline.xuanwu_defense_cd";
@@ -1283,7 +1283,7 @@ namespace xn.bloodline
             return active == 1;
         }
         #endregion
-        #region 变异血脉 - 厄难毒体效果实现
+        #region Mutated Bloodline - Calamity Venombody Effect
         private const string KEY_ENAN_POISON_TICK = "xn.bloodline.enan_poison_tick";
         private static void ApplyEnanPassive(Actor a, float concentration)
         {
@@ -1319,7 +1319,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 变异血脉 - 天煞血脉效果实现
+        #region Mutated Bloodline - Heavenbane Effect
         private const string KEY_TIANSHA_KILL_STACK = "xn.bloodline.tiansha_kill_stack";
         private const string KEY_TIANSHA_COMBAT_ID = "xn.bloodline.tiansha_combat_id";
         private static void ApplyTianshaPassive(Actor a, float concentration)
@@ -1375,7 +1375,7 @@ namespace xn.bloodline
             return stack;
         }
         #endregion
-        #region 变异血脉 - 尸变血脉效果实现
+        #region Mutated Bloodline - Corpseblight Effect
         private const string KEY_SHIBIAN_POISON_TICK = "xn.bloodline.shibian_poison_tick";
         private const string KEY_SHIBIAN_SKELETON_COUNT = "xn.bloodline.shibian_skeleton_count";
         private const string KEY_SHIBIAN_POISONED_BY = "xn.bloodline.shibian_poisoned_by";
@@ -1453,7 +1453,7 @@ namespace xn.bloodline
                 {
                     xn.access.ActorAccess.SetKingdom(skeleton, killer.kingdom);
                 }
-                skeleton.setName("尸毒骷髅", false);
+                skeleton.setName("Corpsevenom Skeleton", false);
                 xn.access.ActorAccess.GetData(killer).set(KEY_SHIBIAN_SKELETON_COUNT, skeletonCount + 1);
             }
         }
@@ -1465,7 +1465,7 @@ namespace xn.bloodline
             return endTime > 0 && currentTime < endTime;
         }
         #endregion
-        #region 变异血脉 - 早衰血脉效果实现
+        #region Mutated Bloodline - Fleeting Bloom Effect
         private const string KEY_ZAOSHUAI_DEATH_CHECKED = "xn.bloodline.zaoshuai_death_checked";
         private static void ApplyZaoshuaiPassive(Actor a, float concentration)
         {
@@ -1490,7 +1490,7 @@ namespace xn.bloodline
             }
         }
         #endregion
-        #region 变异血脉 - 畸变血脉效果实现
+        #region Mutated Bloodline - Aberrant Flesh Effect
         private const string KEY_JIBIAN_SUMMON_COUNT = "xn.bloodline.jibian_summon_count";
         private const string KEY_JIBIAN_CONFUSION_TICK = "xn.bloodline.jibian_confusion_tick";
         private const string KEY_JIBIAN_LAST_HIT_TICK = "xn.bloodline.jibian_last_hit_tick";
@@ -1562,7 +1562,7 @@ namespace xn.bloodline
                 {
                     xn.access.ActorAccess.SetKingdom(creature, victim.kingdom);
                 }
-                creature.setName("血肉分身", false);
+                creature.setName("Flesh Avatar", false);
                 xn.access.ActorAccess.GetData(victim).set(KEY_JIBIAN_SUMMON_COUNT, summonCount + 1);
             }
         }
@@ -1591,7 +1591,7 @@ namespace xn.bloodline
             return true;
         }
         #endregion
-        #region 血脉天赋解锁状态查询
+        #region Bloodline Talent Unlock State Query
         private static string T(string key, string fallback, params object[] args)
         {
             string text = LocalizedTextManager.getText(key);

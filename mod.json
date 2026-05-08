@@ -1,8 +1,8 @@
 {
-  "name": "仙逆·修真世界（Bata版）",
-  "author": "康康(Q群:923773102)",
+  "name": "Renegade Immortal: Cultivation World (Beta)",
+  "author": "KangKang (QQ Group: 923773102)",
   "version": "0.3.97",
-  "description": "Q群:923773102,依据仙逆制作部分魔改",
+  "description": "QQ Group: 923773102 | Based on Renegade Immortal (Xian Ni). A cultivation world gameplay mod for WorldBox.",
   "iconPath": "icon.png",
   "targetGameBuild": 115,
   "GUID": "XIAN_NI_MOD",

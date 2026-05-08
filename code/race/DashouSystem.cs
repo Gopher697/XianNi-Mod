@@ -119,7 +119,7 @@ namespace xn.race
                 ApplyBehaviorJob(actor);
                 count++;
             }
-            xn.world.BroadcastSystem.Custom($"已应用行为模式 {mode} 到 {count} 个打手");
+            xn.world.BroadcastSystem.Custom($"Applied behavior mode {mode} to {count} enforcers");
         }
         private static void ApplyBehaviorJob(Actor actor)
         {
@@ -190,7 +190,7 @@ namespace xn.race
                 if (trait != null)
                 {
                     a.addTrait(trait);
-                    xn.world.BroadcastSystem.Custom($"{a.getName()} 获得了神通：{trait.id}");
+                    xn.world.BroadcastSystem.Custom($"{a.getName()} gained Divine Art: {trait.id}");
                 }
             }
         }
@@ -218,7 +218,7 @@ namespace xn.race
                 if (trait != null)
                 {
                     a.addTrait(trait);
-                    xn.world.BroadcastSystem.Custom($"{a.getName()} 获得了仙术：{trait.id}");
+                    xn.world.BroadcastSystem.Custom($"{a.getName()} gained Celestial Art: {trait.id}");
                 }
             }
         }

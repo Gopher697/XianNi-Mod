@@ -191,7 +191,7 @@
   "row_previous_life_info": "显示被夺舍前的原始身份信息（点击查看详情）",
   "row_slave_master": "主奴",
   "row_slave_master_info": "被种下了奴印记",
-  "row_tianjiu_bridge": "踏天九桥进度", 
+  "row_tianjiu_bridge": "踏天九桥进度",
   "row_tianjiu_bridge_info": "显示踏天九桥的当前进度,通过第9桥可晋升为踏天",
 
   "unit_extra_bridge_completed_value": "已完成（9/9）",
@@ -291,7 +291,7 @@
   "btn_xn_aura_add_brush": "灵气增减(右键切换模式)",
   "btn_xn_aura_add_brush_desc": "点击城市随机增加减少灵气。",
   "btn_xn_aura_add_brush_description": "点击城市随机增加减少灵气。",
-  
+
   "btn_xn_xiuzhenguo_toggle": "修真国铭牌",
   "btn_xn_xiuzhenguo_toggle_desc": "在王国铭牌上显示修真国等级。修真国等级根据境界修士数量判定，提供修炼速度加成并限制占领。",
   "btn_xn_place_ruins": "放置遗迹",
@@ -538,12 +538,12 @@
   "xn_config_enable_mc_select_sfx Description": "开启时会播放音频陪伴你，关闭时不会播放，别和ai播报一起用",
   "xn_config_enable_ai_voice": "AI语音播报",
   "xn_config_enable_ai_voice Description": "开启时按钮点击会生成AI语音播报，关闭时不会播报。",
-  "xn_config_enable_deepseek_textgen": "AI文本生成优化",
-  "xn_config_enable_deepseek_textgen Description": "AI优化语音文本(建议和ai语音播报同时开启)",
+  "xn_config_enable_ai_textgen": "AI文本生成",
+  "xn_config_enable_ai_textgen Description": "使用OpenAI兼容服务生成AI播报文本(建议和AI语音播报同时开启)。",
   "xn_config_custom_ai_api_key": "Key密钥",
   "xn_config_custom_ai_api_key Description": "输入自己的API密钥，填写后token无限制且可自定义模型",
   "xn_config_custom_ai_url": "url地址",
-  "xn_config_custom_ai_url Description": "输入API地址，不填则使用默认DeepSeek地址",
+  "xn_config_custom_ai_url Description": "输入API地址，不填则使用默认OpenAI地址。支持/v1基础地址或完整/v1/chat/completions地址。",
   "xn_config_custom_ai_model": "Ai模型(参考文档可用的模型)",
   "xn_config_custom_ai_model Description": "需要先填写自定义密钥才能生效，不填则使用默认模型",
   "xn_config_enable_xianni_law": "仙逆法则",

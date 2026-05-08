@@ -193,32 +193,32 @@ namespace xn.world
             if (r < 0.30f)
             {
                 var t = PickRandomTrait(_pool_divines, a, 10);
-                if (t != null) { a.addTrait(t); what = "神通·" + t.id; }
-                else what = "空手而归";
+                if (t != null) { a.addTrait(t); what = "Divine Art·" + t.id; }
+                else what = "nothing of value";
             }
             else if (r < 0.70f)
             {
                 int add = Randy.randomInt(1, 1000);
                 int cur; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI, out cur, 0);
                 xn.access.ActorAccess.GetData(a).set(KEY_LINGSHI, cur + add);
-                what = add + " 枚灵石";
+                what = add + " Spirit Stones";
             }
             else if (r < 0.79f)
             {
                 int add = Randy.randomInt(1, 100);
                 int cur; xn.access.ActorAccess.GetData(a).get(KEY_LINGSHI_SUPREME, out cur, 0);
                 xn.access.ActorAccess.GetData(a).set(KEY_LINGSHI_SUPREME, cur + add);
-                what = add + " 枚极品灵石";
+                what = add + " Supreme Spirit Stones";
             }
             else if (r < 0.80f)
             {
                 var t = PickRandomTrait(_pool_arts, a, 10);
-                if (t != null) { a.addTrait(t); what = "仙术·" + t.id; }
-                else what = "空手而归";
+                if (t != null) { a.addTrait(t); what = "Celestial Art·" + t.id; }
+                else what = "nothing of value";
             }
             else
             {
-                what = "空手而归";
+                what = "nothing of value";
             }
             BroadcastSystem.RuinExploreReward(a, what);
         }
