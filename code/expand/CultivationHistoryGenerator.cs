@@ -132,9 +132,7 @@ namespace xn.expand
             var actorAsset = actor.asset;
             if (actorAsset != null && !string.IsNullOrEmpty(actorAsset.id))
             {
-                string raceName = LocalizedTextManager.getText(actorAsset.id);
-                if (string.IsNullOrEmpty(raceName) || raceName == actorAsset.id)
-                    raceName = actorAsset.id;
+                string raceName = GetActorAssetDisplayName(actorAsset);
                 sb.AppendLine(F("cultivation_history_data_race", "Race: {0}", raceName));
             }
             string realmName = GetActorRealm(actor);
@@ -228,6 +226,26 @@ namespace xn.expand
             if (xinmo > 0)
                 sb.AppendLine(F("cultivation_history_data_inner_demon", "Inner Demon: {0}", xinmo));
             return sb.ToString();
+        }
+        private static string GetActorAssetDisplayName(ActorAsset actorAsset)
+        {
+            string name = TryGetLocalized(actorAsset.name_locale);
+            if (!string.IsNullOrEmpty(name))
+                return name;
+
+            name = TryGetLocalized(actorAsset.id);
+            if (!string.IsNullOrEmpty(name))
+                return name;
+
+            return actorAsset.id;
+        }
+        private static string TryGetLocalized(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                return null;
+
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? null : text;
         }
         private static string GetAncientRealm(Actor actor)
         {

@@ -427,6 +427,7 @@
   "btn_xn_place_nvpu": "メイド（テスト用）を設置",
   "btn_xn_place_nvpu_desc": "テスト用のメイドユニットを配置する。",
   "actor_nvpu": "メイド",
+  "nvpu": "Maid",
   "btn_xn_place_dashou": "神の用心棒を設置",
   "btn_xn_place_dashou_desc": "強力な護衛を一人配置することを推奨。",
   "actor_dashou": "神の用心棒",

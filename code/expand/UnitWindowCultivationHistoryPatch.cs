@@ -160,12 +160,7 @@ namespace xn.expand
             ShowHistoryText(T("cultivation_history_calling_ai", "Calling the AI model to generate cultivation history, please wait..."));
             CultivationHistoryGenerator.GenerateCultivationHistory(actor, (history) =>
             {
-                if (!IsGeneratorStatus(history))
-                {
-                    CultivationHistoryStorage.Save(actorId, createdTime, actorName, history);
-                }
-                string displayText = T("cultivation_history_title_format", "[Cultivation History of {0}]\n\n{1}", actorName, history);
-                ShowHistoryText(displayText);
+                ShowGeneratedHistory(actorId, createdTime, actorName, history);
             });
         }
         private static void OnHistoryButtonRightClick()
@@ -191,13 +186,20 @@ namespace xn.expand
             ShowHistoryText(T("cultivation_history_regenerating", "Deleted the old file. Regenerating cultivation history..."));
             CultivationHistoryGenerator.GenerateCultivationHistory(actor, (history) =>
             {
-                if (!IsGeneratorStatus(history))
-                {
-                    CultivationHistoryStorage.Save(actorId, createdTime, actorName, history);
-                }
-                string displayText = T("cultivation_history_title_format", "[Cultivation History of {0}]\n\n{1}", actorName, history);
-                ShowHistoryText(displayText);
+                ShowGeneratedHistory(actorId, createdTime, actorName, history);
             });
+        }
+        private static void ShowGeneratedHistory(long actorId, double createdTime, string actorName, string history)
+        {
+            bool isStatus = IsGeneratorStatus(history);
+            if (!isStatus)
+            {
+                CultivationHistoryStorage.Save(actorId, createdTime, actorName, history);
+            }
+            string displayText = isStatus
+                ? history
+                : T("cultivation_history_title_format", "[Cultivation History of {0}]\n\n{1}", actorName, history);
+            ShowHistoryText(displayText);
         }
         private static bool IsGeneratorStatus(string history)
         {
@@ -205,7 +207,21 @@ namespace xn.expand
                 || history.StartsWith(PrefixGenerationFailed)
                 || history.StartsWith(PrefixNotConfigured)
                 || history.StartsWith(PrefixGenerating)
-                || history.StartsWith(PrefixGameLimit);
+                || history.StartsWith(PrefixGameLimit)
+                || StartsWithStatus(history, "ai_generation_failed", "Generation failed")
+                || StartsWithStatus(history, "cultivation_history_generating", "Generating, please wait...")
+                || StartsWithStatus(history, "cultivation_history_limit_reached", "This world has reached the generation limit")
+                || StartsWithStatus(history, "cultivation_history_limit_reached_format", "This world has reached the generation limit");
+        }
+        private static bool StartsWithStatus(string value, string key, string fallback)
+        {
+            string prefix = T(key, fallback);
+            int formatIndex = prefix.IndexOf("{0}", System.StringComparison.Ordinal);
+            if (formatIndex >= 0)
+                prefix = prefix.Substring(0, formatIndex);
+
+            return !string.IsNullOrEmpty(prefix)
+                && value.StartsWith(prefix, System.StringComparison.Ordinal);
         }
         static UnitWindowCultivationHistoryPatch()
         {
