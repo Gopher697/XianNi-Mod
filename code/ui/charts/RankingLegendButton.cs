@@ -7,6 +7,7 @@ namespace xn.ui.charts
     public static class RankingLegendButton
     {
         private static PowerButton _legendButton;
+        private static xn.ui.ScrollableTextPanel _legendPanel;
         private static Text _legendText;
         private static GameObject _legendTextObj;
         private const string LegendMarker = "---\u6218\u529b\u6392\u884c\u699c\u4f20\u5947---";
@@ -55,51 +56,37 @@ namespace xn.ui.charts
         }
         private static void EnsureLegendText(Transform bg)
         {
-            _legendText = bg.Find("XN_RankingLegend_Text")?.GetComponent<Text>();
-            if (_legendText == null)
+            if (_legendPanel == null || _legendPanel.Root == null || _legendPanel.Root.transform.parent != bg)
             {
-                _legendTextObj = new GameObject("XN_RankingLegend_Text", typeof(Text), typeof(ContentSizeFitter));
-                _legendTextObj.transform.SetParent(bg);
-                _legendTextObj.transform.localPosition = new Vector3(230, 30);
-                _legendTextObj.transform.localScale = Vector3.one;
-                var fitter = _legendTextObj.GetComponent<ContentSizeFitter>();
-                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                _legendText = _legendTextObj.GetComponent<Text>();
-                try { _legendText.font = LocalizedTextManager.current_font; }
-                catch
-                {
-                    var any = bg.GetComponentInChildren<Text>();
-                    if (any != null) _legendText.font = any.font;
-                }
-                _legendText.fontSize = 7;
-                _legendText.alignment = TextAnchor.UpperLeft;
-                _legendText.color = new Color(1f, 0.95f, 0.8f);
-                _legendText.horizontalOverflow = HorizontalWrapMode.Wrap;
-                _legendText.verticalOverflow = VerticalWrapMode.Truncate;
-                var rectTransform = _legendTextObj.GetComponent<RectTransform>();
-                rectTransform.sizeDelta = new Vector2(180, 350);
+                _legendPanel = xn.ui.ScrollableTextPanel.Create(
+                    bg,
+                    "XN_RankingLegend_Scroll",
+                    new Vector3(230, 30),
+                    new Vector2(180, 350),
+                    7,
+                    new Color(1f, 0.95f, 0.8f));
             }
-            else
+            if (_legendPanel != null)
             {
-                _legendTextObj = _legendText.gameObject;
+                _legendText = _legendPanel.Text;
+                _legendTextObj = _legendPanel.Root;
             }
         }
         private static void ShowLegendText(string content)
         {
-            if (_legendText != null)
+            if (_legendPanel != null)
             {
                 string displayContent = content;
                 int idx = content.IndexOf(LegendMarker);
                 if (idx >= 0)
                     displayContent = content.Substring(idx + LegendMarker.Length).Trim();
-                _legendText.text = displayContent;
-                _legendTextObj?.SetActive(true);
+                _legendPanel.SetText(displayContent);
             }
         }
         private static void HideLegendText()
         {
-            if (_legendTextObj != null)
-                _legendTextObj.SetActive(false);
+            if (_legendPanel != null)
+                _legendPanel.SetActive(false);
         }
         private static void OnLeftClick()
         {

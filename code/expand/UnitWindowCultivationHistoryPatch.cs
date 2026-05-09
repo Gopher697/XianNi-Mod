@@ -10,6 +10,7 @@ namespace xn.expand
     {
         private static bool _initialized = false;
         private static PowerButton _historyButton;
+        private static xn.ui.ScrollableTextPanel _historyPanel;
         private static Text _historyText;
         private static GameObject _historyTextObj;
         private static UnitWindow _currentWindow;
@@ -86,48 +87,34 @@ namespace xn.expand
         {
             var bg = window.transform.Find("Background");
             if (bg == null) return;
-            _historyText = bg.Find("XN_CultivationHistory_Text")?.GetComponent<Text>();
-            if (_historyText == null)
+            if (_historyPanel == null || _historyPanel.Root == null || _historyPanel.Root.transform.parent != bg)
             {
-                _historyTextObj = new GameObject("XN_CultivationHistory_Text", typeof(Text), typeof(ContentSizeFitter));
-                _historyTextObj.transform.SetParent(bg);
-                _historyTextObj.transform.localPosition = new Vector3(230, 30);
-                _historyTextObj.transform.localScale = Vector3.one;
-                var fitter = _historyTextObj.GetComponent<ContentSizeFitter>();
-                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                _historyText = _historyTextObj.GetComponent<Text>();
-                try { _historyText.font = LocalizedTextManager.current_font; }
-                catch
-                {
-                    var any = bg.GetComponentInChildren<Text>();
-                    if (any != null) _historyText.font = any.font;
-                }
-                _historyText.fontSize = 8;
-                _historyText.alignment = TextAnchor.UpperLeft;
-                _historyText.color = new Color(1f, 0.95f, 0.8f);
-                _historyText.horizontalOverflow = HorizontalWrapMode.Wrap;
-                _historyText.verticalOverflow = VerticalWrapMode.Truncate;
-                var rectTransform = _historyTextObj.GetComponent<RectTransform>();
-                rectTransform.sizeDelta = new Vector2(180, 350);
+                _historyPanel = xn.ui.ScrollableTextPanel.Create(
+                    bg,
+                    "XN_CultivationHistory_Scroll",
+                    new Vector3(230, 30),
+                    new Vector2(180, 350),
+                    8,
+                    new Color(1f, 0.95f, 0.8f));
             }
-            else
+            if (_historyPanel != null)
             {
-                _historyTextObj = _historyText.gameObject;
+                _historyText = _historyPanel.Text;
+                _historyTextObj = _historyPanel.Root;
             }
         }
         private static void ShowHistoryText(string content)
         {
-            if (_historyText != null)
+            if (_historyPanel != null)
             {
-                _historyText.text = content;
-                _historyTextObj?.SetActive(true);
+                _historyPanel.SetText(content);
             }
         }
         private static void HideHistoryText()
         {
-            if (_historyTextObj != null)
+            if (_historyPanel != null)
             {
-                _historyTextObj.SetActive(false);
+                _historyPanel.SetActive(false);
             }
         }
         private static void OnHistoryButtonClick(UnitWindow window)

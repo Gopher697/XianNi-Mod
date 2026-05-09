@@ -8,6 +8,8 @@ namespace xn.tournament
         private static bool _inited;
         private static ScrollWindow _window;
         private static Text _contentText;
+        private static RectTransform _contentRect;
+        private static ScrollRect _scrollRect;
         public const string WINDOW_ID = "xn_tournament_history";
         private static string T(string key, string fallback, params object[] args)
         {
@@ -28,6 +30,15 @@ namespace xn.tournament
                     winRT.sizeDelta = new Vector2(700, 600);
                 }
                 _window.transform_scrollRect.gameObject.SetActive(true);
+                _scrollRect = _window.transform_scrollRect.GetComponent<ScrollRect>() ?? _window.GetComponentInChildren<ScrollRect>(true);
+                if (_scrollRect != null)
+                {
+                    _scrollRect.enabled = true;
+                    _scrollRect.horizontal = false;
+                    _scrollRect.vertical = true;
+                    _scrollRect.movementType = ScrollRect.MovementType.Clamped;
+                    _scrollRect.scrollSensitivity = 20f;
+                }
                 var contentTransform = _window.transform_content;
                 _contentText = contentTransform.gameObject.AddComponent<Text>();
                 _contentText.font = LocalizedTextManager.current_font;
@@ -36,9 +47,8 @@ namespace xn.tournament
                 _contentText.verticalOverflow = VerticalWrapMode.Overflow;
                 _contentText.alignment = TextAnchor.UpperLeft;
                 _contentText.color = new Color(1f, 0.95f, 0.8f);
-                _contentText.resizeTextForBestFit = true;
-                _contentText.resizeTextMinSize = 8;
-                _contentText.resizeTextMaxSize = 14;
+                _contentText.resizeTextForBestFit = false;
+                _contentText.fontSize = 11;
                 _contentText.lineSpacing = 1.2f;
                 var textRT = _contentText.rectTransform;
                 textRT.anchorMin = new Vector2(0, 1);
@@ -46,6 +56,11 @@ namespace xn.tournament
                 textRT.pivot = new Vector2(0, 1);
                 textRT.anchoredPosition = new Vector2(20, -10);
                 textRT.sizeDelta = new Vector2(-40, 0);
+                _contentRect = textRT;
+                if (_scrollRect != null)
+                {
+                    _scrollRect.content = _contentRect;
+                }
                 var sizeFitter = contentTransform.gameObject.AddComponent<ContentSizeFitter>();
                 sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
                 sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -83,7 +98,7 @@ namespace xn.tournament
             var histories = TournamentHistoryStorage.GetAllHistories();
             if (histories.Count == 0)
             {
-                _contentText.text = T("tournament_history_empty", "No Grand Martial Arts Tournament history available");
+                SetContentText(T("tournament_history_empty", "No Grand Martial Arts Tournament history available"));
                 return;
             }
             var sb = new System.Text.StringBuilder();
@@ -110,7 +125,33 @@ namespace xn.tournament
                 }
                 sb.AppendLine();
             }
-            _contentText.text = sb.ToString();
+            SetContentText(sb.ToString());
+        }
+        private static void SetContentText(string value)
+        {
+            if (_contentText == null) return;
+            _contentText.text = value ?? string.Empty;
+            ResizeContentToText();
+        }
+        private static void ResizeContentToText()
+        {
+            if (_contentText == null) return;
+            var rect = _contentRect ?? _contentText.rectTransform;
+            if (rect == null) return;
+
+            Canvas.ForceUpdateCanvases();
+            float width = Mathf.Max(10f, rect.rect.width);
+            var settings = _contentText.GetGenerationSettings(new Vector2(width, 0f));
+            float preferredHeight = _contentText.cachedTextGeneratorForLayout.GetPreferredHeight(_contentText.text, settings) / _contentText.pixelsPerUnit;
+            float viewportHeight = _scrollRect != null && _scrollRect.viewport != null ? _scrollRect.viewport.rect.height : 0f;
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(viewportHeight, preferredHeight + 20f));
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+            Canvas.ForceUpdateCanvases();
+            if (_scrollRect != null)
+            {
+                _scrollRect.StopMovement();
+                _scrollRect.verticalNormalizedPosition = 1f;
+            }
         }
     }
 }
