@@ -279,7 +279,7 @@ namespace xn.world
             if (dmg <= 0) return;
             if (caster != null) xn.access.ActorAccess.SetAttackedBy(target, caster);
             xn.access.ActorAccess.SetLastAttackType(target, AttackType.Other);
-            target.getHit(dmg, pFlash: true, AttackType.Other, caster);
+            xn.access.BaseSimObjectAccess.GetHit(target, dmg, true, AttackType.Other, caster);
         }
         public static bool Action_Sanmei(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
         {
@@ -291,7 +291,7 @@ namespace xn.world
             if (!CheckCDAndCost(caster, KEY_SANMEI_CD, CD_SANMEI, KEY_LINGLI, COST_SANMEI)) return false;
             ShentongFX.PlayOnce_Sanmei(target);
             DealDamage(caster, target, 4f);
-            target.addStatusEffect("burning", 8f);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(target, "burning", 8f);
             var tile = target.current_tile;
             if (tile != null)
             {
@@ -299,7 +299,7 @@ namespace xn.world
                 {
                     if (u == null || !u.isAlive() || xn.access.ActorAccess.GetData(u).id == xn.access.ActorAccess.GetData(target).id) continue;
                     if (!IsEnemy(caster, u)) continue;
-                    u.addStatusEffect("burning", 8f);
+                    xn.access.BaseSimObjectAccess.AddStatusEffect(u, "burning", 8f);
                 }
             }
             return true;
@@ -329,8 +329,8 @@ namespace xn.world
                 foreach (var u in list)
                 {
                     if (u == null || !u.isAlive()) continue;
-                    u.getHit(segDmg, pFlash: true, AttackType.Other, caster);
-                    u.addStatusEffect("slowness");
+                    xn.access.BaseSimObjectAccess.GetHit(u, segDmg, true, AttackType.Other, caster);
+                    xn.access.BaseSimObjectAccess.AddStatusEffect(u, "slowness");
                 }
             }
             return true;
@@ -394,7 +394,7 @@ namespace xn.world
             foreach (var v in victims)
             {
                 if (v == null || !v.isAlive()) continue;
-                v.getHit(dmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(v, dmg, true, AttackType.Other, caster);
                 v.makeStunned(3);
                 Vector2 vp = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v);
                 Vector2 dir = (vp - posCaster).normalized;
@@ -418,13 +418,13 @@ namespace xn.world
             float hpNow = target.getHealth();
             if (dmg > 0)
             {
-                target.getHit(dmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(target, dmg, true, AttackType.Other, caster);
                 caster.changeHealth(dmg); 
             }
             if (maxHP > 0f && hpNow / maxHP <= 0.15f)
             {
                 int executeDmg = target.getHealth() + 10;
-                target.getHit(executeDmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(target, executeDmg, true, AttackType.Other, caster);
             }
             return true;
         }
@@ -442,13 +442,13 @@ namespace xn.world
             int extraDmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(caster)["damage"] * 0.5f);
             if (extraDmg > 0)
             {
-                target.getHit(extraDmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(target, extraDmg, true, AttackType.Other, caster);
             }
             foreach (var u in Finder.getUnitsFromChunk(tile, 2, 6f))
             {
                 if (u == null || !u.isAlive()) continue;
                 if (!IsEnemy(caster, u)) continue;
-                u.addStatusEffect("poisoned", 10f);
+                xn.access.BaseSimObjectAccess.AddStatusEffect(u, "poisoned", 10f);
             }
             return true;
         }
@@ -475,15 +475,15 @@ namespace xn.world
             if (useYuanli)
             {
                 int dmg = Mathf.FloorToInt(baseAtk * 7.0f);
-                target.getHit(dmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(target, dmg, true, AttackType.Other, caster);
                 int trueDmg = Mathf.FloorToInt(baseAtk * 0.2f);
-                target.getHit(trueDmg, pFlash: false, AttackType.Other, caster, pCheckDamageReduction: false);
+                xn.access.BaseSimObjectAccess.GetHit(target, trueDmg, false, AttackType.Other, caster, pCheckDamageReduction: false);
                 target.makeStunned(3f);
             }
             else
             {
                 int dmg = Mathf.FloorToInt(baseAtk * 6.5f);
-                target.getHit(dmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(target, dmg, true, AttackType.Other, caster);
                 int sub = Mathf.FloorToInt(baseAtk * 0.2f);
                 if (sub > 0)
                 {
@@ -523,7 +523,7 @@ namespace xn.world
             xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_NEXT, now + 0.0f); 
             xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_LEFT, 10);
             xn.access.ActorAccess.GetData(caster).set(KEY_ART_SLASH_TID, (int)xn.access.ActorAccess.GetData(target).id);
-            caster.addStatusEffect("invincible", 2f);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(caster, "invincible", 2f);
             ShentongFX.PlayOnce_XS_Slash(target);
             return true;
         }
@@ -543,8 +543,8 @@ namespace xn.world
             {
                 if (u == null || !u.isAlive()) continue;
                 if (!IsEnemy(caster, u)) continue;
-                u.getHit(dmg, pFlash: true, AttackType.Other, caster);
-                u.addStatusEffect("stunned", 4f);
+                xn.access.BaseSimObjectAccess.GetHit(u, dmg, true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.AddStatusEffect(u, "stunned", 4f);
             }
             return true;
         }
@@ -592,7 +592,7 @@ namespace xn.world
             {
                 if (u == null || !u.isAlive()) continue;
                 int before = u.getHealth();
-                u.getHit(burst, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(u, burst, true, AttackType.Other, caster);
                 int after = u.getHealth();
                 if (after < before) totalDamage += (before - after);
                 if (IsLowerInAnyGroup(caster, u))
@@ -628,7 +628,7 @@ namespace xn.world
             {
                 if (u == null || !u.isAlive()) continue;
                 if (!IsEnemy(caster, u)) continue;
-                u.addStatusEffect("freeze", 5f);
+                xn.access.BaseSimObjectAccess.AddStatusEffect(u, "freeze", 5f);
             }
             int baseHP = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(target)["health"]);
             if (baseHP > 0)
@@ -640,7 +640,7 @@ namespace xn.world
                     int cap = (int)(capHP * 0.30f);
                     if (dmg > cap) dmg = cap;
                 }
-                target.getHit(dmg, pFlash: true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(target, dmg, true, AttackType.Other, caster);
             }
             return true;
         }
@@ -660,7 +660,7 @@ namespace xn.world
             float factor = 1f - (effArmor / 100f);
             if (factor < 0.01f) factor = 0.01f;
             int finalDmg = Mathf.FloorToInt(raw * factor);
-            target.getHit(finalDmg, pFlash: true, AttackType.Other, caster);
+            xn.access.BaseSimObjectAccess.GetHit(target, finalDmg, true, AttackType.Other, caster);
             return true;
         }
         public static bool Action_ArtLink(BaseSimObject pSelf, BaseSimObject pTarget, WorldTile pTile)
@@ -971,7 +971,7 @@ namespace xn.world
                     int segDmg = Mathf.FloorToInt(xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * 0.9f);
                     if (segDmg > 0)
                     {
-                        target.getHit(segDmg, pFlash: true, AttackType.Other, a);
+                        xn.access.BaseSimObjectAccess.GetHit(target, segDmg, true, AttackType.Other, a);
                         a.changeHealth(Mathf.FloorToInt(segDmg * 0.5f)); 
                     }
                     ShentongFX.PlayOnce_XS_Slash(target);
@@ -1029,7 +1029,7 @@ namespace xn.world
                             Vector2 d = (Vector2)xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v) - posCaster;
                             if (d.magnitude > 3f) continue;
                             if (Vector2.Dot(d.normalized, forward) <= 0f) continue; 
-                            v.getHit(dmg, pFlash: true, AttackType.Other, a);
+                            xn.access.BaseSimObjectAccess.GetHit(v, dmg, true, AttackType.Other, a);
                             Vector2 vp = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(v);
                             Vector2 dir = d.normalized;
                             Vector2 hit = vp + dir * 0.08f;
@@ -1173,7 +1173,7 @@ namespace xn.world
                     int transferDmg = Mathf.FloorToInt(pDamage);
                     if (transferDmg > 0)
                     {
-                        linkTarget.getHit(transferDmg, pFlash: true, AttackType.Other, __instance);
+                        xn.access.BaseSimObjectAccess.GetHit(linkTarget, transferDmg, true, AttackType.Other, __instance);
                     }
                 }
                 finally

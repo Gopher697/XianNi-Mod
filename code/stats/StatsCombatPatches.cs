@@ -824,12 +824,12 @@ namespace cultivation
                     int atkEarth; xn.access.ActorAccess.GetData(attacker).get(KEY_BY_EARTH, out atkEarth, 0);
                     if (atkWater == 1)
                     {
-                        __instance.addStatusEffect("slowness", 3f);
+                        xn.access.BaseSimObjectAccess.AddStatusEffect(__instance, "slowness", 3f);
                         D("Water hit: slowness 3s");
                     }
                     if (atkFire == 1)
                     {
-                        __instance.addStatusEffect("burning", 5f);
+                        xn.access.BaseSimObjectAccess.AddStatusEffect(__instance, "burning", 5f);
                         int stacks; xn.access.ActorAccess.GetData(__instance).get(KEY_FIRE_DOT_STACKS, out stacks, 0);
                         xn.access.ActorAccess.GetData(__instance).set(KEY_FIRE_DOT_STACKS, stacks + 1);
                         xn.access.ActorAccess.GetData(__instance).set(KEY_FIRE_DOT_UNTIL, Time.time + 5f);

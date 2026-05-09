@@ -15,6 +15,7 @@ namespace xn.access
         private static readonly MethodInfo GetHeightMethod = AccessTools.Method(typeof(BaseSimObject), "getHeight");
         private static readonly MethodInfo HasStatusMethod = AccessTools.Method(typeof(BaseSimObject), "hasStatus", new[] { typeof(string) });
         private static readonly MethodInfo AddStatusEffectMethod = AccessTools.Method(typeof(BaseSimObject), "addStatusEffect", new[] { typeof(string), typeof(float), typeof(bool) });
+        private static readonly MethodInfo GetHitMethod = AccessTools.Method(typeof(BaseSimObject), "getHit", new[] { typeof(float), typeof(bool), typeof(AttackType), typeof(BaseSimObject), typeof(bool), typeof(bool), typeof(bool) });
         private static readonly MethodInfo IsInLiquidMethod = AccessTools.Method(typeof(BaseSimObject), "isInLiquid");
         private static readonly MethodInfo CanAttackTargetMethod = AccessTools.Method(typeof(BaseSimObject), "canAttackTarget", new[] { typeof(BaseSimObject), typeof(bool), typeof(bool) });
         private static readonly MethodInfo IgnoreTargetMethod = AccessTools.Method(typeof(BaseSimObject), "ignoreTarget", new[] { typeof(BaseSimObject) });
@@ -27,6 +28,7 @@ namespace xn.access
         private static bool _warnedGetHeight;
         private static bool _warnedHasStatus;
         private static bool _warnedAddStatusEffect;
+        private static bool _warnedGetHit;
         private static bool _warnedIsInLiquid;
         private static bool _warnedCanAttackTarget;
         private static bool _warnedIgnoreTarget;
@@ -128,6 +130,17 @@ namespace xn.access
                 return false;
             }
             return AddStatusEffectMethod.Invoke(obj, new object[] { effectId, duration, pColorEffect }) is bool value && value;
+        }
+
+        public static void GetHit(BaseSimObject obj, float pDamage, bool pFlash = true, AttackType pAttackType = AttackType.Other, BaseSimObject pAttacker = null, bool pMetallicWeapon = false, bool pSkipIfShake = false, bool pCheckDamageReduction = true)
+        {
+            if (obj == null) return;
+            if (GetHitMethod == null)
+            {
+                WarnOnce(ref _warnedGetHit, "[XN] BaseSimObject.getHit method not found; damage was not applied.");
+                return;
+            }
+            GetHitMethod.Invoke(obj, new object[] { pDamage, pFlash, pAttackType, pAttacker, pMetallicWeapon, pSkipIfShake, pCheckDamageReduction });
         }
 
         public static bool IsInLiquid(BaseSimObject obj)

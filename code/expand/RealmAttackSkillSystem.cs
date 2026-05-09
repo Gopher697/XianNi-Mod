@@ -459,7 +459,7 @@ namespace xn.expand
                 if (Toolbox.SquaredDistTile(target.current_tile, tile) > radiusSquared) continue;
                 if (target.asset.can_be_hurt_by_powers)
                 {
-                    target.getHit(normalDamage, true, AttackType.Other, actor);
+                    xn.access.BaseSimObjectAccess.GetHit(target, normalDamage, true, AttackType.Other, actor);
                     int attackerRealmIndex = GetCurrentRealmIndex(actor);
                     int attackerAncientIndex = GetCurrentAncientIndex(actor);
                     int attackerBeastIndex = GetCurrentBeastIndex(actor);

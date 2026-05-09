@@ -323,7 +323,7 @@ namespace xn.bloodline
             float tickDamage = dotDamage * 0.1f;
             if (tickDamage > 0 && a.isAlive())
             {
-                a.getHit(tickDamage, true, AttackType.Other, caster);
+                xn.access.BaseSimObjectAccess.GetHit(a, tickDamage, true, AttackType.Other, caster);
                 if (caster != null && caster.isAlive())
                 {
                     caster.restoreHealth((int)tickDamage);
@@ -648,7 +648,7 @@ namespace xn.bloodline
             int reflectDamage = (int)(damage * 0.05f);
             if (reflectDamage > 0)
             {
-                attackerActor.getHit(reflectDamage, true, AttackType.Other, victim);
+                xn.access.BaseSimObjectAccess.GetHit(attackerActor, reflectDamage, true, AttackType.Other, victim);
             }
         }
         private static void ApplyZuzhouAura(Actor a, float concentration)
@@ -704,7 +704,7 @@ namespace xn.bloodline
                 int endTimeTick = GetFutureTimeTick(5);
                 xn.access.ActorAccess.GetData(target).set(KEY_FROZEN_END_TIME, endTimeTick);
                 target.makeWait(5f);
-                target.addStatusEffect("frozen", 5f);
+                xn.access.BaseSimObjectAccess.AddStatusEffect(target, "frozen", 5f);
                 target.startColorEffect(ActorColorEffect.White);
                 if (target.current_tile != null)
                 {
@@ -721,7 +721,7 @@ namespace xn.bloodline
             int currentTime = GetCurrentTimeTick();
             if (frozenEndTime > 0 && currentTime < frozenEndTime)
             {
-                target.getHit(damage, true, AttackType.Other, attacker);
+                xn.access.BaseSimObjectAccess.GetHit(target, damage, true, AttackType.Other, attacker);
                 xn.access.ActorAccess.GetData(target).set(KEY_FROZEN_END_TIME, 0);
             }
         }
@@ -789,7 +789,7 @@ namespace xn.bloodline
         {
             if (concentration < 20f) return;
             if (!IsTargetRealmLowerOrEqual(attacker, target)) return;
-            target.addStatusEffect("burning", 5f);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(target, "burning", 5f);
         }
         public static bool ApplyNiepanDeathTrigger(Actor victim)
         {
@@ -805,7 +805,7 @@ namespace xn.bloodline
             xn.access.ActorAccess.GetData(victim).set(KEY_NIEPAN_EGG_END_TIME, GetFutureTimeTick(10)); 
             xn.access.ActorAccess.GetData(victim).set(KEY_NIEPAN_EGG_MAX_HEALTH, victim.getMaxHealth());
             victim.restoreHealth(1);
-            victim.addStatusEffect("frozen", 10f);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(victim, "frozen", 10f);
             return true;
         }
         public static void ProcessNiepanEggState(Actor a)
@@ -857,8 +857,8 @@ namespace xn.bloodline
                 if (a.kingdom == null || unit.kingdom == null) continue;
                 if (!a.kingdom.isEnemy(unit.kingdom)) continue;
                 if (!IsTargetRealmLowerOrEqual(a, unit)) continue;
-                unit.getHit(fireDamage, true, AttackType.Fire, a);
-                unit.addStatusEffect("burning", 5f);
+                xn.access.BaseSimObjectAccess.GetHit(unit, fireDamage, true, AttackType.Fire, a);
+                xn.access.BaseSimObjectAccess.AddStatusEffect(unit, "burning", 5f);
                 hitCount++;
             }
             EffectsLibrary.spawn("fx_fireball_explosion", tile, null, null, 0f, a.current_position.x, a.current_position.y);
@@ -908,7 +908,7 @@ namespace xn.bloodline
                 {
                     if (!xn.access.BaseSimObjectAccess.HasStatus(unit, "slowness"))
                     {
-                        unit.addStatusEffect("slowness", 1f);
+                        xn.access.BaseSimObjectAccess.AddStatusEffect(unit, "slowness", 1f);
                     }
                     unitStats["speed"] = 0.1f;
                     xn.access.ActorAccess.GetData(unit).set(KEY_JINFA_SILENCED, 1);
@@ -1140,7 +1140,7 @@ namespace xn.bloodline
             {
                 float lightningDamage = xn.access.BaseSimObjectAccess.GetStats(victim)["damage"] * 1.5f;
                 if (lightningDamage < 10f) lightningDamage = 10f;
-                attackerActor.getHit(lightningDamage, true, AttackType.Other, victim);
+                xn.access.BaseSimObjectAccess.GetHit(attackerActor, lightningDamage, true, AttackType.Other, victim);
                 if (attackerActor.current_tile != null)
                 {
                     EffectsLibrary.spawn("fx_lightning_small", attackerActor.current_tile, null, null, 0f,
@@ -1180,7 +1180,7 @@ namespace xn.bloodline
             {
                 if (unit == null || !unit.isAlive()) continue;
                 if (unit.getID() == a.getID()) continue; 
-                unit.getHit(lightningDamage, true, AttackType.Other, a);
+                xn.access.BaseSimObjectAccess.GetHit(unit, lightningDamage, true, AttackType.Other, a);
                 if (UnityEngine.Random.value < 0.3f && unit.current_tile != null)
                 {
                     EffectsLibrary.spawn("fx_lightning_small", unit.current_tile, null, null, 0f,
@@ -1233,7 +1233,7 @@ namespace xn.bloodline
             float reflectDamage = damage * 0.5f;
             if (reflectDamage > 0)
             {
-                attackerActor.getHit(reflectDamage, true, AttackType.Other, victim);
+                xn.access.BaseSimObjectAccess.GetHit(attackerActor, reflectDamage, true, AttackType.Other, victim);
             }
         }
         public static bool ApplyXuanwuDeathTrigger(Actor victim)
@@ -1314,7 +1314,7 @@ namespace xn.bloodline
                 if (!a.kingdom.isEnemy(unit.kingdom)) continue;
                 if (!xn.access.BaseSimObjectAccess.HasStatus(unit, "poisoned"))
                 {
-                    unit.addStatusEffect("poisoned", 3f);
+                    xn.access.BaseSimObjectAccess.AddStatusEffect(unit, "poisoned", 3f);
                 }
             }
         }
@@ -1433,7 +1433,7 @@ namespace xn.bloodline
             if (dotDamage < 1f) dotDamage = 1f;
             xn.access.ActorAccess.GetData(a).get(KEY_SHIBIAN_POISONED_BY, out long casterId, 0L);
             var caster = casterId > 0 ? World.world.units.get(casterId) : null;
-            a.getHit(dotDamage, true, AttackType.Other, caster);
+            xn.access.BaseSimObjectAccess.GetHit(a, dotDamage, true, AttackType.Other, caster);
         }
         public static void ApplyShibianKillTrigger(Actor killer, Actor victim)
         {
@@ -1533,7 +1533,7 @@ namespace xn.bloodline
                 if (nearestAlly != null)
                 {
                     float damage = xn.access.BaseSimObjectAccess.GetStats(a)["damage"] * 0.5f; 
-                    nearestAlly.getHit(damage, true, AttackType.Other, a);
+                    xn.access.BaseSimObjectAccess.GetHit(nearestAlly, damage, true, AttackType.Other, a);
                 }
             }
         }
