@@ -103,7 +103,9 @@ namespace xn.ui
                 txt.color = col;
             }
             var posWorld = xn.access.BaseSimObjectAccess.GetCurrentTransformPosition(a) + new Vector3(0, 2.0f, 0);
-            var screen = World.world.camera.WorldToViewportPoint(posWorld);
+            var camera = xn.access.MapBoxAccess.GetCamera(World.world);
+            if (camera == null || _canvasRect == null) return;
+            var screen = camera.WorldToViewportPoint(posWorld);
             var lp = new Vector2(
                 screen.x * _canvasRect.sizeDelta.x - _canvasRect.sizeDelta.x * 0.5f,
                 screen.y * _canvasRect.sizeDelta.y - _canvasRect.sizeDelta.y * 0.5f

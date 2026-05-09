@@ -15,6 +15,8 @@ namespace xn.access
         private static readonly FieldInfo HeatField = AccessTools.Field(typeof(MapBox), "heat");
         private static readonly FieldInfo TilesListField = AccessTools.Field(typeof(MapBox), "tiles_list");
         private static readonly FieldInfo TutorialField = AccessTools.Field(typeof(MapBox), "tutorial");
+        private static readonly MethodInfo CameraGetter = AccessTools.PropertyGetter(typeof(MapBox), "camera");
+        private static readonly FieldInfo CameraField = AccessTools.Field(typeof(MapBox), "<camera>k__BackingField");
         private static readonly MethodInfo IsPausedMethod = AccessTools.Method(typeof(MapBox), "isPaused");
         private static bool _warnedMapStats;
         private static bool _warnedSelectedButtons;
@@ -24,6 +26,7 @@ namespace xn.access
         private static bool _warnedHeat;
         private static bool _warnedTilesList;
         private static bool _warnedTutorial;
+        private static bool _warnedCamera;
         private static bool _warnedIsPaused;
 
         public static MapStats GetMapStats(MapBox mapBox)
@@ -124,6 +127,21 @@ namespace xn.access
                 return null;
             }
             return TutorialField.GetValue(mapBox) as Tutorial;
+        }
+
+        public static Camera GetCamera(MapBox mapBox)
+        {
+            if (mapBox == null) return null;
+            if (CameraGetter != null)
+            {
+                return CameraGetter.Invoke(mapBox, null) as Camera;
+            }
+            if (CameraField != null)
+            {
+                return CameraField.GetValue(mapBox) as Camera;
+            }
+            WarnOnce(ref _warnedCamera, "[XN] MapBox.camera property not found; camera lookup failed.");
+            return null;
         }
 
         public static void AddWorldLoadedHandler(Action handler)
