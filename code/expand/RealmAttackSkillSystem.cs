@@ -235,6 +235,7 @@ namespace xn.expand
         {
             if (actor == null || targetTile == null) return;
             if (!CheckAndSetCooldown(actor, realmIndex)) return;
+            bool enableBombSkills = xn.config.ModConfigHooks.EnableBombSkills;
             switch (realmIndex)
             {
                 case 2: 
@@ -255,65 +256,65 @@ namespace xn.expand
                     break;
                 case 7: 
                     if (Randy.randomChance(0.50f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.12f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.12f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.22f)) SpawnMeteorite(actor, targetTile);
                     break;
                 case 8: 
                     if (Randy.randomChance(0.57f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.20f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.20f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.32f)) SpawnMeteorite(actor, targetTile);
                     break;
                 case 9: 
                     if (Randy.randomChance(0.64f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.25f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.25f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.42f)) SpawnMeteorite(actor, targetTile);
                     break;
                 case 10: 
                     if (Randy.randomChance(0.71f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.30f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.30f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.50f)) SpawnMeteorite(actor, targetTile);
-                    if (Randy.randomChance(0.10f)) SpawnBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.10f)) SpawnBomb(actor, targetTile);
                     break;
                 case 11: 
                     if (Randy.randomChance(0.78f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.35f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.35f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.58f)) SpawnMeteorite(actor, targetTile);
-                    if (Randy.randomChance(0.10f)) SpawnBomb(actor, targetTile);
-                    if (Randy.randomChance(0.01f)) SpawnBoulder(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.10f)) SpawnBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.01f)) SpawnBoulder(actor, targetTile);
                     break;
                 case 12: 
                     if (Randy.randomChance(0.85f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.35f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.35f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.65f)) SpawnMeteorite(actor, targetTile);
-                    if (Randy.randomChance(0.15f)) SpawnBomb(actor, targetTile);
-                    if (Randy.randomChance(0.10f)) SpawnBoulder(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.15f)) SpawnBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.10f)) SpawnBoulder(actor, targetTile);
                     break;
                 case 13: 
                     if (Randy.randomChance(0.90f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.40f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.40f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.72f)) SpawnMeteorite(actor, targetTile);
-                    if (Randy.randomChance(0.20f)) SpawnBomb(actor, targetTile);
-                    if (Randy.randomChance(0.15f)) SpawnBoulder(actor, targetTile);
-                    if (Randy.randomChance(0.15f)) SpawnHeatRay(actor, targetTile, 5f);
-                    if (Randy.randomChance(0.10f)) SpawnAntimatterBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.20f)) SpawnBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.15f)) SpawnBoulder(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.15f)) SpawnHeatRay(actor, targetTile, 5f);
+                    if (enableBombSkills && Randy.randomChance(0.10f)) SpawnAntimatterBomb(actor, targetTile);
                     break;
                 case 14: 
                     if (Randy.randomChance(0.95f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.40f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.40f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.80f)) SpawnMeteorite(actor, targetTile);
-                    if (Randy.randomChance(0.25f)) SpawnBomb(actor, targetTile);
-                    if (Randy.randomChance(0.20f)) SpawnBoulder(actor, targetTile);
-                    if (Randy.randomChance(0.25f)) SpawnHeatRay(actor, targetTile, 5f);
-                    if (Randy.randomChance(0.20f)) SpawnAntimatterBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.25f)) SpawnBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.20f)) SpawnBoulder(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.25f)) SpawnHeatRay(actor, targetTile, 5f);
+                    if (enableBombSkills && Randy.randomChance(0.20f)) SpawnAntimatterBomb(actor, targetTile);
                     break;
                 case 15: 
                     if (Randy.randomChance(1.0f)) SpawnLightning(actor, targetTile, realmIndex);
-                    if (Randy.randomChance(0.60f)) SpawnGrenade(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.60f)) SpawnGrenade(actor, targetTile);
                     if (Randy.randomChance(0.95f)) SpawnMeteorite(actor, targetTile);
-                    if (Randy.randomChance(0.50f)) SpawnBomb(actor, targetTile);
-                    if (Randy.randomChance(0.50f)) SpawnBoulder(actor, targetTile);
-                    if (Randy.randomChance(0.30f)) SpawnHeatRay(actor, targetTile, 20f);
-                    if (Randy.randomChance(0.50f)) SpawnAntimatterBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.50f)) SpawnBomb(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.50f)) SpawnBoulder(actor, targetTile);
+                    if (enableBombSkills && Randy.randomChance(0.30f)) SpawnHeatRay(actor, targetTile, 20f);
+                    if (enableBombSkills && Randy.randomChance(0.50f)) SpawnAntimatterBomb(actor, targetTile);
                     break;
             }
         }

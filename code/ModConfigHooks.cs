@@ -10,6 +10,11 @@ namespace xn.config
         public static int AutoFavRealmGate = 1;
         public static int TianyunIntervalYears = 15;
         public static bool EnableTitles = true;
+        public static bool EnableTitleGeneration = true;
+        public static int BroadcastRealmGate = 1;
+        public static bool EnableTatianSuppression = true;
+        public static bool EnableTournamentDeathMatch = true;
+        public static bool EnableBombSkills = true;
         public static string UnitSearchKeyword = "";
         public static int AmbitionAddValue = 1;
         public static bool EnableTianyunziSpawn = true;
@@ -70,6 +75,26 @@ namespace xn.config
         public static void OnTitlesSwitchChanged(bool pUpdatedValue)
         {
             EnableTitles = pUpdatedValue;
+        }
+        public static void OnTitleGenerationSwitchChanged(bool v)
+        {
+            EnableTitleGeneration = v;
+        }
+        public static void OnBroadcastRealmGateChanged(int v)
+        {
+            BroadcastRealmGate = v;
+        }
+        public static void OnTatianSuppressionSwitchChanged(bool v)
+        {
+            EnableTatianSuppression = v;
+        }
+        public static void OnTournamentDeathMatchSwitchChanged(bool v)
+        {
+            EnableTournamentDeathMatch = v;
+        }
+        public static void OnBombSkillsSwitchChanged(bool v)
+        {
+            EnableBombSkills = v;
         }
         public static void OnUnitSearchKeywordChanged(string val)
         {

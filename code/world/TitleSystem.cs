@@ -278,6 +278,7 @@ namespace xn.world
         }
         public static void OnRealmTraitAdded(Actor actor, string traitId)
         {
+            if (!xn.config.ModConfigHooks.EnableTitleGeneration) return;
             if (actor == null || string.IsNullOrEmpty(traitId))
                 return;
             string key = NormalizeRealmKey(traitId);
@@ -312,6 +313,7 @@ namespace xn.world
         }
         public static void OnAncientRealmTraitAdded(Actor actor, string traitId)
         {
+            if (!xn.config.ModConfigHooks.EnableTitleGeneration) return;
             if (actor == null || string.IsNullOrEmpty(traitId))
                 return;
             int star = GetAncientStarLevel(traitId);
@@ -391,6 +393,7 @@ namespace xn.world
         }
         public static void OnBeastStageTraitAdded(Actor actor, string traitId)
         {
+            if (!xn.config.ModConfigHooks.EnableTitleGeneration) return;
             if (actor == null || string.IsNullOrEmpty(traitId))
                 return;
             if (!_beastSuffixMap.TryGetValue(traitId, out string suffix))

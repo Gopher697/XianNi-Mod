@@ -31,7 +31,8 @@ namespace xn.tournament
                 match.IsFinished = true;
                 return;
             }
-            match.IsDeathMatch = UnityEngine.Random.Range(0f, 1f) < 0.2f;
+            match.IsDeathMatch = xn.config.ModConfigHooks.EnableTournamentDeathMatch
+                && UnityEngine.Random.Range(0f, 1f) < 0.2f;
             if (match.IsDeathMatch)
             {
                 xn.world.BroadcastSystem.Custom(T("broadcast_tournament_deathmatch", "Death duel! {0} VS {1} - no retreat!", f1.getName(), f2.getName()));

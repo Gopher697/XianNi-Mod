@@ -195,6 +195,7 @@ namespace cultivation
             [HarmonyPostfix]
             private static void Postfix(MapBox __instance)
             {
+                if (!xn.config.ModConfigHooks.EnableTatianSuppression) return;
                 if (__instance == null || __instance.units == null) return;
                 BlackHoleSkill.Update();
                 float now = Time.time;

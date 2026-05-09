@@ -11,11 +11,60 @@ namespace xn.world
     {
         private static float _lastCleanupTime;
         private const float CLEANUP_INTERVAL = 300f; 
+        private static readonly string[] REALM_IDS = new[]
+        {
+            "realm_01_qi",
+            "realm_02_foundation",
+            "realm_03_core",
+            "realm_04_nascent",
+            "realm_05_deity",
+            "realm_06_infantchg",
+            "realm_07_wending",
+            "realm_08_kuinie",
+            "realm_09_jingnie",
+            "realm_10_suinie",
+            "realm_11_kongnie",
+            "realm_12_kongling",
+            "realm_13_kongxuan",
+            "realm_14_gtianzun",
+            "realm_15_half_tatian",
+            "realm_16_tatian"
+        };
         private static string T(string key, string fallback, params object[] args)
         {
             string text = LocalizedTextManager.getText(key);
             if (string.IsNullOrEmpty(text) || text == key) text = fallback;
             return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
+        private static bool ShouldBroadcastRealmId(string realmId)
+        {
+            return ShouldBroadcastRealmIndex(Array.IndexOf(REALM_IDS, realmId));
+        }
+        private static bool ShouldBroadcastRealmIndex(int realmIndex)
+        {
+            if (realmIndex < 0) return false;
+            int gate = xn.config.ModConfigHooks.BroadcastRealmGate;
+            if (gate <= 0) return true;
+            if (gate > 13) gate = 13;
+            int minRealmIndex = gate + 2;
+            return realmIndex >= minRealmIndex;
+        }
+        private static int MapAncientBeastStageToRealmIndex(int stage)
+        {
+            switch (stage)
+            {
+                case 1: return 2;
+                case 2: return 4;
+                case 3: return 6;
+                case 4: return 7;
+                case 5: return 8;
+                case 6: return 9;
+                case 7: return 10;
+                case 8: return 11;
+                case 9: return 13;
+                case 10: return 14;
+                default: return -1;
+            }
         }
 
         public static void Init(Harmony h)
@@ -52,6 +101,7 @@ namespace xn.world
         public static void HeavenSuccessRealm(Actor a, string realmId)
         {
             if (a == null) return;
+            if (!ShouldBroadcastRealmId(realmId)) return;
             string realm = getTraitDisplayName(realmId);
             PostActor(a, T("broadcast_heaven_success_realm", "{0} succeeded in the trial of Heaven and advanced to {1}", a.getName(), realm));
         }
@@ -63,6 +113,7 @@ namespace xn.world
         public static void RealmUp(Actor a, string realmId)
         {
             if (a == null) return;
+            if (!ShouldBroadcastRealmId(realmId)) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
             string realm = getTraitDisplayName(realmId);
             PostActor(a, T("broadcast_realm_up", "{0} broke through to {1}", a.getName(), realm));
@@ -78,6 +129,7 @@ namespace xn.world
         {
             if (a == null) return;
             if (star < 3) return;
+            if (!ShouldBroadcastRealmIndex(MapAncientBeastStageToRealmIndex(star))) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
             PostActor(a, T("broadcast_ancient_up", "{0}'s Ancient God body broke through to {1}-Star", a.getName(), star));
         }
@@ -85,6 +137,7 @@ namespace xn.world
         {
             if (a == null) return;
             if (stage < 3) return;
+            if (!ShouldBroadcastRealmIndex(MapAncientBeastStageToRealmIndex(stage))) return;
             if (UnityEngine.Random.value >= 0.5f) return; 
             PostActor(a, T("broadcast_beast_up", "{0}'s Beast cultivation broke through to Tier {1}", a.getName(), stage));
         }

@@ -19,6 +19,12 @@
       "Callback": "xn.config.ModConfigHooks:OnTitlesSwitchChanged"
     },
     {
+      "Id": "xn_config_enable_title_generation",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnTitleGenerationSwitchChanged"
+    },
+    {
       "Id": "xn_config_enable_broadcast_display",
       "Type": "SWITCH",
       "BoolVal": true,
@@ -69,6 +75,14 @@
       "Type": "TEXT",
       "TextVal": "1",
       "Callback": "xn.config.ModConfigHooks:OnAutoFavRealmGateChanged"
+    },
+    {
+      "Id": "xn_config_broadcast_realm_gate",
+      "Type": "INT_SLIDER",
+      "IntVal": 1,
+      "MinIntVal": 0,
+      "MaxIntVal": 13,
+      "Callback": "xn.config.ModConfigHooks:OnBroadcastRealmGateChanged"
     },
     {
       "Id": "xn_config_tianyun_years",
@@ -157,6 +171,24 @@
       "Type": "SWITCH",
       "BoolVal": true,
       "Callback": "xn.config.ModConfigHooks:OnMentorshipSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_tatian_suppression",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnTatianSuppressionSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_tournament_death_match",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnTournamentDeathMatchSwitchChanged"
+    },
+    {
+      "Id": "xn_config_enable_bomb_skills",
+      "Type": "SWITCH",
+      "BoolVal": true,
+      "Callback": "xn.config.ModConfigHooks:OnBombSkillsSwitchChanged"
     }
   ],
   "xn_config_ai": [
