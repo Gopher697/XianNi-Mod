@@ -55,7 +55,7 @@ namespace xn.world
         {
             if (tile == null) return null;
             InitSafe();
-            var b = World.world.buildings.addBuilding(ID, tile, pCheckForBuild: true, pSfx: playSfx, pType: BuildPlacingType.New);
+            var b = xn.access.BuildingManagerAccess.AddBuilding(World.world.buildings, ID, tile, checkForBuild: true, sfx: playSfx, type: BuildPlacingType.New);
             if (b != null) xn.world.RuinQuestSystem.OnRuinPlaced(b); 
             return b;
         }
