@@ -43,7 +43,7 @@ namespace xn.ui
         {
             var kingdom = SelectedMetas.selected_kingdom;
             if (kingdom == null || __instance == null || kingdom.isRekt()) return;
-            var container = __instance.stats_rows_container;
+            var container = xn.access.StatsRowsContainerAccess.GetStatsRowsContainer(__instance);
             if (container == null) return;
             int[] realmCounts = new int[REALM_IDS.Length];
             int[] ancientCounts = new int[ANCIENT_IDS.Length];
