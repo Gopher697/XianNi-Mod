@@ -35,7 +35,7 @@ namespace xn.world
                 if (unit == null || !unit.isAlive()) continue;
                 if (unit.isKing() || unit.isCityLeader()) continue;
                 if (unit.isBaby()) continue;
-                if (!unit.isProfession(UnitProfession.Unit)) continue; 
+                if (!xn.access.ActorAccess.IsProfession(unit, UnitProfession.Unit)) continue;
                 int level = GetRealmLevel(unit);
                 if (level > bestLevel)
                 {

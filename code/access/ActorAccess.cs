@@ -27,6 +27,7 @@ namespace xn.access
         private static readonly MethodInfo IsUsingPathMethod = AccessTools.Method(typeof(Actor), "isUsingPath");
         private static readonly MethodInfo IsAttackPossibleMethod = AccessTools.Method(typeof(Actor), "isAttackPossible");
         private static readonly MethodInfo IsInAttackRangeMethod = AccessTools.Method(typeof(Actor), "isInAttackRange", new[] { typeof(BaseSimObject) });
+        private static readonly MethodInfo IsProfessionMethod = AccessTools.Method(typeof(Actor), "isProfession", new[] { typeof(UnitProfession) });
         private static readonly MethodInfo CalculateForceMethod = AccessTools.Method(typeof(Actor), "calculateForce", new[] { typeof(float), typeof(float), typeof(float), typeof(float), typeof(float), typeof(float), typeof(bool) });
         private static readonly MethodInfo SetCityMethod = AccessTools.Method(typeof(Actor), "setCity", new[] { typeof(City) });
         private static readonly MethodInfo SetKingdomMethod = AccessTools.Method(typeof(Actor), "setKingdom", new[] { typeof(Kingdom) });
@@ -51,6 +52,7 @@ namespace xn.access
         private static bool _warnedIsUsingPath;
         private static bool _warnedIsAttackPossible;
         private static bool _warnedIsInAttackRange;
+        private static bool _warnedIsProfession;
         private static bool _warnedCalculateForce;
         private static bool _warnedSetCity;
         private static bool _warnedSetKingdom;
@@ -353,6 +355,18 @@ namespace xn.access
                 return false;
             }
             return IsInAttackRangeMethod.Invoke(actor, new object[] { target }) is bool value && value;
+        }
+
+        public static bool IsProfession(Actor actor, UnitProfession profession)
+        {
+            if (actor == null) return false;
+            if (IsProfessionMethod == null)
+            {
+                WarnOnce(ref _warnedIsProfession, "[XN] Actor.isProfession method not found; checking actor data profession.");
+                var data = GetData(actor);
+                return data != null && data.profession == profession;
+            }
+            return IsProfessionMethod.Invoke(actor, new object[] { profession }) is bool value && value;
         }
 
         public static void CalculateForce(Actor actor, float startX, float startY, float targetX, float targetY, float forceAmountDirection, float forceHeight, bool checkCancelJobOnLand)
