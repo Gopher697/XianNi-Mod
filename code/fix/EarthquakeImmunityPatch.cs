@@ -15,7 +15,7 @@ namespace xn.fix
             if (pActor == null || !pActor.isAlive()) return true;
             if (IsCultivator(pActor))
             {
-                pActor.applyRandomForce();
+                xn.access.ActorAccess.ApplyRandomForce(pActor);
                 return false; 
             }
             return true; 

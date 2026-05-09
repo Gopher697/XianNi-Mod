@@ -36,6 +36,7 @@ namespace xn.access
         private static readonly MethodInfo SpawnOnMethod = AccessTools.Method(typeof(Actor), "spawnOn", new[] { typeof(WorldTile), typeof(float) });
         private static readonly MethodInfo TryToAttackMethod = AccessTools.Method(typeof(Actor), "tryToAttack", new[] { typeof(BaseSimObject), typeof(bool), typeof(System.Action), typeof(Vector3), typeof(Kingdom), typeof(WorldTile), typeof(float) });
         private static readonly MethodInfo DieMethod = AccessTools.Method(typeof(Actor), "die", new[] { typeof(bool), typeof(AttackType), typeof(bool), typeof(bool) });
+        private static readonly MethodInfo ApplyRandomForceMethod = AccessTools.Method(typeof(Actor), "applyRandomForce", new[] { typeof(float), typeof(float) });
         private static bool _warnedIsVisible;
         private static bool _warnedData;
         private static bool _warnedHasAttackTarget;
@@ -63,6 +64,7 @@ namespace xn.access
         private static bool _warnedSpawnOn;
         private static bool _warnedTryToAttack;
         private static bool _warnedDie;
+        private static bool _warnedApplyRandomForce;
 
         public static void SetLastAttackType(Actor actor, AttackType attackType)
         {
@@ -459,6 +461,17 @@ namespace xn.access
                 return;
             }
             DieMethod.Invoke(actor, new object[] { pDestroy, pType, pCountDeath, pLogFavorite });
+        }
+
+        public static void ApplyRandomForce(Actor actor, float pMinHeight = 1.5f, float pMaxHeight = 2f)
+        {
+            if (actor == null) return;
+            if (ApplyRandomForceMethod == null)
+            {
+                WarnOnce(ref _warnedApplyRandomForce, "[XN] Actor.applyRandomForce method not found; force was not applied.");
+                return;
+            }
+            ApplyRandomForceMethod.Invoke(actor, new object[] { pMinHeight, pMaxHeight });
         }
 
         private static void WarnOnce(ref bool warned, string message)
