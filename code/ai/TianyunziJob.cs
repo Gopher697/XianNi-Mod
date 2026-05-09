@@ -50,7 +50,7 @@ namespace cultivation.ai
                     pActor.setAttackTarget(currentTarget);
                     if (xn.access.ActorAccess.IsInAttackRange(pActor, currentTarget))
                     {
-                        pActor.tryToAttack(currentTarget);
+                        xn.access.ActorAccess.TryToAttack(pActor, currentTarget);
                     }
                     else
                     {
@@ -69,7 +69,7 @@ namespace cultivation.ai
                     pActor.setAttackTarget(newTarget);
                     if (xn.access.ActorAccess.IsInAttackRange(pActor, newTarget))
                     {
-                        pActor.tryToAttack(newTarget);
+                        xn.access.ActorAccess.TryToAttack(pActor, newTarget);
                     }
                     else
                     {

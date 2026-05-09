@@ -34,6 +34,7 @@ namespace xn.access
         private static readonly MethodInfo SetCurrentTilePositionMethod = AccessTools.Method(typeof(Actor), "setCurrentTilePosition", new[] { typeof(WorldTile) });
         private static readonly MethodInfo SetProfessionMethod = AccessTools.Method(typeof(Actor), "setProfession", new[] { typeof(UnitProfession), typeof(bool) });
         private static readonly MethodInfo SpawnOnMethod = AccessTools.Method(typeof(Actor), "spawnOn", new[] { typeof(WorldTile), typeof(float) });
+        private static readonly MethodInfo TryToAttackMethod = AccessTools.Method(typeof(Actor), "tryToAttack", new[] { typeof(BaseSimObject), typeof(bool), typeof(System.Action), typeof(Vector3), typeof(Kingdom), typeof(WorldTile), typeof(float) });
         private static bool _warnedIsVisible;
         private static bool _warnedData;
         private static bool _warnedHasAttackTarget;
@@ -59,6 +60,7 @@ namespace xn.access
         private static bool _warnedSetCurrentTilePosition;
         private static bool _warnedSetProfession;
         private static bool _warnedSpawnOn;
+        private static bool _warnedTryToAttack;
 
         public static void SetLastAttackType(Actor actor, AttackType attackType)
         {
@@ -433,6 +435,17 @@ namespace xn.access
                 return;
             }
             SpawnOnMethod.Invoke(actor, new object[] { tile, zHeight });
+        }
+
+        public static bool TryToAttack(Actor actor, BaseSimObject target, bool doChecks = true, System.Action killAction = null, Vector3 attackPosition = default(Vector3), Kingdom forceKingdom = null, WorldTile tileTarget = null, float bonusAreaOfEffect = 0f)
+        {
+            if (actor == null || target == null) return false;
+            if (TryToAttackMethod == null)
+            {
+                WarnOnce(ref _warnedTryToAttack, "[XN] Actor.tryToAttack method not found; attack was not performed.");
+                return false;
+            }
+            return TryToAttackMethod.Invoke(actor, new object[] { target, doChecks, killAction, attackPosition, forceKingdom, tileTarget, bonusAreaOfEffect }) is bool value && value;
         }
 
         private static void WarnOnce(ref bool warned, string message)

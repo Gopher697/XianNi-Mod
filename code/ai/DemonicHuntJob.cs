@@ -88,7 +88,7 @@ namespace cultivation.ai
                 pActor.setAttackTarget(target);
                 if (xn.access.ActorAccess.IsInAttackRange(pActor, target))
                 {
-                    pActor.tryToAttack(target);
+                    xn.access.ActorAccess.TryToAttack(pActor, target);
                 }
                 else
                 {

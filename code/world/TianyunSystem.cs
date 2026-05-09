@@ -471,7 +471,7 @@ namespace xn.world
         {
             xn.access.ActorAccess.GetData(a).set(KEY_STOP, 1);
             xn.access.ActorAccess.GetData(a).set(KEY_SEAL_UNTIL_YEAR, Date.getCurrentYear() + years);
-            a.addStatusEffect("slowness", 3f);
+            xn.access.BaseSimObjectAccess.AddStatusEffect(a, "slowness", 3f);
             a.makeStunned(2f);
             return true;
         }
