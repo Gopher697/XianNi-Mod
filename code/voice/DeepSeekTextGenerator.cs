@@ -67,7 +67,10 @@ namespace xn.voice
             public ChatMessage[] messages;
             public string model = DefaultModel;
             public float temperature = 0.7f;
-            public int max_tokens = 120;
+            [JsonProperty("max_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_tokens;
+            [JsonProperty("max_completion_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_completion_tokens;
         }
         private class ChatMessage
         {
@@ -100,6 +103,7 @@ namespace xn.voice
                 string apiKey = GetAPIKey();
                 string systemPrompt = GetSystemPrompt(context);
                 string userPrompt = $"Game event: {rawText}\n\nRequirement: Rewrite as a single concise English voice broadcast line, strictly under {MaxBroadcastWords} words.";
+                bool useMaxCompletionTokens = UsesMaxCompletionTokens(model);
 
                 var request = new ChatRequest
                 {
@@ -110,7 +114,8 @@ namespace xn.voice
                     },
                     model       = model,
                     temperature = 0.9f,
-                    max_tokens  = 80
+                    max_tokens  = useMaxCompletionTokens ? (int?)null : 80,
+                    max_completion_tokens = useMaxCompletionTokens ? 80 : (int?)null
                 };
 
                 using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) })
@@ -163,6 +168,7 @@ namespace xn.voice
             {
                 var (endpoint, model) = GetProviderConfig();
                 string apiKey = GetAPIKey();
+                bool useMaxCompletionTokens = UsesMaxCompletionTokens(model);
 
                 string systemPrompt =
                     "You are a narrator for a xianxia cultivation world simulation game. " +
@@ -184,7 +190,8 @@ namespace xn.voice
                     },
                     model       = model,
                     temperature = 1.0f,
-                    max_tokens  = 400
+                    max_tokens  = useMaxCompletionTokens ? (int?)null : 400,
+                    max_completion_tokens = useMaxCompletionTokens ? 400 : (int?)null
                 };
 
                 using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) })
@@ -244,6 +251,16 @@ namespace xn.voice
             return "You are the voice broadcaster for a xianxia cultivation world simulation game. " +
                    "Convert game events into concise, vivid English broadcast lines. " +
                    $"Keep broadcasts under {MaxBroadcastWords} words. Use cultivation-genre tone.";
+        }
+
+        public static bool UsesMaxCompletionTokens(string model)
+        {
+            if (string.IsNullOrEmpty(model)) return false;
+            string normalized = model.Trim().ToLowerInvariant();
+            return normalized.StartsWith("gpt-5", StringComparison.Ordinal)
+                || normalized.StartsWith("o1", StringComparison.Ordinal)
+                || normalized.StartsWith("o3", StringComparison.Ordinal)
+                || normalized.StartsWith("o4", StringComparison.Ordinal);
         }
 
         /// <summary>Strip any &lt;think&gt;...&lt;/think&gt; reasoning block from a model response.</summary>

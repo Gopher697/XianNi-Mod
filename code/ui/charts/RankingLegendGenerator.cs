@@ -56,7 +56,10 @@ namespace xn.ui.charts
             public ChatMessage[] messages;
             public string model = "deepseek-chat";
             public float temperature = 0.9f;
-            public int max_tokens = 8192;
+            [JsonProperty("max_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_tokens;
+            [JsonProperty("max_completion_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_completion_tokens;
         }
         private class ChatMessage
         {
@@ -219,6 +222,8 @@ namespace xn.ui.charts
             {
                 userPrompt = T("ranking_legend_user_prompt", "Based on the following top three Power Ranking data, write a cultivation legend:\n\n{0}", actorData);
             }
+            const int tokenLimit = 8192;
+            bool useMaxCompletionTokens = xn.voice.AITextGenerator.UsesMaxCompletionTokens(model);
             var request = new ChatRequest
             {
                 messages = new[]
@@ -228,7 +233,8 @@ namespace xn.ui.charts
                 },
                 model = model,
                 temperature = 0.9f,
-                max_tokens = 8192
+                max_tokens = useMaxCompletionTokens ? (int?)null : tokenLimit,
+                max_completion_tokens = useMaxCompletionTokens ? tokenLimit : (int?)null
             };
             using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(60) })
             {

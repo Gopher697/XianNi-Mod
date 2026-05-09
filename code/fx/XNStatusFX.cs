@@ -15,14 +15,14 @@ namespace xn.fx
         }
         private static void RegisterLoopStatus()
         {
-            AddLoopStatus("xn_tiandao", "tiandao", "ui/icons/xn_tiandao", 99999f, 1f, -5f);
-            AddLoopStatus("xn_yijing_loop", "yijing/tongyong", "ui/icons/xn_yijing", 99999f, 1f, -7f);
-            AddLoopStatus("xn_condense_root", "genanim/condense", "ui/icons/xn_condense", 99999f, 1f, -6f);
-            AddLoopStatus("xn_territory", "territory", "ui/icons/xn_territory", 99999f, 1f, 0f);
-            AddLoopStatus("xn_weiya", "shentong/weiya", "ui/icons/xn_weiya", 99999f, 1f, -6f);
-            AddLoopStatus("xn_baonu", "shentong/baonuzhibian", "ui/icons/xn_baonu", 99999f, 1f, -6f);
-            AddLoopStatus("xn_xs_ascension", "xianshu/ascension", "ui/icons/xn_ascension", 99999f, 1f, -5f);
-            AddLoopStatus("xn_xs_shield", "xianshu/shield", "ui/icons/xn_shield", 99999f, 1f, -5f);
+            AddLoopStatus("xn_tiandao", "tiandao", "trair/realm_16_tatian", 99999f, 1f, -5f);
+            AddLoopStatus("xn_yijing_loop", "yijing/tongyong", "trair/intent_01_extreme", 99999f, 1f, -7f);
+            AddLoopStatus("xn_condense_root", "genanim/condense", "trair/root_01_mortal", 99999f, 1f, -6f);
+            AddLoopStatus("xn_territory", "territory", "ui/icon/xiuzhenguo", 99999f, 1f, 0f);
+            AddLoopStatus("xn_weiya", "shentong/weiya", "trair/divine_02_weiya", 99999f, 1f, -6f);
+            AddLoopStatus("xn_baonu", "shentong/baonuzhibian", "trair/divine_01_baonuzhibian", 99999f, 1f, -6f);
+            AddLoopStatus("xn_xs_ascension", "xianshu/ascension", "trair/art_02_ascension", 99999f, 1f, -5f);
+            AddLoopStatus("xn_xs_shield", "xianshu/shield", "trair/art_09_shield", 99999f, 1f, -5f);
         }
         private static void RegisterOnceEffects()
         {

@@ -98,8 +98,8 @@ namespace xn.ui
                         tipBtn.textOnClick            = key;
                         tipBtn.textOnClickDescription = key + "_desc";
                     }
-                    var sprite = Resources.Load<Sprite>(data.iconPath);
-                    if (sprite == null) sprite = Resources.Load<Sprite>("zhanwei");
+                    var sprite = SpriteTextureLoader.getSprite(data.iconPath) ?? Resources.Load<Sprite>(data.iconPath);
+                    if (sprite == null) sprite = SpriteTextureLoader.getSprite("zhanwei") ?? Resources.Load<Sprite>("zhanwei");
                     if (sprite != null) icon.getIcon().sprite = sprite;
                     icon.setValue(0f);
                     RegisterIconToContainer(statsContainer, data.name, icon);

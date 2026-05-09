@@ -33,7 +33,10 @@ namespace xn.tournament
             public ChatMessage[] messages;
             public string model = "deepseek-chat";
             public float temperature = 0.8f;
-            public int max_tokens = 800;
+            [JsonProperty("max_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_tokens;
+            [JsonProperty("max_completion_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_completion_tokens;
         }
         private class ChatMessage
         {
@@ -166,6 +169,8 @@ namespace xn.tournament
             var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
             string systemPrompt = T("tournament_summary_system_prompt", "You are a professional xianxia novelist. Based on the tournament data provided, write a short match summary.\nRequirements:\n1. Keep it between 50 and 200 words\n2. Describe how exciting the matches were and how the champion performed\n3. If runner-up and third-place information is available, mention their performances too\n4. Use vivid, flavorful language that fits a cultivation story\n5. Make the summary complete and emphasize the champion's strength");
             string userPrompt = T("tournament_summary_user_prompt", "Based on the following tournament data, write a match summary:\n\n{0}", tournamentData);
+            int tokenLimit = IsUsingCustomConfig() ? 8192 : 800;
+            bool useMaxCompletionTokens = xn.voice.AITextGenerator.UsesMaxCompletionTokens(model);
             var request = new ChatRequest
             {
                 messages = new[]
@@ -175,7 +180,8 @@ namespace xn.tournament
                 },
                 model = model,
                 temperature = 0.8f,
-                max_tokens = IsUsingCustomConfig() ? 8192 : 800
+                max_tokens = useMaxCompletionTokens ? (int?)null : tokenLimit,
+                max_completion_tokens = useMaxCompletionTokens ? tokenLimit : (int?)null
             };
             using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) })
             {

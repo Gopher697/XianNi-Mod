@@ -43,7 +43,10 @@ namespace xn.expand
             public ChatMessage[] messages;
             public string model = "deepseek-chat";
             public float temperature = 0.8f;
-            public int max_tokens = 1500;
+            [JsonProperty("max_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_tokens;
+            [JsonProperty("max_completion_tokens", NullValueHandling = NullValueHandling.Ignore)]
+            public int? max_completion_tokens;
         }
         private class ChatMessage
         {
@@ -172,9 +175,9 @@ namespace xn.expand
             var citizenJob = actor.citizen_job;
             if (citizenJob != null && !string.IsNullOrEmpty(citizenJob.id))
             {
-                string jobName = LocalizedTextManager.getText(citizenJob.id);
-                if (string.IsNullOrEmpty(jobName) || jobName == citizenJob.id)
-                    jobName = citizenJob.id;
+                string jobName = TryGetLocalized(citizenJob.id);
+                if (string.IsNullOrEmpty(jobName))
+                    jobName = FormatId(citizenJob.id);
                 sb.AppendLine(F("cultivation_history_data_job", "Occupation: {0}", jobName));
             }
             sb.AppendLine(F("cultivation_history_data_kills", "Kills: {0}", xn.access.ActorAccess.GetData(actor).kills));
@@ -244,8 +247,35 @@ namespace xn.expand
             if (string.IsNullOrEmpty(key))
                 return null;
 
+            string fallback = KnownFallback(key);
+            if (!string.IsNullOrEmpty(fallback))
+                return fallback;
+
             string text = LocalizedTextManager.getText(key, null);
             return string.IsNullOrEmpty(text) || text == key ? null : text;
+        }
+        private static string KnownFallback(string key)
+        {
+            switch (key)
+            {
+                case "Human":
+                    return "Human";
+                case "gatherer_herbs":
+                    return "Herb Gatherer";
+                default:
+                    return null;
+            }
+        }
+        private static string FormatId(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return T("value_unknown", "Unknown");
+            string[] parts = id.Replace('-', '_').Split('_');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].Length == 0) continue;
+                parts[i] = char.ToUpperInvariant(parts[i][0]) + (parts[i].Length > 1 ? parts[i].Substring(1) : "");
+            }
+            return string.Join(" ", parts);
         }
         private static string GetAncientRealm(Actor actor)
         {
@@ -319,6 +349,8 @@ namespace xn.expand
             var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
             string systemPrompt = T("cultivation_history_system_prompt", "You are a professional cultivation (Renegade Immortal) novelist. Based on the provided character data, write a short cultivation-history story.\nRequirements:\n1. Keep it between 50 and 550 words\n2. The story should have a beginning, development, turn, and conclusion, including cultivation, breakthroughs, trials, and wandering experience\n3. Use the character's realm, traits, experiences, and other data to weave a plausible plot\n4. Use vivid, flavorful language that fits a cultivation novel\n5. Make the story complete and leave no unresolved suspense\n6. Do not repeat the raw character data; weave it naturally into the story");
             string userPrompt = F("cultivation_history_user_prompt", "Based on the following character data, write a cultivation-history story:\n\n{0}", actorData);
+            int tokenLimit = IsUsingCustomConfig() ? 8192 : 1500;
+            bool useMaxCompletionTokens = xn.voice.AITextGenerator.UsesMaxCompletionTokens(model);
             var request = new ChatRequest
             {
                 messages = new[]
@@ -328,7 +360,8 @@ namespace xn.expand
                 },
                 model = model,
                 temperature = 0.8f,
-                max_tokens = IsUsingCustomConfig() ? 8192 : 1500
+                max_tokens = useMaxCompletionTokens ? (int?)null : tokenLimit,
+                max_completion_tokens = useMaxCompletionTokens ? tokenLimit : (int?)null
             };
             using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) })
             {
