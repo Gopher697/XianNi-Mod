@@ -148,7 +148,7 @@ namespace xn.expand
                     {
                         if (actor.isAlive())
                         {
-                            powerElement.showMember(actor);
+                            xn.access.InterestingPeopleElementAccess.ShowMember(powerElement, actor);
                             yield return new WaitForSecondsRealtime(0.025f);
                         }
                     }

@@ -10,6 +10,8 @@ namespace xn.access
         private static readonly FieldInfo CounterField = AccessTools.Field(typeof(InterestingPeopleElement), "_counter");
         private static readonly FieldInfo GridField = AccessTools.Field(typeof(InterestingPeopleElement), "_grid");
         private static readonly FieldInfo ElementField = AccessTools.Field(typeof(InterestingPeopleElement), "_element");
+        private static readonly MethodInfo ShowMemberMethod = AccessTools.Method(typeof(InterestingPeopleElement), "showMember", new[] { typeof(Actor) });
+        private static bool _warnedShowMember;
 
         public static Text GetCounter(InterestingPeopleElement element)
         {
@@ -27,6 +29,21 @@ namespace xn.access
         {
             if (element == null || ElementField == null) return null;
             return FieldValueToTransform(ElementField.GetValue(element));
+        }
+
+        public static void ShowMember(InterestingPeopleElement element, Actor actor)
+        {
+            if (element == null || actor == null) return;
+            if (ShowMemberMethod == null)
+            {
+                if (!_warnedShowMember)
+                {
+                    _warnedShowMember = true;
+                    Debug.LogWarning("[XN] InterestingPeopleElement.showMember method not found; top power display cannot show member.");
+                }
+                return;
+            }
+            ShowMemberMethod.Invoke(element, new object[] { actor });
         }
 
         private static Transform FieldValueToTransform(object value)
