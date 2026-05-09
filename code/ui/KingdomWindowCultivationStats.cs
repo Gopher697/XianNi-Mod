@@ -28,8 +28,8 @@ namespace xn.ui
             "ancient_06_star", "ancient_07_star", "ancient_08_star", "ancient_09_star", "ancient_10_star"
         };
         private static readonly string[] ANCIENT_NAMES = {
-            "1 Star Ancient God", "2 Star Ancient God", "3 Star Ancient God", "4 Star Ancient God", "5 Star Ancient God",
-            "6 Star Ancient God", "7 Star Ancient God", "8 Star Ancient God", "9 Star Ancient God", "10 Star Ancient God"
+            "Ancient God: 1-Star", "Ancient God: 2-Star", "Ancient God: 3-Star", "Ancient God: 4-Star", "Ancient God: 5-Star",
+            "Ancient God: 6-Star", "Ancient God: 7-Star", "Ancient God: 8-Star", "Ancient God: 9-Star", "Ancient God: 10-Star"
         };
         private static readonly string[] BEAST_IDS = {
             "beast_01_stage", "beast_02_stage", "beast_03_stage", "beast_04_stage", "beast_05_stage",

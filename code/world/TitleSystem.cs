@@ -12,11 +12,47 @@ namespace xn.world
         private const string KEY_SUFFIX = "xn.title.suffix";          
         private static readonly Dictionary<string, string[]> _titleCache = new Dictionary<string, string[]>();
         private static string _titleFolderPath;
+        private static readonly string[] REALM_TRAIT_IDS = new[]
+        {
+            "realm_01_qi",
+            "realm_02_foundation",
+            "realm_03_core",
+            "realm_04_nascent",
+            "realm_05_deity",
+            "realm_06_infantchg",
+            "realm_07_wending",
+            "realm_08_kuinie",
+            "realm_09_jingnie",
+            "realm_10_suinie",
+            "realm_11_kongnie",
+            "realm_12_kongling",
+            "realm_13_kongxuan",
+            "realm_14_gtianzun",
+            "realm_15_half_tatian",
+            "realm_16_tatian"
+        };
+        private static readonly string[] BEAST_STAGE_IDS = new[]
+        {
+            "beast_01_stage",
+            "beast_02_stage",
+            "beast_03_stage",
+            "beast_04_stage",
+            "beast_05_stage",
+            "beast_06_stage",
+            "beast_07_stage",
+            "beast_08_stage",
+            "beast_09_stage",
+            "beast_10_stage"
+        };
         private static string T(string key, string fallback, params object[] args)
         {
             string text = LocalizedTextManager.getText(key);
             if (string.IsNullOrEmpty(text) || text == key) text = fallback;
             return args == null || args.Length == 0 ? text : string.Format(text, args);
+        }
+        private static string TraitName(string traitId, string fallback)
+        {
+            return string.IsNullOrEmpty(traitId) ? fallback : T("trait_" + traitId, fallback);
         }
         public static void ClearTitleData(Actor actor)
         {
@@ -236,6 +272,26 @@ namespace xn.world
             { "realm_15", "Half-Step Heaven Trampling" },
             { "realm_16", "Heaven Trampling" }
         };
+        private static readonly Dictionary<string, string> _realmTraitIdMap =
+            new Dictionary<string, string>
+        {
+            { "realm_01", "realm_01_qi" },
+            { "realm_02", "realm_02_foundation" },
+            { "realm_03", "realm_03_core" },
+            { "realm_04", "realm_04_nascent" },
+            { "realm_05", "realm_05_deity" },
+            { "realm_06", "realm_06_infantchg" },
+            { "realm_07", "realm_07_wending" },
+            { "realm_08", "realm_08_kuinie" },
+            { "realm_09", "realm_09_jingnie" },
+            { "realm_10", "realm_10_suinie" },
+            { "realm_11", "realm_11_kongnie" },
+            { "realm_12", "realm_12_kongling" },
+            { "realm_13", "realm_13_kongxuan" },
+            { "realm_14", "realm_14_gtianzun" },
+            { "realm_15", "realm_15_half_tatian" },
+            { "realm_16", "realm_16_tatian" }
+        };
         private static readonly Dictionary<string, string> _beastSuffixMap =
             new Dictionary<string, string>
         {
@@ -254,16 +310,16 @@ namespace xn.world
         {
             switch (starLevel)
             {
-                case 1: return T("title_suffix_ancient_01", "1 Star Ancient God");
-                case 2: return T("title_suffix_ancient_02", "2 Star Ancient God");
-                case 3: return T("title_suffix_ancient_03", "3 Star Ancient God");
-                case 4: return T("title_suffix_ancient_04", "4 Star Ancient God");
-                case 5: return T("title_suffix_ancient_05", "5 Star Ancient God");
-                case 6: return T("title_suffix_ancient_06", "6 Star Ancient God");
-                case 7: return T("title_suffix_ancient_07", "7 Star Ancient God");
-                case 8: return T("title_suffix_ancient_08", "8 Star Ancient God");
-                case 9: return T("title_suffix_ancient_09", "9 Star Ancient God");
-                case 10: return T("title_suffix_ancient_10", "10 Star Ancient God");
+                case 1: return TraitName("ancient_01_star", "Ancient God: 1-Star");
+                case 2: return TraitName("ancient_02_star", "Ancient God: 2-Star");
+                case 3: return TraitName("ancient_03_star", "Ancient God: 3-Star");
+                case 4: return TraitName("ancient_04_star", "Ancient God: 4-Star");
+                case 5: return TraitName("ancient_05_star", "Ancient God: 5-Star");
+                case 6: return TraitName("ancient_06_star", "Ancient God: 6-Star");
+                case 7: return TraitName("ancient_07_star", "Ancient God: 7-Star");
+                case 8: return TraitName("ancient_08_star", "Ancient God: 8-Star");
+                case 9: return TraitName("ancient_09_star", "Ancient God: 9-Star");
+                case 10: return TraitName("ancient_10_star", "Ancient God: 10-Star");
             }
             return null;
         }
@@ -286,7 +342,8 @@ namespace xn.world
                 return;
             if (!_realmSuffixMap.TryGetValue(key, out string suffix))
                 return;
-            suffix = T("title_suffix_" + key, suffix);
+            if (_realmTraitIdMap.TryGetValue(key, out string traitNameKey))
+                suffix = TraitName(traitNameKey, suffix);
             string currentName = actor.getName();
             if (string.IsNullOrEmpty(currentName))
                 return;
@@ -398,7 +455,7 @@ namespace xn.world
                 return;
             if (!_beastSuffixMap.TryGetValue(traitId, out string suffix))
                 return;
-            suffix = T("title_suffix_" + traitId, suffix);
+            suffix = TraitName(traitId, suffix);
             string currentName = actor.getName();
             if (string.IsNullOrEmpty(currentName))
                 return;
@@ -427,6 +484,86 @@ namespace xn.world
                 }
             }
             SetActorName(actor, title, baseName, suffix);
+        }
+        public static void ReconcileActorName(Actor actor)
+        {
+            if (!xn.config.ModConfigHooks.EnableTitleGeneration) return;
+            if (actor == null)
+                return;
+            string suffix = GetCurrentCultivationSuffix(actor);
+            if (string.IsNullOrEmpty(suffix))
+                return;
+            string currentName = actor.getName();
+            if (string.IsNullOrEmpty(currentName))
+                return;
+            ExtractTitleAndBaseName(actor, currentName, out string titlePart, out string baseName);
+            if (string.IsNullOrEmpty(baseName))
+                baseName = currentName.Trim();
+            string title = null;
+            xn.access.ActorAccess.GetData(actor).get(KEY_TITLE, out string storedTitle, "");
+            if (!string.IsNullOrEmpty(storedTitle))
+                title = storedTitle;
+            else if (!string.IsNullOrEmpty(titlePart) && titlePart.Length > 2)
+                title = titlePart.Substring(1, titlePart.Length - 2);
+            string expectedName = BuildExpectedName(title, baseName, suffix);
+            if (currentName.Trim() == expectedName)
+            {
+                xn.access.ActorAccess.GetData(actor).set(KEY_SUFFIX, suffix);
+                return;
+            }
+            SetActorName(actor, title, baseName, suffix);
+        }
+        private static string GetCurrentCultivationSuffix(Actor actor)
+        {
+            int ancientStar = GetHighestAncientStar(actor);
+            if (ancientStar > 0)
+                return GetAncientSuffix(ancientStar);
+            int beastStage = GetHighestBeastStage(actor);
+            if (beastStage > 0)
+            {
+                string beastId = "beast_" + beastStage.ToString("D2") + "_stage";
+                if (_beastSuffixMap.TryGetValue(beastId, out string beastFallback))
+                    return TraitName(beastId, beastFallback);
+            }
+            string realmId = GetHighestRealmTrait(actor);
+            if (!string.IsNullOrEmpty(realmId))
+            {
+                string key = NormalizeRealmKey(realmId);
+                if (!string.IsNullOrEmpty(key) && _realmSuffixMap.TryGetValue(key, out string realmFallback))
+                    return TraitName(realmId, realmFallback);
+            }
+            return null;
+        }
+        private static int GetHighestAncientStar(Actor actor)
+        {
+            if (actor == null) return 0;
+            for (int i = 10; i >= 1; i--)
+            {
+                string id = "ancient_" + i.ToString("D2") + "_star";
+                if (actor.hasTrait(id))
+                    return i;
+            }
+            return 0;
+        }
+        private static int GetHighestBeastStage(Actor actor)
+        {
+            if (actor == null) return 0;
+            for (int i = BEAST_STAGE_IDS.Length - 1; i >= 0; i--)
+            {
+                if (actor.hasTrait(BEAST_STAGE_IDS[i]))
+                    return i + 1;
+            }
+            return 0;
+        }
+        private static string GetHighestRealmTrait(Actor actor)
+        {
+            if (actor == null) return null;
+            for (int i = REALM_TRAIT_IDS.Length - 1; i >= 0; i--)
+            {
+                if (actor.hasTrait(REALM_TRAIT_IDS[i]))
+                    return REALM_TRAIT_IDS[i];
+            }
+            return null;
         }
         private static void ExtractTitleAndBaseName(Actor actor, string name, out string titlePart, out string baseName)
         {

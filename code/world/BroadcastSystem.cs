@@ -272,8 +272,8 @@ namespace xn.world
             { "realm_01_qi", "Qi Condensation" }, { "realm_02_foundation", "Foundation Establishment" }, { "realm_03_core", "Core Formation" },
             { "realm_04_nascent", "Nascent Soul" }, { "realm_05_deity", "Soul Formation" }, { "realm_06_infantchg", "Soul Transformation" },
             { "realm_07_wending", "Ascendant" }, { "realm_08_kuinie", "Nirvana Scryer" }, { "realm_09_jingnie", "Nirvana Cleanser" },
-            { "realm_10_suinie", "Nirvana Shatterer" }, { "realm_11_kongnie", "Nirvana Void" }, { "realm_12_kongling", "Spirit Void" },
-            { "realm_13_kongxuan", "Arcane Void" }, { "realm_14_gtianzun", "Grand Empyrean" }, { "realm_15_half_tatian", "Half-Step Heaven Trampling" },
+            { "realm_10_suinie", "Nirvana Shatterer" }, { "realm_11_kongnie", "Void Nirvana" }, { "realm_12_kongling", "Void Spirit" },
+            { "realm_13_kongxuan", "Void Arcanum" }, { "realm_14_gtianzun", "Grand Empyrean" }, { "realm_15_half_tatian", "Half-Step Heaven Trampling" },
             { "realm_16_tatian", "Heaven Trampling" }
         };
         private static string getTraitDisplayName(string id)

@@ -86,6 +86,7 @@ namespace xn.world
                     parent.increaseChildren();
                 }
                 __instance.asset.action_on_load?.Invoke(__instance);
+                TitleSystem.ReconcileActorName(__instance);
                 return false;
             }
             catch (System.Exception ex)
