@@ -12,6 +12,12 @@ namespace xn.ui
             var tooltipLib = AssetManager.tooltips;
             if (tooltipLib != null)
             {
+                var textTooltipAsset = new TooltipAsset
+                {
+                    id = "xn_text_info",
+                    callback = ShowTextTooltip
+                };
+                tooltipLib.add(textTooltipAsset);
                 var tooltipAsset1 = new TooltipAsset
                 {
                     id = "row_previous_life_info",
@@ -54,6 +60,19 @@ namespace xn.ui
                     callback = ShowCultivationDistributionTooltip
                 };
                 tooltipLib.add(tooltipAsset7);
+            }
+        }
+        private static void ShowTextTooltip(Tooltip tooltip, string type, TooltipData data)
+        {
+            string tipName = xn.access.TooltipDataAccess.GetTipName(data);
+            string tipDescription = xn.access.TooltipDataAccess.GetTipDescription(data);
+            if (!string.IsNullOrEmpty(tipName))
+            {
+                tooltip.name.text = tipName;
+            }
+            if (!string.IsNullOrEmpty(tipDescription))
+            {
+                xn.access.TooltipAccess.SetDescription(tooltip, tipDescription);
             }
         }
         private static void ShowPreviousLifeTooltip(Tooltip tooltip, string type, TooltipData data)

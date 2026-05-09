@@ -633,6 +633,8 @@ namespace xn.ui
     [HarmonyPatch(typeof(KeyValueField), "setMetaForTooltip")]
     internal static class Patch_KeyValueField_setMetaForTooltip_FixNullRef
     {
+        private const string GenericTooltipAssetId = "xn_text_info";
+
         [HarmonyPrefix]
         private static bool Prefix(KeyValueField __instance, MetaType pMetaType, long pMetaId, string pTooltipId = null, TooltipDataGetter pData = null)
         {
@@ -641,7 +643,7 @@ namespace xn.ui
                 TooltipDataGetter safeData = null;
                 if (pData == null)
                 {
-                    safeData = () => xn.access.TooltipDataAccess.Create(pTooltipId, "");
+                    safeData = () => CreateFallbackTooltipData(pTooltipId);
                 }
                 else
                 {
@@ -653,13 +655,13 @@ namespace xn.ui
                             if (originalData != null)
                             {
                                 var result = originalData();
-                                return result ?? xn.access.TooltipDataAccess.Create(pTooltipId, "");
+                                return result ?? CreateFallbackTooltipData(pTooltipId);
                             }
-                            return xn.access.TooltipDataAccess.Create(pTooltipId, "");
+                            return CreateFallbackTooltipData(pTooltipId);
                         }
                         catch
                         {
-                            return xn.access.TooltipDataAccess.Create(pTooltipId, "");
+                            return CreateFallbackTooltipData(pTooltipId);
                         }
                     };
                 }
@@ -675,7 +677,7 @@ namespace xn.ui
                             var tooltipData = safeData();
                             if (tooltipData != null)
                             {
-                                Tooltip.show(__instance, pTooltipId, tooltipData);
+                                Tooltip.show(__instance, GetTooltipAssetId(pTooltipId), tooltipData);
                             }
                         }
                     }
@@ -686,6 +688,35 @@ namespace xn.ui
                 return false;
             }
             return true;
+        }
+
+        private static string GetTooltipAssetId(string tooltipId)
+        {
+            if (AssetManager.tooltips?.get(tooltipId) != null)
+            {
+                return tooltipId;
+            }
+            if (AssetManager.tooltips?.get(GenericTooltipAssetId) != null)
+            {
+                return GenericTooltipAssetId;
+            }
+            return tooltipId;
+        }
+
+        private static TooltipData CreateFallbackTooltipData(string tooltipId)
+        {
+            string nameKey = tooltipId;
+            if (nameKey.EndsWith("_info", StringComparison.Ordinal))
+            {
+                nameKey = nameKey.Substring(0, nameKey.Length - "_info".Length);
+            }
+            return xn.access.TooltipDataAccess.Create(Localize(nameKey, nameKey), Localize(tooltipId, ""));
+        }
+
+        private static string Localize(string key, string fallback)
+        {
+            string text = LocalizedTextManager.getText(key, null);
+            return string.IsNullOrEmpty(text) || text == key ? fallback : text;
         }
     }
     [HarmonyPatch(typeof(Tooltip), "showTooltip")]
