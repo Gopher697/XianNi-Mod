@@ -35,6 +35,7 @@ namespace xn.access
         private static readonly MethodInfo SetProfessionMethod = AccessTools.Method(typeof(Actor), "setProfession", new[] { typeof(UnitProfession), typeof(bool) });
         private static readonly MethodInfo SpawnOnMethod = AccessTools.Method(typeof(Actor), "spawnOn", new[] { typeof(WorldTile), typeof(float) });
         private static readonly MethodInfo TryToAttackMethod = AccessTools.Method(typeof(Actor), "tryToAttack", new[] { typeof(BaseSimObject), typeof(bool), typeof(System.Action), typeof(Vector3), typeof(Kingdom), typeof(WorldTile), typeof(float) });
+        private static readonly MethodInfo DieMethod = AccessTools.Method(typeof(Actor), "die", new[] { typeof(bool), typeof(AttackType), typeof(bool), typeof(bool) });
         private static bool _warnedIsVisible;
         private static bool _warnedData;
         private static bool _warnedHasAttackTarget;
@@ -61,6 +62,7 @@ namespace xn.access
         private static bool _warnedSetProfession;
         private static bool _warnedSpawnOn;
         private static bool _warnedTryToAttack;
+        private static bool _warnedDie;
 
         public static void SetLastAttackType(Actor actor, AttackType attackType)
         {
@@ -446,6 +448,17 @@ namespace xn.access
                 return false;
             }
             return TryToAttackMethod.Invoke(actor, new object[] { target, doChecks, killAction, attackPosition, forceKingdom, tileTarget, bonusAreaOfEffect }) is bool value && value;
+        }
+
+        public static void Die(Actor actor, bool pDestroy = true, AttackType pType = AttackType.Other, bool pCountDeath = true, bool pLogFavorite = true)
+        {
+            if (actor == null) return;
+            if (DieMethod == null)
+            {
+                WarnOnce(ref _warnedDie, "[XN] Actor.die method not found; actor was not killed.");
+                return;
+            }
+            DieMethod.Invoke(actor, new object[] { pDestroy, pType, pCountDeath, pLogFavorite });
         }
 
         private static void WarnOnce(ref bool warned, string message)

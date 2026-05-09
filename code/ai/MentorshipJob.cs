@@ -434,7 +434,7 @@ namespace xn.world
                 BroadcastSystem.Custom(T("broadcast_mentorship_rebellion", "{0} slew their master and gained half of {1}'s cultivation", disc.getName(), master.getName()));
                 RemoveDisciple(master, discId);
                 xn.access.ActorAccess.GetData(disc).set(KEY_MASTER_ID, 0L);
-                master.die(pDestroy: false, AttackType.Other, pCountDeath: true, pLogFavorite: true);
+                xn.access.ActorAccess.Die(master, pDestroy: false, AttackType.Other, pCountDeath: true, pLogFavorite: true);
                 return;
             }
             long masterXp2;
@@ -445,7 +445,7 @@ namespace xn.world
             IncreaseLifespan(master, CONSUME_LIFE_BONUS);
             BroadcastSystem.MentorshipConsume(master);
             RemoveDisciple(master, discId);
-            disc.die();
+            xn.access.ActorAccess.Die(disc);
             xn.access.ActorAccess.GetData(master).set(KEY_CONSUME_NEXT_YEAR, curYear + CONSUME_INTERVAL_YEARS);
         }
         static void IncreaseLifespan(Actor actor, float bonusPercent)

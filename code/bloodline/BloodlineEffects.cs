@@ -619,7 +619,7 @@ namespace xn.bloodline
             {
                 xn.access.ActorAccess.GetData(a).set(KEY_MINGHE_ACTIVE, 0);
                 xn.access.ActorAccess.GetData(a).set(KEY_MINGHE_END_TIME, 0);
-                a.die(true, AttackType.Other, true, true);
+                xn.access.ActorAccess.Die(a, true, AttackType.Other, true, true);
             }
             else
             {
@@ -838,7 +838,7 @@ namespace xn.bloodline
                     xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_EGG_ACTIVE, 0);
                     xn.access.ActorAccess.GetData(a).set(KEY_NIEPAN_EGG_END_TIME, 0);
                     a.finishStatusEffect("frozen");
-                    a.die(true, AttackType.Other, true, true);
+                    xn.access.ActorAccess.Die(a, true, AttackType.Other, true, true);
                 }
             }
         }
@@ -1022,7 +1022,7 @@ namespace xn.bloodline
                 xn.access.BaseSimObjectAccess.GetStats(target)["lifespan"] -= 10f;
                 if (xn.access.BaseSimObjectAccess.GetStats(target)["lifespan"] <= currentAge)
                 {
-                    target.die(true, AttackType.Age, true, true);
+                    xn.access.ActorAccess.Die(target, true, AttackType.Age, true, true);
                 }
                 else
                 {
@@ -1486,7 +1486,7 @@ namespace xn.bloodline
                 xn.access.ActorAccess.GetData(a).get(KEY_ZAOSHUAI_DEATH_CHECKED, out int checked_, 0);
                 if (checked_ == 1) return;
                 xn.access.ActorAccess.GetData(a).set(KEY_ZAOSHUAI_DEATH_CHECKED, 1);
-                a.die(true, AttackType.Age, true, true);
+                xn.access.ActorAccess.Die(a, true, AttackType.Age, true, true);
             }
         }
         #endregion

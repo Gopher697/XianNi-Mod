@@ -106,7 +106,7 @@ namespace xn.ui
             const string KEY_REINC_BRUSH = "xn.reincarnation.brush";
             xn.access.ActorAccess.GetData(target).set(KEY_REINC_BRUSH, 1);
             string targetName = ActorName(target);
-            target.die(false, AttackType.Other, true, true);
+            xn.access.ActorAccess.Die(target, false, AttackType.Other, true, true);
             xn.access.ActorAccess.GetData(target).set(KEY_REINC_BRUSH, 0);
             xn.world.BroadcastSystem.Custom(T("brush_reincarnation_success", "{0} entered the reincarnation pool to be reborn", targetName));
             return true;
