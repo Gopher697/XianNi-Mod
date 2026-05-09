@@ -448,7 +448,7 @@ namespace xn.expand
             var effect = EffectsLibrary.spawnAtTile("fx_lightning_medium", tile, pScale);
             if (effect != null)
             {
-                effect.sprite_renderer.flipX = Randy.randomBool();
+                xn.access.BaseEffectAccess.SetFlipX(effect, Randy.randomBool());
             }
             int normalDamage = 47 + (realmIndex - 2) * 5;
             float trueDamagePercent = 0.01f + (realmIndex - 2) * 0.03f;
