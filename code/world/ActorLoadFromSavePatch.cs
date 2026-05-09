@@ -17,14 +17,20 @@ namespace xn.world
         }
         private static bool Pre_loadFromSave(Actor __instance)
         {
+            ActorData data = null;
             try
             {
                 if (__instance == null)
                 {
                     return false; 
                 }
+                data = xn.access.ActorAccess.GetData(__instance);
+                if (data == null)
+                {
+                    return true;
+                }
                 __instance.setStatsDirty();
-                TraitTools.loadTraits(__instance, xn.access.ActorAccess.GetData(__instance).saved_traits);
+                TraitTools.loadTraits(__instance, data.saved_traits);
                 if (__instance.traits != null && __instance.traits.Count > 0)
                 {
                     var traitsSnapshot = __instance.traits.ToList();
@@ -35,11 +41,11 @@ namespace xn.world
                 }
                 if (__instance.isSapient() && __instance.is_profession_nothing)
                 {
-                    xn.access.ActorAccess.GetData(__instance).profession = UnitProfession.Unit;
+                    data.profession = UnitProfession.Unit;
                 }
-                xn.access.ActorAccess.SetProfession(__instance, xn.access.ActorAccess.GetData(__instance).profession, cancelBeh: false);
-                City city = World.world.cities.get(xn.access.ActorAccess.GetData(__instance).cityID);
-                Kingdom kingdom = World.world.kingdoms.get(xn.access.ActorAccess.GetData(__instance).civ_kingdom_id);
+                xn.access.ActorAccess.SetProfession(__instance, data.profession, cancelBeh: false);
+                City city = World.world?.cities?.get(data.cityID);
+                Kingdom kingdom = World.world?.kingdoms?.get(data.civ_kingdom_id);
                 if (city != null && !city.isNeutral())
                 {
                     xn.access.ActorAccess.SetCity(__instance, city);
@@ -71,9 +77,9 @@ namespace xn.world
                         }
                     }
                 }
-                if (xn.access.ActorAccess.GetData(__instance).inventory.isEmpty())
+                if (data.inventory != null && data.inventory.isEmpty())
                 {
-                    xn.access.ActorAccess.GetData(__instance).inventory.empty();
+                    data.inventory.empty();
                 }
                 foreach (Actor parent in __instance.getParents())
                 {
@@ -86,7 +92,12 @@ namespace xn.world
             {
                 if (xn.config.ModConfigHooks.EnableLog)
                 {
-                    Debug.LogError($"[XN-Patch] Exception in Pre_loadFromSave for Actor {__instance?.data?.id}: {ex.Message}\n{ex.StackTrace}");
+                    if (data == null && __instance != null)
+                    {
+                        data = xn.access.ActorAccess.GetData(__instance);
+                    }
+                    string actorId = data != null ? data.id.ToString() : "unknown";
+                    Debug.LogError($"[XN-Patch] Exception in Pre_loadFromSave for Actor {actorId}: {ex.Message}\n{ex.StackTrace}");
                 }
                 return true;
             }
