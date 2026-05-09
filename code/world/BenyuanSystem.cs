@@ -486,7 +486,7 @@ namespace xn.world
             }
             if (!xn.access.BaseSimObjectAccess.CanAttackTarget(pActor, xn.access.ActorAccess.GetAttackTarget(pActor)))
             {
-                pActor.ignoreTarget(xn.access.ActorAccess.GetAttackTarget(pActor));
+                xn.access.BaseSimObjectAccess.IgnoreTarget(pActor, xn.access.ActorAccess.GetAttackTarget(pActor));
                 pActor.clearAttackTarget();
                 __result = BehResult.Stop;
                 return false;
@@ -508,7 +508,7 @@ namespace xn.world
                     bool targetFlyingCantReach = targetFlying && !attackerFlying;
                     if (targetNotInWater || targetFlyingCantReach)
                     {
-                        pActor.ignoreTarget(target);
+                        xn.access.BaseSimObjectAccess.IgnoreTarget(pActor, target);
                         pActor.clearAttackTarget();
                         __result = BehResult.Stop;
                         return false;
@@ -520,7 +520,7 @@ namespace xn.world
                     bool targetFlyingCantReach = targetFlying && !attackerFlying;
                     if (targetInWaterCantReach || targetFlyingCantReach)
                     {
-                        pActor.ignoreTarget(target);
+                        xn.access.BaseSimObjectAccess.IgnoreTarget(pActor, target);
                         pActor.clearAttackTarget();
                         __result = BehResult.Stop;
                         return false;

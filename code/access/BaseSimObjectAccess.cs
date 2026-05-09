@@ -17,6 +17,7 @@ namespace xn.access
         private static readonly MethodInfo AddStatusEffectMethod = AccessTools.Method(typeof(BaseSimObject), "addStatusEffect", new[] { typeof(string), typeof(float), typeof(bool) });
         private static readonly MethodInfo IsInLiquidMethod = AccessTools.Method(typeof(BaseSimObject), "isInLiquid");
         private static readonly MethodInfo CanAttackTargetMethod = AccessTools.Method(typeof(BaseSimObject), "canAttackTarget", new[] { typeof(BaseSimObject), typeof(bool), typeof(bool) });
+        private static readonly MethodInfo IgnoreTargetMethod = AccessTools.Method(typeof(BaseSimObject), "ignoreTarget", new[] { typeof(BaseSimObject) });
         private static bool _warnedActor;
         private static bool _warnedBuilding;
         private static bool _warnedStats;
@@ -28,6 +29,7 @@ namespace xn.access
         private static bool _warnedAddStatusEffect;
         private static bool _warnedIsInLiquid;
         private static bool _warnedCanAttackTarget;
+        private static bool _warnedIgnoreTarget;
 
         public static Actor GetActor(BaseSimObject obj)
         {
@@ -148,6 +150,17 @@ namespace xn.access
                 return false;
             }
             return CanAttackTargetMethod.Invoke(source, new object[] { target, pCheckForFactions, pAttackBuildings }) is bool value && value;
+        }
+
+        public static void IgnoreTarget(BaseSimObject source, BaseSimObject target)
+        {
+            if (source == null || target == null) return;
+            if (IgnoreTargetMethod == null)
+            {
+                WarnOnce(ref _warnedIgnoreTarget, "[XN] BaseSimObject.ignoreTarget method not found; target was not ignored.");
+                return;
+            }
+            IgnoreTargetMethod.Invoke(source, new object[] { target });
         }
 
         private static void WarnOnce(ref bool warned, string message)
