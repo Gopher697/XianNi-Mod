@@ -430,6 +430,7 @@
   "btn_xn_place_dashou": "神の用心棒を設置",
   "btn_xn_place_dashou_desc": "強力な護衛を一人配置することを推奨。",
   "actor_dashou": "神の用心棒",
+  "god_s_enforcers": "God's Enforcers",
   "god_s_enforcers_description": "Summons or controls God's Enforcers.",
   "上帝的打手_description": "神の用心棒を召喚または制御する。",
   "xn_config_dashou_behavior": "用心棒の挙動（0=中立、1=攻撃的、2=停止）",

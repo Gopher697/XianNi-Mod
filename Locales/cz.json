@@ -626,6 +626,7 @@
   "btn_xn_place_dashou": "放置上帝的打手",
   "btn_xn_place_dashou_desc": "建议放一个",
   "actor_dashou": "上帝的打手",
+  "god_s_enforcers": "上帝的打手",
   "god_s_enforcers_description": "召唤或控制上帝的打手。",
   "上帝的打手_description": "召唤或控制上帝的打手。",
   "xn_config_dashou_behavior": "打手行为0=中立1=主动攻击2=停止移动和攻击",
