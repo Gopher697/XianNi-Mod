@@ -120,7 +120,7 @@ namespace cultivation
             var effect = EffectsLibrary.spawnAt(FX_BLACKHOLE, pos, effectScale);
             if (effect != null)
             {
-                var anim = effect.sprite_animation;
+                var anim = xn.access.BaseEffectAccess.GetSpriteAnimation(effect);
                 var sr = effect.GetComponent<SpriteRenderer>();
                 if (sr != null) sr.sprite = null; 
                 if (anim != null)

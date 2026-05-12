@@ -7,7 +7,9 @@ namespace xn.access
     internal static class BaseEffectAccess
     {
         private static readonly FieldInfo SpriteRendererField = AccessTools.Field(typeof(BaseEffect), "sprite_renderer");
+        private static readonly FieldInfo SpriteAnimationField = AccessTools.Field(typeof(BaseAnimatedObject), "sprite_animation");
         private static bool _warnedSpriteRenderer;
+        private static bool _warnedSpriteAnimation;
 
         public static SpriteRenderer GetSpriteRenderer(BaseEffect effect)
         {
@@ -26,6 +28,26 @@ namespace xn.access
             if (renderer != null)
             {
                 renderer.flipX = value;
+            }
+        }
+
+        public static SpriteAnimation GetSpriteAnimation(BaseAnimatedObject animatedObject)
+        {
+            if (animatedObject == null) return null;
+            if (SpriteAnimationField == null)
+            {
+                WarnOnce(ref _warnedSpriteAnimation, "[XN] BaseAnimatedObject.sprite_animation field not found; sprite animation lookup failed.");
+                return null;
+            }
+            return SpriteAnimationField.GetValue(animatedObject) as SpriteAnimation;
+        }
+
+        public static void SetAnimationLooped(BaseAnimatedObject animatedObject, bool looped)
+        {
+            var animation = GetSpriteAnimation(animatedObject);
+            if (animation != null)
+            {
+                animation.looped = looped;
             }
         }
 

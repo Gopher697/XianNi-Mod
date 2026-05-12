@@ -307,10 +307,7 @@ namespace xn.fx
         {
             pos.y += yOffset;
             var effect = EffectsLibrary.spawnAt(fxId, pos, scale);
-            if (effect != null && effect.sprite_animation != null)
-            {
-                effect.sprite_animation.looped = false;
-            }
+            xn.access.BaseEffectAccess.SetAnimationLooped(effect, false);
         }
     }
 }
