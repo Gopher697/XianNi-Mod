@@ -77,6 +77,7 @@ namespace cultivation.ai
             {
                 if (pActor != null && pActor.isAlive())
                 {
+                    xn.access.ActorAccess.GetData(pActor).set(KEY_CONDENSE_YEAR, Date.getCurrentYear());
                     CondenseRootFX.StartFor(pActor);
                 }
                 return BehResult.Continue;
@@ -166,9 +167,17 @@ namespace cultivation.ai
             if (c == null || c.data == null) return;
             int aura;
             c.data.get(KEY_CITY_AURA, out aura, 0);
-            if (aura < 0) return; 
+            if (aura < 0) return;
+
+            int age = GetActorAge(a);
+            float ageSuccessModifier = GetAgeSuccessModifier(age);
+            int ageCooldown = GetAgeRetryCooldown(age);
+
+            float traitSuccessDelta = GetTraitSuccessDelta(a);
+
             int isMainChar;
             xn.access.ActorAccess.GetData(a).get(xn.ui.MainCharacterBrushTool.KEY_MAIN_CHARACTER, out isMainChar, 0);
+
             bool success;
             if (isMainChar == 1)
             {
@@ -176,15 +185,20 @@ namespace cultivation.ai
             }
             else
             {
-                success = UnityEngine.Random.value < 0.6f;
+                float baseRate = 0.60f * ageSuccessModifier;
+                float finalRate = Mathf.Clamp(baseRate + traitSuccessDelta, 0.05f, 0.95f);
+                success = UnityEngine.Random.value < finalRate;
             }
+
             if (!success)
             {
-                xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, curYear + 30);
+                xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, curYear + ageCooldown);
                 return;
             }
+
+            float inheritChance = 0.12f + GetTraitInheritBoost(a);
             if (!HasTraitId(a, "path_03_beast") && !HasAnySpiritRoot(a) &&
-                !HasAnyAncientInheritance(a) && UnityEngine.Random.value < 0.12f)
+                !HasAnyAncientInheritance(a) && UnityEngine.Random.value < inheritChance)
             {
                 string inheritId = PickWeightedInheritId();
                 var inh = AssetManager.traits.get(inheritId) as ActorTrait;
@@ -195,7 +209,9 @@ namespace cultivation.ai
                     return;
                 }
             }
-            if (UnityEngine.Random.value < 0.08f)
+
+            float beastChance = 0.08f + GetTraitBeastBoost(a);
+            if (UnityEngine.Random.value < beastChance)
             {
                 if (!IsHuman(a))
                 {
@@ -210,7 +226,8 @@ namespace cultivation.ai
                     }
                 }
             }
-            string rootId = PickWeightedRootId();
+
+            string rootId = PickWeightedRootIdWithTraits(a);
             var trait = AssetManager.traits.get(rootId) as ActorTrait;
             if (trait != null) a.addTrait(trait);
             int idx = Array.IndexOf(ROOT_IDS, rootId);
@@ -222,12 +239,192 @@ namespace cultivation.ai
             }
             xn.access.ActorAccess.GetData(a).set(KEY_NEXT_TRY_YEAR, 0);
         }
+        private static int GetActorAge(Actor a)
+        {
+            if (a == null) return 0;
+            try { return a.getAge(); }
+            catch
+            {
+                ActorData data = xn.access.ActorAccess.GetData(a);
+                return data != null ? data.getAge() : 0;
+            }
+        }
+
+        private static float GetAgeSuccessModifier(int age)
+        {
+            if (age < 15) return 0.50f;
+            if (age < 26) return 0.70f;
+            if (age < 51) return 1.00f;
+            if (age < 81) return 0.85f;
+            if (age < 121) return 0.70f;
+            return 0.55f;
+        }
+
+        private static int GetAgeRetryCooldown(int age)
+        {
+            if (age < 20) return 10;
+            if (age < 51) return 15;
+            if (age < 81) return 20;
+            if (age < 121) return 25;
+            return 35;
+        }
+
+        /// <summary>
+        /// Returns an additive delta applied to the base 0.60 success rate.
+        /// Native WorldBox trait IDs were confirmed by assembly audit (2026-05-13).
+        /// </summary>
+        private static float GetTraitSuccessDelta(Actor a)
+        {
+            float delta = 0f;
+
+            if (HasTraitId(a, "genius")) delta += 0.15f;
+            if (HasTraitId(a, "strong_minded")) delta += 0.10f;
+            if (HasTraitId(a, "heart_of_wizard")) delta += 0.08f;
+            if (HasTraitId(a, "immortal")) delta += 0.07f;
+            if (HasTraitId(a, "ambitious")) delta += 0.06f;
+            if (HasTraitId(a, "titan_lungs")) delta += 0.06f;
+            if (HasTraitId(a, "boosted_vitality")) delta += 0.05f;
+            if (HasTraitId(a, "regeneration")) delta += 0.05f;
+            if (HasTraitId(a, "healing_aura")) delta += 0.05f;
+            if (HasTraitId(a, "peaceful")) delta += 0.04f;
+            if (HasTraitId(a, "pacifist")) delta += 0.04f;
+            if (HasTraitId(a, "immune")) delta += 0.04f;
+            if (HasTraitId(a, "content")) delta += 0.04f;
+            if (HasTraitId(a, "tough")) delta += 0.04f;
+            if (HasTraitId(a, "strong")) delta += 0.03f;
+            if (HasTraitId(a, "long_liver")) delta += 0.03f;
+            if (HasTraitId(a, "veteran")) delta += 0.03f;
+            if (HasTraitId(a, "honest")) delta += 0.03f;
+            if (HasTraitId(a, "agile")) delta += 0.03f;
+            if (HasTraitId(a, "fertile")) delta += 0.02f;
+            if (HasTraitId(a, "flower_prints")) delta += 0.02f;
+
+            if (HasTraitId(a, "plague")) delta -= 0.12f;
+            if (HasTraitId(a, "tumor_infection")) delta -= 0.12f;
+            if (HasTraitId(a, "crippled")) delta -= 0.08f;
+            if (HasTraitId(a, "hotheaded")) delta -= 0.08f;
+            if (HasTraitId(a, "paranoid")) delta -= 0.07f;
+            if (HasTraitId(a, "weak")) delta -= 0.06f;
+            if (HasTraitId(a, "fragile_health")) delta -= 0.06f;
+            if (HasTraitId(a, "gluttonous")) delta -= 0.06f;
+            if (HasTraitId(a, "infected")) delta -= 0.06f;
+            if (HasTraitId(a, "mush_spores")) delta -= 0.06f;
+            if (HasTraitId(a, "pyromaniac")) delta -= 0.05f;
+            if (HasTraitId(a, "clumsy")) delta -= 0.04f;
+            if (HasTraitId(a, "fat")) delta -= 0.04f;
+            if (HasTraitId(a, "tiny")) delta -= 0.03f;
+            if (HasTraitId(a, "slow")) delta -= 0.03f;
+            if (HasTraitId(a, "soft_skin")) delta -= 0.03f;
+            if (HasTraitId(a, "heliophobia")) delta -= 0.03f;
+            if (HasTraitId(a, "infertile")) delta -= 0.03f;
+            if (HasTraitId(a, "eyepatch")) delta -= 0.02f;
+            if (HasTraitId(a, "skin_burns")) delta -= 0.02f;
+
+            return delta;
+        }
+
+        private static float GetQualityBias(Actor a)
+        {
+            float bias = 0f;
+
+            int qiyun;
+            xn.access.ActorAccess.GetData(a).get("xn.stat.qiyun", out qiyun, 50);
+            bias += (qiyun - 50) * 0.30f;
+
+            if (HasTraitId(a, "lucky")) bias += 12f;
+            if (HasTraitId(a, "heart_of_wizard")) bias += 10f;
+            if (HasTraitId(a, "blessed")) bias += 8f;
+            if (HasTraitId(a, "wise")) bias += 8f;
+            if (HasTraitId(a, "arcane_reflexes")) bias += 6f;
+            if (HasTraitId(a, "sunblessed")) bias += 5f;
+            if (HasTraitId(a, "eagle_eyed")) bias += 4f;
+            if (HasTraitId(a, "moonchild")) bias += 4f;
+            if (HasTraitId(a, "nightchild")) bias += 4f;
+            if (HasTraitId(a, "shiny")) bias += 2f;
+
+            if (HasTraitId(a, "unlucky")) bias -= 12f;
+            if (HasTraitId(a, "stupid")) bias -= 10f;
+            if (HasTraitId(a, "deceitful")) bias -= 7f;
+            if (HasTraitId(a, "evil")) bias -= 7f;
+            if (HasTraitId(a, "greedy")) bias -= 5f;
+            if (HasTraitId(a, "lustful")) bias -= 5f;
+            if (HasTraitId(a, "thief")) bias -= 4f;
+            if (HasTraitId(a, "short_sighted")) bias -= 3f;
+
+            return Mathf.Clamp(bias, -30f, 30f);
+        }
+
+        private static string PickWeightedRootIdWithTraits(Actor a)
+        {
+            float bias = GetQualityBias(a);
+            float shiftFactor = 1f + bias * 0.01f;
+
+            var weights = new float[ROOT_IDS.Length];
+            for (int i = 0; i < ROOT_IDS.Length; i++)
+            {
+                float weight = ROOT_WEIGHTS[i] * Mathf.Pow(shiftFactor, i);
+                weights[i] = Mathf.Max(0.01f, weight);
+            }
+
+            if (HasTraitId(a, "chosen_one"))
+            {
+                weights[5] *= 5f;
+            }
+
+            float total = 0f;
+            for (int i = 0; i < weights.Length; i++) total += weights[i];
+            float r = UnityEngine.Random.Range(0f, total);
+            for (int i = 0; i < weights.Length; i++)
+            {
+                if (r < weights[i]) return ROOT_IDS[i];
+                r -= weights[i];
+            }
+            return ROOT_IDS[0];
+        }
+
+        private static float GetTraitInheritBoost(Actor a)
+        {
+            float boost = 0f;
+            if (HasTraitId(a, "chosen_one")) boost += 0.10f;
+            if (HasTraitId(a, "scar_of_divinity")) boost += 0.06f;
+            if (HasTraitId(a, "miracle_born")) boost += 0.05f;
+            if (HasTraitId(a, "miracle_bearer")) boost += 0.03f;
+            return boost;
+        }
+
+        private static float GetTraitBeastBoost(Actor a)
+        {
+            float boost = 0f;
+            if (HasTraitId(a, "bloodlust")) boost += 0.06f;
+            if (HasTraitId(a, "flesh_eater")) boost += 0.05f;
+            if (HasTraitId(a, "psychopath")) boost += 0.05f;
+            if (HasTraitId(a, "savage")) boost += 0.04f;
+            return boost;
+        }
+
+        private static bool ActorHasNativeCondenseRootDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var decision = actor.decisions[i];
+                if (decision != null && decision.id == "xn_decision_condense_root")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         [HarmonyPatch(typeof(Actor), "getNextJob")]
         private static class Patch_Actor_GetNextJob
         {
             [HarmonyPrefix]
             private static bool Prefix(Actor __instance, ref string __result)
             {
+                if (ActorHasNativeCondenseRootDecision(__instance)) return true;
+
                 int curYear = Date.getCurrentYear();
                 if (__instance == null || !__instance.isAlive()) return true;
                 if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance))
@@ -242,7 +439,8 @@ namespace cultivation.ai
                 xn.access.ActorAccess.GetData(__instance).get(KEY_CONDENSE_YEAR, out condenseYear, -1);
                 if (condenseYear == curYear) return true;
                 xn.access.ActorAccess.GetData(__instance).set(KEY_CONDENSE_YEAR, curYear);
-                Debug.Log("[XN S2] CondenseRootJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
+                Debug.LogWarning("[XN S3 FALLBACK] CondenseRootJob legacy prefix fired - native decision missing for actor=" +
+                    xn.access.ActorAccess.GetData(__instance)?.name);
                 __result = "job_xn_condense_root";
                 return false;
             }

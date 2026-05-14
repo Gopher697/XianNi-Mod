@@ -173,6 +173,9 @@ namespace xn.world
             xn.access.ActorAccess.GetData(a).get(KEY_NEXT_TRY_YEAR, out nextYear, 0);
             if (nextYear > curYear)
                 return;
+            int actorAge = GetActorAge(a);
+            float attemptChance = GetCondenseAttemptChance(actorAge);
+            if (UnityEngine.Random.value > attemptChance) return;
             c = a.city;
             if (c == null || c.data == null) return;
             int aura;
@@ -183,6 +186,27 @@ namespace xn.world
             c.data.set(KEY_CITY_AURA, newAura);
             c.data.set(KEY_CITY_ROOT_USED, used + 1);
             xn.access.ActorAccess.GetData(a).set(KEY_CONDENSE_READY, 1);
+        }
+        private static int GetActorAge(Actor a)
+        {
+            if (a == null) return 0;
+            try { return a.getAge(); }
+            catch
+            {
+                ActorData data = xn.access.ActorAccess.GetData(a);
+                return data != null ? data.getAge() : 0;
+            }
+        }
+
+        private static float GetCondenseAttemptChance(int age)
+        {
+            if (age < 10) return 0f;
+            if (age < 21) return 0.25f;
+            if (age < 41) return 0.50f;
+            if (age < 71) return 0.80f;
+            if (age < 101) return 0.50f;
+            if (age < 131) return 0.30f;
+            return 0.15f;
         }
         private static bool HasAnySpiritRoot(Actor a)
         {

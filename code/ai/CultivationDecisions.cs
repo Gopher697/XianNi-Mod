@@ -275,7 +275,7 @@ namespace cultivation.ai
         private static void RegisterEntryTasks()
         {
             RegisterEntryTask(TaskBreakthroughEntry, DecisionBreakthrough, "stats/xiuwei", JobBreakthrough);
-            RegisterEntryTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
+            RegisterDirectTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
             RegisterDirectTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
             RegisterDirectTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", "job_xn_demonic_hunt");
             RegisterEntryTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, JobBreakthrough);
@@ -944,21 +944,13 @@ namespace cultivation.ai
             {
                 return false;
             }
-            // Stage 2 parity: CondenseRootJob.Patch_Actor_GetNextJob redirects from ready/year only;
-            // aura/root/next-try checks live in the condense setup and task body.
             if (GetInt(actor, KeyCondenseReady, 0) != 1)
             {
                 return false;
             }
 
-            int currentYear = Date.getCurrentYear();
-            if (GetInt(actor, KeyCondenseYear, -1) == currentYear)
-            {
-                return false;
-            }
-
-            Debug.Log("[XN S2] " + DecisionCondenseRoot + " launch check PASS actor=" +
-                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
+            Debug.Log("[XN S3] " + DecisionCondenseRoot + " launch check PASS actor=" +
+                GetActorDataName(actor));
             return true;
         }
 
