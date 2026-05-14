@@ -683,6 +683,8 @@ namespace cultivation.ai
             {
                 AttachDecisionToTrait(RealmIds[i], DecisionBreakthrough);
             }
+            AttachDecisionToTrait("path_01_demonic", DecisionBreakthrough);
+            AttachDecisionToTrait("path_02_immortal", DecisionBreakthrough);
 
             for (int i = 0; i < IntentRealmAttachIds.Length; i++)
             {
