@@ -32,12 +32,19 @@ namespace cultivation.ai
         private const string DecisionIntentComprehend = "xn_decision_intent_comprehend";
         private const string DecisionDemonicHunt = "xn_decision_demonic_hunt";
         private const string DecisionTianyunzi = "xn_decision_tianyunzi";
+        private const string DecisionAncientBreakthrough = "xn_decision_ancient_breakthrough";
+        private const string DecisionBeastBreakthrough = "xn_decision_beast_breakthrough";
+
+        private const string IconAncientBreakthrough = "stats/gushen";
+        private const string IconBeastBreakthrough = "stats/yaoli";
 
         private const string TaskBreakthroughEntry = "task_xn_breakthrough_entry";
         private const string TaskCondenseRootEntry = "task_xn_condense_root_entry";
         private const string TaskIntentComprehendEntry = "task_xn_intent_comprehend_entry";
         private const string TaskDemonicHuntEntry = "task_xn_demonic_hunt_entry";
         private const string TaskTianyunziEntry = "task_xn_tianyunzi_entry";
+        private const string TaskAncientBreakthroughEntry = "task_xn_ancient_breakthrough_entry";
+        private const string TaskBeastBreakthroughEntry = "task_xn_beast_breakthrough_entry";
 
         private const string JobBreakthrough = "job_xn_breakthrough";
         private const string JobCondenseRoot = "job_xn_condense_root";
@@ -69,6 +76,8 @@ namespace cultivation.ai
         private const string KeyDemonicHuntTarget = "xn.demonic_hunt.target_id";
         private const string KeyDemonicHuntActive = "xn.demonic_hunt.active";
         private const string KeyTianyunziFlag = "xn_is_tianyunzi";
+        private const string KeyKillCount = "xn.kill_count";
+        private const string KeyKillPrev = "xn.kill.prev";
 
         private static readonly string[] RealmIds = new[]
         {
@@ -126,6 +135,43 @@ namespace cultivation.ai
             "realm_16_tatian"
         };
 
+        private static readonly string[] AncientStarIds = new[]
+        {
+            "ancient_01_star",
+            "ancient_02_star",
+            "ancient_03_star",
+            "ancient_04_star",
+            "ancient_05_star",
+            "ancient_06_star",
+            "ancient_07_star",
+            "ancient_08_star",
+            "ancient_09_star",
+            "ancient_10_star"
+        };
+
+        private static readonly string[] BeastStageIds = new[]
+        {
+            "beast_01_stage",
+            "beast_02_stage",
+            "beast_03_stage",
+            "beast_04_stage",
+            "beast_05_stage",
+            "beast_06_stage",
+            "beast_07_stage",
+            "beast_08_stage",
+            "beast_09_stage",
+            "beast_10_stage"
+        };
+
+        private static readonly string[] InheritanceTraitIds = new[]
+        {
+            "inherit_01_poor",
+            "inherit_02_normal",
+            "inherit_03_supreme",
+            "inherit_04_tusi",
+            "inherit_05_ancientblood"
+        };
+
         private static readonly string[] SapientActorAssetIds = new[]
         {
             "human",
@@ -142,7 +188,9 @@ namespace cultivation.ai
             DecisionCondenseRoot,
             DecisionIntentComprehend,
             DecisionDemonicHunt,
-            DecisionTianyunzi
+            DecisionTianyunzi,
+            DecisionAncientBreakthrough,
+            DecisionBeastBreakthrough
         };
 
         private static readonly FieldInfo DecisionCooldownsField = AccessTools.Field(typeof(Actor), "_decision_cooldowns");
@@ -237,6 +285,8 @@ namespace cultivation.ai
             RegisterEntryTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
             RegisterEntryTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", JobDemonicHunt);
             RegisterEntryTask(TaskTianyunziEntry, DecisionTianyunzi, "acots/skin/tianyunzi", JobTianyunzi);
+            RegisterEntryTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, JobBreakthrough);
+            RegisterEntryTask(TaskBeastBreakthroughEntry, DecisionBeastBreakthrough, IconBeastBreakthrough, JobBreakthrough);
         }
 
         private static void RegisterEntryTask(string taskId, string localeKey, string iconPath, string expectedJobId)
@@ -321,6 +371,30 @@ namespace cultivation.ai
                 action_check_launch = CanLaunchTianyunzi,
                 weight_calculate_custom = WeightTianyunzi
             });
+
+            RegisterDecision(new DecisionAsset
+            {
+                id = DecisionAncientBreakthrough,
+                task_id = TaskAncientBreakthroughEntry,
+                path_icon = IconAncientBreakthrough,
+                priority = NeuroLayer.Layer_3_High,
+                cooldown = CooldownOneYear,
+                unique = true,
+                action_check_launch = CanLaunchAncientBreakthrough,
+                weight_calculate_custom = WeightAncientBreakthrough
+            });
+
+            RegisterDecision(new DecisionAsset
+            {
+                id = DecisionBeastBreakthrough,
+                task_id = TaskBeastBreakthroughEntry,
+                path_icon = IconBeastBreakthrough,
+                priority = NeuroLayer.Layer_3_High,
+                cooldown = CooldownOneYear,
+                unique = true,
+                action_check_launch = CanLaunchBeastBreakthrough,
+                weight_calculate_custom = WeightBeastBreakthrough
+            });
         }
 
         private static void RegisterDecision(DecisionAsset decision)
@@ -397,6 +471,8 @@ namespace cultivation.ai
             }
 
             AttachDecisionToTrait("path_01_demonic", DecisionDemonicHunt);
+            AttachDecisionToTrait("path_04_ancient", DecisionAncientBreakthrough);
+            AttachDecisionToTrait("path_03_beast", DecisionBeastBreakthrough);
 
             for (int i = 0; i < SapientActorAssetIds.Length; i++)
             {
@@ -704,6 +780,78 @@ namespace cultivation.ai
             return true;
         }
 
+        private static bool CanLaunchAncientBreakthrough(Actor actor)
+        {
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
+            {
+                return false;
+            }
+            if (IsInActiveTournament(actor))
+            {
+                return false;
+            }
+            if (!HasTrait(actor, "path_04_ancient"))
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyAncientStop, 0) != 1)
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyTrialActive, 0) == 1)
+            {
+                return false;
+            }
+            if (Date.getCurrentYear() < GetInt(actor, KeyTrialCooldownUntil, 0))
+            {
+                return false;
+            }
+            if (GetCurrentAncientStarIndex(actor) >= GetMaxAncientBeastAllowedByKingdom(actor))
+            {
+                return false;
+            }
+
+            Debug.Log("[XN S2] " + DecisionAncientBreakthrough + " launch check PASS actor=" +
+                GetActorDataName(actor) + " star=" + GetCurrentAncientStarIndex(actor));
+            return true;
+        }
+
+        private static bool CanLaunchBeastBreakthrough(Actor actor)
+        {
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
+            {
+                return false;
+            }
+            if (IsInActiveTournament(actor))
+            {
+                return false;
+            }
+            if (!HasTrait(actor, "path_03_beast"))
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyBeastStop, 0) != 1)
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyTrialActive, 0) == 1)
+            {
+                return false;
+            }
+            if (Date.getCurrentYear() < GetInt(actor, KeyTrialCooldownUntil, 0))
+            {
+                return false;
+            }
+            if (GetCurrentBeastStageIndex(actor) >= GetMaxAncientBeastAllowedByKingdom(actor))
+            {
+                return false;
+            }
+
+            Debug.Log("[XN S2] " + DecisionBeastBreakthrough + " launch check PASS actor=" +
+                GetActorDataName(actor) + " stage=" + GetCurrentBeastStageIndex(actor));
+            return true;
+        }
+
         private static bool CanLaunchCondenseRoot(Actor actor)
         {
             if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
@@ -826,6 +974,41 @@ namespace cultivation.ai
             return Mathf.Max(0.1f, weight);
         }
 
+        private static float WeightAncientBreakthrough(Actor actor)
+        {
+            int currentStar = GetCurrentAncientStarIndex(actor);
+            int maxAllowed = GetMaxAncientBeastAllowedByKingdom(actor);
+            if (currentStar >= maxAllowed)
+            {
+                return 0.1f;
+            }
+
+            float weight = 2f + Mathf.Clamp(GetCityAura(actor) / 2000f, 0f, 5f);
+            weight *= GetInheritanceWeight(actor);
+            return Mathf.Max(0.1f, weight);
+        }
+
+        private static float WeightBeastBreakthrough(Actor actor)
+        {
+            int currentStage = GetCurrentBeastStageIndex(actor);
+            int maxAllowed = GetMaxAncientBeastAllowedByKingdom(actor);
+            if (currentStage >= maxAllowed)
+            {
+                return 0.1f;
+            }
+
+            float weight = 1.8f + Mathf.Clamp(GetCityAura(actor) / 2000f, 0f, 5f);
+            int kills = GetInt(actor, KeyKillCount, 0);
+            int previousKills = GetInt(actor, KeyKillPrev, 0);
+            int wuxin = GetInt(actor, KeyWuxin, 0);
+            if (kills - previousKills > 0 && wuxin >= 50)
+            {
+                weight += 0.5f;
+            }
+
+            return Mathf.Max(0.1f, weight);
+        }
+
         private static float WeightCondenseRoot(Actor actor)
         {
             int aura = GetCityAura(actor);
@@ -907,6 +1090,128 @@ namespace cultivation.ai
             int current = GetCurrentRealmIndex(actor);
             int next = current + 1;
             return next >= RealmIds.Length ? -1 : next;
+        }
+
+        private static int GetCurrentAncientStarIndex(Actor actor)
+        {
+            if (actor == null)
+            {
+                return -1;
+            }
+
+            int current = -1;
+            for (int i = 0; i < AncientStarIds.Length; i++)
+            {
+                if (HasTrait(actor, AncientStarIds[i]) && i > current)
+                {
+                    current = i;
+                }
+            }
+
+            return current;
+        }
+
+        private static int GetCurrentBeastStageIndex(Actor actor)
+        {
+            if (actor == null)
+            {
+                return -1;
+            }
+
+            int current = -1;
+            for (int i = 0; i < BeastStageIds.Length; i++)
+            {
+                if (HasTrait(actor, BeastStageIds[i]) && i > current)
+                {
+                    current = i;
+                }
+            }
+
+            return current;
+        }
+
+        private static int GetMaxAncientBeastAllowedByKingdom(Actor actor)
+        {
+            if (actor == null || actor.kingdom == null || actor.kingdom.isRekt())
+            {
+                return 0;
+            }
+
+            return GetMaxAncientBeastAllowedByKingdomLevel(xn.world.XiuzhenguoSystem.GetLevel(actor.kingdom));
+        }
+
+        private static int GetMaxAncientBeastAllowedByKingdomLevel(int kingdomLevel)
+        {
+            if (kingdomLevel <= 1)
+            {
+                return 0;
+            }
+            if (kingdomLevel <= 3)
+            {
+                return 1;
+            }
+            if (kingdomLevel <= 5)
+            {
+                return 2;
+            }
+            if (kingdomLevel == 6)
+            {
+                return 3;
+            }
+            if (kingdomLevel == 7)
+            {
+                return 5;
+            }
+            if (kingdomLevel == 8)
+            {
+                return 6;
+            }
+            if (kingdomLevel == 9)
+            {
+                return 8;
+            }
+
+            return 9;
+        }
+
+        private static float GetInheritanceWeight(Actor actor)
+        {
+            float result = 0.8f;
+            for (int i = 0; i < InheritanceTraitIds.Length; i++)
+            {
+                if (!HasTrait(actor, InheritanceTraitIds[i]))
+                {
+                    continue;
+                }
+
+                switch (i)
+                {
+                    case 0:
+                        result = 0.9f;
+                        break;
+                    case 1:
+                        result = 1.0f;
+                        break;
+                    case 2:
+                        result = 1.2f;
+                        break;
+                    case 3:
+                        result = 1.5f;
+                        break;
+                    case 4:
+                        result = 2.0f;
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        private static bool IsInActiveTournament(Actor actor)
+        {
+            return actor != null &&
+                xn.tournament.TournamentManager.IsRunning &&
+                xn.tournament.TournamentManager.IsParticipant(actor);
         }
 
         private static bool IsHeavenGateRealm(int index)
