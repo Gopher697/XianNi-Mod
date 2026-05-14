@@ -447,6 +447,11 @@
   "task_xn_condense_root_stay": "凝縮中",
   "task_xn_demonic_hunt": "女修を襲撃中",
   "task_xn_tianyunzi_hunt": "世界を滅ぼし中",
+  "xn_decision_breakthrough": "Seek Breakthrough",
+  "xn_decision_condense_root": "Await Spirit Root Awakening",
+  "xn_decision_intent_comprehend": "Comprehend Intent",
+  "xn_decision_demonic_hunt": "Hunt Demonic Prey",
+  "xn_decision_tianyunzi": "Follow Heavenly Fortune",
 
   "btn_xn_bloodline": "血脈",
   "btn_xn_bloodline_desc": "血脈インターフェースを開き、各氏族を確認する。",
