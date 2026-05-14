@@ -278,8 +278,8 @@ namespace cultivation.ai
             RegisterDirectTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
             RegisterDirectTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
             RegisterDirectTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", "job_xn_demonic_hunt");
-            RegisterEntryTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, JobBreakthrough);
-            RegisterEntryTask(TaskBeastBreakthroughEntry, DecisionBeastBreakthrough, IconBeastBreakthrough, JobBreakthrough);
+            RegisterTrialTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, 3);
+            RegisterTrialTask(TaskBeastBreakthroughEntry, DecisionBeastBreakthrough, IconBeastBreakthrough, 4);
         }
 
         private static void RegisterEntryTask(string taskId, string localeKey, string iconPath, string expectedJobId)
@@ -335,6 +335,37 @@ namespace cultivation.ai
             }
 
             task.addBeh(new BehSetDirectJob(localeKey, jobId));
+        }
+
+        private static void RegisterTrialTask(string taskId, string localeKey, string iconPath, int trialType)
+        {
+            BehaviourTaskActorLibrary taskLibrary = AssetManager.tasks_actor;
+            if (taskLibrary == null)
+            {
+                return;
+            }
+
+            BehaviourTaskActor task = taskLibrary.get(taskId);
+            if (task == null)
+            {
+                task = new BehaviourTaskActor
+                {
+                    id = taskId,
+                    locale_key = localeKey,
+                    path_icon = iconPath,
+                    show_icon = true
+                };
+                taskLibrary.add(task);
+            }
+            else
+            {
+                task.locale_key = localeKey;
+                task.path_icon = iconPath;
+                task.show_icon = true;
+                ClearTaskBehaviours(task);
+            }
+
+            task.addBeh(new BehStartTrialDirectly(localeKey, trialType));
         }
 
         private static void ClearTaskBehaviours(BehaviourTaskActor task)
@@ -1541,6 +1572,40 @@ namespace cultivation.ai
                 if (ai != null)
                 {
                     ai.setJob(_jobId);
+                }
+
+                return BehResult.Stop;
+            }
+        }
+
+        private sealed class BehStartTrialDirectly : BehaviourActionActor
+        {
+            private readonly string _decisionId;
+            private readonly int _trialType;
+
+            public BehStartTrialDirectly(string decisionId, int trialType)
+            {
+                _decisionId = decisionId;
+                _trialType = trialType;
+            }
+
+            public override BehResult execute(Actor actor)
+            {
+                if (actor == null || !actor.isAlive())
+                {
+                    return BehResult.Stop;
+                }
+
+                Debug.Log("[XN S3] Native trial decision fired: " + _decisionId +
+                    " type=" + _trialType + " actor=" + GetActorDataName(actor));
+
+                if (_trialType == 3)
+                {
+                    BreakthroughJob.BeginAncientTrial(actor);
+                }
+                else if (_trialType == 4)
+                {
+                    BreakthroughJob.BeginBeastTrial(actor);
                 }
 
                 return BehResult.Stop;

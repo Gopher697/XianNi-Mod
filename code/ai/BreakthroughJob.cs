@@ -45,6 +45,19 @@ namespace cultivation.ai
             job.addTask("task_xn_breakthrough_stay");
             job.addTask("end_job");
         }
+
+        internal static void BeginAncientTrial(Actor a)
+        {
+            if (a == null || !a.isAlive()) return;
+            StartHeavenTrial(a, 3, GetCurrentAncientIndex(a));
+        }
+
+        internal static void BeginBeastTrial(Actor a)
+        {
+            if (a == null || !a.isAlive()) return;
+            StartHeavenTrial(a, 4, GetCurrentBeastIndex(a));
+        }
+
         private static void RegisterBreakthroughTask()
         {
             var taskLib = AssetManager.tasks_actor;
@@ -590,12 +603,18 @@ namespace cultivation.ai
                 int ancStop; xn.access.ActorAccess.GetData(__instance).get(KEY_ANC_STOP, out ancStop, 0);
                 if (ancStop == 1)
                 {
+                    if (ActorHasNativeAncientBreakthroughDecision(__instance)) return true;
+                    Debug.LogWarning("[XN S3 FALLBACK] AncientBreakthrough legacy prefix fired actor=" +
+                        (xn.access.ActorAccess.GetData(__instance)?.name ?? "?"));
                     StartHeavenTrial(__instance, 3, GetCurrentAncientIndex(__instance)); 
                     return true;
                 }
                 int bstStop; xn.access.ActorAccess.GetData(__instance).get(KEY_BEAST_STOP, out bstStop, 0);
                 if (bstStop == 1)
                 {
+                    if (ActorHasNativeBeastBreakthroughDecision(__instance)) return true;
+                    Debug.LogWarning("[XN S3 FALLBACK] BeastBreakthrough legacy prefix fired actor=" +
+                        (xn.access.ActorAccess.GetData(__instance)?.name ?? "?"));
                     StartHeavenTrial(__instance, 4, GetCurrentBeastIndex(__instance));   
                     return true;
                 }
@@ -641,6 +660,31 @@ namespace cultivation.ai
                 return false;
             }
         }
+
+        private static bool ActorHasNativeAncientBreakthroughDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var d = actor.decisions[i];
+                if (d != null && d.id == "xn_decision_ancient_breakthrough") return true;
+            }
+            return false;
+        }
+
+        private static bool ActorHasNativeBeastBreakthroughDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var d = actor.decisions[i];
+                if (d != null && d.id == "xn_decision_beast_breakthrough") return true;
+            }
+            return false;
+        }
+
         private static bool HasTrait(Actor a, string traitId)
         {
             var list = a.getTraits();
