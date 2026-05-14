@@ -203,6 +203,7 @@ namespace cultivation.ai
         private static bool _actorRefreshDone;
         private static bool _warnedActorArrayReflection;
         private static bool _warnedActorAssetCacheReflection;
+        private static bool _warnedTaskBehaviourReflection;
 
         public static void Init(Harmony harmony)
         {
@@ -282,7 +283,7 @@ namespace cultivation.ai
         {
             RegisterEntryTask(TaskBreakthroughEntry, DecisionBreakthrough, "stats/xiuwei", JobBreakthrough);
             RegisterEntryTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
-            RegisterEntryTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
+            RegisterDirectTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
             RegisterEntryTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", JobDemonicHunt);
             RegisterEntryTask(TaskTianyunziEntry, DecisionTianyunzi, "acots/skin/tianyunzi", JobTianyunzi);
             RegisterEntryTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, JobBreakthrough);
@@ -307,6 +308,109 @@ namespace cultivation.ai
 
             taskLibrary.add(task);
             task.addBeh(new BehEnterLegacyJob(localeKey, expectedJobId));
+        }
+
+        private static void RegisterDirectTask(string taskId, string localeKey, string iconPath, string jobId)
+        {
+            BehaviourTaskActorLibrary taskLibrary = AssetManager.tasks_actor;
+            if (taskLibrary == null)
+            {
+                return;
+            }
+
+            BehaviourTaskActor task = taskLibrary.get(taskId);
+            if (task == null)
+            {
+                task = new BehaviourTaskActor
+                {
+                    id = taskId,
+                    locale_key = localeKey,
+                    path_icon = iconPath,
+                    show_icon = true
+                };
+
+                taskLibrary.add(task);
+            }
+            else
+            {
+                // Stage 3 migration: hot-loaded Stage 1 task objects are modified in place.
+                // BehaviourTaskActor exposes addBeh() but not a stable public remove API here,
+                // so clear the existing behaviour IList by reflection before adding the direct entry.
+                task.locale_key = localeKey;
+                task.path_icon = iconPath;
+                task.show_icon = true;
+                ClearTaskBehaviours(task);
+            }
+
+            task.addBeh(new BehSetDirectJob(localeKey, jobId));
+        }
+
+        private static void ClearTaskBehaviours(BehaviourTaskActor task)
+        {
+            if (task == null)
+            {
+                return;
+            }
+
+            bool cleared = false;
+            Type type = task.GetType();
+            while (type != null)
+            {
+                FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    FieldInfo field = fields[i];
+                    var list = field.GetValue(task) as System.Collections.IList;
+                    if (list == null || !LooksLikeBehaviourList(field, list))
+                    {
+                        continue;
+                    }
+
+                    list.Clear();
+                    cleared = true;
+                }
+
+                type = type.BaseType;
+            }
+
+            if (!cleared)
+            {
+                WarnOnce(ref _warnedTaskBehaviourReflection, "[XN] Could not clear existing intent entry task behaviours; direct native behaviour was appended.");
+            }
+        }
+
+        private static bool LooksLikeBehaviourList(FieldInfo field, System.Collections.IList list)
+        {
+            if (field == null)
+            {
+                return false;
+            }
+
+            string name = field.Name != null ? field.Name.ToLowerInvariant() : "";
+            if (name.Contains("beh"))
+            {
+                return true;
+            }
+
+            Type fieldType = field.FieldType;
+            if (fieldType != null && fieldType.IsGenericType)
+            {
+                Type[] args = fieldType.GetGenericArguments();
+                if (args.Length == 1 && typeof(BehaviourActionActor).IsAssignableFrom(args[0]))
+                {
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] is BehaviourActionActor)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void RegisterDecisionAssets()
@@ -1456,6 +1560,43 @@ namespace cultivation.ai
                     {
                         ai.setJob(_expectedJobId);
                     }
+                }
+
+                return BehResult.Stop;
+            }
+        }
+
+        private sealed class BehSetDirectJob : BehaviourActionActor
+        {
+            private readonly string _decisionId;
+            private readonly string _jobId;
+
+            public BehSetDirectJob(string decisionId, string jobId)
+            {
+                _decisionId = decisionId;
+                _jobId = jobId;
+            }
+
+            public override BehResult execute(Actor actor)
+            {
+                if (actor == null || !actor.isAlive())
+                {
+                    return BehResult.Stop;
+                }
+
+                Debug.Log("[XN S3] Native decision authoritative: " +
+                    _decisionId + " actor=" + GetActorDataName(actor));
+
+                if (_jobId == JobIntentComprehend)
+                {
+                    IntentComprehendJob.BeginComprehension(actor);
+                }
+
+                actor.endJob();
+                var ai = xn.access.ActorAccess.GetAI(actor);
+                if (ai != null)
+                {
+                    ai.setJob(_jobId);
                 }
 
                 return BehResult.Stop;

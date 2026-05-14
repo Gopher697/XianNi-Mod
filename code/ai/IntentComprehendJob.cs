@@ -9,6 +9,7 @@ namespace cultivation.ai
 {
     internal static class IntentComprehendJob
     {
+        private const string DECISION_INTENT_COMPREHEND = "xn_decision_intent_comprehend";
         private const string KEY_LV_ACTIVE   = "xn.intent.lv_active";          
         private const string KEY_LV_END_T    = "xn.intent.lv_end_t";           
         private const string KEY_LV_CD_UNTIL = "xn.intent.lv_cd_until_year";   
@@ -54,6 +55,16 @@ namespace cultivation.ai
             task.addBeh(new BehRestoreStats(0.1f, 0.2f));
             task.addBeh(new BehExitBuilding());
         }
+        internal static void BeginComprehension(Actor actor)
+        {
+            if (actor == null || !actor.isAlive()) return;
+            RegisterJob();
+            ActorData data = xn.access.ActorAccess.GetData(actor);
+            if (data == null) return;
+            data.set(KEY_LV_ACTIVE, 1);
+            float dur = UnityEngine.Random.Range(30f, 60f);
+            data.set(KEY_LV_END_T, Time.time + dur);
+        }
         private static bool HasAnyIntent(Actor a)
         {
             var list = a.getTraits();
@@ -72,12 +83,32 @@ namespace cultivation.ai
             }
             return cur;
         }
+        private static bool ActorHasNativeIntentDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var decision = actor.decisions[i];
+                if (decision != null && decision.id == DECISION_INTENT_COMPREHEND)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private static string GetActorDataName(Actor actor)
+        {
+            ActorData data = xn.access.ActorAccess.GetData(actor);
+            return data != null ? data.name : "";
+        }
         [HarmonyPatch(typeof(Actor), "getNextJob")]
         private static class Patch_Actor_GetNextJob_Comprehend
         {
             [HarmonyPrefix]
             private static bool Prefix(Actor __instance, ref string __result)
             {
+                if (ActorHasNativeIntentDecision(__instance)) return true;
                 if (__instance == null || !__instance.isAlive()) return true;
                 if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance)) return true;
                 if (HasAnyIntent(__instance)) return true;
@@ -87,11 +118,10 @@ namespace cultivation.ai
                 int active; xn.access.ActorAccess.GetData(__instance).get(KEY_LV_ACTIVE, out active, 0);
                 if (active == 1) return true;
                 RegisterJob();
-                Debug.Log("[XN S2] IntentComprehendJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
+                Debug.LogWarning("[XN S3 FALLBACK] IntentComprehendJob legacy prefix fired - native decision missing for actor=" +
+                    GetActorDataName(__instance));
                 __result = "job_xn_intent_comprehend";
-                xn.access.ActorAccess.GetData(__instance).set(KEY_LV_ACTIVE, 1);
-                float dur = UnityEngine.Random.Range(30f, 60f);
-                xn.access.ActorAccess.GetData(__instance).set(KEY_LV_END_T, Time.time + dur);
+                BeginComprehension(__instance);
                 return false;
             }
         }
