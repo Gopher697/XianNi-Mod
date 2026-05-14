@@ -58,6 +58,13 @@ namespace cultivation.ai
             StartHeavenTrial(a, 4, GetCurrentBeastIndex(a));
         }
 
+        internal static void BeginHeavenTrial(Actor a, int curRealmIndex)
+        {
+            if (a == null || !a.isAlive()) return;
+            int ttype = HasTrait(a, "path_01_demonic") ? 2 : 1;
+            StartHeavenTrial(a, ttype, curRealmIndex);
+        }
+
         private static void RegisterBreakthroughTask()
         {
             var taskLib = AssetManager.tasks_actor;
@@ -633,9 +640,13 @@ namespace cultivation.ai
                 }
                 if (stop == 1 && IsHeavenGateRealm(curRealm) && xp >= cap)
                 {
-                    int ttype = HasTrait(__instance, "path_01_demonic") ? 2 : 1; 
+                    if (ActorHasNativeBreakthroughDecision(__instance)) return true;
+                    Debug.LogWarning("[XN S3 FALLBACK] BreakthroughJob heaven-gate prefix fired actor=" +
+                        (xn.access.ActorAccess.GetData(__instance)?.name ?? "?") +
+                        " realm=" + curRealm);
+                    int ttype = HasTrait(__instance, "path_01_demonic") ? 2 : 1;
                     StartHeavenTrial(__instance, ttype, curRealm);
-                    return true; 
+                    return true;
                 }
                 if (IsHeavenGateRealm(curRealm))
                     return true;
@@ -654,11 +665,26 @@ namespace cultivation.ai
                 }
                 int triedYear; xn.access.ActorAccess.GetData(__instance).get(KEY_BREAK_TRIED_YEAR, out triedYear, -1);
                 if (triedYear == curYear) return true;
+                if (ActorHasNativeBreakthroughDecision(__instance)) return true;
+                Debug.LogWarning("[XN S3 FALLBACK] BreakthroughJob realm redirect prefix fired actor=" +
+                    (xn.access.ActorAccess.GetData(__instance)?.name ?? "?") +
+                    " realm=" + curRealm);
                 xn.access.ActorAccess.GetData(__instance).set(KEY_BREAK_TRIED_YEAR, curYear);
-                Debug.Log("[XN S2] BreakthroughJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
                 __result = "job_xn_breakthrough";
                 return false;
             }
+        }
+
+        private static bool ActorHasNativeBreakthroughDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var d = actor.decisions[i];
+                if (d != null && d.id == "xn_decision_breakthrough") return true;
+            }
+            return false;
         }
 
         private static bool ActorHasNativeAncientBreakthroughDecision(Actor actor)

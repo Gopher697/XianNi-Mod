@@ -274,7 +274,7 @@ namespace cultivation.ai
 
         private static void RegisterEntryTasks()
         {
-            RegisterEntryTask(TaskBreakthroughEntry, DecisionBreakthrough, "stats/xiuwei", JobBreakthrough);
+            RegisterBreakthroughTask(TaskBreakthroughEntry, DecisionBreakthrough, "stats/xiuwei");
             RegisterDirectTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
             RegisterDirectTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
             RegisterDirectTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", "job_xn_demonic_hunt");
@@ -366,6 +366,37 @@ namespace cultivation.ai
             }
 
             task.addBeh(new BehStartTrialDirectly(localeKey, trialType));
+        }
+
+        private static void RegisterBreakthroughTask(string taskId, string localeKey, string iconPath)
+        {
+            BehaviourTaskActorLibrary taskLibrary = AssetManager.tasks_actor;
+            if (taskLibrary == null)
+            {
+                return;
+            }
+
+            BehaviourTaskActor task = taskLibrary.get(taskId);
+            if (task == null)
+            {
+                task = new BehaviourTaskActor
+                {
+                    id = taskId,
+                    locale_key = localeKey,
+                    path_icon = iconPath,
+                    show_icon = true
+                };
+                taskLibrary.add(task);
+            }
+            else
+            {
+                task.locale_key = localeKey;
+                task.path_icon = iconPath;
+                task.show_icon = true;
+                ClearTaskBehaviours(task);
+            }
+
+            task.addBeh(new BehStartBreakthrough(localeKey));
         }
 
         private static void ClearTaskBehaviours(BehaviourTaskActor task)
@@ -857,12 +888,6 @@ namespace cultivation.ai
                 return false;
             }
 
-            // Stage 2 parity: BreakthroughJob.Patch_Actor_GetNextJob starts heaven-gate trials here and does not redirect.
-            if (IsHeavenGateRealm(currentRealm))
-            {
-                return false;
-            }
-
             if (HasDaoBaseDamage(actor, currentYear))
             {
                 return false;
@@ -888,7 +913,7 @@ namespace cultivation.ai
                 return false;
             }
 
-            Debug.Log("[XN S2] " + DecisionBreakthrough + " launch check PASS actor=" +
+            Debug.Log("[XN S3] " + DecisionBreakthrough + " launch check PASS actor=" +
                 GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
             return true;
         }
@@ -1606,6 +1631,53 @@ namespace cultivation.ai
                 else if (_trialType == 4)
                 {
                     BreakthroughJob.BeginBeastTrial(actor);
+                }
+
+                return BehResult.Stop;
+            }
+        }
+
+        private sealed class BehStartBreakthrough : BehaviourActionActor
+        {
+            private readonly string _decisionId;
+
+            public BehStartBreakthrough(string decisionId)
+            {
+                _decisionId = decisionId;
+            }
+
+            public override BehResult execute(Actor actor)
+            {
+                if (actor == null || !actor.isAlive())
+                {
+                    return BehResult.Stop;
+                }
+
+                int curRealm = GetCurrentRealmIndex(actor);
+                int curYear = Date.getCurrentYear();
+
+                // Stamp tried-year before acting so the fallback patch and
+                // CanLaunchBreakthrough both see this attempt recorded.
+                xn.access.ActorAccess.GetData(actor).set(KeyBreakTriedYear, curYear);
+
+                if (IsHeavenGateRealm(curRealm))
+                {
+                    // Heaven-gate: stun in place and resolve via Patch_TickHeavenTrial.
+                    // Do not set a job - mirrors the ancient/beast trial behavior.
+                    Debug.Log("[XN S3] Native breakthrough decision fired (heaven gate): " +
+                        _decisionId + " actor=" + GetActorDataName(actor) + " realm=" + curRealm);
+                    BreakthroughJob.BeginHeavenTrial(actor, curRealm);
+                    return BehResult.Stop;
+                }
+
+                // Normal realm: send actor to the breakthrough job.
+                Debug.Log("[XN S3] Native breakthrough decision fired (realm): " +
+                    _decisionId + " actor=" + GetActorDataName(actor) + " realm=" + curRealm);
+                actor.endJob();
+                var ai = xn.access.ActorAccess.GetAI(actor);
+                if (ai != null)
+                {
+                    ai.setJob(JobBreakthrough);
                 }
 
                 return BehResult.Stop;
