@@ -124,31 +124,45 @@ namespace cultivation.ai
             if (hunter == null || !hunter.isAlive()) return;
             hunter.dieAndDestroy(AttackType.Divine);
         }
+        private static bool ActorHasNativeDemonicHuntDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var d = actor.decisions[i];
+                if (d != null && d.id == "xn_decision_demonic_hunt")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         [HarmonyPatch(typeof(Actor), "getNextJob")]
         private static class Patch_Actor_GetNextJob
         {
             [HarmonyPrefix]
             private static bool Prefix(Actor __instance, ref string __result)
             {
+                if (ActorHasNativeDemonicHuntDecision(__instance)) return true;
+
                 if (__instance == null || !__instance.isAlive()) return true;
                 if (__instance.kingdom == null || __instance.city == null) return true;
                 if (!HasTrait(__instance, "path_01_demonic")) return true;
                 int active;
                 xn.access.ActorAccess.GetData(__instance).get(KEY_HUNT_ACTIVE, out active, 0);
-                if (active == 1)
-                {
-                    int stop;
-                    xn.access.ActorAccess.GetData(__instance).get("xn.cultivation.stop", out stop, 0);
-                    if (stop == 1) return true;
-                    int trialActive;
-                    xn.access.ActorAccess.GetData(__instance).get("xn.trial.active", out trialActive, 0);
-                    if (trialActive == 1) return true;
-                    RegisterJob();
-                    Debug.Log("[XN S2] DemonicHuntJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
-                    __result = "job_xn_demonic_hunt";
-                    return false;
-                }
-                return true;
+                if (active != 1) return true;
+                int stop;
+                xn.access.ActorAccess.GetData(__instance).get("xn.cultivation.stop", out stop, 0);
+                if (stop == 1) return true;
+                int trialActive;
+                xn.access.ActorAccess.GetData(__instance).get("xn.trial.active", out trialActive, 0);
+                if (trialActive == 1) return true;
+                RegisterJob();
+                Debug.LogWarning("[XN S3 FALLBACK] DemonicHuntJob legacy prefix fired - native decision missing for actor=" +
+                    xn.access.ActorAccess.GetData(__instance)?.name);
+                __result = "job_xn_demonic_hunt";
+                return false;
             }
         }
         [HarmonyPatch(typeof(Actor), "setTask", new Type[] {
@@ -315,9 +329,6 @@ namespace cultivation.ai
                     xn.access.ActorAccess.GetData(a).set(KEY_HUNT_YEAR, curYear);
                     xn.access.ActorAccess.GetData(a).set(KEY_HUNT_ACTIVE, 1);
                     s_activeHunters.Add(xn.access.ActorAccess.GetData(a).id);
-                    RegisterJob();
-                    a.endJob();
-                    xn.access.ActorAccess.GetAI(a)?.setJob("job_xn_demonic_hunt");
                     string hunterName = a.getName();
                     string targetName = target.getName();
                     string broadcastText;
