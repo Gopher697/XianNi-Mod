@@ -33,6 +33,7 @@ namespace cultivation.ai
         private const string DecisionDemonicHunt = "xn_decision_demonic_hunt";
         private const string DecisionAncientBreakthrough = "xn_decision_ancient_breakthrough";
         private const string DecisionBeastBreakthrough = "xn_decision_beast_breakthrough";
+        private const string DecisionPathChoice = "xn_decision_path_choice";
 
         private const string IconAncientBreakthrough = "stats/gushen";
         private const string IconBeastBreakthrough = "stats/yaoli";
@@ -43,6 +44,7 @@ namespace cultivation.ai
         private const string TaskDemonicHuntEntry = "task_xn_demonic_hunt_entry";
         private const string TaskAncientBreakthroughEntry = "task_xn_ancient_breakthrough_entry";
         private const string TaskBeastBreakthroughEntry = "task_xn_beast_breakthrough_entry";
+        private const string TaskPathChoiceEntry = "task_xn_path_choice_entry";
 
         private const string JobBreakthrough = "job_xn_breakthrough";
         private const string JobCondenseRoot = "job_xn_condense_root";
@@ -183,7 +185,8 @@ namespace cultivation.ai
             DecisionIntentComprehend,
             DecisionDemonicHunt,
             DecisionAncientBreakthrough,
-            DecisionBeastBreakthrough
+            DecisionBeastBreakthrough,
+            DecisionPathChoice
         };
 
         private static readonly FieldInfo DecisionCooldownsField = AccessTools.Field(typeof(Actor), "_decision_cooldowns");
@@ -280,6 +283,7 @@ namespace cultivation.ai
             RegisterDirectTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", "job_xn_demonic_hunt");
             RegisterTrialTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, 3);
             RegisterTrialTask(TaskBeastBreakthroughEntry, DecisionBeastBreakthrough, IconBeastBreakthrough, 4);
+            RegisterPathChoiceTask(TaskPathChoiceEntry, DecisionPathChoice, "stats/xiuwei");
         }
 
         private static void RegisterEntryTask(string taskId, string localeKey, string iconPath, string expectedJobId)
@@ -397,6 +401,34 @@ namespace cultivation.ai
             }
 
             task.addBeh(new BehStartBreakthrough(localeKey));
+        }
+
+        private static void RegisterPathChoiceTask(string taskId, string localeKey, string iconPath)
+        {
+            BehaviourTaskActorLibrary taskLibrary = AssetManager.tasks_actor;
+            if (taskLibrary == null) return;
+
+            BehaviourTaskActor task = taskLibrary.get(taskId);
+            if (task == null)
+            {
+                task = new BehaviourTaskActor
+                {
+                    id = taskId,
+                    locale_key = localeKey,
+                    path_icon = iconPath,
+                    show_icon = true
+                };
+                taskLibrary.add(task);
+            }
+            else
+            {
+                task.locale_key = localeKey;
+                task.path_icon = iconPath;
+                task.show_icon = true;
+                ClearTaskBehaviours(task);
+            }
+
+            task.addBeh(new BehChoosePath(localeKey));
         }
 
         private static void ClearTaskBehaviours(BehaviourTaskActor task)
@@ -541,6 +573,18 @@ namespace cultivation.ai
                 action_check_launch = CanLaunchBeastBreakthrough,
                 weight_calculate_custom = WeightBeastBreakthrough
             });
+
+            RegisterDecision(new DecisionAsset
+            {
+                id = DecisionPathChoice,
+                task_id = TaskPathChoiceEntry,
+                path_icon = "stats/xiuwei",
+                priority = NeuroLayer.Layer_3_High,
+                cooldown = CooldownOneYear,
+                unique = true,
+                action_check_launch = CanLaunchPathChoice,
+                weight_calculate_custom = WeightPathChoice
+            });
         }
 
         private static void RegisterDecision(DecisionAsset decision)
@@ -623,6 +667,7 @@ namespace cultivation.ai
             for (int i = 0; i < SapientActorAssetIds.Length; i++)
             {
                 AttachDecisionToActorAsset(SapientActorAssetIds[i], DecisionCondenseRoot);
+                AttachDecisionToActorAsset(SapientActorAssetIds[i], DecisionPathChoice);
             }
         }
 
@@ -882,6 +927,14 @@ namespace cultivation.ai
                 return false;
             }
 
+            // Stage 3g: path choice must resolve before first breakthrough fires
+            if (GetCurrentRealmIndex(actor) < 0 &&
+                !HasTrait(actor, "path_01_demonic") &&
+                !HasTrait(actor, "path_02_immortal"))
+            {
+                return false;
+            }
+
             int currentRealm = GetCurrentRealmIndex(actor);
             if (GetInt(actor, KeyHalfTatianLocked, 0) == 1 && currentRealm >= 14)
             {
@@ -915,6 +968,24 @@ namespace cultivation.ai
 
             Debug.Log("[XN S3] " + DecisionBreakthrough + " launch check PASS actor=" +
                 GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
+            return true;
+        }
+
+        private static bool CanLaunchPathChoice(Actor actor)
+        {
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
+                return false;
+            if (GetInt(actor, KeyStop, 0) != 1)
+                return false;
+            if (GetCurrentRealmIndex(actor) >= 0)
+                return false;
+            if (HasTrait(actor, "path_01_demonic") || HasTrait(actor, "path_02_immortal"))
+                return false;
+            long xp = GetLong(actor, KeyXp, 0L);
+            if (xp < RealmThresholds[0])
+                return false;
+
+            Debug.Log("[XN S3] " + DecisionPathChoice + " launch check PASS actor=" + GetActorDataName(actor));
             return true;
         }
 
@@ -1081,6 +1152,11 @@ namespace cultivation.ai
             }
 
             return Mathf.Max(0.1f, weight);
+        }
+
+        private static float WeightPathChoice(Actor actor)
+        {
+            return 3f;
         }
 
         private static float WeightAncientBreakthrough(Actor actor)
@@ -1679,6 +1755,78 @@ namespace cultivation.ai
                 {
                     ai.setJob(JobBreakthrough);
                 }
+
+                return BehResult.Stop;
+            }
+        }
+
+        private sealed class BehChoosePath : BehaviourActionActor
+        {
+            private readonly string _decisionId;
+
+            public BehChoosePath(string decisionId)
+            {
+                _decisionId = decisionId;
+            }
+
+            public override BehResult execute(Actor actor)
+            {
+                if (actor == null || !actor.isAlive()) return BehResult.Stop;
+
+                // Idempotent: if path already assigned (e.g. via IncreaseXinmoAndMaybeCorrupt
+                // firing before this decision resolved), do nothing.
+                if (HasTrait(actor, "path_01_demonic") || HasTrait(actor, "path_02_immortal"))
+                    return BehResult.Stop;
+
+                int xinmo = GetInt(actor, KeyXinmo, 0);
+                int wuxin = GetInt(actor, KeyWuxin, 0);
+
+                float demonicChance = 15f;
+
+                // Continuous stats
+                demonicChance += Mathf.Min(xinmo * 0.22f, 45f);
+                demonicChance -= Mathf.Clamp(Mathf.Max(0f, (wuxin - 50) * 0.2f), 0f, 15f);
+
+                // Demonic trait deltas
+                if (HasTrait(actor, "psychopath")) demonicChance += 20f;
+                if (HasTrait(actor, "evil")) demonicChance += 15f;
+                if (HasTrait(actor, "bloodlust")) demonicChance += 15f;
+                if (HasTrait(actor, "madness")) demonicChance += 10f;
+                if (HasTrait(actor, "savage")) demonicChance += 10f;
+                if (HasTrait(actor, "death_mark")) demonicChance += 8f;
+                if (HasTrait(actor, "flesh_eater")) demonicChance += 8f;
+                if (HasTrait(actor, "greedy")) demonicChance += 5f;
+                if (HasTrait(actor, "deceitful")) demonicChance += 5f;
+                if (HasTrait(actor, "pyromaniac")) demonicChance += 5f;
+                if (HasTrait(actor, "hotheaded")) demonicChance += 3f;
+                if (HasTrait(actor, "nightchild")) demonicChance += 3f;
+
+                // Immortal trait deltas
+                if (HasTrait(actor, "chosen_one")) demonicChance -= 20f;
+                if (HasTrait(actor, "blessed")) demonicChance -= 12f;
+                if (HasTrait(actor, "wise")) demonicChance -= 10f;
+                if (HasTrait(actor, "strong_minded")) demonicChance -= 8f;
+                if (HasTrait(actor, "peaceful")) demonicChance -= 7f;
+                if (HasTrait(actor, "pacifist")) demonicChance -= 7f;
+                if (HasTrait(actor, "content")) demonicChance -= 5f;
+                if (HasTrait(actor, "honest")) demonicChance -= 5f;
+                if (HasTrait(actor, "moonchild")) demonicChance -= 5f;
+                if (HasTrait(actor, "sunblessed")) demonicChance -= 5f;
+
+                // Clamp - preserve free will
+                demonicChance = Mathf.Clamp(demonicChance, 5f, 80f);
+
+                bool goesDemonic = UnityEngine.Random.value * 100f < demonicChance;
+                string pathId = goesDemonic ? "path_01_demonic" : "path_02_immortal";
+                var pathTrait = AssetManager.traits.get(pathId) as ActorTrait;
+                if (pathTrait != null) actor.addTrait(pathTrait);
+
+                // Immortal path: clear xinmo contamination
+                if (!goesDemonic)
+                    xn.access.ActorAccess.GetData(actor).set(KeyXinmo, 0);
+
+                Debug.Log("[XN S3] " + _decisionId + " resolved: actor=" + GetActorDataName(actor) +
+                    " demonicChance=" + demonicChance.ToString("F1") + "% result=" + pathId);
 
                 return BehResult.Stop;
             }

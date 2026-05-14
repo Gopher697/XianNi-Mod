@@ -261,19 +261,6 @@ namespace cultivation.ai
                 {
                     BroadcastSystem.RealmUp(a, REALM_IDS[next]);
                 }
-                if (next == 0)
-                {
-                    if (UnityEngine.Random.value < 0.85f)
-                    {
-                        var path = AssetManager.traits.get("path_02_immortal") as ActorTrait;
-                    if (path != null) a.addTrait(path);
-                    }
-                    else
-                    {
-                        var path = AssetManager.traits.get("path_01_demonic") as ActorTrait;
-                        if (path != null) a.addTrait(path);
-                    }
-                }
                 if (HasTrait(a, "path_02_immortal") && !HasTrait(a, "path_01_demonic"))
                     xn.access.ActorAccess.GetData(a).set(KEY_XINMO, 0);
                 MaybeGiveAttrForRealm(a, next);
