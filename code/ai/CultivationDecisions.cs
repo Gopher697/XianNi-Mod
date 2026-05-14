@@ -30,8 +30,6 @@ namespace cultivation.ai
         private const string DecisionBreakthrough = "xn_decision_breakthrough";
         private const string DecisionCondenseRoot = "xn_decision_condense_root";
         private const string DecisionIntentComprehend = "xn_decision_intent_comprehend";
-        private const string DecisionDemonicHunt = "xn_decision_demonic_hunt";
-        private const string DecisionTianyunzi = "xn_decision_tianyunzi";
         private const string DecisionAncientBreakthrough = "xn_decision_ancient_breakthrough";
         private const string DecisionBeastBreakthrough = "xn_decision_beast_breakthrough";
 
@@ -41,16 +39,12 @@ namespace cultivation.ai
         private const string TaskBreakthroughEntry = "task_xn_breakthrough_entry";
         private const string TaskCondenseRootEntry = "task_xn_condense_root_entry";
         private const string TaskIntentComprehendEntry = "task_xn_intent_comprehend_entry";
-        private const string TaskDemonicHuntEntry = "task_xn_demonic_hunt_entry";
-        private const string TaskTianyunziEntry = "task_xn_tianyunzi_entry";
         private const string TaskAncientBreakthroughEntry = "task_xn_ancient_breakthrough_entry";
         private const string TaskBeastBreakthroughEntry = "task_xn_beast_breakthrough_entry";
 
         private const string JobBreakthrough = "job_xn_breakthrough";
         private const string JobCondenseRoot = "job_xn_condense_root";
         private const string JobIntentComprehend = "job_xn_intent_comprehend";
-        private const string JobDemonicHunt = "job_xn_demonic_hunt";
-        private const string JobTianyunzi = "job_xn_tianyunzi";
 
         private const string KeyStop = "xn.cultivation.stop";
         private const string KeyXp = "xn.stat.xiuwei";
@@ -73,9 +67,6 @@ namespace cultivation.ai
         private const string KeyCityRootQuota = "xn.city.root.try_quota";
         private const string KeyIntentActive = "xn.intent.lv_active";
         private const string KeyIntentCooldownUntil = "xn.intent.lv_cd_until_year";
-        private const string KeyDemonicHuntTarget = "xn.demonic_hunt.target_id";
-        private const string KeyDemonicHuntActive = "xn.demonic_hunt.active";
-        private const string KeyTianyunziFlag = "xn_is_tianyunzi";
         private const string KeyKillCount = "xn.kill_count";
         private const string KeyKillPrev = "xn.kill.prev";
 
@@ -187,8 +178,6 @@ namespace cultivation.ai
             DecisionBreakthrough,
             DecisionCondenseRoot,
             DecisionIntentComprehend,
-            DecisionDemonicHunt,
-            DecisionTianyunzi,
             DecisionAncientBreakthrough,
             DecisionBeastBreakthrough
         };
@@ -284,8 +273,6 @@ namespace cultivation.ai
             RegisterEntryTask(TaskBreakthroughEntry, DecisionBreakthrough, "stats/xiuwei", JobBreakthrough);
             RegisterEntryTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
             RegisterDirectTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
-            RegisterEntryTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", JobDemonicHunt);
-            RegisterDirectTask(TaskTianyunziEntry, DecisionTianyunzi, "acots/skin/tianyunzi", JobTianyunzi);
             RegisterEntryTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, JobBreakthrough);
             RegisterEntryTask(TaskBeastBreakthroughEntry, DecisionBeastBreakthrough, IconBeastBreakthrough, JobBreakthrough);
         }
@@ -454,30 +441,6 @@ namespace cultivation.ai
 
             RegisterDecision(new DecisionAsset
             {
-                id = DecisionDemonicHunt,
-                task_id = TaskDemonicHuntEntry,
-                path_icon = "trair/path_01_demonic",
-                priority = NeuroLayer.Layer_2_Moderate,
-                cooldown = CooldownOneYear,
-                unique = true,
-                action_check_launch = CanLaunchDemonicHunt,
-                weight_calculate_custom = WeightDemonicHunt
-            });
-
-            RegisterDecision(new DecisionAsset
-            {
-                id = DecisionTianyunzi,
-                task_id = TaskTianyunziEntry,
-                path_icon = "acots/skin/tianyunzi",
-                priority = NeuroLayer.Layer_2_Moderate,
-                cooldown = CooldownOneYear,
-                unique = true,
-                action_check_launch = CanLaunchTianyunzi,
-                weight_calculate_custom = WeightTianyunzi
-            });
-
-            RegisterDecision(new DecisionAsset
-            {
                 id = DecisionAncientBreakthrough,
                 task_id = TaskAncientBreakthroughEntry,
                 path_icon = IconAncientBreakthrough,
@@ -574,7 +537,6 @@ namespace cultivation.ai
                 AttachDecisionToTrait(IntentRealmAttachIds[i], DecisionIntentComprehend);
             }
 
-            AttachDecisionToTrait("path_01_demonic", DecisionDemonicHunt);
             AttachDecisionToTrait("path_04_ancient", DecisionAncientBreakthrough);
             AttachDecisionToTrait("path_03_beast", DecisionBeastBreakthrough);
 
@@ -582,8 +544,6 @@ namespace cultivation.ai
             {
                 AttachDecisionToActorAsset(SapientActorAssetIds[i], DecisionCondenseRoot);
             }
-
-            AttachDecisionToActorAsset("dragon", DecisionTianyunzi);
         }
 
         private static void AttachDecisionToTrait(string traitId, string decisionId)
@@ -1012,51 +972,6 @@ namespace cultivation.ai
             return true;
         }
 
-        private static bool CanLaunchDemonicHunt(Actor actor)
-        {
-            if (!IsAlive(actor) || !HasCityAndKingdom(actor))
-            {
-                return false;
-            }
-            if (!HasTrait(actor, "path_01_demonic"))
-            {
-                return false;
-            }
-            if (GetInt(actor, KeyDemonicHuntActive, 0) != 1)
-            {
-                return false;
-            }
-            if (GetInt(actor, KeyStop, 0) == 1 || GetInt(actor, KeyTrialActive, 0) == 1)
-            {
-                return false;
-            }
-
-            // Stage 2 parity: DemonicHuntJob.Patch_Actor_GetNextJob does not validate target liveness before redirecting.
-            Debug.Log("[XN S2] " + DecisionDemonicHunt + " launch check PASS actor=" +
-                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
-            return true;
-        }
-
-        private static bool CanLaunchTianyunzi(Actor actor)
-        {
-            if (!IsAlive(actor))
-            {
-                return false;
-            }
-            if (GetInt(actor, KeyTianyunziFlag, 0) != 1)
-            {
-                return false;
-            }
-            if (GetInt(actor, KeyStop, 0) == 1 || GetInt(actor, KeyTrialActive, 0) == 1)
-            {
-                return false;
-            }
-
-            Debug.Log("[XN S3] " + DecisionTianyunzi + " launch check PASS actor=" +
-                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
-            return true;
-        }
-
         private static float WeightBreakthrough(Actor actor)
         {
             float weight = 2f;
@@ -1132,17 +1047,6 @@ namespace cultivation.ai
 
             int wuxin = GetInt(actor, KeyWuxin, 0);
             return Mathf.Max(0.1f, 1f + Mathf.Clamp(wuxin / 100f, 0f, 1.5f));
-        }
-
-        private static float WeightDemonicHunt(Actor actor)
-        {
-            int xinmo = GetInt(actor, KeyXinmo, 0);
-            return Mathf.Max(0.1f, 1f + Mathf.Clamp(xinmo / 100f, 0f, 4f));
-        }
-
-        private static float WeightTianyunzi(Actor actor)
-        {
-            return GetInt(actor, KeyTianyunziFlag, 0) == 1 ? 4f : 0.1f;
         }
 
         private static bool IsAlive(Actor actor)
