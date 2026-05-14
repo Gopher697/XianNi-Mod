@@ -215,6 +215,7 @@ namespace cultivation.ai
                 Patch(harmony, typeof(DecisionsLibrary), "init", nameof(PostDecisionsLibraryInit));
                 Patch(harmony, typeof(DecisionsLibrary), "linkAssets", nameof(PostDecisionsLibraryLinkAssets));
                 Patch(harmony, typeof(MapBox), "Update", nameof(PostMapBoxUpdate));
+                Patch(harmony, typeof(Actor), "updateStats", nameof(PostActorUpdateStats));
             }
 
             RegisterAll();
@@ -254,6 +255,34 @@ namespace cultivation.ai
             RegisterAll();
             RefreshExistingActorDecisionArrays(__instance);
             _actorRefreshDone = true;
+        }
+
+        private static void PostActorUpdateStats(Actor __instance)
+        {
+            Patch_Actor_UpdateStats_InjectSapientDecisions.Postfix(__instance);
+        }
+
+        private static class Patch_Actor_UpdateStats_InjectSapientDecisions
+        {
+            internal static void Postfix(Actor __instance)
+            {
+                if (__instance == null || !__instance.isAlive()) return;
+                if (__instance.asset == null) return;
+
+                bool isSapient = false;
+                for (int i = 0; i < SapientActorAssetIds.Length; i++)
+                {
+                    if (__instance.asset.id == SapientActorAssetIds[i])
+                    {
+                        isSapient = true;
+                        break;
+                    }
+                }
+                if (!isSapient) return;
+
+                InjectDecisionIfMissing(__instance, DecisionCondenseRoot);
+                InjectDecisionIfMissing(__instance, DecisionPathChoice);
+            }
         }
 
         private static void RegisterAll()
@@ -848,6 +877,33 @@ namespace cultivation.ai
             }
 
             return changed;
+        }
+
+        private static void InjectDecisionIfMissing(Actor actor, string decisionId)
+        {
+            if (actor == null || actor.decisions == null) return;
+            DecisionAsset decision = AssetManager.decisions_library != null
+                ? AssetManager.decisions_library.get(decisionId)
+                : null;
+            if (decision == null) return;
+
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                if (actor.decisions[i] != null && actor.decisions[i].id == decisionId)
+                {
+                    return;
+                }
+            }
+
+            if (actor.decisions_counter >= actor.decisions.Length)
+            {
+                Debug.LogWarning("[XN] InjectDecisionIfMissing: decisions array full for actor=" +
+                    GetActorDataName(actor) + " decision=" + decisionId);
+                return;
+            }
+
+            actor.decisions[actor.decisions_counter++] = decision;
         }
 
         private static T[] EnsureArraySize<T>(T[] current, int targetSize)

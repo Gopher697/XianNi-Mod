@@ -652,6 +652,15 @@ namespace cultivation.ai
                 }
                 int triedYear; xn.access.ActorAccess.GetData(__instance).get(KEY_BREAK_TRIED_YEAR, out triedYear, -1);
                 if (triedYear == curYear) return true;
+                // Stage 3g: pre-path-choice actors must resolve path before breakthrough.
+                // realm=-1 means no realm trait yet; without a path trait the native
+                // path-choice decision (not breakthrough) must fire. Do not redirect.
+                if (curRealm < 0 &&
+                    !HasTrait(__instance, "path_01_demonic") &&
+                    !HasTrait(__instance, "path_02_immortal"))
+                {
+                    return true;
+                }
                 if (ActorHasNativeBreakthroughDecision(__instance)) return true;
                 Debug.LogWarning("[XN S3 FALLBACK] BreakthroughJob realm redirect prefix fired actor=" +
                     (xn.access.ActorAccess.GetData(__instance)?.name ?? "?") +
