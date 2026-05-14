@@ -242,6 +242,7 @@ namespace cultivation.ai
                 xn.access.ActorAccess.GetData(__instance).get(KEY_CONDENSE_YEAR, out condenseYear, -1);
                 if (condenseYear == curYear) return true;
                 xn.access.ActorAccess.GetData(__instance).set(KEY_CONDENSE_YEAR, curYear);
+                Debug.Log("[XN S2] CondenseRootJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
                 __result = "job_xn_condense_root";
                 return false;
             }

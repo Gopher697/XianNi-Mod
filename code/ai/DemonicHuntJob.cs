@@ -144,6 +144,7 @@ namespace cultivation.ai
                     xn.access.ActorAccess.GetData(__instance).get("xn.trial.active", out trialActive, 0);
                     if (trialActive == 1) return true;
                     RegisterJob();
+                    Debug.Log("[XN S2] DemonicHuntJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
                     __result = "job_xn_demonic_hunt";
                     return false;
                 }

@@ -53,7 +53,10 @@ namespace cultivation.ai
         private const string KeyTrialCooldownUntil = "xn.trial.cooldown_until";
         private const string KeyHalfTatianLocked = "xn.half_tatian.locked";
         private const string KeyDaoBaseDamagedUntil = "xn.daobase.damaged_until";
+        private const string KeyBreakTriedYear = "xn.break.tried_year";
         private const string KeyBreakSuccessYear = "xn.break.success_year";
+        private const string KeyAncientStop = "xn.ancient.stop";
+        private const string KeyBeastStop = "xn.beast.stop";
         private const string KeyCondenseReady = "xn.root.condense_ready";
         private const string KeyCondenseYear = "xn.root.condense_year";
         private const string KeyNextRootTryYear = "xn.root.next_try_year";
@@ -622,7 +625,7 @@ namespace cultivation.ai
 
         private static bool CanLaunchBreakthrough(Actor actor)
         {
-            if (!IsActorReady(actor, requireCity: true))
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
             {
                 return false;
             }
@@ -633,6 +636,11 @@ namespace cultivation.ai
                 return false;
             }
             if (GetInt(actor, KeyTrialActive, 0) == 1)
+            {
+                return false;
+            }
+            // Stage 2 parity: BreakthroughJob.Patch_Actor_GetNextJob starts ancient/beast trials here and returns true.
+            if (GetInt(actor, KeyAncientStop, 0) == 1 || GetInt(actor, KeyBeastStop, 0) == 1)
             {
                 return false;
             }
@@ -660,9 +668,10 @@ namespace cultivation.ai
                 return false;
             }
 
+            // Stage 2 parity: BreakthroughJob.Patch_Actor_GetNextJob starts heaven-gate trials here and does not redirect.
             if (IsHeavenGateRealm(currentRealm))
             {
-                return true;
+                return false;
             }
 
             if (HasDaoBaseDamage(actor, currentYear))
@@ -684,12 +693,20 @@ namespace cultivation.ai
                 }
             }
 
+            // Stage 2 parity: BreakthroughJob.Patch_Actor_GetNextJob skips actors that already tried this year.
+            if (GetInt(actor, KeyBreakTriedYear, -1) == currentYear)
+            {
+                return false;
+            }
+
+            Debug.Log("[XN S2] " + DecisionBreakthrough + " launch check PASS actor=" +
+                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
             return true;
         }
 
         private static bool CanLaunchCondenseRoot(Actor actor)
         {
-            if (!IsActorReady(actor, requireCity: true))
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
             {
                 return false;
             }
@@ -697,19 +714,9 @@ namespace cultivation.ai
             {
                 return false;
             }
-            if (GetCurrentRealmIndex(actor) >= 0)
-            {
-                return false;
-            }
-            if (GetCityAura(actor) <= 600 || !CityHasRootQuota(actor))
-            {
-                return false;
-            }
+            // Stage 2 parity: CondenseRootJob.Patch_Actor_GetNextJob redirects from ready/year only;
+            // aura/root/next-try checks live in the condense setup and task body.
             if (GetInt(actor, KeyCondenseReady, 0) != 1)
-            {
-                return false;
-            }
-            if (HasAnySpiritRoot(actor) || HasAnyAncientInheritance(actor) || HasTrait(actor, "path_03_beast"))
             {
                 return false;
             }
@@ -719,17 +726,15 @@ namespace cultivation.ai
             {
                 return false;
             }
-            if (GetInt(actor, KeyNextRootTryYear, 0) > currentYear)
-            {
-                return false;
-            }
 
+            Debug.Log("[XN S2] " + DecisionCondenseRoot + " launch check PASS actor=" +
+                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
             return true;
         }
 
         private static bool CanLaunchIntentComprehend(Actor actor)
         {
-            if (!IsActorReady(actor, requireCity: true))
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
             {
                 return false;
             }
@@ -750,12 +755,14 @@ namespace cultivation.ai
                 return false;
             }
 
+            Debug.Log("[XN S2] " + DecisionIntentComprehend + " launch check PASS actor=" +
+                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
             return true;
         }
 
         private static bool CanLaunchDemonicHunt(Actor actor)
         {
-            if (!IsActorReady(actor, requireCity: true))
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor))
             {
                 return false;
             }
@@ -772,14 +779,15 @@ namespace cultivation.ai
                 return false;
             }
 
-            long targetId = GetLong(actor, KeyDemonicHuntTarget, -1L);
-            Actor target = World.world != null && World.world.units != null ? World.world.units.get(targetId) : null;
-            return target != null && target.isAlive();
+            // Stage 2 parity: DemonicHuntJob.Patch_Actor_GetNextJob does not validate target liveness before redirecting.
+            Debug.Log("[XN S2] " + DecisionDemonicHunt + " launch check PASS actor=" +
+                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
+            return true;
         }
 
         private static bool CanLaunchTianyunzi(Actor actor)
         {
-            if (!IsActorReady(actor, requireCity: false))
+            if (!IsAlive(actor))
             {
                 return false;
             }
@@ -792,6 +800,8 @@ namespace cultivation.ai
                 return false;
             }
 
+            Debug.Log("[XN S2] " + DecisionTianyunzi + " launch check PASS actor=" +
+                GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
             return true;
         }
 
@@ -848,26 +858,20 @@ namespace cultivation.ai
             return GetInt(actor, KeyTianyunziFlag, 0) == 1 ? 4f : 0.1f;
         }
 
-        private static bool IsActorReady(Actor actor, bool requireCity)
+        private static bool IsAlive(Actor actor)
         {
-            if (actor == null || !actor.isAlive())
-            {
-                return false;
-            }
-            if (requireCity && (actor.kingdom == null || actor.city == null))
-            {
-                return false;
-            }
-            if (xn.access.ActorAccess.IsInsideBoat(actor))
-            {
-                return false;
-            }
-            if (xn.tournament.TournamentManager.IsRunning && xn.tournament.TournamentManager.IsParticipant(actor))
-            {
-                return false;
-            }
+            return actor != null && actor.isAlive();
+        }
 
-            return true;
+        private static bool HasCityAndKingdom(Actor actor)
+        {
+            return actor != null && actor.kingdom != null && actor.city != null;
+        }
+
+        private static string GetActorDataName(Actor actor)
+        {
+            ActorData data = xn.access.ActorAccess.GetData(actor);
+            return data != null ? data.name : "";
         }
 
         private static int GetCurrentRealmIndex(Actor actor)

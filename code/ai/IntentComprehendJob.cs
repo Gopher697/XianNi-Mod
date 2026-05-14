@@ -87,6 +87,7 @@ namespace cultivation.ai
                 int active; xn.access.ActorAccess.GetData(__instance).get(KEY_LV_ACTIVE, out active, 0);
                 if (active == 1) return true;
                 RegisterJob();
+                Debug.Log("[XN S2] IntentComprehendJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
                 __result = "job_xn_intent_comprehend";
                 xn.access.ActorAccess.GetData(__instance).set(KEY_LV_ACTIVE, 1);
                 float dur = UnityEngine.Random.Range(30f, 60f);

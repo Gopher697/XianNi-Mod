@@ -636,6 +636,7 @@ namespace cultivation.ai
                 int triedYear; xn.access.ActorAccess.GetData(__instance).get(KEY_BREAK_TRIED_YEAR, out triedYear, -1);
                 if (triedYear == curYear) return true;
                 xn.access.ActorAccess.GetData(__instance).set(KEY_BREAK_TRIED_YEAR, curYear);
+                Debug.Log("[XN S2] BreakthroughJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
                 __result = "job_xn_breakthrough";
                 return false;
             }
