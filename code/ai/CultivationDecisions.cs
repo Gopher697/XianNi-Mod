@@ -285,7 +285,7 @@ namespace cultivation.ai
             RegisterEntryTask(TaskCondenseRootEntry, DecisionCondenseRoot, "ui/icon/lingqiadd", JobCondenseRoot);
             RegisterDirectTask(TaskIntentComprehendEntry, DecisionIntentComprehend, "trair/intent_01_extreme", JobIntentComprehend);
             RegisterEntryTask(TaskDemonicHuntEntry, DecisionDemonicHunt, "trair/path_01_demonic", JobDemonicHunt);
-            RegisterEntryTask(TaskTianyunziEntry, DecisionTianyunzi, "acots/skin/tianyunzi", JobTianyunzi);
+            RegisterDirectTask(TaskTianyunziEntry, DecisionTianyunzi, "acots/skin/tianyunzi", JobTianyunzi);
             RegisterEntryTask(TaskAncientBreakthroughEntry, DecisionAncientBreakthrough, IconAncientBreakthrough, JobBreakthrough);
             RegisterEntryTask(TaskBeastBreakthroughEntry, DecisionBeastBreakthrough, IconBeastBreakthrough, JobBreakthrough);
         }
@@ -1052,7 +1052,7 @@ namespace cultivation.ai
                 return false;
             }
 
-            Debug.Log("[XN S2] " + DecisionTianyunzi + " launch check PASS actor=" +
+            Debug.Log("[XN S3] " + DecisionTianyunzi + " launch check PASS actor=" +
                 GetActorDataName(actor) + " realm=" + GetCurrentRealmIndex(actor));
             return true;
         }

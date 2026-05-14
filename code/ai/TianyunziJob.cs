@@ -38,6 +38,18 @@ namespace cultivation.ai
             task.addBeh(new BehFindAndAttackTarget());
             task.addBeh(new AiBehaviours.BehRestartTask());
         }
+        private static bool ActorHasNativeTianyunziDecision(Actor actor)
+        {
+            if (actor == null || actor.decisions == null) return false;
+            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var decision = actor.decisions[i];
+                if (decision != null && decision.id == "xn_decision_tianyunzi")
+                    return true;
+            }
+            return false;
+        }
         private class BehFindAndAttackTarget : BehaviourActionActor
         {
             public override BehResult execute(Actor pActor)
@@ -121,6 +133,9 @@ namespace cultivation.ai
             [HarmonyPrefix]
             private static bool Prefix(Actor __instance, ref string __result)
             {
+                // Stage 3b: if native decision is attached, let BehSetDirectJob handle it.
+                if (ActorHasNativeTianyunziDecision(__instance)) return true;
+
                 if (__instance == null || !__instance.isAlive()) return true;
                 int isTianyunzi;
                 xn.access.ActorAccess.GetData(__instance).get(KEY_TYZ_FLAG, out isTianyunzi, 0);
@@ -132,7 +147,8 @@ namespace cultivation.ai
                 xn.access.ActorAccess.GetData(__instance).get("xn.trial.active", out trialActive, 0);
                 if (trialActive == 1) return true;
                 RegisterJob();
-                Debug.Log("[XN S2] TianyunziJob prefix FIRE actor=" + xn.access.ActorAccess.GetData(__instance)?.name);
+                Debug.LogWarning("[XN S3 FALLBACK] TianyunziJob legacy prefix fired - native decision missing for actor=" +
+                    xn.access.ActorAccess.GetData(__instance)?.name);
                 __result = "job_xn_tianyunzi";
                 return false;
             }
