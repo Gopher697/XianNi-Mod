@@ -117,7 +117,7 @@ namespace xn.expand
                 _isGenerating = false;
             }
         }
-        private static string CollectActorData(Actor actor)
+        internal static string CollectActorData(Actor actor)
         {
             if (actor == null || actor.isRekt())
                 return T("cultivation_history_unknown_actor", "Unknown actor");
@@ -180,6 +180,7 @@ namespace xn.expand
                     jobName = FormatId(citizenJob.id);
                 sb.AppendLine(F("cultivation_history_data_job", "Occupation: {0}", jobName));
             }
+            AppendMentorshipData(actor, sb);
             sb.AppendLine(F("cultivation_history_data_kills", "Kills: {0}", xn.access.ActorAccess.GetData(actor).kills));
             sb.AppendLine(F("cultivation_history_data_births", "Births: {0}", xn.access.ActorAccess.GetData(actor).births));
             xn.access.ActorAccess.GetData(actor).get("xn.possession.taken", out int possession, 0);
@@ -229,6 +230,46 @@ namespace xn.expand
             if (xinmo > 0)
                 sb.AppendLine(F("cultivation_history_data_inner_demon", "Inner Demon: {0}", xinmo));
             return sb.ToString();
+        }
+        private static void AppendMentorshipData(Actor actor, StringBuilder sb)
+        {
+            const string KEY_MASTER_ID = "xn_men_master_id";
+            const string KEY_DISCIPLES_IDS = "xn_men_disciples_ids";
+
+            xn.access.ActorAccess.GetData(actor).get(KEY_MASTER_ID, out long masterId, 0L);
+            if (masterId > 0 && World.world != null && World.world.units != null)
+            {
+                Actor master = World.world.units.get(masterId);
+                if (master != null && !master.isRekt())
+                    sb.AppendLine(F("cultivation_history_data_master", "Master: {0}", GetActorStoryName(master)));
+            }
+
+            xn.access.ActorAccess.GetData(actor).get(KEY_DISCIPLES_IDS, out string idsStr, "");
+            if (string.IsNullOrEmpty(idsStr) || World.world == null || World.world.units == null)
+                return;
+
+            var names = new System.Collections.Generic.List<string>();
+            string[] parts = idsStr.Split(',');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!long.TryParse(parts[i], out long discipleId) || discipleId <= 0)
+                    continue;
+
+                Actor disciple = World.world.units.get(discipleId);
+                if (disciple != null && !disciple.isRekt())
+                    names.Add(GetActorStoryName(disciple));
+            }
+
+            if (names.Count > 0)
+                sb.AppendLine(F("cultivation_history_data_disciples", "Disciple(s): {0}", string.Join(T("cultivation_history_trait_separator", ", "), names)));
+        }
+        private static string GetActorStoryName(Actor actor)
+        {
+            if (actor == null) return T("value_unknown", "Unknown");
+            string baseName = xn.world.TitleSystem.GetBaseName(actor);
+            if (!string.IsNullOrEmpty(baseName)) return baseName;
+            string name = actor.getName();
+            return string.IsNullOrEmpty(name) ? T("value_unknown", "Unknown") : name;
         }
         private static string GetActorAssetDisplayName(ActorAsset actorAsset)
         {
@@ -347,7 +388,7 @@ namespace xn.expand
         private static async Task<string> GenerateHistoryFromAPI(string actorData, string apiKey)
         {
             var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
-            string systemPrompt = T("cultivation_history_system_prompt", "You are a professional cultivation (Renegade Immortal) novelist. Based on the provided character data, write a short cultivation-history story.\nRequirements:\n1. Keep it between 50 and 550 words\n2. The story should have a beginning, development, turn, and conclusion, including cultivation, breakthroughs, trials, and wandering experience\n3. Use the character's realm, traits, experiences, and other data to weave a plausible plot\n4. Use vivid, flavorful language that fits a cultivation novel\n5. Make the story complete and leave no unresolved suspense\n6. Do not repeat the raw character data; weave it naturally into the story");
+            string systemPrompt = T("cultivation_history_system_prompt", "You are a professional cultivation (Renegade Immortal) novelist. Based on the provided character data, write a short cultivation-history story.\nRequirements:\n1. Keep it between 50 and 550 words\n2. The story should have a beginning, development, turn, and conclusion, including cultivation, breakthroughs, trials, and wandering experience\n3. Use the character's realm, traits, relationships, experiences, and other data to weave a plausible plot\n4. Treat the Immortal/Devil Cultivator path as a moment of self-revelation shaped by the character's nature, Inner Demon, Comprehension, traits, and relationships; never describe it as random fate or an equal default chance\n5. Use vivid, flavorful language that fits a cultivation novel\n6. Make the story complete and leave no unresolved suspense\n7. Do not repeat the raw character data; weave it naturally into the story");
             string userPrompt = F("cultivation_history_user_prompt", "Based on the following character data, write a cultivation-history story:\n\n{0}", actorData);
             int tokenLimit = IsUsingCustomConfig() ? 8192 : 1500;
             bool useMaxCompletionTokens = xn.voice.AITextGenerator.UsesMaxCompletionTokens(model);

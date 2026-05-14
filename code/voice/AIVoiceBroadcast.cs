@@ -7,6 +7,7 @@ namespace xn.voice
     {
         private static float _lastRandomBroadcastYear = 0;
         private const float RANDOM_BROADCAST_INTERVAL = 200f; 
+        private const string FALLBACK_CULTIVATION_STORY = "Across the cultivation world, Dao hearts stir, old vows deepen, and each cultivator's nature slowly reveals the road ahead.";
         public static void Init(Harmony harmony)
         {
             harmony.PatchAll(typeof(Hook_MapBox_updateSimulation));
@@ -49,14 +50,43 @@ namespace xn.voice
                 string story;
                 if (xn.config.ModConfigHooks.EnableAITextGen)
                 {
-                    story = await AITextGenerator.GenerateCultivationStory();
+                    Actor actor = PickRandomCultivatingSapientActor();
+                    story = actor != null
+                        ? await AITextGenerator.GenerateCultivationStory(actor)
+                        : FALLBACK_CULTIVATION_STORY;
                 }
                 else
                 {
-                    story = "The cultivation world churns — Heaven's will is fickle, fate unpredictable.";
+                    story = FALLBACK_CULTIVATION_STORY;
                 }
                 AIVoiceManager.Play(story);
             }
+        }
+        private static Actor PickRandomCultivatingSapientActor()
+        {
+            if (MapBox.instance == null || MapBox.instance.units == null)
+                return null;
+
+            var list = MapBox.instance.units.getSimpleList();
+            if (list == null || list.Count == 0)
+                return null;
+
+            var candidates = new List<Actor>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                Actor actor = list[i];
+                if (actor == null || !actor.isAlive() || !actor.isSapient())
+                    continue;
+
+                xn.access.ActorAccess.GetData(actor).get("xn.stat.xiuwei", out long xiuwei, 0L);
+                if (xiuwei > 0)
+                    candidates.Add(actor);
+            }
+
+            if (candidates.Count == 0)
+                return null;
+
+            return candidates[UnityEngine.Random.Range(0, candidates.Count)];
         }
         private static async void PlayWithOptimization(string rawText, string context)
         {

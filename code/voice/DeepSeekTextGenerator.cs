@@ -159,27 +159,33 @@ namespace xn.voice
         /// <summary>
         /// Generate a short cultivation story for ambient voice broadcasts.
         /// </summary>
-        public static async Task<string> GenerateCultivationStory()
+        public static async Task<string> GenerateCultivationStory(Actor actor)
         {
+            const string fallbackStory = "Across the cultivation world, Dao hearts stir, old vows deepen, and each cultivator's nature slowly reveals the road ahead.";
+            if (actor == null || actor.isRekt())
+                return fallbackStory;
+
             if (!xn.config.ModConfigHooks.EnableAITextGen)
-                return "The cultivation world churns — Heaven's will is fickle, fate unpredictable.";
+                return fallbackStory;
 
             try
             {
                 var (endpoint, model) = GetProviderConfig();
                 string apiKey = GetAPIKey();
                 bool useMaxCompletionTokens = UsesMaxCompletionTokens(model);
+                string actorData = xn.expand.CultivationHistoryGenerator.CollectActorData(actor);
 
                 string systemPrompt =
                     "You are a narrator for a xianxia cultivation world simulation game. " +
-                    "Write vivid, immersive short stories set in a world of immortal cultivators. " +
-                    "Stories should feel authentic to the genre: breakthroughs, tribulations, rivalries, fate.";
+                    "Write vivid, immersive short stories grounded in the provided actor data. " +
+                    "Use the actor's actual traits, cultivation path, realm, relationships, and world context. " +
+                    "If the actor is an Immortal or Devil Cultivator, portray that path as self-revelation shaped by nature, Inner Demon, Comprehension, traits, and relationships, not random fate.";
 
                 string userPrompt =
-                    "Write a complete short cultivation story (100-200 words). " +
-                    "Give the protagonist a name. Include a cultivation element such as a realm " +
-                    "breakthrough, a divine treasure, a heavenly tribulation, or a fateful encounter. " +
-                    "Each story should have a unique protagonist and plot. Write in English.";
+                    "Write a complete short cultivation story (100-200 words) about this specific actor. " +
+                    "Do not invent a different protagonist. Use the provided data naturally instead of listing it. " +
+                    "Include a cultivation element such as a realm breakthrough, a divine treasure, a heavenly tribulation, mentorship, rivalry, or wandering experience. " +
+                    "Write in English.\n\nActor data:\n" + actorData;
 
                 var request = new ChatRequest
                 {
@@ -223,7 +229,7 @@ namespace xn.voice
             {
                 Debug.LogWarning($"[XN-Voice] AI story generation error: {e.Message}");
             }
-            return "The cultivation world churns — Heaven's will is fickle, fate unpredictable. The immortal road stretches on without end.";
+            return fallbackStory;
         }
 
         /// <summary>Pre-warm the AI cache with common broadcast phrases.</summary>
@@ -290,8 +296,8 @@ namespace xn.voice
     {
         public static Task<string> GenerateNaturalText(string rawText, string context = "general")
             => AITextGenerator.GenerateNaturalText(rawText, context);
-        public static Task<string> GenerateCultivationStory()
-            => AITextGenerator.GenerateCultivationStory();
+        public static Task<string> GenerateCultivationStory(Actor actor)
+            => AITextGenerator.GenerateCultivationStory(actor);
         public static Task PreGenerateCommonTexts()
             => AITextGenerator.PreGenerateCommonTexts();
         public static string FilterThinkingProcess(string response)

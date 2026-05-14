@@ -160,6 +160,12 @@ namespace xn.ui.charts
                     if (traitNames.Count > 0)
                         sb.AppendLine(T("ranking_legend_data_traits", "Traits: {0}", string.Join(", ", traitNames)));
                 }
+                xn.access.ActorAccess.GetData(actor).get("xn.stat.wuxin", out int wuxin, 0);
+                if (wuxin > 0)
+                    sb.AppendLine(T("ranking_legend_data_comprehension", "Comprehension: {0}", wuxin));
+                xn.access.ActorAccess.GetData(actor).get("xn.stat.xinmo", out int xinmo, 0);
+                if (xinmo > 0)
+                    sb.AppendLine(T("ranking_legend_data_inner_demon", "Inner Demon: {0}", xinmo));
                 if (xn.bloodline.BloodlineSystem.HasBloodline(actor))
                 {
                     string bloodlineType = xn.bloodline.BloodlineSystem.GetBloodlineType(actor);
@@ -206,7 +212,7 @@ namespace xn.ui.charts
         private static async Task<string> GenerateLegendFromAPI(string actorData, string apiKey, string previousContent = null, int currentYear = 0, int previousYear = 0)
         {
             var (endpoint, model) = xn.voice.AITextGenerator.GetProviderConfig();
-            string systemPrompt = T("ranking_legend_system_prompt", "You are a cultivation (Renegade Immortal) novelist. Based on the top three Power Ranking data, evaluate these three mighty figures.\nRequirements:\n1. Keep it between 100 and 800 words\n2. Narrate in third person and evaluate each of the three separately\n3. Use grand, sweeping language that fits a cultivation novel\n4. Comment based on their realm, power score, traits, bloodline, and other data\n5. Highlight each person's defining qualities and legendary aspects");
+            string systemPrompt = T("ranking_legend_system_prompt", "You are a cultivation (Renegade Immortal) novelist. Based on the top three Power Ranking data, evaluate these three mighty figures.\nRequirements:\n1. Keep it between 100 and 800 words\n2. Narrate in third person and evaluate each of the three separately\n3. Use grand, sweeping language that fits a cultivation novel\n4. Comment based on their realm, power score, traits, Inner Demon, Comprehension, bloodline, and other data\n5. Treat the Immortal/Devil Cultivator path as a moment of self-revelation shaped by each character's nature, Inner Demon, Comprehension, and traits; never describe it as random fate or an equal default chance\n6. Highlight each person's defining qualities and legendary aspects");
             string userPrompt;
             if (!string.IsNullOrEmpty(previousContent))
             {
