@@ -83,47 +83,10 @@ namespace cultivation.ai
             }
             return cur;
         }
-        private static bool ActorHasNativeIntentDecision(Actor actor)
-        {
-            if (actor == null || actor.decisions == null) return false;
-            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
-            for (int i = 0; i < count; i++)
-            {
-                var decision = actor.decisions[i];
-                if (decision != null && decision.id == DECISION_INTENT_COMPREHEND)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
         private static string GetActorDataName(Actor actor)
         {
             ActorData data = xn.access.ActorAccess.GetData(actor);
             return data != null ? data.name : "";
-        }
-        [HarmonyPatch(typeof(Actor), "getNextJob")]
-        private static class Patch_Actor_GetNextJob_Comprehend
-        {
-            [HarmonyPrefix]
-            private static bool Prefix(Actor __instance, ref string __result)
-            {
-                if (ActorHasNativeIntentDecision(__instance)) return true;
-                if (__instance == null || !__instance.isAlive()) return true;
-                if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance)) return true;
-                if (HasAnyIntent(__instance)) return true;
-                if (GetRealmIndex(__instance) < 4) return true;
-                int cd; xn.access.ActorAccess.GetData(__instance).get(KEY_LV_CD_UNTIL, out cd, 0);
-                if (Date.getCurrentYear() < cd) return true;
-                int active; xn.access.ActorAccess.GetData(__instance).get(KEY_LV_ACTIVE, out active, 0);
-                if (active == 1) return true;
-                RegisterJob();
-                Debug.LogWarning("[XN S3 FALLBACK] IntentComprehendJob legacy prefix fired - native decision missing for actor=" +
-                    GetActorDataName(__instance));
-                __result = "job_xn_intent_comprehend";
-                BeginComprehension(__instance);
-                return false;
-            }
         }
         [HarmonyPatch(typeof(MapBox), "Update")]
         private static class Patch_Tick_Comprehend

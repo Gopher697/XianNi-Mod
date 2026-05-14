@@ -402,49 +402,6 @@ namespace cultivation.ai
             return boost;
         }
 
-        private static bool ActorHasNativeCondenseRootDecision(Actor actor)
-        {
-            if (actor == null || actor.decisions == null) return false;
-            int count = Mathf.Min(actor.decisions_counter, actor.decisions.Length);
-            for (int i = 0; i < count; i++)
-            {
-                var decision = actor.decisions[i];
-                if (decision != null && decision.id == "xn_decision_condense_root")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        [HarmonyPatch(typeof(Actor), "getNextJob")]
-        private static class Patch_Actor_GetNextJob
-        {
-            [HarmonyPrefix]
-            private static bool Prefix(Actor __instance, ref string __result)
-            {
-                if (ActorHasNativeCondenseRootDecision(__instance)) return true;
-
-                int curYear = Date.getCurrentYear();
-                if (__instance == null || !__instance.isAlive()) return true;
-                if (__instance.kingdom == null || __instance.city == null || xn.access.ActorAccess.IsInsideBoat(__instance))
-                    return true;
-                if (xn.expand.FanjieKingdomTrait.ActorHasFanjieTrait(__instance))
-                    return true;
-                RegisterJob();
-                int ready;
-                xn.access.ActorAccess.GetData(__instance).get(KEY_CONDENSE_READY, out ready, 0);
-                if (ready != 1) return true;
-                int condenseYear;
-                xn.access.ActorAccess.GetData(__instance).get(KEY_CONDENSE_YEAR, out condenseYear, -1);
-                if (condenseYear == curYear) return true;
-                xn.access.ActorAccess.GetData(__instance).set(KEY_CONDENSE_YEAR, curYear);
-                Debug.LogWarning("[XN S3 FALLBACK] CondenseRootJob legacy prefix fired - native decision missing for actor=" +
-                    xn.access.ActorAccess.GetData(__instance)?.name);
-                __result = "job_xn_condense_root";
-                return false;
-            }
-        }
         private static string PickWeightedRootId()
         {
             int sum = 0;
