@@ -269,16 +269,7 @@ namespace cultivation.ai
                 if (__instance == null || !__instance.isAlive()) return;
                 if (__instance.asset == null) return;
 
-                bool isSapient = false;
-                for (int i = 0; i < SapientActorAssetIds.Length; i++)
-                {
-                    if (__instance.asset.id == SapientActorAssetIds[i])
-                    {
-                        isSapient = true;
-                        break;
-                    }
-                }
-                if (!isSapient) return;
+                if (!__instance.isSapient()) return;
 
                 InjectDecisionIfMissing(__instance, DecisionCondenseRoot);
                 InjectDecisionIfMissing(__instance, DecisionPathChoice);
