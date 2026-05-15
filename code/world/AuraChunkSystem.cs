@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace xn.world
     {
         public const int CHUNK_SIZE = 16;
         public const string SAVE_KEY = "xn.aura.chunks.v1";
+        public const string KEY_KINGDOM_AURA = "xn.kingdom.aura";
 
         private const int CEILING_MOUNTAINS = 120000;
         private const int CEILING_FOREST = 80000;
@@ -192,6 +194,70 @@ namespace xn.world
             return actor != null ? GetAuraForTile(actor.current_tile) : 0;
         }
 
+        public static int GetEffectiveAura(Actor actor)
+        {
+            if (actor == null)
+            {
+                return 0;
+            }
+
+            WorldTile tile = actor.current_tile;
+            if (tile == null)
+            {
+                return 0;
+            }
+
+            int chunkAura = GetAuraForTile(tile);
+            Kingdom kingdom = actor.kingdom;
+            if (kingdom == null || kingdom.isRekt())
+            {
+                return chunkAura;
+            }
+
+            int pool = GetKingdomPool(kingdom);
+            if (pool <= 0)
+            {
+                return chunkAura;
+            }
+
+            int sapients = Math.Max(1, kingdom.getPopulationPeople());
+            int kingdomBonus = Math.Min(pool / sapients, 2000);
+            return chunkAura + kingdomBonus;
+        }
+
+        public static int GetKingdomPool(Kingdom kingdom)
+        {
+            if (kingdom == null || kingdom.isRekt() || kingdom.data == null)
+            {
+                return 0;
+            }
+
+            int value;
+            kingdom.data.get(KEY_KINGDOM_AURA, out value, 0);
+            return ClampKingdomPool(kingdom, value);
+        }
+
+        public static void AddKingdomPool(Kingdom kingdom, int delta)
+        {
+            if (kingdom == null || kingdom.isRekt() || kingdom.data == null || delta == 0)
+            {
+                return;
+            }
+
+            long next = (long)GetKingdomPool(kingdom) + delta;
+            kingdom.data.set(KEY_KINGDOM_AURA, ClampKingdomPool(kingdom, next));
+        }
+
+        public static void DeductKingdomPool(Kingdom kingdom, int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            AddKingdomPool(kingdom, -amount);
+        }
+
         public static void DeductAuraAtTile(WorldTile tile, int amount)
         {
             if (tile == null || amount <= 0)
@@ -256,11 +322,12 @@ namespace xn.world
                 return;
             }
 
+            HashSet<City> kingdomPoolCities = new HashSet<City>();
             for (int cy = 0; cy < _gridH; cy++)
             {
                 for (int cx = 0; cx < _gridW; cx++)
                 {
-                    int gain = ComputeChunkGeneration(cx, cy, year);
+                    int gain = ComputeChunkGeneration(cx, cy, year, kingdomPoolCities);
                     AddChunkAura(cx, cy, gain);
                 }
             }
@@ -300,7 +367,7 @@ namespace xn.world
             return (int)total;
         }
 
-        private static int ComputeChunkGeneration(int cx, int cy, int year)
+        private static int ComputeChunkGeneration(int cx, int cy, int year, HashSet<City> kingdomPoolCities)
         {
             int terrainBase = GetTerrainBase(cx, cy);
             if (GetChunkCeiling(cx, cy) <= 0)
@@ -313,7 +380,7 @@ namespace xn.world
 
             int vegetationScore = ComputeVegetationScore(cx, cy);
             int wildlifeScore = ComputeWildlifeScore(cx, cy);
-            int livingScore = ComputeCityLivingScore(cx, cy);
+            int livingScore = ComputeCityLivingScore(cx, cy, cycleMultiplier, kingdomPoolCities);
             int livingTotal = (int)((vegetationScore + wildlifeScore + livingScore) * cycleMultiplier);
             return terrainBase + livingTotal;
         }
@@ -435,7 +502,7 @@ namespace xn.world
             return animalCount * 3;
         }
 
-        private static int ComputeCityLivingScore(int cx, int cy)
+        private static int ComputeCityLivingScore(int cx, int cy, float cycleMultiplier, HashSet<City> kingdomPoolCities)
         {
             City chunkCity = GetChunkCity(cx, cy);
             if (chunkCity == null || chunkCity.isRekt())
@@ -450,6 +517,8 @@ namespace xn.world
             }
 
             int livingScore = 0;
+            int kingdomGain = 0;
+            bool creditKingdomPool = kingdomPoolCities != null && kingdomPoolCities.Add(chunkCity);
             foreach (Actor actor in kingdom.units)
             {
                 if (actor == null || !actor.isAlive() || actor.city != chunkCity)
@@ -464,14 +533,28 @@ namespace xn.world
                     data.get("xn.stat.xiuwei", out xiuwei, 0L);
                 }
 
+                bool sapient = actor.isSapient();
+                int contribution = 0;
                 if (xiuwei <= 0)
                 {
-                    livingScore += actor.isSapient() ? 2 : 0;
+                    contribution = sapient ? 2 : 0;
                 }
                 else
                 {
-                    livingScore += GetCultivatorGeneration(actor);
+                    contribution = GetCultivatorGeneration(actor);
                 }
+
+                livingScore += contribution;
+                if (creditKingdomPool && sapient)
+                {
+                    kingdomGain += contribution;
+                }
+            }
+
+            if (creditKingdomPool && kingdomGain > 0)
+            {
+                int cycledGain = (int)(kingdomGain * cycleMultiplier);
+                AddKingdomPool(kingdom, cycledGain);
             }
 
             return livingScore;
@@ -536,6 +619,37 @@ namespace xn.world
         private static int ClampAuraForChunk(int cx, int cy, int value)
         {
             return Mathf.Clamp(value, 0, GetChunkLimit(cx, cy));
+        }
+
+        private static int ClampKingdomPool(Kingdom kingdom, long value)
+        {
+            int cap = GetKingdomPoolCap(kingdom);
+            if (cap <= 0 || value <= 0L)
+            {
+                return 0;
+            }
+            if (value >= cap)
+            {
+                return cap;
+            }
+
+            return (int)value;
+        }
+
+        private static int GetKingdomPoolCap(Kingdom kingdom)
+        {
+            if (kingdom == null || kingdom.isRekt())
+            {
+                return 0;
+            }
+
+            int xiuzhenLevel = xn.world.XiuzhenguoSystem.GetLevel(kingdom);
+            if (xiuzhenLevel > 0)
+            {
+                return xn.world.XiuzhenguoSystem.GetMaxAura(kingdom);
+            }
+
+            return Mathf.Max(0, xn.config.ModConfigHooks.MaxKingdomAura);
         }
 
         private static int GetXiuzhenAuraMax(int cx, int cy)

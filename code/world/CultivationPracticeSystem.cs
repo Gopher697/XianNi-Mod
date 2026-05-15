@@ -179,10 +179,10 @@ namespace xn.world
             c = a.city;
             if (c == null || c.data == null) return;
             WorldTile actorTile = a.current_tile;
-            int aura = AuraChunkSystem.GetAuraForTile(actorTile);
+            int aura = AuraChunkSystem.GetEffectiveAura(a);
             if (aura <= 600) return; 
             int cost = UnityEngine.Random.Range(1, 151);
-            AuraChunkSystem.DeductAuraAtTile(actorTile, cost);
+            DeductEffectiveAura(a, actorTile, cost, aura);
             c.data.set(KEY_CITY_ROOT_USED, used + 1);
             xn.access.ActorAccess.GetData(a).set(KEY_CONDENSE_READY, 1);
         }
@@ -307,7 +307,7 @@ namespace xn.world
                 ClearBreakthroughCapYear(a);
                 xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
             }
-            int aura = AuraChunkSystem.GetAuraForTile(actorTile);
+            int aura = AuraChunkSystem.GetEffectiveAura(a);
             if (aura <= 0) return;
             int wx;
             xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
@@ -346,9 +346,28 @@ namespace xn.world
             if (appliedGain > 0)
             {
                 int consumed = Mathf.Clamp((int)Math.Ceiling(appliedGain / (double)coeff), 1, aura);
-                AuraChunkSystem.DeductAuraAtTile(actorTile, consumed);
+                DeductEffectiveAura(a, actorTile, consumed, aura);
             }
             RefreshRootCoeffAnnual(a);
+        }
+
+        private static void DeductEffectiveAura(Actor actor, WorldTile actorTile, int amount, int effectiveAura)
+        {
+            if (actorTile == null || amount <= 0 || effectiveAura <= 0)
+            {
+                return;
+            }
+
+            int chunkAura = AuraChunkSystem.GetAuraForTile(actorTile);
+            float chunkFraction = Mathf.Clamp01(chunkAura / (float)effectiveAura);
+            int chunkCost = Mathf.Clamp((int)(amount * chunkFraction), 0, amount);
+            int poolCost = amount - chunkCost;
+
+            AuraChunkSystem.DeductAuraAtTile(actorTile, chunkCost);
+            if (poolCost > 0)
+            {
+                AuraChunkSystem.DeductKingdomPool(actor != null ? actor.kingdom : null, poolCost);
+            }
         }
 
         private static void StampBreakthroughCapYear(Actor a, int curYear)

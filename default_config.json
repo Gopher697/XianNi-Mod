@@ -103,6 +103,12 @@
       "Callback": "xn.config.ModConfigHooks:OnXiuzhenguoAuraLimitSwitchChanged"
     },
     {
+      "Id": "xn_config_max_kingdom_aura",
+      "Type": "TEXT",
+      "TextVal": "500000",
+      "Callback": "xn.config.ModConfigHooks:OnMaxKingdomAuraChanged"
+    },
+    {
       "Id": "xn_config_ancient_beast_multiplier",
       "Type": "INT_SLIDER",
       "IntVal": 1,

@@ -403,6 +403,8 @@
   "xn_config_enable_building_protection Description": "開啟後，小人建造的建築無法受到傷害或摧毀（除了本mod的遺跡建築）。遺跡建築始終可以手動摧毀。",
   "xn_config_enable_xiuzhenguo_aura_limit": "修真國靈氣限制",
   "xn_config_enable_xiuzhenguo_aura_limit Description": "開啟時修真國等級會限制領地區塊靈氣上限。建議開啟以保持平衡。",
+  "xn_config_max_kingdom_aura": "普通王國靈氣池上限",
+  "xn_config_max_kingdom_aura Description": "非修真國可儲存的集體靈氣上限。修真國使用自身等級上限。",
   "xn_config_ancient_beast_multiplier": "古神妖獸增長倍率",
   "xn_config_ancient_beast_multiplier Description": "增長倍率，默認1倍，最大10000倍。",
   "xn_config_enable_broadcast_display": "刷屏或播報顯示",

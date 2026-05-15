@@ -640,6 +640,8 @@
   "xn_config_enable_bomb_skills Description": "When ON, realm-level attacks trigger all skill types. When OFF, only Lightning and Meteor are retained; Grenades, Bombs, Bowling Balls, Heat Rays, and Antimatter Bombs will no longer trigger.",
   "xn_config_enable_xiuzhenguo_aura_limit": "Kingdom Qi Limit",
   "xn_config_enable_xiuzhenguo_aura_limit Description": "If on, cultivation kingdom rank caps Qi in territorial chunks. Recommended for balance.",
+  "xn_config_max_kingdom_aura": "Max Kingdom Qi Pool",
+  "xn_config_max_kingdom_aura Description": "Maximum collective Qi stored by non-cultivation kingdoms. Cultivation kingdoms use their rank cap instead.",
   "xn_config_ancient_beast_multiplier": "Ancient/Beast Growth Rate",
   "xn_config_ancient_beast_multiplier Description": "Growth multiplier. Default 1x, Max 10000x.",
   "xn_config_disable_condense": "Disable Condensation",

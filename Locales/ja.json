@@ -403,6 +403,8 @@
   "xn_config_enable_building_protection Description": "ユニットが建てた建築物が破壊されなくなる（遺跡を除く）。",
   "xn_config_enable_xiuzhenguo_aura_limit": "修真国の霊気制限",
   "xn_config_enable_xiuzhenguo_aura_limit Description": "オンにすると修真国ランクが領地区画の霊気上限を制限する。バランスのため推奨。",
+  "xn_config_max_kingdom_aura": "通常王国の霊気プール上限",
+  "xn_config_max_kingdom_aura Description": "修真国ではない王国が蓄えられる集合霊気の上限。修真国はランク上限を使用する。",
   "xn_config_ancient_beast_multiplier": "古神・妖獣の成長倍率",
   "xn_config_ancient_beast_multiplier Description": "成長速度の倍率設定（最大10000倍）。",
   "xn_config_enable_broadcast_display": "アナウンス表示",

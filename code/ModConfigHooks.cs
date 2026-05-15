@@ -154,6 +154,15 @@ namespace xn.config
         {
             EnableXiuzhenguoAuraLimit = v;
         }
+        public static int MaxKingdomAura = 500000;
+        public static void OnMaxKingdomAuraChanged(string val)
+        {
+            int v;
+            if (!int.TryParse(val, out v)) v = 500000;
+            if (v < 0) v = 0;
+            if (v > 1_000_000_000) v = 1_000_000_000;
+            MaxKingdomAura = v;
+        }
         // Legacy no-op callbacks for retired city aura config entries that may remain in user config files.
         public static void OnCityAuraMaxChanged(string val) { }
         public static void OnCityAuraRefreshYearsChanged(string val) { }

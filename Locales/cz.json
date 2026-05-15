@@ -591,6 +591,8 @@
   "xn_config_enable_bomb_skills Description": "开启后境界攻击触发全部技能；关闭后只保留闪电和陨石，手雷/炸弹/保龄球/灼热射线/反物质炸弹不再触发。",
   "xn_config_enable_xiuzhenguo_aura_limit": "修真国灵气限制",
   "xn_config_enable_xiuzhenguo_aura_limit Description": "开启时修真国等级会限制领地区块灵气上限。建议开启以保持平衡。",
+  "xn_config_max_kingdom_aura": "普通王国灵气池上限",
+  "xn_config_max_kingdom_aura Description": "非修真国可储存的集体灵气上限。修真国使用自身等级上限。",
   "xn_config_ancient_beast_multiplier": "古神妖兽增长倍率",
   "xn_config_ancient_beast_multiplier Description": "增长倍率，默认1倍，最大10000倍。",
   "xn_config_disable_condense": "禁止凝聚",
