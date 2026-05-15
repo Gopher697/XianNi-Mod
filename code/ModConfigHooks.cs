@@ -4,8 +4,6 @@ namespace xn.config
     public static class ModConfigHooks
     {
         public static bool EnableLog = true;
-        public static int MaxCityAura = 10000;
-        public static int CityAuraRefreshYears = 30;
         public static bool EnableAnimation = true;
         public static int AutoFavRealmGate = 1;
         public static int TianyunIntervalYears = 15;
@@ -24,44 +22,12 @@ namespace xn.config
         {
             EnableLog = pUpdatedValue;
         }
-        public static void OnCityAuraMaxChanged(string pUpdatedValue)
-        {
-            if (string.IsNullOrEmpty(pUpdatedValue))
-            {
-                MaxCityAura = 10000;
-                return;
-            }
-            int value;
-            if (!int.TryParse(pUpdatedValue, out value))
-            {
-                MaxCityAura = 10000;
-                return;
-            }
-            if (value <= 0)
-            {
-                MaxCityAura = 10000;
-                return;
-            }
-            if (value > 100000000)
-            {
-                value = 100000000;
-            }
-            MaxCityAura = value;
-        }
         public static void OnAutoFavRealmGateChanged(string val)
         {
             int v;
             if (!int.TryParse(val, out v)) { AutoFavRealmGate = 1; return; } 
             if (v < 0 || v > 13) { AutoFavRealmGate = 0; return; } 
             AutoFavRealmGate = v;
-        }
-        public static void OnCityAuraRefreshYearsChanged(string val)
-        {
-            int years;
-            if (!int.TryParse(val, out years)) years = 30;
-            if (years < 0) years = 0; 
-            CityAuraRefreshYears = years;
-            xn.world.CityAuraSystem.RefreshAllCityAura(null);
         }
          public static void OnTianyunYearsChanged(string val)
         {
@@ -187,7 +153,6 @@ namespace xn.config
         public static void OnXiuzhenguoAuraLimitSwitchChanged(bool v)
         {
             EnableXiuzhenguoAuraLimit = v;
-            xn.world.CityAuraSystem.RefreshAllCityAura(null);
         }
         public static void OnAnimationSwitchChanged(bool pUpdatedValue)
         {

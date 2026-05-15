@@ -59,18 +59,6 @@
   ],
   "xn_config_cultivation": [
     {
-      "Id": "xn_config_city_aura_max",
-      "Type": "TEXT",
-      "TextVal": "10000",
-      "Callback": "xn.config.ModConfigHooks:OnCityAuraMaxChanged"
-    },
-    {
-      "Id": "xn_config_city_aura_refresh_years",
-      "Type": "TEXT",
-      "TextVal": "30",
-      "Callback": "xn.config.ModConfigHooks:OnCityAuraRefreshYearsChanged"
-    },
-    {
       "Id": "xn_config_auto_fav_realm_gate",
       "Type": "TEXT",
       "TextVal": "1",

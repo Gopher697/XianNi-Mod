@@ -26,7 +26,6 @@ namespace xn.newbie
                 new NewbieGuideStep { Content = "xn_guide_tournament", HighlightButton = xn.ui.XNModTab.BtnTournament?.gameObject },
                 new NewbieGuideStep { Content = "xn_guide_brushes" },
                 new NewbieGuideStep { Content = "xn_guide_cfg_log", HighlightButton = settings },
-                new NewbieGuideStep { Content = "xn_guide_cfg_aura", HighlightButton = settings },
                 new NewbieGuideStep { Content = "xn_guide_cfg_fav", HighlightButton = settings },
                 new NewbieGuideStep { Content = "xn_guide_cfg_tianyun", HighlightButton = settings },
                 new NewbieGuideStep { Content = "xn_guide_cfg_anim", HighlightButton = settings },

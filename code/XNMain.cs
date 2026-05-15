@@ -91,7 +91,8 @@ namespace xn
         {
             var city = SelectedMetas.selected_city;
             if (city == null || __instance == null) return;
-            int aura; city.data.get(xn.world.CityAuraSystem.KeyAura, out aura, 0);
+            WorldTile tile = city.getTile(false);
+            int aura = xn.world.AuraChunkSystem.GetAuraForTile(tile);
             if (_pStatsContainer == null)
                 _pStatsContainer = AccessTools.Property(typeof(StatsWindow), "stats_rows_container");
             var container = _pStatsContainer?.GetValue(__instance, null) as StatsRowsContainer;

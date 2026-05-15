@@ -14,7 +14,6 @@ namespace cultivation.ai
         private const string KEY_CONDENSE_YEAR = "xn.root.condense_year";   
         private const string KEY_COEFF = "xn.root.coeff";                     
         private const string KEY_NEXT_TRY_YEAR = "xn.root.next_try_year";   
-        private const string KEY_CITY_AURA = "xn.city.aura";                 
         private const string KEY_CITY_ROOT_USED = "xn.city.root.try_used";  
         private const string KEY_CONDENSE_RESULT = "xn.root.condense_result"; 
         private const string KEY_CONDENSE_ID = "xn.root.condense_id";         
@@ -165,9 +164,6 @@ namespace cultivation.ai
             if (HasAnySpiritRoot(a) || HasAnyAncientInheritance(a) || HasTraitId(a, "path_03_beast")) return;
             City c = a.city;
             if (c == null || c.data == null) return;
-            int aura;
-            c.data.get(KEY_CITY_AURA, out aura, 0);
-            if (aura < 0) return;
 
             int age = GetActorAge(a);
             float ageSuccessModifier = GetAgeSuccessModifier(age);

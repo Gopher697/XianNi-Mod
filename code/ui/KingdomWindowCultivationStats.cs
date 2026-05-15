@@ -108,7 +108,7 @@ namespace xn.ui
         {
             var row = xn.access.StatsRowsContainerAccess.GetStatRow(container, "xn_kingdom_aura_sum");
             if (row == null) return;
-            int auraSum = CityAuraSystem.SumAuraFromKingdom(kingdom);
+            int auraSum = AuraChunkSystem.SumAuraForKingdom(kingdom);
             string title = T("row_xn_kingdom_aura_sum", "Total Kingdom Aura");
             row.name_text.text = title;
             row.value.text = auraSum.ToString();

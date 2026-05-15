@@ -6,7 +6,6 @@ namespace xn.ui
     {
         private static readonly string _currentPowerId = "xn_aura_add_brush";
         private static PowerButton _powerButton = null;
-        private const string KEY_CITY_AURA = "xn.city.aura";
         private static bool _isDecreaseMode = false;
         public static bool IsDecreaseMode => _isDecreaseMode;
         private static AuraAddBrushInputListener _inputListener = null;
@@ -89,42 +88,34 @@ namespace xn.ui
         private static bool ModifyAura(WorldTile pTile, bool isAdd)
         {
             if (pTile == null) return false;
-            City city = pTile.zone?.city;
-            if (city == null || city.data == null)
-            {
-                return false;
-            }
-            int maxAura = xn.config.ModConfigHooks.MaxCityAura;
-            if (maxAura <= 0) maxAura = 10000;
-            int currentAura;
-            city.data.get(KEY_CITY_AURA, out currentAura, 0);
-            string cityName = city.data.name ?? T("brush_aura_unknown_city", "Unknown City");
+            var chunk = xn.world.AuraChunkSystem.TileToChunk(pTile.x, pTile.y);
+            int maxAura = xn.world.AuraChunkSystem.GetChunkLimit(chunk.cx, chunk.cy);
+            int currentAura = xn.world.AuraChunkSystem.GetChunkAura(chunk.cx, chunk.cy);
+            string chunkName = chunk.cx + "," + chunk.cy;
             if (isAdd)
             {
                 if (currentAura >= maxAura)
                 {
-                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_at_max", "City {0} Aura has reached the limit {1}"), cityName, maxAura));
+                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_at_max", "Chunk {0} Aura has reached the limit {1}"), chunkName, maxAura));
                     return false;
                 }
                 int remaining = maxAura - currentAura;
                 int addAmount = Random.Range(1, remaining + 1);
-                int newAura = currentAura + addAmount;
-                if (newAura > maxAura) newAura = maxAura;
-                city.data.set(KEY_CITY_AURA, newAura);
-                xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_added", "City {0} Aura +{1} (Current: {2}/{3})"), cityName, addAmount, newAura, maxAura));
+                xn.world.AuraChunkSystem.AddChunkAura(chunk.cx, chunk.cy, addAmount);
+                int newAura = xn.world.AuraChunkSystem.GetChunkAura(chunk.cx, chunk.cy);
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_added", "Chunk {0} Aura +{1} (Current: {2}/{3})"), chunkName, newAura - currentAura, newAura, maxAura));
             }
             else
             {
                 if (currentAura <= 0)
                 {
-                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_zero", "City {0} Aura is already 0 and cannot be reduced"), cityName));
+                    xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_zero", "Chunk {0} Aura is already 0 and cannot be reduced"), chunkName));
                     return false;
                 }
                 int reduceAmount = Random.Range(1, currentAura + 1);
-                int newAura = currentAura - reduceAmount;
-                if (newAura < 0) newAura = 0;
-                city.data.set(KEY_CITY_AURA, newAura);
-                xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_reduced", "City {0} Aura -{1} (Current: {2}/{3})"), cityName, reduceAmount, newAura, maxAura));
+                xn.world.AuraChunkSystem.DeductChunkAura(chunk.cx, chunk.cy, reduceAmount);
+                int newAura = xn.world.AuraChunkSystem.GetChunkAura(chunk.cx, chunk.cy);
+                xn.world.BroadcastSystem.Custom(string.Format(T("brush_aura_city_reduced", "Chunk {0} Aura -{1} (Current: {2}/{3})"), chunkName, currentAura - newAura, newAura, maxAura));
             }
             return true;
         }

@@ -19,7 +19,6 @@ namespace xn.world
         private const string KEY_BREAKTHROUGH_CAP_YEAR = "xn.breakthrough.cap_year";
         private const string KEY_COEFF  = "xn.root.coeff";                  
         private const string KEY_NEXT_TRY_YEAR = "xn.root.next_try_year";   
-        private const string KEY_CITY_AURA = "xn.city.aura";                
         private const string KEY_DAOB_DAMAGED_UNTIL = "xn.daobase.damaged_until";
         private const string KEY_HALF_TATIAN_LOCKED = "xn.half_tatian.locked";    
         private const string KEY_CITY_ROOT_YEAR = "xn.city.root.try_year";
@@ -179,12 +178,11 @@ namespace xn.world
             if (UnityEngine.Random.value > attemptChance) return;
             c = a.city;
             if (c == null || c.data == null) return;
-            int aura;
-            c.data.get(KEY_CITY_AURA, out aura, 0);
+            WorldTile actorTile = a.current_tile;
+            int aura = AuraChunkSystem.GetAuraForTile(actorTile);
             if (aura <= 600) return; 
             int cost = UnityEngine.Random.Range(1, 151);
-            int newAura = Mathf.Max(0, aura - cost);
-            c.data.set(KEY_CITY_AURA, newAura);
+            AuraChunkSystem.DeductAuraAtTile(actorTile, cost);
             c.data.set(KEY_CITY_ROOT_USED, used + 1);
             xn.access.ActorAccess.GetData(a).set(KEY_CONDENSE_READY, 1);
         }
@@ -271,7 +269,8 @@ namespace xn.world
             if (HasAnyAncientInheritance(a)) return;
             int halfTatianLocked; xn.access.ActorAccess.GetData(a).get(KEY_HALF_TATIAN_LOCKED, out halfTatianLocked, 0);
             if (halfTatianLocked == 1) return;
-            if (a.city == null) return;
+            WorldTile actorTile = a.current_tile;
+            if (actorTile == null) return;
             {
                 int nextRealmIdx = NextRealmIndex(a); 
                 int curIndex = nextRealmIdx - 1;      
@@ -295,8 +294,7 @@ namespace xn.world
                 ClearBreakthroughCapYear(a);
                 xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
             }
-            int aura;
-            a.city.data.get(KEY_CITY_AURA, out aura, 0);
+            int aura = AuraChunkSystem.GetAuraForTile(actorTile);
             if (aura <= 0) return;
             int wx;
             xn.access.ActorAccess.GetData(a).get(KEY_WUXIN, out wx, 0);
@@ -331,6 +329,12 @@ namespace xn.world
                 }
             }
             xn.access.ActorAccess.GetData(a).set(KEY_XP, next);
+            long appliedGain = next - cur;
+            if (appliedGain > 0)
+            {
+                int consumed = Mathf.Clamp((int)Math.Ceiling(appliedGain / (double)coeff), 1, aura);
+                AuraChunkSystem.DeductAuraAtTile(actorTile, consumed);
+            }
             RefreshRootCoeffAnnual(a);
         }
 

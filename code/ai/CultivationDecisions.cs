@@ -67,7 +67,6 @@ namespace cultivation.ai
         private const string KeyCondenseReady = "xn.root.condense_ready";
         private const string KeyCondenseYear = "xn.root.condense_year";
         private const string KeyNextRootTryYear = "xn.root.next_try_year";
-        private const string KeyCityAura = "xn.city.aura";
         private const string KeyCityRootYear = "xn.city.root.try_year";
         private const string KeyCityRootUsed = "xn.city.root.try_used";
         private const string KeyCityRootQuota = "xn.city.root.try_quota";
@@ -1198,7 +1197,7 @@ namespace cultivation.ai
             }
 
             float weight = 2f;
-            int aura = GetCityAura(actor);
+            int aura = GetLocalAura(actor);
             weight += Mathf.Clamp(aura / 2000f, 0f, 5f);
 
             int xinmo = GetInt(actor, KeyXinmo, 0);
@@ -1257,7 +1256,7 @@ namespace cultivation.ai
                 return 0.1f;
             }
 
-            float weight = 2f + Mathf.Clamp(GetCityAura(actor) / 2000f, 0f, 5f);
+            float weight = 2f + Mathf.Clamp(GetLocalAura(actor) / 2000f, 0f, 5f);
             weight *= GetInheritanceWeight(actor);
             return Mathf.Max(0.1f, weight);
         }
@@ -1271,7 +1270,7 @@ namespace cultivation.ai
                 return 0.1f;
             }
 
-            float weight = 1.8f + Mathf.Clamp(GetCityAura(actor) / 2000f, 0f, 5f);
+            float weight = 1.8f + Mathf.Clamp(GetLocalAura(actor) / 2000f, 0f, 5f);
             int kills = GetInt(actor, KeyKillCount, 0);
             int previousKills = GetInt(actor, KeyKillPrev, 0);
             int wuxin = GetInt(actor, KeyWuxin, 0);
@@ -1290,7 +1289,7 @@ namespace cultivation.ai
                 return 0f;
             }
 
-            int aura = GetCityAura(actor);
+            int aura = GetLocalAura(actor);
             int wuxin = GetInt(actor, KeyWuxin, 0);
             float auraFactor = Mathf.Clamp((aura - 600) / 2000f, 0f, 5f);
             float wuxinFactor = Mathf.Clamp(wuxin / 100f, 0.1f, 1.5f);
@@ -1750,17 +1749,9 @@ namespace cultivation.ai
             return false;
         }
 
-        private static int GetCityAura(Actor actor)
+        private static int GetLocalAura(Actor actor)
         {
-            City city = actor != null ? actor.city : null;
-            if (city == null || city.data == null)
-            {
-                return 0;
-            }
-
-            int aura;
-            city.data.get(KeyCityAura, out aura, 0);
-            return aura;
+            return AuraChunkSystem.GetAuraForActor(actor);
         }
 
         private static bool CityHasRootQuota(Actor actor)

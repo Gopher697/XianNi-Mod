@@ -73,10 +73,6 @@ namespace xn.world
             TryPatch(mUpdate, "MapBox.Update", postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_MapBox_Update)));
             var mCultTick = AccessTools.Method(typeof(xn.world.CultivationPracticeSystem), "GainCultivationAnnual", new Type[] { typeof(Actor) });
             TryPatch(mCultTick, "CultivationPracticeSystem.GainCultivationAnnual(Actor)", prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_CultivationPractice_Tick)), postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_CultivationPractice_Tick)));
-            var mCityInit = AccessTools.Method(typeof(xn.world.CityAuraSystem), "Post_City_Init");
-            TryPatch(mCityInit, "CityAuraSystem.Post_City_Init(City)", postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_CityAura_Init)));
-            var mRefreshAura = AccessTools.Method(typeof(xn.world.CityAuraSystem), "RefreshAllCityAura", new Type[] { typeof(MapBox) });
-            TryPatch(mRefreshAura, "CityAuraSystem.RefreshAllCityAura(MapBox)", postfix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Post_RefreshAllCityAura)));
             var mFinishCapture = AccessTools.Method(typeof(City), "finishCapture", new Type[] { typeof(Kingdom) });
             TryPatch(mFinishCapture, "City.finishCapture(Kingdom)", prefix: new HarmonyMethod(typeof(XiuzhenguoSystem), nameof(Pre_City_FinishCapture)));
         }
@@ -236,7 +232,6 @@ namespace xn.world
                     {
                         TryAutoSetKing(kingdom, cfg);
                     }
-                    ApplyKingdomAuraLimit(kingdom);
                 }
             }
         }
@@ -291,17 +286,6 @@ namespace xn.world
             var cfg = GetConfig(level);
             return cfg.maxAura < 0 ? int.MaxValue : cfg.maxAura;
         }
-        public static int GetMaxKingdomAura(Kingdom k)
-        {
-            if (k == null || k.isRekt()) return 40000;
-            int level = GetLevel(k);
-            var cfg = GetConfig(level);
-            if (cfg.maxAura < 0) return int.MaxValue;
-            int cityCount = (k.cities != null) ? k.cities.Count : 1;
-            if (cityCount <= 0) cityCount = 1;
-            int maxTotal = cfg.maxAura * cityCount;
-            return maxTotal >= cfg.maxAura ? maxTotal : cfg.maxAura;
-        }
         [ThreadStatic]
         private static long _oldXP = 0;
         private const string KEY_XP = "xn.stat.xiuwei";
@@ -340,61 +324,6 @@ namespace xn.world
                 xn.access.ActorAccess.GetData(a).set(KEY_XP, newXP + extra);
             }
         }
-        public static void Post_CityAura_Init(City __instance)
-        {
-            if (__instance == null) return;
-            if (!xn.config.ModConfigHooks.EnableXiuzhenguoAuraLimit)
-            {
-                return;
-            }
-            int currentAura;
-            __instance.data.get(CityAuraSystem.KeyAura, out currentAura, 0);
-            int maxAura = 40000; 
-            Kingdom kingdom = xn.access.CityAccess.GetKingdom(__instance);
-            if (kingdom != null && !kingdom.isRekt())
-            {
-                maxAura = GetMaxAura(kingdom);
-            }
-            if (maxAura < int.MaxValue && currentAura > maxAura)
-            {
-                __instance.data.set(CityAuraSystem.KeyAura, maxAura);
-                currentAura = maxAura;
-            }
-            if (kingdom != null && !kingdom.isRekt())
-            {
-                ApplyKingdomAuraLimit(kingdom);
-            }
-        }
-        private static void ApplyKingdomAuraLimit(Kingdom k)
-        {
-            if (k == null || k.isRekt() || k.cities == null) return;
-            if (!xn.config.ModConfigHooks.EnableXiuzhenguoAuraLimit)
-            {
-                return;
-            }
-            int maxKingdomAura = GetMaxKingdomAura(k);
-            if (maxKingdomAura >= int.MaxValue) return;
-            int totalAura = 0;
-            foreach (var city in k.cities)
-            {
-                if (city == null || city.isRekt()) continue;
-                int aura;
-                city.data.get(CityAuraSystem.KeyAura, out aura, 0);
-                totalAura += aura;
-            }
-            if (totalAura > maxKingdomAura)
-            {
-                float ratio = (float)maxKingdomAura / (float)totalAura;
-                foreach (var city in k.cities)
-                {
-                    if (city == null || city.isRekt()) continue;
-                    int aura;
-                    city.data.get(CityAuraSystem.KeyAura, out aura, 0);
-                    int newAura = (int)(aura * ratio);
-                    city.data.set(CityAuraSystem.KeyAura, newAura);
-                }
-            }
-        }
         public static bool Pre_City_FinishCapture(City __instance, Kingdom pNewKingdom)
         {
             if (__instance == null || pNewKingdom == null) return true;
@@ -425,15 +354,6 @@ namespace xn.world
                 return false;
             }
             return true;
-        }
-        public static void Post_RefreshAllCityAura()
-        {
-            if (World.world == null || World.world.kingdoms == null) return;
-            foreach (var kingdom in World.world.kingdoms)
-            {
-                if (kingdom == null || kingdom.isRekt()) continue;
-                ApplyKingdomAuraLimit(kingdom);
-            }
         }
     }
 }
