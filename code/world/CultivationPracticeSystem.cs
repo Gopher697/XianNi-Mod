@@ -173,8 +173,8 @@ namespace xn.world
             xn.access.ActorAccess.GetData(a).get(KEY_NEXT_TRY_YEAR, out nextYear, 0);
             if (nextYear > curYear)
                 return;
-            int actorAge = GetActorAge(a);
-            float attemptChance = GetCondenseAttemptChance(actorAge);
+            float lifeRatio = GetActorLifeRatio(a);
+            float attemptChance = GetCondenseAttemptChance(lifeRatio);
             if (UnityEngine.Random.value > attemptChance) return;
             c = a.city;
             if (c == null || c.data == null) return;
@@ -186,6 +186,30 @@ namespace xn.world
             c.data.set(KEY_CITY_ROOT_USED, used + 1);
             xn.access.ActorAccess.GetData(a).set(KEY_CONDENSE_READY, 1);
         }
+        private static float GetActorLifeRatio(Actor a)
+        {
+            if (a == null) return 1f;
+            try { return Mathf.Clamp01(a.getAgeRatio()); }
+            catch
+            {
+                int age = GetActorAge(a);
+                BaseStats stats = xn.access.BaseSimObjectAccess.GetStats(a);
+                float lifespan = stats != null ? stats["lifespan"] : 0f;
+                if (lifespan <= 0f) return 1f;
+                return Mathf.Clamp01((float)age / lifespan);
+            }
+        }
+
+        private static float GetCondenseAttemptChance(float lifeRatio)
+        {
+            lifeRatio = Mathf.Clamp01(lifeRatio);
+            if (lifeRatio < 0.10f) return 0f;
+            if (lifeRatio < 0.15f) return 0.20f;
+            if (lifeRatio < 0.23f) return 0.80f;
+            if (lifeRatio < 0.36f) return 0.30f;
+            if (lifeRatio < 0.51f) return 0.08f;
+            return 0.01f;
+        }
         private static int GetActorAge(Actor a)
         {
             if (a == null) return 0;
@@ -195,17 +219,6 @@ namespace xn.world
                 ActorData data = xn.access.ActorAccess.GetData(a);
                 return data != null ? data.getAge() : 0;
             }
-        }
-
-        private static float GetCondenseAttemptChance(int age)
-        {
-            if (age < 10) return 0f;
-            if (age < 21) return 0.25f;
-            if (age < 41) return 0.50f;
-            if (age < 71) return 0.80f;
-            if (age < 101) return 0.50f;
-            if (age < 131) return 0.30f;
-            return 0.15f;
         }
         private static bool HasAnySpiritRoot(Actor a)
         {
