@@ -374,14 +374,14 @@ namespace xn.world
                         continue;
                     }
 
+                    BuildingAsset buildingAsset = xn.access.BuildingAccess.GetAsset(tile.building);
                     bool hasVegetationBuilding =
-                        tile.building != null &&
-                        tile.building.asset != null &&
-                        (tile.building.asset.is_vegetation ||
-                         tile.building.asset.flora ||
-                         tile.building.asset.building_type == BuildingType.Building_Tree ||
-                         tile.building.asset.building_type == BuildingType.Building_Plant ||
-                         tile.building.asset.building_type == BuildingType.Building_Fruits);
+                        buildingAsset != null &&
+                        (buildingAsset.is_vegetation ||
+                         buildingAsset.flora ||
+                         buildingAsset.building_type == BuildingType.Building_Tree ||
+                         buildingAsset.building_type == BuildingType.Building_Plant ||
+                         buildingAsset.building_type == BuildingType.Building_Fruits);
 
                     bool hasVegetatedSurface =
                         tile.top_type != null &&

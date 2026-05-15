@@ -154,6 +154,9 @@ namespace xn.config
         {
             EnableXiuzhenguoAuraLimit = v;
         }
+        // Legacy no-op callbacks for retired city aura config entries that may remain in user config files.
+        public static void OnCityAuraMaxChanged(string val) { }
+        public static void OnCityAuraRefreshYearsChanged(string val) { }
         public static void OnAnimationSwitchChanged(bool pUpdatedValue)
         {
             EnableAnimation = pUpdatedValue;
