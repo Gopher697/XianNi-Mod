@@ -16,6 +16,7 @@ namespace xn.world
         private const string KEY_LUCK = "xn.stat.qiyun";    
         private const string KEY_XP = "xn.stat.xiuwei";   
         private const string KEY_STOP   = "xn.cultivation.stop";            
+        private const string KEY_BREAKTHROUGH_CAP_YEAR = "xn.breakthrough.cap_year";
         private const string KEY_COEFF  = "xn.root.coeff";                  
         private const string KEY_NEXT_TRY_YEAR = "xn.root.next_try_year";   
         private const string KEY_CITY_AURA = "xn.city.aura";                
@@ -286,8 +287,12 @@ namespace xn.world
                 {
                     long capNow = REALM_THRESHOLDS[idx];
                     if (curXP >= capNow)
+                    {
+                        StampBreakthroughCapYear(a, curYear);
                         return; 
+                    }
                 }
+                ClearBreakthroughCapYear(a);
                 xn.access.ActorAccess.GetData(a).set(KEY_STOP, 0);
             }
             int aura;
@@ -311,17 +316,49 @@ namespace xn.world
                 if (cur >= cap)
                 {
                     xn.access.ActorAccess.GetData(a).set(KEY_STOP, 1);
+                    StampBreakthroughCapYear(a, curYear);
                     return;
                 }
                 if (next >= cap)
                 {
                     next = cap; 
                     xn.access.ActorAccess.GetData(a).set(KEY_STOP, 1); 
+                    StampBreakthroughCapYear(a, curYear);
+                }
+                else
+                {
+                    ClearBreakthroughCapYear(a);
                 }
             }
             xn.access.ActorAccess.GetData(a).set(KEY_XP, next);
             RefreshRootCoeffAnnual(a);
         }
+
+        private static void StampBreakthroughCapYear(Actor a, int curYear)
+        {
+            if (a == null || curYear <= 0) return;
+            ActorData data = xn.access.ActorAccess.GetData(a);
+            if (data == null) return;
+            int capYear;
+            data.get(KEY_BREAKTHROUGH_CAP_YEAR, out capYear, 0);
+            if (capYear <= 0 || capYear > curYear)
+            {
+                data.set(KEY_BREAKTHROUGH_CAP_YEAR, curYear);
+            }
+        }
+
+        private static void ClearBreakthroughCapYear(Actor a)
+        {
+            ActorData data = xn.access.ActorAccess.GetData(a);
+            if (data == null) return;
+            int capYear;
+            data.get(KEY_BREAKTHROUGH_CAP_YEAR, out capYear, 0);
+            if (capYear > 0)
+            {
+                data.set(KEY_BREAKTHROUGH_CAP_YEAR, 0);
+            }
+        }
+
         private static bool HasBrokenRoot(Actor a)
         {
             var list = a.getTraits();

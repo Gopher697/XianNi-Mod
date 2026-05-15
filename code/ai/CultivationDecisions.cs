@@ -60,6 +60,8 @@ namespace cultivation.ai
         private const string KeyDaoBaseDamagedUntil = "xn.daobase.damaged_until";
         private const string KeyBreakTriedYear = "xn.break.tried_year";
         private const string KeyBreakSuccessYear = "xn.break.success_year";
+        private const string KeyPathEligibleYear = "xn.path.eligible_year";
+        private const string KeyBreakthroughCapYear = "xn.breakthrough.cap_year";
         private const string KeyAncientStop = "xn.ancient.stop";
         private const string KeyBeastStop = "xn.beast.stop";
         private const string KeyCondenseReady = "xn.root.condense_ready";
@@ -1034,6 +1036,12 @@ namespace cultivation.ai
             if (xp < RealmThresholds[0])
                 return false;
 
+            int currentYear = Date.getCurrentYear();
+            if (currentYear > 0 && GetInt(actor, KeyPathEligibleYear, 0) <= 0)
+            {
+                xn.access.ActorAccess.GetData(actor).set(KeyPathEligibleYear, currentYear);
+            }
+
             Debug.Log("[XN S3] " + DecisionPathChoice + " launch check PASS actor=" + GetActorDataName(actor));
             return true;
         }
@@ -1184,6 +1192,11 @@ namespace cultivation.ai
 
         private static float WeightBreakthrough(Actor actor)
         {
+            if (!CanWeightBreakthrough(actor))
+            {
+                return 0f;
+            }
+
             float weight = 2f;
             int aura = GetCityAura(actor);
             weight += Mathf.Clamp(aura / 2000f, 0f, 5f);
@@ -1200,12 +1213,39 @@ namespace cultivation.ai
                 weight += 3f;
             }
 
-            return Mathf.Max(0.1f, weight);
+            int currentYear = Date.getCurrentYear();
+            int capYear = GetInt(actor, KeyBreakthroughCapYear, 0);
+            if (currentYear > 0 && capYear > 0 && currentYear >= capYear)
+            {
+                weight += Mathf.Clamp((currentYear - capYear) / 20f, 0f, 3f);
+            }
+
+            weight += GetThreatUrgency(actor, 2f);
+
+            return Mathf.Clamp(weight, 0.1f, 12f);
         }
 
         private static float WeightPathChoice(Actor actor)
         {
-            return 3f;
+            if (!CanWeightPathChoice(actor))
+            {
+                return 0f;
+            }
+
+            float weight = 2f;
+            int wuxin = GetInt(actor, KeyWuxin, 0);
+            weight += Mathf.Clamp(wuxin / 50f, 0f, 2f);
+
+            int currentYear = Date.getCurrentYear();
+            int eligibleYear = GetInt(actor, KeyPathEligibleYear, 0);
+            if (currentYear > 0 && eligibleYear > 0 && currentYear >= eligibleYear)
+            {
+                weight += Mathf.Clamp((currentYear - eligibleYear) / 25f, 0f, 2f);
+            }
+
+            weight += GetThreatUrgency(actor, 1.5f);
+
+            return Mathf.Clamp(weight, 0.1f, 7f);
         }
 
         private static float WeightAncientBreakthrough(Actor actor)
@@ -1245,11 +1285,143 @@ namespace cultivation.ai
 
         private static float WeightCondenseRoot(Actor actor)
         {
+            if (!CanWeightCondenseRoot(actor))
+            {
+                return 0f;
+            }
+
             int aura = GetCityAura(actor);
             int wuxin = GetInt(actor, KeyWuxin, 0);
             float auraFactor = Mathf.Clamp((aura - 600) / 2000f, 0f, 5f);
             float wuxinFactor = Mathf.Clamp(wuxin / 100f, 0.1f, 1.5f);
             return Mathf.Max(0.1f, 0.5f + auraFactor + wuxinFactor);
+        }
+
+        private static bool CanWeightBreakthrough(Actor actor)
+        {
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
+            {
+                return false;
+            }
+
+            int currentYear = Date.getCurrentYear();
+            if (GetInt(actor, KeyTrialCooldownUntil, 0) > currentYear || GetInt(actor, KeyTrialActive, 0) == 1)
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyAncientStop, 0) == 1 || GetInt(actor, KeyBeastStop, 0) == 1)
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyStop, 0) != 1)
+            {
+                return false;
+            }
+
+            int nextIndex = GetNextRealmIndex(actor);
+            if (nextIndex < 0 || nextIndex >= RealmThresholds.Length)
+            {
+                return false;
+            }
+            if (GetLong(actor, KeyXp, 0L) < RealmThresholds[nextIndex])
+            {
+                return false;
+            }
+
+            int currentRealm = GetCurrentRealmIndex(actor);
+            if (currentRealm < 0 && !HasTrait(actor, "path_01_demonic") && !HasTrait(actor, "path_02_immortal"))
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyHalfTatianLocked, 0) == 1 && currentRealm >= 14)
+            {
+                return false;
+            }
+            if (HasDaoBaseDamage(actor, currentYear))
+            {
+                return false;
+            }
+            if (currentRealm >= 1)
+            {
+                int successYear = GetInt(actor, KeyBreakSuccessYear, 0);
+                if (successYear > 0 && currentYear - successYear < GetDaoBaseCooldownYears(GetDaoBaseCode(actor)))
+                {
+                    return false;
+                }
+            }
+            if (GetInt(actor, KeyBreakTriedYear, -1) == currentYear)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool CanWeightPathChoice(Actor actor)
+        {
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
+            {
+                return false;
+            }
+            if (GetInt(actor, KeyStop, 0) != 1)
+            {
+                return false;
+            }
+            if (GetCurrentRealmIndex(actor) >= 0)
+            {
+                return false;
+            }
+            if (HasTrait(actor, "path_01_demonic") || HasTrait(actor, "path_02_immortal"))
+            {
+                return false;
+            }
+            return GetLong(actor, KeyXp, 0L) >= RealmThresholds[0];
+        }
+
+        private static bool CanWeightCondenseRoot(Actor actor)
+        {
+            if (!IsAlive(actor) || !HasCityAndKingdom(actor) || xn.access.ActorAccess.IsInsideBoat(actor))
+            {
+                return false;
+            }
+            if (xn.expand.FanjieKingdomTrait.ActorHasFanjieTrait(actor))
+            {
+                return false;
+            }
+            return GetInt(actor, KeyCondenseReady, 0) == 1;
+        }
+
+        private static float GetThreatUrgency(Actor actor, float max)
+        {
+            if (actor == null || max <= 0f)
+            {
+                return 0f;
+            }
+
+            float urgency = 0f;
+            Kingdom kingdom = actor.kingdom;
+            if (kingdom != null && kingdom.hasEnemies())
+            {
+                urgency += 0.6f;
+            }
+
+            City city = actor.city;
+            if (city != null && city.isInDanger())
+            {
+                urgency += 0.6f;
+            }
+
+            float healthRatio = actor.getHealthRatio();
+            if (healthRatio < 0.35f)
+            {
+                urgency += 0.8f;
+            }
+            else if (healthRatio < 0.60f)
+            {
+                urgency += 0.4f;
+            }
+
+            return Mathf.Clamp(urgency, 0f, max);
         }
 
         private static float WeightIntentComprehend(Actor actor)
@@ -1783,7 +1955,9 @@ namespace cultivation.ai
 
                 // Stamp tried-year before acting so the fallback patch and
                 // CanLaunchBreakthrough both see this attempt recorded.
-                xn.access.ActorAccess.GetData(actor).set(KeyBreakTriedYear, curYear);
+                ActorData data = xn.access.ActorAccess.GetData(actor);
+                data.set(KeyBreakTriedYear, curYear);
+                data.set(KeyBreakthroughCapYear, 0);
 
                 if (IsHeavenGateRealm(curRealm))
                 {
@@ -1825,7 +1999,10 @@ namespace cultivation.ai
                 // Idempotent: if path already assigned (e.g. via IncreaseXinmoAndMaybeCorrupt
                 // firing before this decision resolved), do nothing.
                 if (HasTrait(actor, "path_01_demonic") || HasTrait(actor, "path_02_immortal"))
+                {
+                    xn.access.ActorAccess.GetData(actor).set(KeyPathEligibleYear, 0);
                     return BehResult.Stop;
+                }
 
                 int xinmo = GetInt(actor, KeyXinmo, 0);
                 int wuxin = GetInt(actor, KeyWuxin, 0);
@@ -1873,6 +2050,7 @@ namespace cultivation.ai
                 // Immortal path: clear xinmo contamination
                 if (!goesDemonic)
                     xn.access.ActorAccess.GetData(actor).set(KeyXinmo, 0);
+                xn.access.ActorAccess.GetData(actor).set(KeyPathEligibleYear, 0);
 
                 Debug.Log("[XN S3] " + _decisionId + " resolved: actor=" + GetActorDataName(actor) +
                     " demonicChance=" + demonicChance.ToString("F1") + "% result=" + pathId);
