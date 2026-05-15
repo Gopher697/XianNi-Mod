@@ -359,14 +359,50 @@ namespace xn.world
             }
 
             int chunkAura = AuraChunkSystem.GetAuraForTile(actorTile);
-            float chunkFraction = Mathf.Clamp01(chunkAura / (float)effectiveAura);
+            Kingdom kingdom = actor != null ? actor.kingdom : null;
+            City city = actor != null ? actor.city : null;
+            int kingdomAura = 0;
+            if (kingdom != null && !kingdom.isRekt())
+            {
+                int kingdomPool = AuraChunkSystem.GetKingdomPool(kingdom);
+                if (kingdomPool > 0)
+                {
+                    int kingdomPop = Math.Max(1, kingdom.getPopulationPeople());
+                    kingdomAura = Math.Min(kingdomPool / kingdomPop, 2000);
+                }
+            }
+
+            int cityAura = 0;
+            if (city != null && !city.isRekt())
+            {
+                int cityPool = AuraChunkSystem.GetCityPool(city);
+                if (cityPool > 0)
+                {
+                    int cityPop = Math.Max(1, city.getPopulationPeople());
+                    cityAura = Math.Min(cityPool / cityPop, 1000);
+                }
+            }
+
+            float denominator = Mathf.Max(1f, effectiveAura);
+            float chunkFraction = Mathf.Clamp01(chunkAura / denominator);
+            float kingdomFraction = Mathf.Clamp01(kingdomAura / denominator);
             int chunkCost = Mathf.Clamp((int)(amount * chunkFraction), 0, amount);
-            int poolCost = amount - chunkCost;
+            int kingdomCost = Mathf.Clamp((int)(amount * kingdomFraction), 0, amount - chunkCost);
+            int cityCost = amount - chunkCost - kingdomCost;
+            if ((city == null || city.isRekt()) && cityCost > 0)
+            {
+                kingdomCost += cityCost;
+                cityCost = 0;
+            }
 
             AuraChunkSystem.DeductAuraAtTile(actorTile, chunkCost);
-            if (poolCost > 0)
+            if (kingdomCost > 0)
             {
-                AuraChunkSystem.DeductKingdomPool(actor != null ? actor.kingdom : null, poolCost);
+                AuraChunkSystem.DeductKingdomPool(kingdom, kingdomCost);
+            }
+            if (cityCost > 0)
+            {
+                AuraChunkSystem.DeductCityPool(city, cityCost);
             }
         }
 

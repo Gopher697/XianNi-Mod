@@ -10,6 +10,7 @@ namespace xn.world
     {
         public const int CHUNK_SIZE = 16;
         public const string SAVE_KEY = "xn.aura.chunks.v1";
+        public const string KEY_CITY_AURA = "xn.city.aura.pool";
         public const string KEY_KINGDOM_AURA = "xn.kingdom.aura";
 
         private const int CEILING_MOUNTAINS = 120000;
@@ -208,21 +209,74 @@ namespace xn.world
             }
 
             int chunkAura = GetAuraForTile(tile);
+            int kingdomBonus = 0;
             Kingdom kingdom = actor.kingdom;
-            if (kingdom == null || kingdom.isRekt())
+            if (kingdom != null && !kingdom.isRekt())
             {
-                return chunkAura;
+                int pool = GetKingdomPool(kingdom);
+                if (pool > 0)
+                {
+                    int sapients = Math.Max(1, kingdom.getPopulationPeople());
+                    kingdomBonus = Math.Min(pool / sapients, 2000);
+                }
             }
 
-            int pool = GetKingdomPool(kingdom);
-            if (pool <= 0)
+            int cityBonus = 0;
+            City city = actor.city;
+            if (city != null && !city.isRekt())
             {
-                return chunkAura;
+                int cityPool = GetCityPool(city);
+                if (cityPool > 0)
+                {
+                    int cityPop = Math.Max(1, city.getPopulationPeople());
+                    cityBonus = Math.Min(cityPool / cityPop, 1000);
+                }
             }
 
-            int sapients = Math.Max(1, kingdom.getPopulationPeople());
-            int kingdomBonus = Math.Min(pool / sapients, 2000);
-            return chunkAura + kingdomBonus;
+            return chunkAura + kingdomBonus + cityBonus;
+        }
+
+        public static int GetCityPool(City city)
+        {
+            if (city == null || city.isRekt() || city.data == null)
+            {
+                return 0;
+            }
+
+            int value;
+            city.data.get(KEY_CITY_AURA, out value, 0);
+            return ClampCityPool(city, value);
+        }
+
+        public static void AddCityPool(City city, int delta)
+        {
+            if (city == null || city.isRekt() || city.data == null || delta == 0)
+            {
+                return;
+            }
+
+            long next = (long)GetCityPool(city) + delta;
+            city.data.set(KEY_CITY_AURA, ClampCityPool(city, next));
+        }
+
+        public static void DeductCityPool(City city, int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            AddCityPool(city, -amount);
+        }
+
+        public static int GetCityPoolCap(City city)
+        {
+            if (city == null || city.isRekt())
+            {
+                return 0;
+            }
+
+            return Mathf.Max(0, xn.config.ModConfigHooks.MaxCityAura);
         }
 
         public static int GetKingdomPool(Kingdom kingdom)
@@ -518,6 +572,7 @@ namespace xn.world
 
             int livingScore = 0;
             int kingdomGain = 0;
+            int cityGain = 0;
             bool creditKingdomPool = kingdomPoolCities != null && kingdomPoolCities.Add(chunkCity);
             foreach (Actor actor in kingdom.units)
             {
@@ -545,6 +600,7 @@ namespace xn.world
                 }
 
                 livingScore += contribution;
+                cityGain += contribution;
                 if (creditKingdomPool && sapient)
                 {
                     kingdomGain += contribution;
@@ -555,6 +611,11 @@ namespace xn.world
             {
                 int cycledGain = (int)(kingdomGain * cycleMultiplier);
                 AddKingdomPool(kingdom, cycledGain);
+            }
+            if (cityGain > 0)
+            {
+                int cycledCityGain = (int)(cityGain * cycleMultiplier);
+                AddCityPool(chunkCity, cycledCityGain);
             }
 
             return livingScore;
@@ -624,6 +685,21 @@ namespace xn.world
         private static int ClampKingdomPool(Kingdom kingdom, long value)
         {
             int cap = GetKingdomPoolCap(kingdom);
+            if (cap <= 0 || value <= 0L)
+            {
+                return 0;
+            }
+            if (value >= cap)
+            {
+                return cap;
+            }
+
+            return (int)value;
+        }
+
+        private static int ClampCityPool(City city, long value)
+        {
+            int cap = GetCityPoolCap(city);
             if (cap <= 0 || value <= 0L)
             {
                 return 0;

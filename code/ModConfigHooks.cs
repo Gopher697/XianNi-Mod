@@ -163,6 +163,24 @@ namespace xn.config
             if (v > 1_000_000_000) v = 1_000_000_000;
             MaxKingdomAura = v;
         }
+        public static int MaxCityAura = 150000;
+        public static void OnCityAuraPoolMaxChanged(float val)
+        {
+            MaxCityAura = ClampAuraCap((int)val);
+        }
+        public static void OnCityAuraPoolMaxChanged(string val)
+        {
+            int v;
+            if (!int.TryParse(val, out v)) v = 150000;
+            MaxCityAura = ClampAuraCap(v);
+        }
+        private static int ClampAuraCap(int value)
+        {
+            int v = value;
+            if (v < 0) v = 0;
+            if (v > 1_000_000_000) v = 1_000_000_000;
+            return v;
+        }
         // Legacy no-op callbacks for retired city aura config entries that may remain in user config files.
         public static void OnCityAuraMaxChanged(string val) { }
         public static void OnCityAuraRefreshYearsChanged(string val) { }
@@ -218,6 +236,15 @@ namespace xn.config
             if (config == null) return;
             try
             {
+                try
+                {
+                    var maxCityAuraItem = config["xn_config_cultivation"]["MaxCityAura"];
+                    if (maxCityAuraItem != null && !string.IsNullOrEmpty(maxCityAuraItem.TextVal))
+                    {
+                        OnCityAuraPoolMaxChanged(maxCityAuraItem.TextVal);
+                    }
+                }
+                catch (System.Collections.Generic.KeyNotFoundException) { }
                 try
                 {
                     var apiKeyItem = config["xn_config_ai"]["xn_config_custom_ai_api_key"];

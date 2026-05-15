@@ -109,6 +109,12 @@
       "Callback": "xn.config.ModConfigHooks:OnMaxKingdomAuraChanged"
     },
     {
+      "Id": "MaxCityAura",
+      "Type": "TEXT",
+      "TextVal": "150000",
+      "Callback": "xn.config.ModConfigHooks:OnCityAuraPoolMaxChanged"
+    },
+    {
       "Id": "xn_config_ancient_beast_multiplier",
       "Type": "INT_SLIDER",
       "IntVal": 1,
