@@ -142,11 +142,19 @@ namespace xn.fx
 
             if (texture == null)
             {
-                Texture2D placeholder = new Texture2D(1, 1);
-                placeholder.SetPixel(0, 0, new Color(1f, 0.75f, 0.2f, 0.18f));
-                placeholder.Apply();
-                texture = placeholder;
-                Debug.Log("[XN] AuraChunkFX: amber texture not found, using placeholder");
+                Texture2D noise = new Texture2D(64, 64, TextureFormat.RGBA32, false);
+                noise.wrapMode = TextureWrapMode.Repeat;
+                float scale = 4f;
+                for (int y = 0; y < 64; y++)
+                {
+                    for (int x = 0; x < 64; x++)
+                    {
+                        float n = Mathf.PerlinNoise(x / 64f * scale, y / 64f * scale);
+                        noise.SetPixel(x, y, new Color(1f, 0.70f + n * 0.20f, 0.05f + n * 0.15f, 0.5f + n * 0.5f));
+                    }
+                }
+                noise.Apply();
+                texture = noise;
             }
 
             _material.SetTexture("_MainTex", texture);
