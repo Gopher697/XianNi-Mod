@@ -44,21 +44,34 @@ namespace xn.assets
             {
                 return;
             }
-            if (AssetManager.resources.get(LingshiResourceId) != null)
+            ResourceAsset existing = AssetManager.resources.get(LingshiResourceId);
+            if (existing != null)
             {
+                Configure(existing);
                 _registered = true;
                 return;
             }
 
-            AssetManager.resources.add(new ResourceAsset
+            ResourceAsset asset = new ResourceAsset
             {
                 id = LingshiResourceId,
                 path_icon = "iconResGold",
-                path_gameplay_sprite = "gold",
-                full_sprite_path = "items/resources/gold",
                 type = ResType.Currency
-            });
+            };
+            Configure(asset);
+            AssetManager.resources.add(asset);
             _registered = true;
+        }
+
+        private static void Configure(ResourceAsset asset)
+        {
+            if (asset == null)
+            {
+                return;
+            }
+
+            asset.path_gameplay_sprite = "stats/lingshi";
+            asset.full_sprite_path = "stats/lingshi";
         }
     }
 }
