@@ -12,9 +12,12 @@ namespace xn.fx
         internal const int OverlaySortingOrder = 200;
 
         private static bool _initialized;
-        private static Sprite _auraSprite;
+        private static Sprite[] _auraFrames;
         private static GameObject _root;
         private static int _lastUpdateFrame = -1;
+        private static int _currentFrame;
+        private static float _nextFrameAt;
+        private const float FrameInterval = 0.25f;
         private static Harmony _harmony;
         private static readonly List<AuraQuad> _quads = new List<AuraQuad>();
 
@@ -24,7 +27,7 @@ namespace xn.fx
                 return;
 
             _initialized = true;
-            GetOrCreateAuraSprite();
+            GetOrCreateAuraFrames();
             EnsureRoot();
             PatchRebuildHooks();
             Rebuild();
@@ -53,7 +56,7 @@ namespace xn.fx
                     GameObject child = new GameObject($"XN_AuraChunkFX_{cx}_{cy}");
                     child.transform.SetParent(_root.transform, false);
                     child.transform.position = centerTile.posV3;
-                    child.transform.localScale = new Vector3(quadScale, quadScale, 1f);
+                    child.transform.localScale = new Vector3(quadScale * 1.1f, quadScale * 1.1f, 1f);
 
                     AuraQuad quad = new AuraQuad
                     {
@@ -63,7 +66,7 @@ namespace xn.fx
                     };
 
                     SpriteRenderer renderer = child.AddComponent<SpriteRenderer>();
-                    renderer.sprite = GetOrCreateAuraSprite();
+                    renderer.sprite = GetOrCreateAuraFrames()[0];
                     renderer.color = new Color(1f, 0.75f, 0.2f, 0f);
                     renderer.sortingLayerName = OverlaySortingLayer;
                     renderer.sortingOrder = OverlaySortingOrder;
@@ -75,27 +78,50 @@ namespace xn.fx
             }
         }
 
-        private static Sprite GetOrCreateAuraSprite()
+        private static Sprite[] GetOrCreateAuraFrames()
         {
-            if (_auraSprite != null)
-                return _auraSprite;
-
+            if (_auraFrames != null) return _auraFrames;
             const int size = 64;
-            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            tex.wrapMode = TextureWrapMode.Repeat;
-            const float noiseScale = 4f;
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float n = Mathf.PerlinNoise(x / (float)size * noiseScale, y / (float)size * noiseScale);
-                    tex.SetPixel(x, y, new Color(1f, 0.85f + n * 0.15f, 0.3f + n * 0.2f, 1f));
-                }
-            }
+            const int frameCount = 8;
+            const float noiseScale = 3.5f;
+            float edgeRadius = size * 0.22f;
 
-            tex.Apply();
-            _auraSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
-            return _auraSprite;
+            _auraFrames = new Sprite[frameCount];
+            for (int f = 0; f < frameCount; f++)
+            {
+                float offsetX = f * 0.18f;
+                float offsetY = f * 0.13f;
+                Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float n = Mathf.PerlinNoise(
+                            offsetX + x / (float)size * noiseScale,
+                            offsetY + y / (float)size * noiseScale);
+
+                        float edgeDist = Mathf.Min(
+                            Mathf.Min(x, size - 1 - x),
+                            Mathf.Min(y, size - 1 - y));
+                        float edgeFade = Mathf.Clamp01(edgeDist / edgeRadius);
+                        edgeFade = edgeFade * edgeFade;
+
+                        tex.SetPixel(x, y, new Color(
+                            1f,
+                            0.82f + n * 0.18f,
+                            0.15f + n * 0.25f,
+                            edgeFade));
+                    }
+                }
+                tex.Apply();
+                _auraFrames[f] = Sprite.Create(
+                    tex,
+                    new Rect(0, 0, size, size),
+                    new Vector2(0.5f, 0.5f),
+                    size);
+            }
+            return _auraFrames;
         }
 
         private static void EnsureRoot()
@@ -172,6 +198,18 @@ namespace xn.fx
             if (_quads.Count == 0)
                 return;
 
+            if (Time.time >= _nextFrameAt)
+            {
+                _nextFrameAt = Time.time + FrameInterval;
+                _currentFrame = (_currentFrame + 1) % GetOrCreateAuraFrames().Length;
+                Sprite frame = GetOrCreateAuraFrames()[_currentFrame];
+                for (int i = 0; i < _quads.Count; i++)
+                {
+                    if (_quads[i].spriteRenderer != null)
+                        _quads[i].spriteRenderer.sprite = frame;
+                }
+            }
+
             if (Time.frameCount == _lastUpdateFrame || Time.frameCount % 30 != 0)
                 return;
 
@@ -189,7 +227,7 @@ namespace xn.fx
                 int aura = AuraChunkSystem.GetChunkAura(quad.cx, quad.cy);
                 int ceiling = AuraChunkSystem.GetChunkCeiling(quad.cx, quad.cy);
                 float fill = ceiling > 0 ? Mathf.Clamp01((float)aura / ceiling) : 0f;
-                float alpha = Mathf.Pow(fill, 0.5f) * 0.15f;
+                float alpha = Mathf.Pow(fill, 0.5f) * 0.08f;
                 ApplySpriteAlpha(quad, alpha);
             }
         }
