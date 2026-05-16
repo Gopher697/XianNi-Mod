@@ -20,6 +20,7 @@ namespace xn.world
         private const string KEY_COEFF  = "xn.root.coeff";                  
         private const string KEY_NEXT_TRY_YEAR = "xn.root.next_try_year";   
         private const string KEY_DAOB_DAMAGED_UNTIL = "xn.daobase.damaged_until";
+        private const string KEY_LINGSHI_PENDING_XP = "xn.stat.lingshi_pending_xp";
         private const string KEY_HALF_TATIAN_LOCKED = "xn.half_tatian.locked";    
         private const string KEY_CITY_ROOT_YEAR = "xn.city.root.try_year";
         private const string KEY_CITY_ROOT_USED = "xn.city.root.try_used";
@@ -278,6 +279,7 @@ namespace xn.world
                     return;
                 }
             }
+            ConsumePendingLingshiXp(a);
             if (HasTraitId(a, "path_03_beast")) return;
             if (HasAnyAncientInheritance(a)) return;
             int halfTatianLocked; xn.access.ActorAccess.GetData(a).get(KEY_HALF_TATIAN_LOCKED, out halfTatianLocked, 0);
@@ -349,6 +351,29 @@ namespace xn.world
                 DeductEffectiveAura(a, actorTile, consumed, aura);
             }
             RefreshRootCoeffAnnual(a);
+        }
+
+        private static void ConsumePendingLingshiXp(Actor a)
+        {
+            ActorData data = xn.access.ActorAccess.GetData(a);
+            if (data == null) return;
+
+            long pending;
+            data.get(KEY_LINGSHI_PENDING_XP, out pending, 0L);
+            if (pending <= 0L)
+            {
+                if (pending < 0L)
+                {
+                    data.set(KEY_LINGSHI_PENDING_XP, 0L);
+                }
+                return;
+            }
+
+            long current;
+            data.get(KEY_XP, out current, 0L);
+            long next = long.MaxValue - current < pending ? long.MaxValue : current + pending;
+            data.set(KEY_XP, next);
+            data.set(KEY_LINGSHI_PENDING_XP, 0L);
         }
 
         private static void DeductEffectiveAura(Actor actor, WorldTile actorTile, int amount, int effectiveAura)
