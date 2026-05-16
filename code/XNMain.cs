@@ -24,6 +24,7 @@ namespace xn
             var h = new Harmony(ModId);
             xn.assets.XNResourceRegistry.Init(h);
             xn.world.LingshiVeinAssets.Init(h);
+            xn.world.LingshiVeinSpawnBehaviour.Init(h);
             cultivation.ai.CultivationDecisions.Init(h);
             voice.AIVoiceBroadcast.Init(h);
             expand.TopPowerDisplay.Init(h);
