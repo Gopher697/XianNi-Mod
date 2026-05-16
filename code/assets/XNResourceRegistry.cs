@@ -53,8 +53,9 @@ namespace xn.assets
             AssetManager.resources.add(new ResourceAsset
             {
                 id = LingshiResourceId,
-                path_icon = "iconResLingshi",
-                path_gameplay_sprite = "lingshi",
+                path_icon = "iconResGold",
+                path_gameplay_sprite = "gold",
+                full_sprite_path = "items/resources/gold",
                 type = ResType.Currency
             });
             _registered = true;
