@@ -71,7 +71,8 @@ namespace xn.world
 
         private static void TrySpawnVeins()
         {
-            if (World.world == null || World.world.islands_calculator == null)
+            IslandsCalculator islandsCalculator = xn.access.MapBoxAccess.GetIslandsCalculator(World.world);
+            if (islandsCalculator == null)
             {
                 return;
             }
@@ -87,7 +88,7 @@ namespace xn.world
                 return;
             }
 
-            var islands = World.world.islands_calculator.islands_ground;
+            var islands = islandsCalculator.islands_ground;
             if (islands == null || islands.Count == 0)
             {
                 return;

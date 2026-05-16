@@ -15,6 +15,7 @@ namespace xn.access
         private static readonly FieldInfo HeatField = AccessTools.Field(typeof(MapBox), "heat");
         private static readonly FieldInfo TilesListField = AccessTools.Field(typeof(MapBox), "tiles_list");
         private static readonly FieldInfo TutorialField = AccessTools.Field(typeof(MapBox), "tutorial");
+        private static readonly FieldInfo IslandsCalculatorField = AccessTools.Field(typeof(MapBox), "islands_calculator");
         private static readonly MethodInfo CameraGetter = AccessTools.PropertyGetter(typeof(MapBox), "camera");
         private static readonly FieldInfo CameraField = AccessTools.Field(typeof(MapBox), "<camera>k__BackingField");
         private static readonly MethodInfo IsPausedMethod = AccessTools.Method(typeof(MapBox), "isPaused");
@@ -26,6 +27,7 @@ namespace xn.access
         private static bool _warnedHeat;
         private static bool _warnedTilesList;
         private static bool _warnedTutorial;
+        private static bool _warnedIslandsCalculator;
         private static bool _warnedCamera;
         private static bool _warnedIsPaused;
 
@@ -127,6 +129,17 @@ namespace xn.access
                 return null;
             }
             return TutorialField.GetValue(mapBox) as Tutorial;
+        }
+
+        public static IslandsCalculator GetIslandsCalculator(MapBox mapBox)
+        {
+            if (mapBox == null) return null;
+            if (IslandsCalculatorField == null)
+            {
+                WarnOnce(ref _warnedIslandsCalculator, "[XN] MapBox.islands_calculator field not found; island lookup failed.");
+                return null;
+            }
+            return IslandsCalculatorField.GetValue(mapBox) as IslandsCalculator;
         }
 
         public static Camera GetCamera(MapBox mapBox)
