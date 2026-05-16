@@ -71,12 +71,15 @@ namespace xn.world
 
         private static void TrySpawnVeins()
         {
+            int year = Date.getCurrentYear();
+            Debug.Log($"[XN Vein] TrySpawnVeins fired, year {year}");
+
             IslandsCalculator islandsCalculator = xn.access.MapBoxAccess.GetIslandsCalculator(World.world);
             if (islandsCalculator == null)
             {
                 return;
             }
-            if (Date.getCurrentYear() < MinWorldYear)
+            if (year < MinWorldYear)
             {
                 return;
             }
@@ -115,8 +118,11 @@ namespace xn.world
                 }
 
                 int chunkAura = AuraChunkSystem.GetAuraForTile(centerTile);
+                var chunk = AuraChunkSystem.TileToChunk(centerTile.x, centerTile.y);
+                Debug.Log($"[XN Vein] Chunk ({chunk.cx},{chunk.cy}) aura {chunkAura}");
                 if (chunkAura < MinChunkAura)
                 {
+                    Debug.Log($"[XN Vein] Skipped chunk ({chunk.cx},{chunk.cy}) aura {chunkAura} below threshold");
                     continue;
                 }
                 if (RegionHasVein(region))
@@ -133,6 +139,7 @@ namespace xn.world
                 WorldTile targetTile = PickBuildableTile(region, veinAsset);
                 if (targetTile == null)
                 {
+                    Debug.Log($"[XN Vein] Failed to place vein at chunk ({chunk.cx},{chunk.cy})");
                     continue;
                 }
 
@@ -143,6 +150,7 @@ namespace xn.world
                     checkForBuild: true,
                     sfx: false,
                     type: BuildPlacingType.New);
+                Debug.Log($"[XN Vein] Placed vein at tile ({targetTile.x},{targetTile.y}) chunk aura {chunkAura}");
             }
         }
 
