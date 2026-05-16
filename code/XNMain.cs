@@ -63,6 +63,7 @@ namespace xn
             cultivation.ai.BreakthroughJob.Init(); 
             cultivation.ai.CondenseRootJob.Init(); 
             cultivation.ai.DemonicHuntJob.Init(); 
+            cultivation.ai.LingshiMineJob.Init();
             xn.assets.XNTreasureRegistry.RegisterGroupsIfNeeded();
             xn.assets.XNTreasureRegistry.RegisterItemsIfNeeded();
             world.ShentongFX.Register();
