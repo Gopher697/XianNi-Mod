@@ -22,6 +22,7 @@ namespace xn
             expand.AudioManager.Init();
             voice.AIVoiceManager.Init();
             var h = new Harmony(ModId);
+            xn.assets.XNResourceRegistry.Init(h);
             cultivation.ai.CultivationDecisions.Init(h);
             voice.AIVoiceBroadcast.Init(h);
             expand.TopPowerDisplay.Init(h);
