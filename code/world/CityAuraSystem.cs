@@ -28,6 +28,7 @@ namespace xn.world
         public static void Toggle()
         {
             Visible = !Visible;
+            xn.fx.AuraChunkFX.SetVisible(Visible);
             if (Visible)
             {
                 EnsureOverlay();

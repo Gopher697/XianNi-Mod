@@ -75,6 +75,12 @@ namespace xn.fx
             }
         }
 
+        public static void SetVisible(bool visible)
+        {
+            if (_root != null)
+                _root.SetActive(visible);
+        }
+
         private static Sprite GetOrCreateAuraSprite()
         {
             if (_auraSprite != null)
