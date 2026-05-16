@@ -82,7 +82,7 @@ namespace xn.world
             asset.id = ID;
             asset.main_path = "buildings/minerals/xn_lingshi_vein/";
             asset.sprite_path = "buildings/minerals/xn_lingshi_vein";
-            asset.scale_base = new Vector3(0.25f, 0.25f, 0.25f);
+            asset.scale_base = new Vector3(0.10f, 0.10f, 0.10f);
             asset.fundament = new BuildingFundament(1, 1, 1, 0);
             asset.group = "nature";
             asset.kingdom = "nature";
