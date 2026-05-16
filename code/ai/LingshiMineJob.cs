@@ -182,6 +182,7 @@ namespace cultivation.ai
             remaining -= yield;
             veinData.set(KeyVeinRemaining, remaining);
             actor.addToInventory(xn.assets.XNResourceRegistry.LingshiResourceId, yield);
+            RecordTrespassIfForeign(actor, vein);
 
             long pending;
             xn.access.ActorAccess.GetData(actor).get(KeyPendingXp, out pending, 0L);
@@ -201,6 +202,31 @@ namespace cultivation.ai
             }
 
             xn.access.ActorAccess.GetData(actor).set(KeyReturning, 1);
+        }
+
+        private static void RecordTrespassIfForeign(Actor actor, Building vein)
+        {
+            if (actor == null || vein == null || vein.current_tile == null)
+            {
+                return;
+            }
+
+            Kingdom offender = actor.kingdom;
+            if (offender == null || offender.isRekt())
+            {
+                return;
+            }
+
+            City zoneCity = vein.current_tile.zone != null ? vein.current_tile.zone.city : null;
+            Kingdom offended = zoneCity != null && !zoneCity.isRekt()
+                ? xn.access.CityAccess.GetKingdom(zoneCity)
+                : null;
+            if (offended == null || offended == offender || offended.isRekt())
+            {
+                return;
+            }
+
+            LingshiTrespassOpinion.RecordTrespass(offended, offender);
         }
 
         private static BehResult ReturnHomeAndDeposit(Actor actor)
