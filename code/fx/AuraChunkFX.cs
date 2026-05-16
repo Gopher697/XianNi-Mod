@@ -155,7 +155,7 @@ namespace xn.fx
                     for (int x = 0; x < 64; x++)
                     {
                         float n = Mathf.PerlinNoise(x / 64f * scale, y / 64f * scale);
-                        noise.SetPixel(x, y, new Color(1f, 0.70f + n * 0.20f, 0.05f + n * 0.15f, 0.5f + n * 0.5f));
+                        noise.SetPixel(x, y, new Color(1f, 0.70f + n * 0.20f, 0.05f + n * 0.15f, 1f));
                     }
                 }
                 noise.Apply();
@@ -279,25 +279,19 @@ namespace xn.fx
 
             _lastUpdateFrame = Time.frameCount;
 
-            Camera camera = MapBoxAccess.GetCamera(World.world);
-            bool hiddenByZoom = camera != null && camera.orthographicSize > 40f;
             for (int i = 0; i < _quads.Count; i++)
             {
                 AuraQuad quad = _quads[i];
                 if (quad.go == null)
                     continue;
 
-                if (hiddenByZoom)
-                {
-                    quad.go.SetActive(false);
-                    continue;
-                }
-
                 if (!quad.go.activeSelf)
                     quad.go.SetActive(true);
 
                 int aura = AuraChunkSystem.GetChunkAura(quad.cx, quad.cy);
-                float alpha = Mathf.Clamp01(aura / 120000f) * 0.12f;
+                int ceiling = AuraChunkSystem.GetChunkCeiling(quad.cx, quad.cy);
+                float fill = ceiling > 0 ? Mathf.Clamp01((float)aura / ceiling) : 0f;
+                float alpha = Mathf.Pow(fill, 0.5f) * 0.15f;
                 if (_useFrameFallback)
                     ApplySpriteAlpha(quad, alpha);
                 else
@@ -325,7 +319,7 @@ namespace xn.fx
             if (quad.meshRenderer == null)
                 return;
 
-            if (alpha < 0.005f)
+            if (alpha < 0.002f)
             {
                 quad.meshRenderer.enabled = false;
                 return;
@@ -343,7 +337,7 @@ namespace xn.fx
             if (quad.spriteRenderer == null)
                 return;
 
-            if (alpha < 0.005f)
+            if (alpha < 0.002f)
             {
                 quad.spriteRenderer.enabled = false;
                 return;
