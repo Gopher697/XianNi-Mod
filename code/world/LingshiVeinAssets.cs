@@ -80,9 +80,9 @@ namespace xn.world
 
             BuildingAsset asset = new BuildingAsset();
             asset.id = ID;
-            asset.main_path = "buildings/minerals/xn_lingshi_vein/";
-            asset.sprite_path = "buildings/minerals/xn_lingshi_vein";
-            asset.scale_base = new Vector3(0.10f, 0.10f, 0.10f);
+            asset.main_path = "buildings/minerals/";
+            asset.sprite_path = "buildings/minerals/mineral_gems";
+            asset.scale_base = new Vector3(0.25f, 0.25f, 0.25f);
             asset.fundament = new BuildingFundament(1, 1, 1, 0);
             asset.group = "nature";
             asset.kingdom = "nature";
@@ -105,7 +105,7 @@ namespace xn.world
             asset.ignore_same_building_id = true;
             asset.ignored_by_cities = true;
             asset.random_flip = true;
-            asset.sparkle_effect = true;
+            asset.sparkle_effect = false;
             asset.nutrition_restore = 40;
             asset.setAtlasID("buildings");
             if (AssetManager.dynamic_sprites_library != null)

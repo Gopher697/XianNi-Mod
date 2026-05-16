@@ -45,6 +45,7 @@ namespace xn.fx
             AddOnceEffect(lib, "fx_xs_palm", "xianshu/palm");
             AddOnceEffect(lib, "fx_xs_breaker", "xianshu/breaker");
             AddOnceEffect(lib, "fx_xs_link", "xianshu/link");
+            AddOnceEffect(lib, "xn_lingshi_vein_sparkle_fx", "effects/sparkle/xn_blue_sparkle");
         }
         private static void AddLoopStatus(string id, string texturePath, string iconPath, float duration, float scale, float offsetY = 0f)
         {

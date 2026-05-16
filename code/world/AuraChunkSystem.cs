@@ -8,8 +8,8 @@ namespace xn.world
 {
     public static class AuraChunkSystem
     {
-        public const int CHUNK_SIZE = 16;
-        public const string SAVE_KEY = "xn.aura.chunks.v1";
+        public const int CHUNK_SIZE = 8;
+        public const string SAVE_KEY = "xn.aura.chunks.v2";
         public const string KEY_CITY_AURA = "xn.city.aura.pool";
         public const string KEY_KINGDOM_AURA = "xn.kingdom.aura";
 
@@ -790,7 +790,7 @@ namespace xn.world
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.Append("v1;");
+            sb.Append("v2;");
             sb.Append(CHUNK_SIZE);
             sb.Append(';');
             sb.Append(_gridW);
@@ -817,7 +817,7 @@ namespace xn.world
             }
 
             string[] parts = saved.Split(new[] { ';' }, 5);
-            if (parts.Length != 5 || parts[0] != "v1")
+            if (parts.Length != 5 || parts[0] != "v2")
             {
                 return false;
             }

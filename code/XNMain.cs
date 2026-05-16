@@ -72,6 +72,8 @@ namespace xn
             YijingFX.Register();
             cultivation.BlackHoleSkill.Register();
             world.HeavenTrialFX.Register();
+            xn.fx.AuraChunkFX.Init();
+            xn.fx.LingshiVeinSparkle.Init(h);
             xn.world.BroadcastSystem.Init(h);
             xn.world.XNHistoryRegistry.Init(); 
             xn.ui.RealmTitleDisplay.Init();
