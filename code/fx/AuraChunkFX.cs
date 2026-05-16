@@ -32,8 +32,7 @@ namespace xn.fx
 
         public static void Rebuild()
         {
-            if (_root == null)
-                return;
+            EnsureRoot();
 
             ClearQuads();
 
@@ -105,7 +104,6 @@ namespace xn.fx
                 return;
 
             _root = new GameObject("XN_AuraChunkFX_Root");
-            UnityEngine.Object.DontDestroyOnLoad(_root);
             _root.AddComponent<AuraChunkFXDriver>();
         }
 
