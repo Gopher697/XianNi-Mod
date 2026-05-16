@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 using xn.assets;
@@ -9,6 +11,7 @@ namespace xn.world
         public const string ID = "xn_building_lingshi_vein";
 
         private static bool _patchRegistered;
+        private static bool _auraPatchRegistered;
         private static bool _registered;
 
         public static void Init(Harmony harmony)
@@ -27,7 +30,29 @@ namespace xn.world
                 }
             }
 
+            RegisterAuraGenerationPatch(harmony);
             RegisterIfNeeded();
+        }
+
+        private static void RegisterAuraGenerationPatch(Harmony harmony)
+        {
+            if (_auraPatchRegistered || harmony == null)
+            {
+                return;
+            }
+
+            var method = AccessTools.Method(
+                typeof(AuraChunkSystem),
+                "ComputeChunkGeneration",
+                new Type[] { typeof(int), typeof(int), typeof(int), typeof(HashSet<City>) });
+            if (method == null)
+            {
+                Debug.LogWarning("[XN] AuraChunkSystem.ComputeChunkGeneration not found; lingshi vein aura bonus was not patched.");
+                return;
+            }
+
+            harmony.Patch(method, postfix: new HarmonyMethod(typeof(LingshiVeinAssets), nameof(PostComputeChunkGeneration)));
+            _auraPatchRegistered = true;
         }
 
         private static void PostBuildingLibraryInit()
@@ -93,6 +118,45 @@ namespace xn.world
             asset.base_stats["health"] = 20f;
             asset.loadBuildingSprites();
             _registered = true;
+        }
+
+        private static void PostComputeChunkGeneration(int cx, int cy, ref int __result)
+        {
+            int count = CountVeinsInChunk(cx, cy);
+            if (count <= 0)
+            {
+                return;
+            }
+
+            __result += count * 20;
+        }
+
+        private static int CountVeinsInChunk(int cx, int cy)
+        {
+            if (World.world == null)
+            {
+                return 0;
+            }
+
+            int startX = cx * AuraChunkSystem.CHUNK_SIZE;
+            int startY = cy * AuraChunkSystem.CHUNK_SIZE;
+            int endX = Mathf.Min(startX + AuraChunkSystem.CHUNK_SIZE, MapBox.width);
+            int endY = Mathf.Min(startY + AuraChunkSystem.CHUNK_SIZE, MapBox.height);
+            int count = 0;
+            for (int y = startY; y < endY; y++)
+            {
+                for (int x = startX; x < endX; x++)
+                {
+                    WorldTile tile = World.world.GetTile(x, y);
+                    BuildingAsset asset = xn.access.BuildingAccess.GetAsset(tile != null ? tile.building : null);
+                    if (asset != null && asset.id == ID)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
         }
     }
 }
