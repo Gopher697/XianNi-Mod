@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
-using xn.access;
 using xn.world;
 
 namespace xn.fx
@@ -12,25 +11,10 @@ namespace xn.fx
         internal const string OverlaySortingLayer = "MapOverlay";
         internal const int OverlaySortingOrder = 200;
 
-        private const string TexturePath = "effects/aura/xn_aura_amber";
-        private static readonly string[] ShaderCandidates =
-        {
-            "Legacy Shaders/Particles/Alpha Blended",
-            "Particles/Standard Unlit",
-            "Sprites/Default"
-        };
-
         private static bool _initialized;
-        private static bool _useFrameFallback;
-        private static Shader _shader;
-        private static Material _material;
-        private static Sprite[] _frames;
+        private static Sprite _auraSprite;
         private static GameObject _root;
-        private static Mesh _mesh;
-        private static float _scrollOffset;
         private static int _lastUpdateFrame = -1;
-        private static float _nextFrameTime;
-        private static int _frameIndex;
         private static Harmony _harmony;
         private static readonly List<AuraQuad> _quads = new List<AuraQuad>();
 
@@ -40,18 +24,7 @@ namespace xn.fx
                 return;
 
             _initialized = true;
-            ProbeShader();
-            LoadTextureFrames();
-
-            if (_useFrameFallback && (_frames == null || _frames.Length == 0))
-            {
-                Debug.LogWarning("[XN] AuraChunkFX: amber texture frames not found, overlay disabled.");
-                return;
-            }
-
-            if (!_useFrameFallback)
-                PrepareMaterial();
-
+            GetOrCreateAuraSprite();
             EnsureRoot();
             PatchRebuildHooks();
             Rebuild();
@@ -63,7 +36,6 @@ namespace xn.fx
                 return;
 
             ClearQuads();
-            EnsureMesh();
 
             if (World.world == null || AuraChunkSystem.GridWidth <= 0 || AuraChunkSystem.GridHeight <= 0)
                 return;
@@ -88,81 +60,43 @@ namespace xn.fx
                     {
                         cx = cx,
                         cy = cy,
-                        go = child,
-                        mpb = new MaterialPropertyBlock()
+                        go = child
                     };
 
-                    if (_useFrameFallback)
-                    {
-                        SpriteRenderer renderer = child.AddComponent<SpriteRenderer>();
-                        renderer.sprite = _frames != null && _frames.Length > 0 ? _frames[0] : null;
-                        renderer.color = new Color(1f, 0.75f, 0.2f, 0f);
-                        quad.spriteRenderer = renderer;
-                    }
-                    else
-                    {
-                        MeshFilter filter = child.AddComponent<MeshFilter>();
-                        filter.sharedMesh = _mesh;
-                        MeshRenderer renderer = child.AddComponent<MeshRenderer>();
-                        renderer.sharedMaterial = _material;
-                        renderer.sortingLayerName = OverlaySortingLayer;
-                        renderer.sortingOrder = OverlaySortingOrder;
-                        renderer.enabled = false;
-                        quad.meshRenderer = renderer;
-                    }
+                    SpriteRenderer renderer = child.AddComponent<SpriteRenderer>();
+                    renderer.sprite = GetOrCreateAuraSprite();
+                    renderer.color = new Color(1f, 0.75f, 0.2f, 0f);
+                    renderer.sortingLayerName = OverlaySortingLayer;
+                    renderer.sortingOrder = OverlaySortingOrder;
+                    renderer.enabled = false;
+                    quad.spriteRenderer = renderer;
 
                     _quads.Add(quad);
                 }
             }
         }
 
-        private static void ProbeShader()
+        private static Sprite GetOrCreateAuraSprite()
         {
-            foreach (string candidate in ShaderCandidates)
+            if (_auraSprite != null)
+                return _auraSprite;
+
+            const int size = 64;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            tex.wrapMode = TextureWrapMode.Repeat;
+            const float noiseScale = 4f;
+            for (int y = 0; y < size; y++)
             {
-                Shader shader = Shader.Find(candidate);
-                if (shader == null)
-                    continue;
-
-                _shader = shader;
-                _useFrameFallback = false;
-                return;
-            }
-
-            _useFrameFallback = true;
-        }
-
-        private static void LoadTextureFrames()
-        {
-            _frames = SpriteTextureLoader.getSpriteList(TexturePath);
-        }
-
-        private static void PrepareMaterial()
-        {
-            _material = new Material(_shader);
-            Texture texture = null;
-
-            if (_frames != null && _frames.Length > 0 && _frames[0] != null)
-                texture = _frames[0].texture;
-
-            if (texture == null)
-            {
-                Texture2D noise = new Texture2D(64, 64, TextureFormat.RGBA32, false);
-                noise.wrapMode = TextureWrapMode.Repeat;
-                float scale = 4f;
-                for (int y = 0; y < 64; y++)
+                for (int x = 0; x < size; x++)
                 {
-                    for (int x = 0; x < 64; x++)
-                    {
-                        float n = Mathf.PerlinNoise(x / 64f * scale, y / 64f * scale);
-                        noise.SetPixel(x, y, new Color(1f, 0.70f + n * 0.20f, 0.05f + n * 0.15f, 1f));
-                    }
+                    float n = Mathf.PerlinNoise(x / (float)size * noiseScale, y / (float)size * noiseScale);
+                    tex.SetPixel(x, y, new Color(1f, 0.85f + n * 0.15f, 0.3f + n * 0.2f, 1f));
                 }
-                noise.Apply();
-                texture = noise;
             }
 
-            _material.SetTexture("_MainTex", texture);
+            tex.Apply();
+            _auraSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+            return _auraSprite;
         }
 
         private static void EnsureRoot()
@@ -210,31 +144,6 @@ namespace xn.fx
             _quads.Clear();
         }
 
-        private static void EnsureMesh()
-        {
-            if (_mesh != null)
-                return;
-
-            _mesh = new Mesh();
-            _mesh.name = "XN_AuraChunkFX_Quad";
-            _mesh.vertices = new[]
-            {
-                new Vector3(-0.5f, -0.5f, 0f),
-                new Vector3(0.5f, -0.5f, 0f),
-                new Vector3(0.5f, 0.5f, 0f),
-                new Vector3(-0.5f, 0.5f, 0f)
-            };
-            _mesh.uv = new[]
-            {
-                new Vector2(0f, 0f),
-                new Vector2(1f, 0f),
-                new Vector2(1f, 1f),
-                new Vector2(0f, 1f)
-            };
-            _mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
-            _mesh.RecalculateBounds();
-        }
-
         private static float MeasureTileWorldSize()
         {
             try
@@ -265,15 +174,6 @@ namespace xn.fx
             if (_quads.Count == 0)
                 return;
 
-            if (!_useFrameFallback && _material != null)
-            {
-                _scrollOffset += Time.deltaTime * 0.02f;
-                _material.SetTextureOffset("_MainTex", new Vector2(_scrollOffset, _scrollOffset * 0.7f));
-            }
-
-            if (_useFrameFallback)
-                UpdateFallbackFrame();
-
             if (Time.frameCount == _lastUpdateFrame || Time.frameCount % 30 != 0)
                 return;
 
@@ -292,44 +192,8 @@ namespace xn.fx
                 int ceiling = AuraChunkSystem.GetChunkCeiling(quad.cx, quad.cy);
                 float fill = ceiling > 0 ? Mathf.Clamp01((float)aura / ceiling) : 0f;
                 float alpha = Mathf.Pow(fill, 0.5f) * 0.15f;
-                if (_useFrameFallback)
-                    ApplySpriteAlpha(quad, alpha);
-                else
-                    ApplyMeshAlpha(quad, alpha);
+                ApplySpriteAlpha(quad, alpha);
             }
-        }
-
-        private static void UpdateFallbackFrame()
-        {
-            if (_frames == null || _frames.Length == 0 || Time.time < _nextFrameTime)
-                return;
-
-            _nextFrameTime = Time.time + 0.15f;
-            _frameIndex++;
-            Sprite frame = _frames[_frameIndex % _frames.Length];
-            for (int i = 0; i < _quads.Count; i++)
-            {
-                if (_quads[i].spriteRenderer != null)
-                    _quads[i].spriteRenderer.sprite = frame;
-            }
-        }
-
-        private static void ApplyMeshAlpha(AuraQuad quad, float alpha)
-        {
-            if (quad.meshRenderer == null)
-                return;
-
-            if (alpha < 0.002f)
-            {
-                quad.meshRenderer.enabled = false;
-                return;
-            }
-
-            quad.meshRenderer.enabled = true;
-            Color color = new Color(1f, 0.75f, 0.2f, alpha);
-            quad.mpb.SetColor("_Color", color);
-            quad.mpb.SetColor("_TintColor", color);
-            quad.meshRenderer.SetPropertyBlock(quad.mpb);
         }
 
         private static void ApplySpriteAlpha(AuraQuad quad, float alpha)
@@ -352,9 +216,7 @@ namespace xn.fx
             public int cx;
             public int cy;
             public GameObject go;
-            public MeshRenderer meshRenderer;
             public SpriteRenderer spriteRenderer;
-            public MaterialPropertyBlock mpb;
         }
 
         private sealed class AuraChunkFXDriver : MonoBehaviour
