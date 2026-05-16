@@ -9,6 +9,9 @@ namespace xn.fx
 {
     public static class AuraChunkFX
     {
+        internal const string OverlaySortingLayer = "MapOverlay";
+        internal const int OverlaySortingOrder = 200;
+
         private const string TexturePath = "effects/aura/xn_aura_amber";
         private static readonly string[] ShaderCandidates =
         {
@@ -102,6 +105,8 @@ namespace xn.fx
                         filter.sharedMesh = _mesh;
                         MeshRenderer renderer = child.AddComponent<MeshRenderer>();
                         renderer.sharedMaterial = _material;
+                        renderer.sortingLayerName = OverlaySortingLayer;
+                        renderer.sortingOrder = OverlaySortingOrder;
                         renderer.enabled = false;
                         quad.meshRenderer = renderer;
                     }
