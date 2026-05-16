@@ -80,9 +80,9 @@ namespace xn.world
 
             BuildingAsset asset = new BuildingAsset();
             asset.id = ID;
-            asset.main_path = "buildings/minerals/";
-            asset.sprite_path = "buildings/minerals/mineral_gems";
-            asset.scale_base = new Vector3(0.25f, 0.25f, 0.25f);
+            asset.main_path = "buildings/minerals/xn_lingshi_vein/";
+            asset.sprite_path = "buildings/minerals/xn_lingshi_vein";
+            asset.scale_base = new Vector3(0.40f, 0.40f, 0.40f);
             asset.fundament = new BuildingFundament(1, 1, 1, 0);
             asset.group = "nature";
             asset.kingdom = "nature";
@@ -117,6 +117,14 @@ namespace xn.world
             AssetManager.buildings.add(asset);
             asset.base_stats["health"] = 20f;
             asset.loadBuildingSprites();
+            if (!asset.sprites_are_initiated)
+            {
+                Sprite[] fallback = SpriteTextureLoader.getSpriteList(asset.sprite_path);
+                if (fallback != null && fallback.Length > 0)
+                    Debug.Log($"[XN] Lingshi vein: loaded {fallback.Length} sprite(s) via path fallback.");
+                else
+                    Debug.LogWarning("[XN] Lingshi vein: sprite failed to load from path, building will be invisible.");
+            }
             _registered = true;
         }
 
