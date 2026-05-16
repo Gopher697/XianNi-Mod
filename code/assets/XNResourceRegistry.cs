@@ -71,6 +71,11 @@ namespace xn.assets
             }
 
             asset.path_gameplay_sprite = "stats/lingshi";
+            var sprites = SpriteTextureLoader.getSpriteList("stats/lingshi", false);
+            if (sprites != null && sprites.Length > 0)
+                asset.gameplay_sprites = sprites;
+            else
+                Debug.LogWarning("[XN] gameplay_sprites empty for resource 'xn_lingshi', avatar rendering may crash");
             asset.full_sprite_path = "stats/lingshi";
         }
     }
