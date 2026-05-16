@@ -35,6 +35,8 @@ namespace xn.fx
             EnsureRoot();
 
             ClearQuads();
+            if (_root != null && CityAuraSystem.Visible == false)
+                _root.SetActive(false);
 
             if (World.world == null || AuraChunkSystem.GridWidth <= 0 || AuraChunkSystem.GridHeight <= 0)
                 return;
@@ -111,6 +113,7 @@ namespace xn.fx
 
             _root = new GameObject("XN_AuraChunkFX_Root");
             _root.AddComponent<AuraChunkFXDriver>();
+            _root.SetActive(false);
         }
 
         private static void PatchRebuildHooks()
