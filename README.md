@@ -1,8 +1,8 @@
-# WorldBox Xianni Mod
+# Er Gen: Cultivation World
 
-This repository contains Gopher's modified and maintained Steam Workshop release of the Xianni cultivation overhaul for WorldBox. It is based on the GameBanana Xianni / Cultivate the Way mod page: <https://gamebanana.com/mods/648751>.
+This repository contains Gopher's modified and maintained Steam Workshop release of Er Gen: Cultivation World, a WorldBox cultivation mod based on the GameBanana Xianni / Cultivate the Way mod page: <https://gamebanana.com/mods/648751>.
 
-This project is not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
+This project is planned to expand toward broader Er Gen novel-inspired cultivation content. It is not official Er Gen content, not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
 
 ## Credits
 

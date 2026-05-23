@@ -1,6 +1,6 @@
-# Renegade Immortal: Cultivation World
+# Er Gen: Cultivation World
 
-Modified Steam Workshop release based on the GameBanana Xianni / Cultivate the Way mod page:
+Er Gen: Cultivation World is a modified Steam Workshop release based on the GameBanana Xianni / Cultivate the Way mod page:
 
 <https://gamebanana.com/mods/648751>
 
@@ -10,7 +10,7 @@ Source mod page: <https://gamebanana.com/mods/648751>
 
 Existing repository credit field: KangKang (QQ Group: 923773102).
 
-This Steam Workshop release is a modified version maintained by Gopher. It is not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
+This Steam Workshop release is a modified version maintained by Gopher. It is planned to expand toward broader Er Gen novel-inspired cultivation content, but it is not official Er Gen content, not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
 
 ## Release Notes
 
@@ -41,4 +41,4 @@ Before upload:
 2. Build with `dotnet build .\XianniMod.csproj -c Release`.
 3. Deploy with `.\tools\deploy-local.ps1 -ModDir "<WorldBox>\Mods\Xianni"`.
 4. Launch WorldBox and confirm the mod loads without Xianni exceptions or missing locale keys.
-5. Confirm the Workshop description clearly says this is a modified release maintained by Gopher, based on the GameBanana Xianni / Cultivate the Way source page.
+5. Confirm the Workshop description clearly says Er Gen: Cultivation World is a modified release maintained by Gopher, based on the GameBanana Xianni / Cultivate the Way source page.
