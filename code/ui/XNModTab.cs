@@ -8,8 +8,6 @@ using NeoModLoader.ui;
 using xn.bloodline;
 using xn.tournament;
 using xn.newbie;
-using xn.feedback;
-using xn.questions;
 namespace xn.ui
 {
     public static class XNModTab
@@ -227,21 +225,6 @@ namespace xn.ui
             var tipGuide = btnGuide.GetComponent<TipButton>() ?? btnGuide.gameObject.AddComponent<TipButton>();
             tipGuide.textOnClick = "btn_xn_newbie_guide";
             tipGuide.textOnClickDescription = "btn_xn_newbie_guide_desc";
-            QuestionsWindow.Init();
-            var questionIcon = SpriteTextureLoader.getSprite("ui/questionui/question")
-                            ?? SpriteTextureLoader.getSprite("ui/icons/iconAbout");
-            var btnQuestion = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton(T("btn_xn_questions", "Q&A"), OnOpenQuestions, questionIcon);
-            _tab.AddPowerButton("tools", btnQuestion);
-            var tipQuestion = btnQuestion.GetComponent<TipButton>() ?? btnQuestion.gameObject.AddComponent<TipButton>();
-            tipQuestion.textOnClick = "btn_xn_questions";
-            tipQuestion.textOnClickDescription = "btn_xn_questions_desc";
-            FeedbackWindow.Init();
-            var feedbackIcon = SpriteTextureLoader.getSprite("ui/icons/iconAbout");
-            var btnFeedback = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton(T("btn_xn_feedback", "Feedback"), OnOpenFeedback, feedbackIcon);
-            _tab.AddPowerButton("tools", btnFeedback);
-            var tipFeedback = btnFeedback.GetComponent<TipButton>() ?? btnFeedback.gameObject.AddComponent<TipButton>();
-            tipFeedback.textOnClick = "btn_xn_feedback";
-            tipFeedback.textOnClickDescription = "btn_xn_feedback_desc";
             _tab.UpdateLayout();
             XNPowerRanking.Init();
         }
@@ -355,16 +338,6 @@ namespace xn.ui
         {
             xn.voice.AIVoiceBroadcast.OnButtonClicked(T("btn_xn_newbie_guide", "Newbie Guide"));
             NewbieGuideSystem.Start();
-        }
-        private static void OnOpenFeedback()
-        {
-            xn.voice.AIVoiceBroadcast.OnButtonClicked(T("btn_xn_feedback", "Feedback"));
-            FeedbackWindow.Toggle();
-        }
-        private static void OnOpenQuestions()
-        {
-            xn.voice.AIVoiceBroadcast.OnButtonClicked(T("btn_xn_questions", "Q&A"));
-            QuestionsWindow.Toggle();
         }
     }
 }

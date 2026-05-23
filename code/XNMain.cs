@@ -88,7 +88,6 @@ namespace xn
                 harmonyMethod.priority = Priority.Last; 
                 h.Patch(mUWRows, postfix: harmonyMethod);
             }
-            xn.version.OnlineVersionChecker.CheckOnLoad();
         }
     }
     internal static class CityWindowRowsPatch

@@ -16,7 +16,7 @@ namespace xn.newbie
             return new List<NewbieGuideStep>
             {
                 new NewbieGuideStep { Content = "xn_guide_welcome" },
-                new NewbieGuideStep { Content = "xn_guide_ad" },
+                new NewbieGuideStep { Content = "xn_guide_source_credit" },
                 new NewbieGuideStep { Content = "xn_guide_aura", HighlightButton = xn.ui.XNModTab.BtnAura?.gameObject },
                 new NewbieGuideStep { Content = "xn_guide_xiuzhenguo", HighlightButton = xn.ui.XNModTab.BtnXiuzhenguo?.gameObject },
                 new NewbieGuideStep { Content = "xn_guide_ruins", HighlightButton = xn.ui.XNModTab.BtnRuins?.gameObject },
