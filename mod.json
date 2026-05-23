@@ -1,8 +1,8 @@
 {
   "name": "Renegade Immortal: Cultivation World (Beta)",
-  "author": "KangKang (QQ Group: 923773102)",
-  "version": "0.4.2",
-  "description": "QQ Group: 923773102 | Based on Renegade Immortal (Xian Ni). A cultivation world gameplay mod for WorldBox.",
+  "author": "KangKang (QQ Group: 923773102), Gopher",
+  "version": "0.5.0",
+  "description": "Modified Steam Workshop release based on the GameBanana Xianni / Cultivate the Way mod page: https://gamebanana.com/mods/648751. Maintained by Gopher; not an official continuation.",
   "iconPath": "icon.png",
   "targetGameBuild": 115,
   "GUID": "XIAN_NI_MOD",

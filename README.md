@@ -1,14 +1,24 @@
 # WorldBox Xianni Mod
 
-This repository contains a C# WorldBox mod for the Xianni cultivation overhaul. It is built against WorldBox, NeoModLoader/NML, Harmony, and Unity assemblies.
+This repository contains Gopher's modified and maintained Steam Workshop release of the Xianni cultivation overhaul for WorldBox. It is based on the GameBanana Xianni / Cultivate the Way mod page: <https://gamebanana.com/mods/648751>.
+
+This project is not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
+
+## Credits
+
+- Source mod page: <https://gamebanana.com/mods/648751>
+- Existing repository credit field: KangKang (QQ Group: 923773102)
+- Modified Steam Workshop release: Gopher
+- Base version: Xianni 0.4.2
 
 ## Repository Layout
 
 - `code/` contains the C# mod source.
 - `Locales/` contains runtime locale JSON files loaded by the mod.
 - `GameResources/`, `Title/`, `mod.json`, `default_config.json`, and `icon.png` are runtime package assets.
+- `WORKSHOP_DESCRIPTION.md` contains publication-facing draft text and upload checklist notes.
 - `docs/translation/` contains historical translation archaeology notes and artifacts.
-- `tools/deploy-local.ps1` copies the built DLL and locale files into a local mod folder.
+- `tools/deploy-local.ps1` copies the built DLL and runtime package files into a local mod folder.
 - `build_staging/` contains local build output and intermediates.
 - `reports/` contains local smoke-test logs, screenshots, and session closeouts.
 
@@ -58,19 +68,23 @@ build_staging\XianniMod.dll
 
 ## Deploy
 
-Deploy the current DLL and runtime locale files to an existing Xianni mod directory:
+Deploy the current release package to an existing Xianni mod directory:
 
 ```powershell
-.\tools\deploy-local.ps1 -ModDir "<WorldBox>\Mods\xianni"
+.\tools\deploy-local.ps1 -ModDir "<WorldBox>\Mods\Xianni"
 ```
 
-The deploy helper:
+The deploy helper copies:
 
-- copies `build_staging\XianniMod.dll` to `XianniMod.dll`;
-- copies all repository `Locales\*.json` files to the target `Locales\` folder;
-- does not copy reports or build intermediates.
+- `build_staging\XianniMod.dll` to `XianniMod.dll`
+- `mod.json`
+- `default_config.json`
+- `icon.png`
+- all `Locales\*.json`
+- the `GameResources\` runtime asset tree
+- the `Title\` runtime title tree
 
-For a full clean install, ensure the target mod folder also has the runtime package assets: `GameResources/`, `Title/`, `mod.json`, `default_config.json`, and `icon.png`.
+It does not copy `reports/`, build intermediates, or local planning notes.
 
 ## Local Smoke Workflow
 
@@ -81,5 +95,6 @@ Ignored `reports/` artifacts are used for smoke screenshots, logs, and session c
 ## Known Follow-Ups
 
 - Consider replacing the default `WorldBoxDir` fallback with documented per-developer setup only.
+- Rework Aura/cultivation growth before adding broad new Er Gen feature systems.
 - Add fixture/setup notes for populated bloodline family/member/talent validation.
 - Treasure display is manually validated, but a repeatable automated treasure grant route is still open.
