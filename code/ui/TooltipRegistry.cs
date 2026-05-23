@@ -42,25 +42,56 @@ namespace xn.ui
                     callback = ShowBloodlineFamilyTooltip
                 };
                 tooltipLib.add(tooltipAsset4);
-                var tooltipAsset5 = new TooltipAsset
+                string[] distributionTooltips =
                 {
-                    id = "row_xn_kingdom_cultivators_info",
-                    callback = ShowCultivationDistributionTooltip
+                    "row_xn_kingdom_cultivators_info",
+                    "row_xn_kingdom_ancients_info",
+                    "row_xn_kingdom_beasts_info",
+                    "row_xn_city_cultivators_info",
+                    "row_xn_city_ancients_info",
+                    "row_xn_city_beasts_info",
+                    "row_xn_clan_cultivators_info",
+                    "row_xn_clan_ancients_info",
+                    "row_xn_clan_beasts_info",
+                    "row_xn_family_cultivators_info",
+                    "row_xn_family_ancients_info",
+                    "row_xn_family_beasts_info",
+                    "row_xn_culture_cultivators_info",
+                    "row_xn_culture_ancients_info",
+                    "row_xn_culture_beasts_info",
+                    "row_xn_language_cultivators_info",
+                    "row_xn_language_ancients_info",
+                    "row_xn_language_beasts_info",
+                    "row_xn_religion_cultivators_info",
+                    "row_xn_religion_ancients_info",
+                    "row_xn_religion_beasts_info",
+                    "row_xn_subspecies_cultivators_info",
+                    "row_xn_subspecies_ancients_info",
+                    "row_xn_subspecies_beasts_info",
+                    "row_xn_alliance_cultivators_info",
+                    "row_xn_alliance_ancients_info",
+                    "row_xn_alliance_beasts_info",
+                    "row_xn_army_cultivators_info",
+                    "row_xn_army_ancients_info",
+                    "row_xn_army_beasts_info",
+                    "row_xn_war_cultivators_info",
+                    "row_xn_war_ancients_info",
+                    "row_xn_war_beasts_info"
                 };
-                tooltipLib.add(tooltipAsset5);
-                var tooltipAsset6 = new TooltipAsset
+                for (int i = 0; i < distributionTooltips.Length; i++)
                 {
-                    id = "row_xn_kingdom_ancients_info",
-                    callback = ShowCultivationDistributionTooltip
-                };
-                tooltipLib.add(tooltipAsset6);
-                var tooltipAsset7 = new TooltipAsset
-                {
-                    id = "row_xn_kingdom_beasts_info",
-                    callback = ShowCultivationDistributionTooltip
-                };
-                tooltipLib.add(tooltipAsset7);
+                    AddCultivationDistributionTooltip(tooltipLib, distributionTooltips[i]);
+                }
             }
+        }
+        private static void AddCultivationDistributionTooltip(TooltipLibrary tooltipLib, string id)
+        {
+            var tooltipAsset = new TooltipAsset
+            {
+                id = id,
+                callback = ShowCultivationDistributionTooltip
+            };
+            tooltipLib.add(tooltipAsset);
         }
         private static void ShowTextTooltip(Tooltip tooltip, string type, TooltipData data)
         {

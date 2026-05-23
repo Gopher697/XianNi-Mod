@@ -41,6 +41,51 @@ namespace xn.ui
             "xn_city_ancients", "Ancient Gods",
             "xn_city_beasts", "Beasts");
 
+        internal static readonly RowMapping ClanRows = new RowMapping(
+            "xn_clan_cultivators", "Cultivators",
+            "xn_clan_ancients", "Ancient Gods",
+            "xn_clan_beasts", "Beasts");
+
+        internal static readonly RowMapping FamilyRows = new RowMapping(
+            "xn_family_cultivators", "Cultivators",
+            "xn_family_ancients", "Ancient Gods",
+            "xn_family_beasts", "Beasts");
+
+        internal static readonly RowMapping CultureRows = new RowMapping(
+            "xn_culture_cultivators", "Cultivators",
+            "xn_culture_ancients", "Ancient Gods",
+            "xn_culture_beasts", "Beasts");
+
+        internal static readonly RowMapping LanguageRows = new RowMapping(
+            "xn_language_cultivators", "Cultivators",
+            "xn_language_ancients", "Ancient Gods",
+            "xn_language_beasts", "Beasts");
+
+        internal static readonly RowMapping ReligionRows = new RowMapping(
+            "xn_religion_cultivators", "Cultivators",
+            "xn_religion_ancients", "Ancient Gods",
+            "xn_religion_beasts", "Beasts");
+
+        internal static readonly RowMapping SubspeciesRows = new RowMapping(
+            "xn_subspecies_cultivators", "Cultivators",
+            "xn_subspecies_ancients", "Ancient Gods",
+            "xn_subspecies_beasts", "Beasts");
+
+        internal static readonly RowMapping AllianceRows = new RowMapping(
+            "xn_alliance_cultivators", "Cultivators",
+            "xn_alliance_ancients", "Ancient Gods",
+            "xn_alliance_beasts", "Beasts");
+
+        internal static readonly RowMapping ArmyRows = new RowMapping(
+            "xn_army_cultivators", "Cultivators",
+            "xn_army_ancients", "Ancient Gods",
+            "xn_army_beasts", "Beasts");
+
+        internal static readonly RowMapping WarRows = new RowMapping(
+            "xn_war_cultivators", "Cultivators",
+            "xn_war_ancients", "Ancient Gods",
+            "xn_war_beasts", "Beasts");
+
         private static readonly string[] REALM_IDS = {
             "realm_01_qi", "realm_02_foundation", "realm_03_core", "realm_04_nascent",
             "realm_05_deity", "realm_06_infantchg", "realm_07_wending", "realm_08_kuinie",

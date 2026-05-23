@@ -37,6 +37,7 @@ namespace xn
             if (mKingdomRows != null)
                 h.Patch(mKingdomRows,
                     postfix: new HarmonyMethod(typeof(ui.KingdomWindowCultivationStats), nameof(ui.KingdomWindowCultivationStats.Post_showStatsRows)));
+            ui.PopulationWindowCultivationStats.Init(h);
             h.PatchAll(Assembly.GetExecutingAssembly()); 
             config.ModConfigHooks.InitializeFromConfig(this.GetConfig());
             cultivation.DamageSystemOverride.Init(h);
