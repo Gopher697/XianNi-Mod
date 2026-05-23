@@ -92,30 +92,27 @@ namespace xn
     }
     internal static class CityWindowRowsPatch
     {
-        private static PropertyInfo _pStatsContainer;
-        private static MethodInfo _mGetRow;
         public static void Post_showStatsRows(CityWindow __instance)
         {
             var city = SelectedMetas.selected_city;
             if (city == null || __instance == null) return;
             WorldTile tile = city.getTile(false);
             int aura = xn.world.AuraChunkSystem.GetAuraForTile(tile);
-            if (_pStatsContainer == null)
-                _pStatsContainer = AccessTools.Property(typeof(StatsWindow), "stats_rows_container");
-            var container = _pStatsContainer?.GetValue(__instance, null) as StatsRowsContainer;
+            var container = xn.access.StatsRowsContainerAccess.GetStatsRowsContainer(__instance);
             if (container == null) return;
-            if (_mGetRow == null)
-                _mGetRow = AccessTools.Method(typeof(StatsRowsContainer), "getStatRow", new[] { typeof(string) });
-            var row = _mGetRow?.Invoke(container, new object[] { "xn_city_aura" }) as KeyValueField;
-            if (row == null) return;
-            string title = LocalizedTextManager.getText("row_xn_city_aura");
-            if (string.IsNullOrEmpty(title) || title == "row_xn_city_aura") title = "Aura";
-            row.name_text.text = title;
-            row.value.text = aura.ToString();
-            var sp = SpriteTextureLoader.getSprite("ui/icon/lingqi")
-                  ?? SpriteTextureLoader.getSprite("zhanwei");
-            if (sp != null && row.icon != null) row.icon.sprite = sp;
-            row.gameObject.SetActive(true);
+            var row = xn.access.StatsRowsContainerAccess.GetStatRow(container, "xn_city_aura");
+            if (row != null)
+            {
+                string title = LocalizedTextManager.getText("row_xn_city_aura");
+                if (string.IsNullOrEmpty(title) || title == "row_xn_city_aura") title = "Aura";
+                row.name_text.text = title;
+                row.value.text = aura.ToString();
+                var sp = SpriteTextureLoader.getSprite("ui/icon/lingqi")
+                      ?? SpriteTextureLoader.getSprite("zhanwei");
+                if (sp != null && row.icon != null) row.icon.sprite = sp;
+                row.gameObject.SetActive(true);
+            }
+            ui.CultivationInfoRows.Show(container, city.units, ui.CultivationInfoRows.CityRows);
         }
     }
     internal static class UnitWindowPatch
