@@ -70,13 +70,14 @@ namespace xn.assets
                 return;
             }
 
-            asset.path_gameplay_sprite = "stats/lingshi";
-            var sprites = SpriteTextureLoader.getSpriteList("stats/lingshi", false);
-            if (sprites != null && sprites.Length > 0)
+            const string spritePath = "stats/lingshi";
+            asset.path_gameplay_sprite = spritePath;
+            Sprite[] sprites = XNGameplaySpriteFrames.Load(spritePath, "resource 'xn_lingshi'");
+            if (sprites != null)
+            {
                 asset.gameplay_sprites = sprites;
-            else
-                Debug.LogWarning("[XN] gameplay_sprites empty for resource 'xn_lingshi', avatar rendering may crash");
-            asset.full_sprite_path = "stats/lingshi";
+            }
+            asset.full_sprite_path = spritePath;
         }
     }
 }

@@ -49,13 +49,14 @@ namespace xn.assets
                 a.equipment_type = et;
                 a.show_in_meta_editor = true;
                 a.mod_can_be_given = true;
-                a.path_icon = "sutras/" + id;      
-                a.path_gameplay_sprite = "sutras/" + id;
-                var sprites = SpriteTextureLoader.getSpriteList("sutras/" + id, false);
-                if (sprites != null && sprites.Length > 0)
+                string spritePath = "sutras/" + id;
+                a.path_icon = spritePath;
+                a.path_gameplay_sprite = spritePath;
+                Sprite[] sprites = XNGameplaySpriteFrames.Load(spritePath, $"treasure '{finalId}'");
+                if (sprites != null)
+                {
                     a.gameplay_sprites = sprites;
-                else
-                    Debug.LogWarning($"[XN] gameplay_sprites empty for treasure '{finalId}', avatar rendering may crash");
+                }
                 a.name_class = "item_class_treasure";
                 AssetManager.items.add(a);
                     a.unlock(true);
