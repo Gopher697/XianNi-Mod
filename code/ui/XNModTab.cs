@@ -102,7 +102,7 @@ namespace xn.ui
             tipSearch.textOnClick = "btn_xn_search_units";
             tipSearch.textOnClickDescription = "btn_xn_search_units_desc";
             var modsysIcon = SpriteTextureLoader.getSprite("ui/icon/modsystem");
-            var btnModSettings = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton(T("btn_xn_open_modsettings", "Er Gen Settings"), OnOpenModSettings, modsysIcon);
+            var btnModSettings = NeoModLoader.General.PowerButtonCreator.CreateSimpleButton(T("btn_xn_open_modsettings", "Ergenverse Settings"), OnOpenModSettings, modsysIcon);
             _tab.AddPowerButton("tools", btnModSettings);
             BtnModSettings = btnModSettings;
             var tipMod = btnModSettings.GetComponent<TipButton>() ?? btnModSettings.gameObject.AddComponent<TipButton>();
@@ -287,7 +287,7 @@ namespace xn.ui
         }
         private static void OnOpenModSettings()
         {
-            xn.voice.AIVoiceBroadcast.OnButtonClicked(T("btn_xn_open_modsettings", "Er Gen Settings"));
+            xn.voice.AIVoiceBroadcast.OnButtonClicked(T("btn_xn_open_modsettings", "Ergenverse Settings"));
             const string MY_UID = "XIAN_NI_MOD";
             IMod self = null;
             foreach (var m in NeoModLoader.WorldBoxMod.LoadedMods)

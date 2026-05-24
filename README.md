@@ -1,8 +1,8 @@
-# Er Gen: Cultivation World
+# Ergenverse: Cultivation World
 
-This repository contains Gopher's modified and maintained Steam Workshop release of Er Gen: Cultivation World, a WorldBox cultivation mod based on the GameBanana Xianni / Cultivate the Way mod page: <https://gamebanana.com/mods/648751>.
+This repository contains Gopher's modified and maintained Steam Workshop release of Ergenverse: Cultivation World, a WorldBox cultivation mod inspired by Er Gen's xianxia novels and based on the GameBanana Xianni / Cultivate the Way mod page: <https://gamebanana.com/mods/648751>.
 
-This project is planned to expand toward broader Er Gen novel-inspired cultivation content. It is not official Er Gen content, not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
+This project is not official Er Gen content, not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
 
 ## Credits
 
@@ -95,6 +95,6 @@ Ignored `reports/` artifacts are used for smoke screenshots, logs, and session c
 ## Known Follow-Ups
 
 - Consider replacing the default `WorldBoxDir` fallback with documented per-developer setup only.
-- Rework Aura/cultivation growth before adding broad new Er Gen feature systems.
+- Rework Aura/cultivation growth before adding broader Er Gen-inspired feature systems.
 - Add fixture/setup notes for populated bloodline family/member/talent validation.
 - Treasure display is manually validated, but a repeatable automated treasure grant route is still open.

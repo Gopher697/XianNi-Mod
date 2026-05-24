@@ -1,8 +1,8 @@
 {
-  "name": "Er Gen: Cultivation World",
+  "name": "Ergenverse: Cultivation World",
   "author": "KangKang (QQ Group: 923773102), Gopher",
   "version": "0.5.0",
-  "description": "Er Gen: Cultivation World is a modified Steam Workshop release based on the GameBanana Xianni / Cultivate the Way mod page: https://gamebanana.com/mods/648751. Maintained by Gopher; not official Er Gen content or an official continuation.",
+  "description": "A WorldBox cultivation mod inspired by Er Gen's xianxia novels. Based on the GameBanana Xianni / Cultivate the Way mod source, with Steam release updates, localization polish, UI improvements, and compatibility fixes.",
   "iconPath": "icon.png",
   "targetGameBuild": 115,
   "GUID": "XIAN_NI_MOD",

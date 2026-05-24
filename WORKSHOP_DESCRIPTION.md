@@ -1,16 +1,42 @@
-# Er Gen: Cultivation World
+# Ergenverse: Cultivation World
 
-Er Gen: Cultivation World is a modified Steam Workshop release based on the GameBanana Xianni / Cultivate the Way mod page:
+Ergenverse: Cultivation World is a WorldBox cultivation mod inspired by Er Gen's xianxia novels.
+
+It is based on the GameBanana Xianni / Cultivate the Way source page:
 
 <https://gamebanana.com/mods/648751>
 
-## Credits
+This Steam Workshop release is maintained by Gopher. It is not official Er Gen content, not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
 
-Source mod page: <https://gamebanana.com/mods/648751>
+## Core Gameplay
 
-Existing repository credit field: KangKang (QQ Group: 923773102).
+- Adds a cultivation progression layer to WorldBox civilizations and creatures.
+- Includes cultivation realms, realm advancement, and dangerous breakthrough attempts.
+- Models realm suppression so crossing major power gaps is difficult.
+- Supports cultivator progression alongside Ancient God legacy/star progression and beast/demonic progression.
+- Adds cultivation-facing UI, statistics, resources, traits, histories, titles, and related world systems from the Xianni base.
 
-This Steam Workshop release is a modified version maintained by Gopher. It is planned to expand toward broader Er Gen novel-inspired cultivation content, but it is not official Er Gen content, not an unmodified upload of the GameBanana release, not an official continuation, and not a replacement for the source GameBanana page.
+## Steam Release Improvements
+
+- English localization and preferred terminology pass.
+- Retained and cleaned Simplified Chinese, Traditional Chinese, and Japanese locale files where present.
+- UI and panel improvements, including cultivator distribution rows across confirmed population info panels.
+- Removed or disabled upstream social/contact/update panels that were unsuitable for this Steam Workshop release.
+- Stability and compatibility fixes for the current deployed version.
+
+## Credits And Source
+
+Source / upstream GameBanana page:
+
+<https://gamebanana.com/mods/648751>
+
+Existing repository credit:
+
+KangKang (QQ Group: 923773102)
+
+Steam Workshop release maintained by:
+
+Gopher
 
 ## Release Notes
 
@@ -41,4 +67,4 @@ Before upload:
 2. Build with `dotnet build .\XianniMod.csproj -c Release`.
 3. Deploy with `.\tools\deploy-local.ps1 -ModDir "<WorldBox>\Mods\Xianni"`.
 4. Launch WorldBox and confirm the mod loads without Xianni exceptions or missing locale keys.
-5. Confirm the Workshop description clearly says Er Gen: Cultivation World is a modified release maintained by Gopher, based on the GameBanana Xianni / Cultivate the Way source page.
+5. Confirm the Workshop description clearly says Ergenverse: Cultivation World is a modified release maintained by Gopher, based on the GameBanana Xianni / Cultivate the Way source page.
