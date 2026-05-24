@@ -14,15 +14,25 @@ namespace xn.assets
         {
             if (!_patchRegistered && harmony != null)
             {
-                var method = AccessTools.Method(typeof(ResourceLibrary), "init");
-                if (method != null)
+                var initMethod = AccessTools.Method(typeof(ResourceLibrary), "init");
+                if (initMethod != null)
                 {
-                    harmony.Patch(method, postfix: new HarmonyMethod(typeof(XNResourceRegistry), nameof(PostResourceLibraryInit)));
+                    harmony.Patch(initMethod, postfix: new HarmonyMethod(typeof(XNResourceRegistry), nameof(PostResourceLibraryInit)));
                     _patchRegistered = true;
                 }
                 else
                 {
                     Debug.LogWarning("[XN] ResourceLibrary.init not found; lingshi resource patch was not registered.");
+                }
+
+                var loadSpritesMethod = AccessTools.Method(typeof(ResourceLibrary), "loadSprites");
+                if (loadSpritesMethod != null)
+                {
+                    harmony.Patch(loadSpritesMethod, postfix: new HarmonyMethod(typeof(XNResourceRegistry), nameof(PostResourceLibraryLoadSprites)));
+                }
+                else
+                {
+                    Debug.LogWarning("[XN] ResourceLibrary.loadSprites not found; lingshi gameplay sprite refresh was not registered.");
                 }
             }
 
@@ -32,6 +42,11 @@ namespace xn.assets
         private static void PostResourceLibraryInit()
         {
             RegisterIfNeeded();
+        }
+
+        private static void PostResourceLibraryLoadSprites()
+        {
+            RefreshRegisteredAsset();
         }
 
         public static void RegisterIfNeeded()
@@ -61,6 +76,20 @@ namespace xn.assets
             Configure(asset);
             AssetManager.resources.add(asset);
             _registered = true;
+        }
+
+        private static void RefreshRegisteredAsset()
+        {
+            if (AssetManager.resources == null)
+            {
+                return;
+            }
+
+            ResourceAsset asset = AssetManager.resources.get(LingshiResourceId);
+            if (asset != null)
+            {
+                Configure(asset);
+            }
         }
 
         private static void Configure(ResourceAsset asset)
