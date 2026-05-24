@@ -7,6 +7,7 @@ namespace xn.ui
     {
         public static XNRankingElement Prefab { get; private set; }
         public UiUnitAvatarElement avatarElement;
+        public Image avatarIcon;
         public Text textName;
         public Text textRank;
         public Text textRealm;
@@ -55,7 +56,7 @@ namespace xn.ui
             rankText.resizeTextMinSize = 10;
             rankText.resizeTextMaxSize = 14;
             rankObj.GetComponent<RectTransform>().sizeDelta = new Vector2(24, 48);
-            var avatarContainer = CreateAvatarElement(obj.transform);
+            var avatarIcon = CreateAvatarElement(obj.transform);
             var infoGroup = new GameObject("InfoGroup", typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             infoGroup.transform.SetParent(obj.transform);
             infoGroup.GetComponent<RectTransform>().sizeDelta = new Vector2(120, 48);
@@ -179,7 +180,7 @@ namespace xn.ui
             layoutElement.minHeight = 52f;
             layoutElement.preferredHeight = 52f;
             var element = obj.AddComponent<XNRankingElement>();
-            element.avatarElement = avatarContainer;
+            element.avatarIcon = avatarIcon;
             element.textName = nameText;
             element.textRank = rankText;
             element.textRealm = realmText;
@@ -195,26 +196,23 @@ namespace xn.ui
             obj.SetActive(false);
             Prefab = element;
         }
-        private static UiUnitAvatarElement CreateAvatarElement(Transform parent)
+        private static Image CreateAvatarElement(Transform parent)
         {
-            var prefab = Resources.Load<UiUnitAvatarElement>("ui/UnitAvatarElement");
-            if (prefab != null)
-            {
-                var avatar = Object.Instantiate(prefab, parent);
-                avatar.transform.localScale = new Vector3(0.85f, 0.85f, 0.85f);
-                avatar.show_banner_kingdom = false;
-                avatar.show_banner_clan = false;
-                if (avatar.kingdomBanner != null)
-                    avatar.kingdomBanner.gameObject.SetActive(false);
-                if (avatar.clanBanner != null)
-                    avatar.clanBanner.gameObject.SetActive(false);
-                return avatar;
-            }
             var avatarObj = new GameObject("Avatar", typeof(Image));
             avatarObj.transform.SetParent(parent);
             avatarObj.GetComponent<RectTransform>().sizeDelta = new Vector2(48, 48);
             avatarObj.GetComponent<Image>().sprite = SpriteTextureLoader.getSprite("ui/special/windowAvatarElement");
-            return null;
+            var iconObj = new GameObject("Icon", typeof(Image));
+            iconObj.transform.SetParent(avatarObj.transform);
+            var iconRect = iconObj.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRect.pivot = new Vector2(0.5f, 0.5f);
+            iconRect.anchoredPosition = Vector2.zero;
+            iconRect.sizeDelta = new Vector2(36, 36);
+            var icon = iconObj.GetComponent<Image>();
+            icon.preserveAspect = true;
+            return icon;
         }
         private static GameObject CreateStatItem(Transform parent, string iconPath)
         {
@@ -265,14 +263,7 @@ namespace xn.ui
             }
             string rankColor = rank == 1 ? "#FFD700" : rank == 2 ? "#C0C0C0" : rank == 3 ? "#CD7F32" : "#FFFFFF";
             textRank.text = $"<color={rankColor}>{rank}</color>";
-            if (avatarElement != null)
-            {
-                avatarElement.show(actor);
-                if (avatarElement.kingdomBanner != null)
-                    avatarElement.kingdomBanner.gameObject.SetActive(false);
-                if (avatarElement.clanBanner != null)
-                    avatarElement.clanBanner.gameObject.SetActive(false);
-            }
+            SetAvatarIcon(actor);
             textName.text = actor.coloredName;
             SetRealmDisplay(actor);
             textLevel.text = actor.level.ToString();
@@ -291,6 +282,14 @@ namespace xn.ui
                 iconSex.gameObject.SetActive(false);
             }
             iconSpecies.sprite = actor.asset.getSpriteIcon();
+        }
+        private void SetAvatarIcon(Actor actor)
+        {
+            if (avatarIcon == null) return;
+            avatarIcon.gameObject.SetActive(true);
+            avatarIcon.sprite = xn.access.ActorAccess.GetLastColoredSprite(actor)
+                ?? actor.asset.getSpriteIcon()
+                ?? SpriteTextureLoader.getSprite("zhanwei");
         }
         private void SetRealmDisplay(Actor actor)
         {
@@ -351,6 +350,8 @@ namespace xn.ui
             textAge.text = "-";
             iconSex.gameObject.SetActive(false);
             iconRealm.gameObject.SetActive(false);
+            if (avatarIcon != null)
+                avatarIcon.gameObject.SetActive(false);
         }
         private string FormatPower(long power)
         {
