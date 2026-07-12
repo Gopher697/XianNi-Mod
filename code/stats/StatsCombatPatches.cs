@@ -206,6 +206,7 @@ namespace cultivation
             [HarmonyPriority(int.MaxValue)] 
             private static bool Prefix(Actor __instance, ref float pDamage, bool pFlash, AttackType pAttackType, BaseSimObject pAttacker, bool pSkipIfShake, bool pMetallicWeapon, bool pCheckDamageReduction)
             {
+                if (__instance == null) return true;
                 if (!__instance.hasHealth()) return false;
                 Actor attacker = null;
                 if (pAttacker != null && xn.access.BaseSimObjectAccess.IsActor(pAttacker))
